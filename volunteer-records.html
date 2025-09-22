@@ -76,7 +76,7 @@
                         <option value="On Leave">On Leave</option>
                     </select>
                     <button id="exportCSVBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-center">
-                        Export CSV
+                        Export PDF
                     </button>
                     <a href="add-volunteer.html" class="px-4 py-2 bg-red-primary text-white rounded-lg hover:bg-red-700 transition-colors text-center inline-block">
                         Add Volunteer
@@ -209,7 +209,7 @@
             document.getElementById('searchInput').addEventListener('input', filterRecords);
             document.getElementById('departmentFilter').addEventListener('change', filterRecords);
             document.getElementById('statusFilter').addEventListener('change', filterRecords);
-            document.getElementById('exportCSVBtn').addEventListener('click', exportToCSV);
+            document.getElementById('exportCSVBtn').addEventListener('click', exportToPDF);
             document.getElementById('closeModalBtn').addEventListener('click', closeModal);
 
             // Session Manager (same as staff-records.html)
@@ -524,40 +524,117 @@
         }
 
         function exportToCSV() {
-            const headers = [
-                'Volunteer ID', 'First Name', 'Middle Name', 'Last Name', 'Preferred Department',
-                'Status', 'Contact Number', 'Email', 'Availability', 'Skills', 'Motivation', 'Emergency Contact Name',
-                'Emergency Contact Relationship', 'Emergency Contact Number', 'Date Added'
-            ];
-            const csvContent = [
-                headers.join(','),
-                ...allRecords.map(volunteer => [
-                    volunteer.volunteerId || '',
-                    volunteer.firstName || '',
-                    volunteer.middleName || '',
-                    volunteer.lastName || '',
-                    volunteer.preferredDepartment || '',
-                    volunteer.volunteerStatus || '',
-                    volunteer.contactNumber || '',
-                    volunteer.emailAddress || '',
-                    volunteer.availability || '',
-                    volunteer.skillsAndExperience || '',
-                    volunteer.motivationForVolunteering || '',
-                    volunteer.emergencyContactName || '',
-                    volunteer.emergencyContactRelationship || '',
-                    volunteer.emergencyContactNumber || '',
-                    volunteer.dateAdded || ''
-                ].map(field => `"${field.replace(/"/g, '""')}"`).join(','))
-            ].join('\n');
-
-            const blob = new Blob([csvContent], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `volunteer-records-${new Date().toISOString().split('T')[0]}.csv`;
-            a.click();
-            window.URL.revokeObjectURL(url);
+            // PDF Export using jsPDF and jsPDF-AutoTable
+            // Load jsPDF and AutoTable if not already loaded
+            if (typeof window.jspdf === 'undefined') {
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+                script.onload = () => exportToPDF();
+                document.body.appendChild(script);
+                const autoTableScript = document.createElement('script');
+                autoTableScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.7.0/jspdf.plugin.autotable.min.js';
+                document.body.appendChild(autoTableScript);
+                return;
+            }
         }
+
+        function exportToPDF() {
+            // Ensure jsPDF and AutoTable are loaded
+            // Load jsPDF and autoTable from CDN if not present
+            function loadScript(src, callback) {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = callback;
+                document.body.appendChild(script);
+            }
+            function ensureJsPDFAndAutoTable(callback) {
+                if (typeof window.jspdf === 'undefined') {
+                    loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', function() {
+                        loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.7.0/jspdf.plugin.autotable.min.js', callback);
+                    });
+                } else if (typeof window.jspdf?.jsPDF === 'undefined' || typeof window.jspdf?.jsPDF?.prototype?.autoTable === 'undefined') {
+                    loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.7.0/jspdf.plugin.autotable.min.js', callback);
+                } else {
+                    callback();
+                }
+            }
+            ensureJsPDFAndAutoTable(generatePDF);
+
+            function generatePDF() {
+                const { jsPDF } = window.jspdf;
+                // Use landscape orientation and A4 size for more columns
+                const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+                // Header design
+                doc.setFillColor(220, 38, 38); // Tailwind red-primary
+                doc.rect(0, 0, doc.internal.pageSize.getWidth(), 20, 'F');
+                doc.setTextColor(255,255,255);
+                doc.setFontSize(20);
+                doc.text('Tahanan ng Pagmamahal OMS', doc.internal.pageSize.getWidth() / 2, 10, {align: 'center'});
+                doc.setFontSize(12);
+                doc.text('Volunteer Records Report', doc.internal.pageSize.getWidth() / 2, 17, {align: 'center'});
+                doc.setTextColor(0,0,0);
+
+                // Table columns with custom widths for readability
+                const columns = [
+                    { header: 'Volunteer ID', dataKey: 'volunteerId', width: 25 },
+                    { header: 'Name', dataKey: 'name', width: 35 },
+                    { header: 'Department', dataKey: 'preferredDepartment', width: 25 },
+                    { header: 'Status', dataKey: 'volunteerStatus', width: 20 },
+                    { header: 'Contact', dataKey: 'contactNumber', width: 25 },
+                    { header: 'Email', dataKey: 'emailAddress', width: 35 },
+                    { header: 'Availability', dataKey: 'availability', width: 20 },
+                    { header: 'Skills', dataKey: 'skillsAndExperience', width: 30 },
+                    { header: 'Motivation', dataKey: 'motivationForVolunteering', width: 30 },
+                    { header: 'Emergency Contact', dataKey: 'emergencyContactName', width: 25 },
+                    { header: 'Relationship', dataKey: 'emergencyContactRelationship', width: 20 },
+                    { header: 'Emergency Number', dataKey: 'emergencyContactNumber', width: 25 },
+                    { header: 'Date Added', dataKey: 'dateAdded', width: 25 }
+                ];
+                // Table rows
+                const rows = allRecords.map(volunteer => ({
+                    volunteerId: volunteer.volunteerId || '',
+                    name: `${volunteer.firstName || ''} ${volunteer.middleName || ''} ${volunteer.lastName || ''}`.trim(),
+                    preferredDepartment: volunteer.preferredDepartment || '',
+                    volunteerStatus: volunteer.volunteerStatus || '',
+                    contactNumber: volunteer.contactNumber || '',
+                    emailAddress: volunteer.emailAddress || '',
+                    availability: volunteer.availability || '',
+                    skillsAndExperience: volunteer.skillsAndExperience || '',
+                    motivationForVolunteering: volunteer.motivationForVolunteering || '',
+                    emergencyContactName: volunteer.emergencyContactName || '',
+                    emergencyContactRelationship: volunteer.emergencyContactRelationship || '',
+                    emergencyContactNumber: volunteer.emergencyContactNumber || '',
+                    dateAdded: volunteer.dateAdded || ''
+                }));
+
+                // Table with autoTable
+                doc.autoTable({
+                    startY: 25,
+                    head: [columns.map(col => col.header)],
+                    body: rows.map(row => columns.map(col => row[col.dataKey])),
+                    styles: { fontSize: 9, cellPadding: 2 },
+                    headStyles: { fillColor: [220,38,38], textColor: 255, fontStyle: 'bold' },
+                    alternateRowStyles: { fillColor: [245,245,245] },
+                    margin: { left: 5, right: 5 },
+                    columnStyles: columns.reduce((acc, col, idx) => { acc[idx] = { cellWidth: col.width }; return acc; }, {}),
+                });
+
+                // Footer design
+                const pageCount = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= pageCount; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(10);
+                    doc.setTextColor(120,120,120);
+                    doc.text(`Generated by TNP-OMS | ${new Date().toLocaleString()}`, 5, doc.internal.pageSize.getHeight() - 5);
+                    doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.getWidth() - 5, doc.internal.pageSize.getHeight() - 5, {align: 'right'});
+                }
+
+                doc.save(`volunteer-records-report-${new Date().toISOString().split('T')[0]}.pdf`);
+            }
+    }
+
+        
 
         function showMessage(message, type) {
             const messageContainer = document.getElementById('messageContainer');
