@@ -9,6 +9,8 @@
     <!-- Added SheetJS library for Excel parsing -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -185,6 +187,7 @@
                     <input type="text" id="searchInput" placeholder="Search items by name, category, or description..."
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
                 </div>
+                &nbsp;&nbsp;&nbsp;&nbsp;
                 <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
                     <select id="categoryFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
                         <option value="">All Categories</option>
@@ -199,12 +202,31 @@
                     <button onclick="exportToCSV()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-center">
                         Export CSV
                     </button>
+                    <button onclick="exportToPDF()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-center ml-2">
+                        Export PDF
+                    </button>
+                    <button id="removeExpiredBtn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors ml-2">
+                        Remove Expired Items
+                    </button>
+                    <button id="showHistoryBtn" class="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors ml-2">
+                        Inventory History
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="historyModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+            <div class="bg-white rounded-lg shadow-lg p-6 max-w-2xl w-full relative max-h-[90vh] overflow-y-auto">
+                <button id="closeHistoryModal" class="absolute top-2 right-2 text-red-600 hover:text-red-800 text-2xl font-bold leading-none">&times;</button>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Inventory History</h3>
+                <div id="historyContent" class="space-y-3">
+                    <!-- History will be loaded here -->
                 </div>
             </div>
         </div>
 
         <!-- Statistics Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-6">
             <div class="bg-white rounded-lg shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
@@ -234,13 +256,26 @@
             <div class="bg-white rounded-lg shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
+                        <svg class="h-8 w-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-orange-700">Expiring Soon</p>
+                        <p id="expiringSoonItems" class="text-2xl font-semibold text-orange-600">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Expiring Soon</p>
-                        <p id="expiringSoonItems" class="text-2xl font-semibold text-red-600">0</p>
+                        <p class="text-sm font-medium text-red-700">Expired</p>
+                        <p id="expiredItems" class="text-2xl font-semibold text-red-600">0</p>
                     </div>
                 </div>
             </div>
@@ -264,6 +299,7 @@
             <div class="p-6 border-b">
                 <div class="flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-gray-900">Categories</h3>
+                    
                     <button id="showRecentBtn" onclick="toggleRecentItems()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
                         Show Recent Items
                     </button>
@@ -282,8 +318,13 @@
         <div id="categoryContent" class="bg-white rounded-lg shadow mb-6">
             <div class="p-6 border-b">
                 <div class="flex items-center justify-between">
-                    <h2 id="currentCategoryTitle" class="text-2xl font-bold text-gray-900">All Items</h2>
-                    <span id="currentCategoryCount" class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">0 items</span>
+                    <div class="flex items-center space-x-4">
+                        <h2 id="currentCategoryTitle" class="text-2xl font-bold text-gray-900">All Items</h2>
+                        <span id="currentCategoryCount" class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">0 items</span>
+                    </div>
+                    <button id="addItemBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        Add New Item
+                    </button>
                 </div>
             </div>
             <div class="p-6">
@@ -308,6 +349,24 @@
                         </button>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div id="addItemModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+            <div class="bg-white rounded-lg shadow-lg p-6 max-w-md w-full relative">
+                <button id="closeAddItemModal" class="absolute top-2 right-2 text-red-600 hover:text-red-800 text-2xl font-bold leading-none">&times;</button>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Add New Inventory Item</h3>
+                <form id="addItemForm" class="space-y-3">
+                    <input required name="itemDescription" class="w-full border rounded px-3 py-2" placeholder="Item Name">
+                    <input required name="itemCategory" class="w-full border rounded px-3 py-2" placeholder="Category">
+                    <input required name="quantity" type="number" min="1" class="w-full border rounded px-3 py-2" placeholder="Quantity">
+                    <input name="unit" class="w-full border rounded px-3 py-2" placeholder="Unit (e.g. pcs)">
+                    <input name="conditionOfItems" class="w-full border rounded px-3 py-2" placeholder="Condition">
+                    <input name="expiryDate" type="date" class="w-full border rounded px-3 py-2" placeholder="Expiry Date">
+                    <input name="donorName" class="w-full border rounded px-3 py-2" placeholder="Donor Name">
+                    <input name="notes" class="w-full border rounded px-3 py-2" placeholder="Notes">
+                    <button type="submit" class="w-full bg-green-600 text-white rounded px-4 py-2 mt-2 hover:bg-green-700">Add Item</button>
+                </form>
             </div>
         </div>
 
@@ -367,6 +426,26 @@
         </div>
     </div>
 
+    <!-- Remove Item Modal -->
+    <div id="removeItemModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+        <div class="bg-white rounded-lg shadow-lg p-6 max-w-md w-full relative">
+            <button id="closeRemoveItemModal" class="absolute top-2 right-2 text-red-600 hover:text-red-800 text-2xl font-bold leading-none">&times;</button>
+            <h3 class="text-lg font-semibold text-red-700 mb-4">Remove Item</h3>
+            <form id="removeItemForm" class="space-y-3">
+                <input type="hidden" name="inventoryId" id="removeInventoryId">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Reason for Removal <span class="text-red-600">*</span></label>
+                    <input required name="reason" class="w-full border rounded px-3 py-2" placeholder="e.g. Expired, Damaged, Used, etc.">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Remarks</label>
+                    <textarea name="remarks" class="w-full border rounded px-3 py-2" placeholder="Additional remarks (optional)"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-red-600 text-white rounded px-4 py-2 mt-2 hover:bg-red-700">Confirm Remove</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Converted script to ES6 module with Firebase integration -->
     <script type="module">
         import {
@@ -377,8 +456,17 @@
             query,
             where,
             getDoc,
-            doc
+            doc,
+            deleteDoc,
+            updateDoc,
+            orderBy,
+            limit,
+            getAuth,
+            auth
         } from './firebase.js';
+
+        const user = auth.currentUser;
+        const uid = user ? user.uid : null;
 
         let allItems = [];
         let filteredItems = [];
@@ -420,6 +508,29 @@
             }
 
             currentUser = sessionManager.getCurrentUser();
+
+            // Get user from Firebase Auth
+            const auth = getAuth();
+            const user = auth.currentUser;
+            if (user) {
+            // Fetch user info from Firestore
+            const userDoc = await getDoc(doc(db, 'users', user.uid));
+            if (userDoc.exists()) {
+                const data = userDoc.data();
+                let name = data.firstName || '';
+                if (data.middleName) name += ' ' + data.middleName;
+                if (data.lastName) name += ' ' + data.lastName;
+                name = name.trim() || user.email;
+                currentUser = {
+                    ...currentUser,
+                    uid: user.uid,
+                    email: user.email,
+                    name,
+                    role: data.role || 'Unknown'
+                };
+            }
+        }
+
             await loadInventoryData();
             setupEventListeners();
             setupExcelUpload(); // Setup Excel upload listeners
@@ -436,7 +547,6 @@
                 
                 snapshot.forEach(docSnap => {
                     const data = docSnap.data();
-                    data.inventoryId = docSnap.id; // Use inventoryId from document
                     inventoryItems.push(data);
                 });
                 
@@ -500,6 +610,144 @@
 
             filteredItems = [...allItems];
         }
+
+        document.getElementById('addItemBtn').onclick = () => {
+            document.getElementById('addItemModal').classList.remove('hidden');
+        };
+        document.getElementById('closeAddItemModal').onclick = () => {
+            document.getElementById('addItemModal').classList.add('hidden');
+        };
+        document.getElementById('addItemForm').onsubmit = async function(e) {
+            e.preventDefault();
+            const form = e.target;
+            const data = Object.fromEntries(new FormData(form).entries());
+            data.quantity = parseInt(data.quantity) || 0;
+            data.unit = data.unit || 'pcs';
+            data.conditionOfItems = data.conditionOfItems || 'Good';
+            data.expiryDate = data.expiryDate || null;
+            data.donorName = data.donorName || 'Anonymous';
+            data.notes = data.notes || '';
+            data.dateAdded = new Date().toISOString();
+            data.addedBy = currentUser?.email || 'system';
+            data.source = 'manual_add';
+            // Generate unique inventoryId
+            data.inventoryId = `INV-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            try {
+                await addDoc(collection(db, 'inventory'), data);
+                logInventoryHistory('Add Item', { ...data });
+                showSuccessMessage('Item added successfully!');
+                document.getElementById('addItemModal').classList.add('hidden');
+                await loadInventoryData(true);
+            } catch (err) {
+                showErrorMessage('Failed to add item: ' + err.message);
+            }
+        };
+
+        document.getElementById('removeExpiredBtn').onclick = async function() {
+            if (!confirm('Are you sure you want to remove all expired items?')) return;
+            try {
+                const expired = allItems.filter(item => getItemStatus(item) === 'expired');
+                for (const item of expired) {
+                    const itemRef = query(collection(db, 'inventory'), where('inventoryId', '==', item.inventoryId));
+                    const snapshot = await getDocs(itemRef);
+                    if (!snapshot.empty) {
+                        const docId = snapshot.docs[0].id;
+                        await deleteDoc(doc(db, 'inventory', docId));
+                        logInventoryHistory('Remove Item', { inventoryId: item.inventoryId });
+                    }
+                }
+
+                logInventoryHistory('Remove Expired Items', { count: expired.length, items: expired.map(i => i.inventoryId) });
+
+                num = 0; // to stop showSuccessMessage
+                showSuccessMessage('All expired items removed!');
+                downloadExpiredItemsPDF(expired);
+                await loadInventoryData(true);
+            } catch (err) {
+                showErrorMessage('Failed to remove expired items: ' + err.message);
+            }
+        };
+
+        function downloadExpiredItemsPDF(expiredItems) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape');
+
+            doc.setFontSize(16);
+            doc.text('List of Expired Inventory Items Removed', 14, 18);
+
+            doc.setFontSize(12);
+            let y = 30;
+            doc.text('Date: ' + new Date().toLocaleString(), 14, y);
+            y += 10;
+
+            if (expiredItems.length === 0) {
+                doc.text('No expired items were found.', 14, y);
+            } else {
+                doc.text('The following items were removed as expired:', 14, y);
+                y += 10;
+
+                expiredItems.forEach((item, idx) => {
+                    // Add more fields for each product
+                    doc.text(
+                        [
+                            `${idx + 1}. ${item.itemDescription} (${item.quantity} ${item.unit || 'pcs'})`,
+                            `   Category: ${item.itemCategory || 'N/A'}`,
+                            `   Donor: ${item.donorName || 'N/A'}`,
+                            `   Expiry: ${item.expiryDate || 'N/A'}`,
+                            `   Notes: ${item.notes || 'None'}`
+                        ].join('\n'),
+                        14,
+                        y
+                    );
+                    y += 20; // Increase y more to accommodate extra lines
+                    if (y > 270) {
+                        doc.addPage();
+                        y = 20;
+                    }
+                });
+            }
+
+            doc.save('expired-items-removed.pdf');
+        }
+
+        async function logInventoryHistory(action, details) {
+            try {
+                const auth = getAuth();
+                const user = auth.currentUser;
+                const uid = user ? user.uid : null;
+                const { name, role } = await getUserInfo(uid);
+
+                await addDoc(collection(db, 'inventoryHistory'), {
+                    action,
+                    details,
+                    user: currentUser?.email || 'system',
+                    name: name || 'Unknown',
+                    role: currentUser?.role || 'Unknown',
+                    date: new Date().toISOString()
+                });
+            } catch (err) {
+                console.error('Failed to log inventory history:', err);
+            }
+        }
+
+        async function getUserInfo(uid) {
+            if (!uid) return { name: 'Unknown', role: 'Unknown' };
+            const userDoc = await getDoc(doc(db, 'users', uid));
+            if (userDoc.exists()) {
+                const data = userDoc.data();
+                // Build full name from firstName, middleName, lastName
+                let name = data.firstName || '';
+                if (data.middleName) name += ' ' + data.middleName;
+                if (data.lastName) name += ' ' + data.lastName;
+                name = name.trim() || 'Unknown';
+                return {
+                    name,
+                    role: data.role || 'Unknown'
+                };
+            }
+            return { name: 'Unknown', role: 'Unknown' };
+        }
+        
 
         function createCategoryDropdown() {
             const dropdown = document.getElementById('categoryDropdown');
@@ -578,6 +826,46 @@
             document.getElementById('currentCategoryTitle').textContent = title;
             document.getElementById('currentCategoryCount').textContent = `${currentCategoryItems.length} item${currentCategoryItems.length !== 1 ? 's' : ''}`;
         }
+
+        window.exportToPDF = function() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape');
+
+            // Table headers
+            const headers = [
+                "Inventory ID", "Category", "Description", "Quantity", "Unit", "Condition",
+                "Expiry Date", "Status", "Donor", "Notes", "Date Added"
+            ];
+
+            // Table rows
+            const rows = filteredItems.map(item => [
+                item.inventoryId,
+                item.itemCategory || '',
+                item.itemDescription,
+                item.quantity,
+                item.unit || 'pcs',
+                item.conditionOfItems,
+                item.expiryDate || '',
+                getItemStatus(item),
+                item.donorName,
+                item.notes || '',
+                formatDateTime(item.dateAdded)
+            ]);
+
+            doc.setFontSize(16);
+            doc.text('Inventory List', 14, 18);
+
+            doc.autoTable({
+                head: [headers],
+                body: rows,
+                startY: 24,
+                styles: { fontSize: 9 },
+                headStyles: { fillColor: [220, 38, 38] }, // Tailwind red-600
+                alternateRowStyles: { fillColor: [245, 245, 245] }
+            });
+
+            doc.save(`inventory-${new Date().toISOString().split('T')[0]}.pdf`);
+        };
 
         function displayCurrentPage() {
             const itemsGrid = document.getElementById('itemsGrid');
@@ -758,8 +1046,14 @@
             const daysUntilExpiry = getDaysUntilExpiry(item.expiryDate);
             
             return `
-                <div class="item-card bg-white border rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer ${status === 'expiring' || status === 'expired' ? 'ring-2 ring-red-200' : ''}" 
-                    onclick="showItemDetail('${item.inventoryId}')">
+                <div class="item-card border rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer
+                ${status === 'expired' 
+                    ? 'bg-red-50 border-red-500 ring-2 ring-red-300' 
+                    : status === 'expiring' 
+                        ? 'bg-orange-50 border-orange-400 ring-2 ring-orange-200' 
+                        : 'bg-white border-gray-200'}"
+                onclick="showItemDetail('${item.inventoryId}')">
+
                     <div class="p-4">
                         ${item.photoData ? `
                             <div class="mb-4">
@@ -776,8 +1070,7 @@
                         
                         <div class="space-y-2">
                             <div class="flex items-start justify-between">
-                                <h4 class="font-medium text-gray-900 text-sm line-clamp-2">${item.itemDescription}</h4>
-                                <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded ml-2 flex-shrink-0">${item.inventoryId}</span>
+                                <h4 class="font-medium ${status === 'expired' ? 'text-red-700' : 'text-gray-900'} text-sm line-clamp-2">${item.itemDescription}</h4>
                             </div>
                             
                             <div class="flex items-center justify-between text-sm">
@@ -1010,9 +1303,18 @@
                         </div>
 
                         <!-- Action Buttons -->
-                        <div class="pt-4 border-t">
-                            <button class="w-full px-4 py-2 bg-red-primary text-white rounded-lg hover:bg-red-700 transition-colors">
+                        <div class="pt-4 border-t space-y-2">
+                            <button id="editQtyBtn" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                                 Edit Quantity
+                            </button>
+                            <button id="deductQtyBtn" class="w-full px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
+                                Deduct Quantity
+                            </button>
+                            <button id="updateItemBtn" class="w-full px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors">
+                                Update Item Info
+                            </button>
+                            <button id="removeItemBtn" class="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                                Remove Item
                             </button>
                             <p class="text-xs text-gray-500 mt-2 text-center">
                                 Editing requires appropriate permissions
@@ -1025,6 +1327,164 @@
             document.getElementById('itemModal').classList.remove('hidden');
         };
 
+        document.addEventListener('click', async function(e) {
+            if (e.target && e.target.id === 'editQtyBtn') {
+                const inventoryId = document.querySelector('#modalContent .text-sm.bg-gray-100').textContent;
+                const item = allItems.find(i => i.inventoryId === inventoryId);
+                if (!item) return;
+                const newQty = prompt('Enter new quantity:', item.quantity);
+                const qty = parseInt(newQty);
+                if (isNaN(qty) || qty < 0) {
+                    alert('Invalid quantity.');
+                    return;
+                }
+                try {
+                    const itemRef = query(collection(db, 'inventory'), where('inventoryId', '==', inventoryId));
+                    const snapshot = await getDocs(itemRef);
+                    if (!snapshot.empty) {
+                        const docId = snapshot.docs[0].id;
+                        await updateDoc(doc(db, 'inventory', docId), {
+                            quantity: qty
+                        });
+                        showSuccessMessage('Quantity updated!');
+                        await loadInventoryData(true);
+                        closeModal();
+                    }
+                } catch (err) {
+                    showErrorMessage('Failed to update quantity: ' + err.message);
+                }
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            if (e.target && e.target.id === 'removeItemBtn') {
+                // Show the remove item modal
+                const inventoryId = document.querySelector('#modalContent .text-sm.bg-gray-100').textContent;
+                document.getElementById('removeInventoryId').value = inventoryId;
+                document.getElementById('removeItemModal').classList.remove('hidden');
+            }
+        });
+        document.getElementById('closeRemoveItemModal').onclick = function() {
+            document.getElementById('removeItemModal').classList.add('hidden');
+        };
+        document.getElementById('removeItemForm').onsubmit = async function(e) {
+            e.preventDefault();
+            const inventoryId = document.getElementById('removeInventoryId').value;
+            const reason = e.target.reason.value.trim();
+            const remarks = e.target.remarks.value.trim();
+            const item = allItems.find(i => i.inventoryId === inventoryId);
+            if (!item) {
+                showErrorMessage('Item not found.');
+                return;
+            }
+            try {
+                const itemRef = query(collection(db, 'inventory'), where('inventoryId', '==', inventoryId));
+                const snapshot = await getDocs(itemRef);
+                if (!snapshot.empty) {
+                    const docId = snapshot.docs[0].id;
+                    await deleteDoc(doc(db, 'inventory', docId));
+                    // Log with item name and removal info
+                    logInventoryHistory('Remove Item', {
+                        inventoryId,
+                        itemName: item.itemDescription,
+                        reason,
+                        remarks
+                    });
+                    showSuccessMessage('Item removed!');
+                    document.getElementById('removeItemModal').classList.add('hidden');
+                    closeModal();
+                    await loadInventoryData(true);
+                } else {
+                    showErrorMessage('Item not found.');
+                }
+            } catch (err) {
+                showErrorMessage('Failed to remove item: ' + err.message);
+            }
+        };
+
+        document.addEventListener('click', function(e) {
+            if (e.target && e.target.id === 'updateItemBtn') {
+                const inventoryId = document.querySelector('#modalContent .text-sm.bg-gray-100').textContent;
+                const item = allItems.find(i => i.inventoryId === inventoryId);
+                if (!item) return;
+
+                // Show a simple prompt for each field (for demo; you can make a modal form for better UX)
+                const newName = prompt('Item Name:', item.itemDescription) || item.itemDescription;
+                const newCategory = prompt('Category:', item.itemCategory) || item.itemCategory;
+                const newQty = parseInt(prompt('Quantity:', item.quantity)) || item.quantity;
+                const newUnit = prompt('Unit:', item.unit) || item.unit;
+                const newCondition = prompt('Condition:', item.conditionOfItems) || item.conditionOfItems;
+                const newExpiry = prompt('Expiry Date (YYYY-MM-DD):', item.expiryDate) || item.expiryDate;
+                const newDonor = prompt('Donor Name:', item.donorName) || item.donorName;
+                const newNotes = prompt('Notes:', item.notes) || item.notes;
+
+                // Confirm update
+                if (!confirm('Save changes to this item?')) return;
+
+                (async () => {
+                    try {
+                        const itemRef = query(collection(db, 'inventory'), where('inventoryId', '==', inventoryId));
+                        const snapshot = await getDocs(itemRef);
+                        if (!snapshot.empty) {
+                            const docId = snapshot.docs[0].id;
+                            await updateDoc(doc(db, 'inventory', docId), {
+                                itemDescription: newName,
+                                itemCategory: newCategory,
+                                quantity: newQty,
+                                unit: newUnit,
+                                conditionOfItems: newCondition,
+                                expiryDate: newExpiry,
+                                donorName: newDonor,
+                                notes: newNotes
+                            });
+                            logInventoryHistory('Update Item', { inventoryId, ...fields });
+                            showSuccessMessage('Item info updated!');
+                            await loadInventoryData(true);
+                            closeModal();
+                        } else {
+                            showErrorMessage('Item not found.');
+                        }
+                    } catch (err) {
+                        showErrorMessage('Failed to update item: ' + err.message);
+                    }
+                })();
+            }
+        });
+
+        document.addEventListener('click', async function(e) {
+            if (e.target && e.target.id === 'deductQtyBtn') {
+                const inventoryId = document.querySelector('#modalContent .text-sm.bg-gray-100').textContent;
+                const item = allItems.find(i => i.inventoryId === inventoryId);
+                if (!item) return;
+                const deduct = prompt('Enter quantity to deduct:', '1');
+                const deductQty = parseInt(deduct);
+                if (isNaN(deductQty) || deductQty <= 0) {
+                    alert('Invalid quantity.');
+                    return;
+                }
+                if (deductQty > item.quantity) {
+                    alert('Cannot deduct more than available quantity.');
+                    return;
+                }
+                try {
+                    const itemRef = query(collection(db, 'inventory'), where('inventoryId', '==', inventoryId));
+                    const snapshot = await getDocs(itemRef);
+                    if (!snapshot.empty) {
+                        const docId = snapshot.docs[0].id;
+                        await updateDoc(doc(db, 'inventory', docId), {
+                            quantity: item.quantity - deductQty
+                        });
+                        logInventoryHistory('Deduct Quantity', { inventoryId, deducted: deductQty });
+                        showSuccessMessage('Quantity deducted!');
+                        await loadInventoryData(true);
+                        closeModal();
+                    }
+                } catch (err) {
+                    showErrorMessage('Failed to deduct quantity: ' + err.message);
+                }
+            }
+        });
+
         window.closeModal = function() {
             document.getElementById('itemModal').classList.add('hidden');
         };
@@ -1032,15 +1492,14 @@
         function updateStatistics() {
             const totalItems = filteredItems.length;
             const lowStockItems = filteredItems.filter(item => getItemStatus(item) === 'low').length;
-            const expiringSoonItems = filteredItems.filter(item => {
-                const status = getItemStatus(item);
-                return status === 'expiring' || status === 'expired';
-            }).length;
+            const expiringSoonItems = filteredItems.filter(item => getItemStatus(item) === 'expiring').length;
+            const expiredItems = filteredItems.filter(item => getItemStatus(item) === 'expired').length;
             const totalCategories = new Set(filteredItems.map(item => item.itemCategory).filter(Boolean)).size;
 
             document.getElementById('totalItems').textContent = totalItems;
             document.getElementById('lowStockItems').textContent = lowStockItems;
             document.getElementById('expiringSoonItems').textContent = expiringSoonItems;
+            document.getElementById('expiredItems').textContent = expiredItems;
             document.getElementById('totalCategories').textContent = totalCategories;
         }
 
@@ -1189,6 +1648,69 @@
             uploadedFile = null;
             document.getElementById('excelFileInput').value = ''; // Clear file input
             resetUploadUI();
+        };
+
+        document.getElementById('showHistoryBtn').onclick = async function() {
+            const modal = document.getElementById('historyModal');
+            const content = document.getElementById('historyContent');
+            content.innerHTML = '<p class="text-gray-500">Loading history...</p>';
+
+            try {
+                // Get the 200 most recent history entries, newest first
+                const historyQuery = query(
+                    collection(db, 'inventoryHistory'),
+                    orderBy('date', 'desc'),
+                    limit(200)
+                );
+                const snapshot = await getDocs(historyQuery);
+                const history = [];
+                snapshot.forEach(doc => history.push(doc.data()));
+
+                if (history.length === 0) {
+                    content.innerHTML = '<p class="text-gray-500">No inventory operations recorded yet.</p>';
+                } else {
+                    content.innerHTML = history.map((h, idx) => {
+                        // Choose color/icon based on action
+                        let color = 'gray', icon = '';
+                        if (/add/i.test(h.action)) { color = 'green'; icon = '➕'; }
+                        else if (/remove/i.test(h.action)) { color = 'red'; icon = '🗑️'; }
+                        else if (/update|edit/i.test(h.action)) { color = 'yellow'; icon = '✏️'; }
+                        else if (/deduct/i.test(h.action)) { color = 'orange'; icon = '➖'; }
+                        else if (/upload/i.test(h.action)) { color = 'blue'; icon = '⬆️'; }
+
+                        return `
+                        <div class="rounded-lg p-4 mb-3 shadow-sm ${idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'} border-l-4 border-${color}-500">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="inline-flex items-center text-${color}-700 font-semibold text-base">
+                                    <span class="mr-2 text-xl">${icon}</span>
+                                    <span class="uppercase tracking-wide">${h.action}</span>
+                                </span>
+                                <span class="text-xs text-gray-400">${new Date(h.date).toLocaleString()}</span>
+                            </div>
+                            <div class="text-sm text-gray-700 mt-1 mb-2">
+                                ${h.details.itemName ? `<span class="inline-block font-bold text-${color}-700 bg-${color}-100 px-2 py-1 rounded">Item: ${h.details.itemName}</span><br>` : ''}
+                                ${Object.entries(h.details).filter(([k]) => k !== 'itemName').map(([k, v]) => `<span class="inline-block mr-2 mb-1 bg-gray-200 px-2 py-1 rounded"><b>${k}:</b> ${typeof v === 'object' ? JSON.stringify(v) : v}</span>`).join('')}
+                            </div>
+                            <div class="flex items-center text-xs text-gray-500 mt-2">
+                                <svg class="h-4 w-4 mr-1 text-${color}-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01"></path>
+                                </svg>
+                                <span>By: <span class="font-semibold text-gray-700">${h.name || h.user}</span> <span class="ml-1 px-2 py-0.5 rounded bg-${color}-100 text-${color}-700">${h.role || 'Unknown'}</span></span>
+                            </div>
+                        </div>
+                        `;
+                    }).join('');
+                }
+            } catch (err) {
+                content.innerHTML = `<p class="text-red-600">Failed to load history: ${err.message}</p>`;
+            }
+
+            modal.classList.remove('hidden');
+        };
+
+        document.getElementById('closeHistoryModal').onclick = function() {
+            document.getElementById('historyModal').classList.add('hidden');
         };
 
         function resetUploadUI() {
@@ -1449,7 +1971,8 @@
                             const duplicateQuery = query(
                                 donationCollection, 
                                 where("itemDescription", "==", item.itemDescription),
-                                where("donorName", "==", item.donorName)
+                                where("donorName", "==", item.donorName),
+                                where("expiryDate", "==", item.expiryDate)
                             );
                             const duplicateSnapshot = await getDocs(duplicateQuery);
 
@@ -1494,6 +2017,7 @@
                     document.getElementById('uploadResults').classList.remove('hidden');
                     updateUploadResultsUI();
 
+                    logInventoryHistory('Upload Excel File', { fileName: uploadedFile.name, added: uploadResults.success });
                     // Reload inventory data to show new items
                     await loadInventoryData();
                     
