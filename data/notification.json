@@ -1,0 +1,26 @@
+{
+  "notifications": [
+    {
+      "notificationId": "NOT001",
+      "type": "task_accepted",
+      "title": "Task Accepted",
+      "message": "Michael Anderson accepted task: Organize Children's Library",
+      "taskId": "TSK001",
+      "userId": "VL001",
+      "userName": "Michael Anderson",
+      "timestamp": "2025-01-08T12:00:00.000Z",
+      "read": false
+    },
+    {
+      "notificationId": "NOT002",
+      "type": "task_completed",
+      "title": "Task Completed",
+      "message": "Elena Garcia Mendoza completed task: Art Class Preparation",
+      "taskId": "TSK002",
+      "userId": "elena.mendoza",
+      "userName": "Elena Garcia Mendoza",
+      "timestamp": "2025-01-08T14:00:00.000Z",
+      "read": false
+    }
+  ]
+}

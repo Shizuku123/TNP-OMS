@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expenses Tracking - Tahanan ng Pagmamahal OMS</title>
+    <script type="module" src="firebase.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'red-primary': '#dc2626',
+                        'red-secondary': '#ef4444',
+                        'red-light': '#fef2f2'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="flex items-center text-gray-600 hover:text-red-primary">
+                        <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                    </a>
+                </div>
+                <h1 class="text-xl font-semibold text-gray-900">Expenses Tracking</h1>
+                <div></div>
+            </div>
+        </div>
+    </header>
+    
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Action Buttons -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center justify-center space-x-2 mb-4">
+            <img src="GCash-Logo (2).png" alt="GCash" class="h-20 w-auto">
+            </div>
+            <div class="flex justify-center">
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="sendMoney()" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-center">
+                Send money
+                </button>
+                <button onclick="viewTransactionHistory()" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-center">
+                Transaction History
+                </button>
+            </div>
+            </div>
+        </div>
+        <!-- Record Expenses Button -->
+        
+        
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 pt-5">
+            <!-- Total Donations Card -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Total Donations</p>
+                        <p id="totalDonations" class="text-2xl font-bold text-green-600">₱0.00</p>
+                        <p class="text-xs text-green-500 mt-1"> Available for expenses</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cash Expenses Card -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Cash Expenses</p>
+                        <p id="cashExpenses" class="text-2xl font-bold text-gray-900">₱0.00</p>
+                        <p class="text-xs text-red-500 mt-1">+ 10% Increase from last month</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GCash Expenses Card -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="flex items-center space-x-2 mb-1">
+                            <img src="GCash-Logo (2).png" alt="GCash" class="h-12 w-auto -mt-5">
+                        </div>
+                        <p id="gcashExpenses" class="text-2xl font-bold text-gray-900">₱0.00</p>
+                        <p class="text-xs text-red-500 mt-1">+ 10% Increase from last month</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Checks Card -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Total Checks</p>
+                        <p id="totalChecks" class="text-2xl font-bold text-gray-900">0</p>
+                        <p class="text-xs text-green-500 mt-1">+ 2 checks this month</p>
+                    </div>
+                   
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Transaction Section -->
+        <div class="bg-white rounded-lg shadow mb-6">
+            <div class="p-6 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Recent Transaction</h2>
+            </div>
+            
+            <!-- Search and Filter Controls -->
+            <div class="p-6 border-b border-gray-200">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <div class="md:col-span-1">
+                        <input type="text" id="searchInput" placeholder="Search" 
+                               class="w-full  h-12 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                    <div class="md:col-span-1 flex space-x-2">
+                        <input type="date" id="dateStart"
+                            class="w-1/2 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary mb-2">
+                        <input type="date" id="dateEnd"
+                            class="w-1/2 h-12  px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary mb-2">
+                    </div>
+                    <div class="md:col-span-1">
+                        <select id="typeFilter" class="w-full h-12  px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <option value="">All types</option>
+                            <option value="cash">Cash</option>
+                            <option value="gcash">GCash</option>
+                            <option value="check">Check</option>
+                        </select>
+                    </div>
+                    <button onclick="openRecordExpenseModal()" class="h-12 px-4 py-3 bg-red-primary text-white rounded-lg hover:bg-red-700 transition-colors text-center">
+                        Record Expenses
+                    </button>
+                    <div class="md:col-span-1">
+                        <button onclick="viewAllHistory()" class="w-full h-12 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                            View All History
+                        </button>
+                        
+                        
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transaction List -->
+            <div id="transactionList" class="p-6">
+                <!-- Transactions will be populated here -->
+            </div>
+
+            <!-- Skeleton Loading for Transactions -->
+            <div id="transactionSkeleton" class="hidden p-6 space-y-4">
+                <div class="animate-pulse">
+                    <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                        <div class="flex items-center space-x-4">
+                            <div class="h-10 w-10 bg-gray-300 rounded-full"></div>
+                            <div class="space-y-2">
+                                <div class="h-4 bg-gray-300 rounded w-32"></div>
+                                <div class="h-3 bg-gray-300 rounded w-24"></div>
+                            </div>
+                        </div>
+                        <div class="text-right space-y-2">
+                            <div class="h-4 bg-gray-300 rounded w-20"></div>
+                            <div class="h-3 bg-gray-300 rounded w-16"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="animate-pulse">
+                    <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                        <div class="flex items-center space-x-4">
+                            <div class="h-10 w-10 bg-gray-300 rounded-full"></div>
+                            <div class="space-y-2">
+                                <div class="h-4 bg-gray-300 rounded w-28"></div>
+                                <div class="h-3 bg-gray-300 rounded w-20"></div>
+                            </div>
+                        </div>
+                        <div class="text-right space-y-2">
+                            <div class="h-4 bg-gray-300 rounded w-24"></div>
+                            <div class="h-3 bg-gray-300 rounded w-16"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- No Transactions Message -->
+            <div id="noTransactions" class="hidden p-12 text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">No transactions found</h3>
+                <p class="mt-1 text-sm text-gray-500">Get started by recording a new expense.</p>
+            </div>
+        </div>
+
+        
+    </div>
+
+    <!-- Record Expense Modal -->
+    <div id="recordExpenseModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-10 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-2/3 xl:w-1/2 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-medium text-gray-900">Record New Expense</h3>
+                    <button onclick="closeRecordExpenseModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <form id="expenseForm" class="space-y-6">
+                    <!-- Transaction Info Section -->
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h4 class="font-medium text-gray-900 mb-4">Transaction Information</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Expense ID / Reference No.</label>
+                                <input type="text" id="expenseId" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Date & Time</label>
+                                <input type="datetime-local" id="expenseDateTime" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
+                                <select id="paymentMethod" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary" required>
+                                    <option value="">Select payment method</option>
+                                    <option value="cash">Cash</option>
+                                    <option value="gcash">GCash</option>
+                                    <option value="check">Check</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+                                <input type="number" id="expenseAmount" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recipient/Vendor Section -->
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h4 class="font-medium text-gray-900 mb-4">Recipient / Vendor Information</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Paid To / Vendor Name</label>
+                                <input type="text" id="vendorName" placeholder="e.g., Puregold Grocery, Electric Company" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary" required>
+                            </div>
+                            <div id="checkNumberDiv" class="hidden">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Check Number</label>
+                                <input type="text" id="checkNumber" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            </div>
+                        </div>
+                    </div>
+
+                    
+
+                    <!-- Description Section -->
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h4 class="font-medium text-gray-900 mb-4">Description</h4>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Purpose / Notes</label>
+                            <textarea id="expensePurpose" rows="3" placeholder="e.g., Bought 5 sacks of rice, Paid school supplies, Maintenance for dormitory" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary" required></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Supporting Evidence Section -->
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h4 class="font-medium text-gray-900 mb-4">Supporting Evidence</h4>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Receipt / Invoice Upload</label>
+                            <input type="file" id="receiptUpload" accept="image/*,.pdf" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <p class="text-xs text-gray-500 mt-1">Upload scanned or photo of official receipt</p>
+                        </div>
+                    </div>
+
+                    
+
+                    <!-- Form Actions -->
+                    <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+                        <button type="button" onclick="closeRecordExpenseModal()" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-red-primary text-white rounded-md hover:bg-red-700">
+                            Record Expense
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import {
+            db,
+            collection,
+            getDocs,
+            addDoc
+        } from './firebase.js';
+
+        let allExpenses = [];
+        let allDonations = [];
+        let currentUser = null;
+
+        // Session Manager
+        const sessionManager = {
+            getCurrentUser: function() {
+                const user = localStorage.getItem('currentUser');
+                return user ? JSON.parse(user) : null;
+            },
+            
+            requireLogin: function() {
+                if (!localStorage.getItem('currentUser')) {
+                    window.location.href = 'login.html';
+                    return false;
+                }
+                return true;
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Check authentication
+            if (!sessionManager.requireLogin()) {
+                return;
+            }
+            currentUser = sessionManager.getCurrentUser();
+            
+            // Set current date/time
+            document.getElementById('expenseDateTime').value = new Date().toISOString().slice(0, 16);
+            
+            await loadData();
+            setupEventListeners();
+        });
+
+        async function loadData() {
+            try {
+                showSkeletonLoading();
+                
+                // Load expenses
+                const expensesCol = collection(db, 'expenses');
+                const expensesSnapshot = await getDocs(expensesCol);
+                allExpenses = [];
+                expensesSnapshot.forEach(docSnap => {
+                    allExpenses.push(docSnap.data());
+                });
+
+                // Load donations for total calculation
+                const donationsCol = collection(db, 'donations');
+                const donationsSnapshot = await getDocs(donationsCol);
+                allDonations = [];
+                donationsSnapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if (data.donationType === 'money') {
+                        allDonations.push(data);
+                    }
+                });
+                
+                hideSkeletonLoading();
+                updateStatistics();
+                displayTransactions();
+            } catch (error) {
+                console.error('Failed to load data:', error);
+                hideSkeletonLoading();
+                displayTransactions();
+            }
+        }
+
+        function showSkeletonLoading() {
+            document.getElementById('transactionList').classList.add('hidden');
+            document.getElementById('noTransactions').classList.add('hidden');
+            document.getElementById('transactionSkeleton').classList.remove('hidden');
+        }
+
+        function hideSkeletonLoading() {
+            document.getElementById('transactionSkeleton').classList.add('hidden');
+            document.getElementById('transactionList').classList.remove('hidden');
+        }
+
+        function updateStatistics() {
+            // Calculate total donations
+            const totalDonations = allDonations.reduce((sum, donation) => {
+                return sum + parseFloat(donation.amount || 0);
+            }, 0);
+            document.getElementById('totalDonations').textContent = `₱${totalDonations.toLocaleString()}`;
+
+            // Calculate expenses by type
+            const cashExpenses = allExpenses.filter(e => e.paymentMethod === 'cash')
+                .reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0);
+            const gcashExpenses = allExpenses.filter(e => e.paymentMethod === 'gcash')
+                .reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0);
+            const totalChecks = allExpenses.filter(e => e.paymentMethod === 'check').length;
+
+            document.getElementById('cashExpenses').textContent = `₱${cashExpenses.toLocaleString()}`;
+            document.getElementById('gcashExpenses').textContent = `₱${gcashExpenses.toLocaleString()}`;
+            document.getElementById('totalChecks').textContent = totalChecks;
+        }
+
+        function displayTransactions() {
+            const transactionList = document.getElementById('transactionList');
+            const noTransactions = document.getElementById('noTransactions');
+            
+            if (allExpenses.length === 0) {
+                transactionList.innerHTML = '';
+                noTransactions.classList.remove('hidden');
+                return;
+            }
+            
+            noTransactions.classList.add('hidden');
+            
+            // Sort by date (newest first)
+            const sortedExpenses = [...allExpenses].sort((a, b) => 
+                new Date(b.dateTime) - new Date(a.dateTime)
+            ).slice(0, 5); // Show only recent 5
+
+            transactionList.innerHTML = sortedExpenses.map(expense => `
+                <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer mb-4">
+                    <div class="flex items-center space-x-4">
+                        <div class="p-2 rounded-full ${getPaymentMethodColor(expense.paymentMethod)}">
+                            ${getPaymentMethodIcon(expense.paymentMethod)}
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-900">${expense.vendorName || 'Unknown Vendor'}</p>
+                            <p class="text-sm text-gray-500">${expense.purpose || 'No description'}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-semibold text-red-600">-₱${parseFloat(expense.amount || 0).toLocaleString()}</p>
+                        <p class="text-sm text-gray-500">${formatDate(expense.dateTime)}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getPaymentMethodColor(method) {
+            switch(method) {
+                case 'cash': return 'bg-gray-100';
+                case 'gcash': return 'bg-blue-100';
+                case 'check': return 'bg-purple-100';
+                default: return 'bg-gray-100';
+            }
+        }
+
+        function getPaymentMethodIcon(method) {
+            switch(method) {
+                case 'cash': 
+                    return '<svg class="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>';
+                case 'gcash':
+                    return '<svg class="h-5 w-5 text-blue-600" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10" fill="#007DFF"/><text x="12" y="16" text-anchor="middle" fill="white" font-size="8" font-weight="bold">G</text></svg>';
+                case 'check':
+                    return '<svg class="h-5 w-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>';
+                default:
+                    return '<svg class="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path></svg>';
+            }
+        }
+
+        function setupEventListeners() {
+            // Payment method change handler
+            document.getElementById('paymentMethod').addEventListener('change', function() {
+                const checkDiv = document.getElementById('checkNumberDiv');
+                if (this.value === 'check') {
+                    checkDiv.classList.remove('hidden');
+                    document.getElementById('checkNumber').required = true;
+                } else {
+                    checkDiv.classList.add('hidden');
+                    document.getElementById('checkNumber').required = false;
+                }
+            });
+
+            // Form submission
+            document.getElementById('expenseForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                await recordExpense();
+            });
+
+            // Search and filter
+            document.getElementById('searchInput').addEventListener('input', filterTransactions);
+            document.getElementById('typeFilter').addEventListener('change', filterTransactions);
+        }
+
+        function filterTransactions() {
+            // Implementation for filtering transactions
+            displayTransactions();
+        }
+
+        async function recordExpense() {
+            try {
+                const formData = {
+                    expenseId: document.getElementById('expenseId').value,
+                    dateTime: document.getElementById('expenseDateTime').value,
+                    paymentMethod: document.getElementById('paymentMethod').value,
+                    amount: parseFloat(document.getElementById('expenseAmount').value),
+                    vendorName: document.getElementById('vendorName').value,
+                    checkNumber: document.getElementById('checkNumber').value,
+                    requestedBy: document.getElementById('requestedBy').value,
+                    approvedBy: document.getElementById('approvedBy').value,
+                    handledBy: document.getElementById('handledBy').value,
+                    purpose: document.getElementById('expensePurpose').value,
+                    status: document.getElementById('expenseStatus').value,
+                    reimbursementStatus: document.getElementById('reimbursementStatus').value,
+                    recordedBy: currentUser.username,
+                    recordedAt: new Date().toISOString()
+                };
+
+                // Add to Firebase
+                const expensesCol = collection(db, 'expenses');
+                await addDoc(expensesCol, formData);
+
+                // Add to local array
+                allExpenses.push(formData);
+
+                // Update UI
+                updateStatistics();
+                displayTransactions();
+                closeRecordExpenseModal();
+                
+                // Reset form
+                document.getElementById('expenseForm').reset();
+                document.getElementById('expenseDateTime').value = new Date().toISOString().slice(0, 16);
+                
+                alert('Expense recorded successfully!');
+            } catch (error) {
+                console.error('Error recording expense:', error);
+                alert('Failed to record expense. Please try again.');
+            }
+        }
+
+        // Global functions
+        window.openRecordExpenseModal = function() {
+            document.getElementById('recordExpenseModal').classList.remove('hidden');
+        };
+
+        window.closeRecordExpenseModal = function() {
+            document.getElementById('recordExpenseModal').classList.add('hidden');
+        };
+
+        window.viewAllHistory = function() {
+            // Implementation for viewing all history
+            alert('View All History functionality to be implemented');
+        };
+
+        window.sendMoney = function() {
+            alert('Send Money functionality to be implemented');
+        };
+
+        window.viewTransactionHistory = function() {
+            alert('Transaction History functionality to be implemented');
+        };
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+    </script>
+</body>
+</html>

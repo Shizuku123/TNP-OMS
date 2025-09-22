@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Settings - Tahanan ng Pagmamahal OMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'red-primary': '#dc2626',
+                        'red-secondary': '#ef4444',
+                        'red-light': '#fef2f2'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="flex items-center text-gray-600 hover:text-red-primary">
+                        <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                        Back to Dashboard
+                    </a>
+                </div>
+                <h1 class="text-xl font-semibold text-gray-900">System Settings</h1>
+                <div></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Success/Error Messages -->
+        <div id="messageContainer" class="mb-4 hidden"></div>
+
+        <form id="settingsForm" class="space-y-8">
+            <!-- Operating Hours -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="text-lg font-medium text-gray-900 mb-6">Operating Hours</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label for="operatingHoursStart" class="block text-sm font-medium text-gray-700 mb-2">Start Time *</label>
+                        <input type="time" id="operatingHoursStart" name="operatingHoursStart" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        <p class="mt-1 text-sm text-gray-500">Official start time for work</p>
+                    </div>
+                    <div>
+                        <label for="operatingHoursEnd" class="block text-sm font-medium text-gray-700 mb-2">End Time *</label>
+                        <input type="time" id="operatingHoursEnd" name="operatingHoursEnd" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        <p class="mt-1 text-sm text-gray-500">Official end time for work</p>
+                    </div>
+                    <div>
+                        <label for="lateThresholdMinutes" class="block text-sm font-medium text-gray-700 mb-2">Late Threshold (Minutes)</label>
+                        <input type="number" id="lateThresholdMinutes" name="lateThresholdMinutes" min="0" max="60"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        <p class="mt-1 text-sm text-gray-500">Grace period before marking as late</p>
+                    </div>
+                </div>
+                
+                <!-- Current Schedule Display -->
+                <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                    <h3 class="text-sm font-medium text-blue-900 mb-2">Current Schedule</h3>
+                    <div class="text-sm text-blue-800" id="schedulePreview">
+                        <!-- Schedule preview will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Organization Settings -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="text-lg font-medium text-gray-900 mb-6">Organization Settings</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="organizationName" class="block text-sm font-medium text-gray-700 mb-2">Organization Name</label>
+                        <input type="text" id="organizationName" name="organizationName"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                    <div>
+                        <label for="timezone" class="block text-sm font-medium text-gray-700 mb-2">Timezone</label>
+                        <select id="timezone" name="timezone"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <option value="Asia/Manila">Asia/Manila (PHT)</option>
+                            <option value="UTC">UTC</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Attendance Settings -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="text-lg font-medium text-gray-900 mb-6">Attendance Settings</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="requireLocationVerification" class="block text-sm font-medium text-gray-700 mb-2">Location Verification</label>
+                        <select id="requireLocationVerification" name="requireLocationVerification"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <option value="yes">Required</option>
+                            <option value="no">Optional</option>
+                        </select>
+                        <p class="mt-1 text-sm text-gray-500">Require GPS location for attendance</p>
+                    </div>
+                    <div>
+                        <label for="autoLogoutHours" class="block text-sm font-medium text-gray-700 mb-2">Auto Logout (Hours)</label>
+                        <input type="number" id="autoLogoutHours" name="autoLogoutHours" min="8" max="24"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        <p class="mt-1 text-sm text-gray-500">Automatically log out staff after X hours</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Information -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="text-lg font-medium text-gray-900 mb-6">System Information</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Last Updated</label>
+                        <div id="lastUpdated" class="px-3 py-2 bg-gray-100 border border-gray-300 rounded-md text-gray-600">
+                            Never
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">System Version</label>
+                        <div class="px-3 py-2 bg-gray-100 border border-gray-300 rounded-md text-gray-600">
+                            TNP OMS v1.0
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex justify-end space-x-4">
+                <a href="index.html" class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                    Cancel
+                </a>
+                <button type="submit" class="px-6 py-2 bg-red-primary text-white rounded-md hover:bg-red-700 transition-colors">
+                    Save Settings
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        let currentUser = null;
+
+        // Session Manager
+        const sessionManager = {
+            getCurrentUser: function() {
+                const user = localStorage.getItem('currentUser');
+                return user ? JSON.parse(user) : null;
+            },
+            
+            requireLogin: function() {
+                if (!localStorage.getItem('currentUser')) {
+                    window.location.href = 'login.html';
+                    return false;
+                }
+                return true;
+            }
+        };
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication
+            if (!sessionManager.requireLogin()) {
+                return;
+            }
+
+            currentUser = sessionManager.getCurrentUser();
+            
+            // Check if user is admin
+            if (currentUser.role !== 'admin') {
+                showMessage('Access denied. Only administrators can access system settings.', 'error');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000);
+                return;
+            }
+
+            loadSettings();
+            setupEventListeners();
+        });
+
+        function loadSettings() {
+            // Load settings from localStorage or set defaults
+            const settings = JSON.parse(localStorage.getItem('system-settings') || '{}');
+            
+            // Set default values
+            const defaults = {
+                operatingHoursStart: '07:00',
+                operatingHoursEnd: '17:00',
+                lateThresholdMinutes: '15',
+                organizationName: 'Tahanan ng Pagmamahal',
+                timezone: 'Asia/Manila',
+                requireLocationVerification: 'yes',
+                autoLogoutHours: '12'
+            };
+
+            // Populate form fields
+            Object.keys(defaults).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.value = settings[key] || defaults[key];
+                }
+            });
+
+            // Update last updated display
+            if (settings.lastUpdated) {
+                document.getElementById('lastUpdated').textContent = 
+                    new Date(settings.lastUpdated).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit'
+                    });
+            }
+
+            updateSchedulePreview();
+        }
+
+        function setupEventListeners() {
+            // Form submission
+            document.getElementById('settingsForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveSettings();
+            });
+
+            // Update schedule preview when times change
+            document.getElementById('operatingHoursStart').addEventListener('change', updateSchedulePreview);
+            document.getElementById('operatingHoursEnd').addEventListener('change', updateSchedulePreview);
+            document.getElementById('lateThresholdMinutes').addEventListener('change', updateSchedulePreview);
+        }
+
+        function updateSchedulePreview() {
+            const startTime = document.getElementById('operatingHoursStart').value;
+            const endTime = document.getElementById('operatingHoursEnd').value;
+            const threshold = document.getElementById('lateThresholdMinutes').value || '15';
+            
+            if (startTime && endTime) {
+                const startDate = new Date(`2000-01-01T${startTime}`);
+                const endDate = new Date(`2000-01-01T${endTime}`);
+                const lateTime = new Date(startDate.getTime() + (parseInt(threshold) * 60000));
+                
+                const preview = `
+                    <p><strong>Work Hours:</strong> ${startDate.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit'})} - ${endDate.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit'})}</p>
+                    <p><strong>Late Threshold:</strong> ${threshold} minutes after start time</p>
+                    <p><strong>Attendance Rules:</strong></p>
+                    <ul class="list-disc list-inside ml-4 mt-1">
+                        <li>On time: Arrive by ${startDate.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit'})}</li>
+                        <li>Present (with grace): Arrive within ${threshold} minutes</li>
+                        <li>Late: Arrive after ${lateTime.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit'})}</li>
+                    </ul>
+                `;
+                
+                document.getElementById('schedulePreview').innerHTML = preview;
+            }
+        }
+
+        function saveSettings() {
+            try {
+                const formData = new FormData(document.getElementById('settingsForm'));
+                const settings = {};
+                
+                // Get all form data
+                for (let [key, value] of formData.entries()) {
+                    settings[key] = value;
+                }
+                
+                // Add timestamp
+                settings.lastUpdated = new Date().toISOString();
+                
+                // Save to localStorage
+                localStorage.setItem('system-settings', JSON.stringify(settings));
+                
+                // Log activity
+                logActivity('Updated System Settings', 'Modified operating hours and system configuration');
+                
+                showMessage('System settings updated successfully!', 'success');
+                
+                // Update last updated display
+                document.getElementById('lastUpdated').textContent = 
+                    new Date().toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit'
+                    });
+                
+            } catch (error) {
+                console.error('Error saving settings:', error);
+                showMessage('Error saving settings. Please try again.', 'error');
+            }
+        }
+
+        function logActivity(action, details) {
+            try {
+                const activities = JSON.parse(localStorage.getItem('system-activity') || '[]');
+                const activityId = 'ACT' + String(activities.length + 1).padStart(4, '0');
+                
+                const activity = {
+                    activityId: activityId,
+                    userId: currentUser.username,
+                    username: currentUser.username,
+                    action: action,
+                    details: details,
+                    timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+                    ipAddress: '127.0.0.1'
+                };
+                
+                activities.push(activity);
+                localStorage.setItem('system-activity', JSON.stringify(activities));
+            } catch (error) {
+                console.error('Error logging activity:', error);
+            }
+        }
+
+        function showMessage(message, type) {
+            const container = document.getElementById('messageContainer');
+            const bgColor = type === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700';
+            
+            container.innerHTML = `
+                <div class="${bgColor} px-4 py-3 rounded border">
+                    ${message}
+                </div>
+            `;
+            container.classList.remove('hidden');
+            
+            setTimeout(() => {
+                container.classList.add('hidden');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+{
+    "accounts": [
+        {
+            "username": "admin",
+            "password": "admin123",
+            "name": "System Administrator",
+            "role": "admin",
+            "department": "Administration",
+            "position":"admin",
+            "status":"active",
+            "email": "admin@orphanage.ph",
+            "dateCreated": "2024-01-01"
+        },
+        {
+            "username": "szanil",
+            "password": "password123",
+            "name": "Szanil Anil",
+            "role": "staff",
+            "department": "Administration",
+            "position":"staff",
+            "status":"active",
+            "email": "szanil123@gmail.com",
+            "dateCreated": "2024-01-01"
+        },
+        {
+            "username": "michael",
+            "password": "password123",
+            "name": "Michael Santos",
+            "role": "staff",
+            "department": "Administration",
+            "position":"admin",
+            "status":"active",
+            "email": "michaelsantos@gmail.com",
+            "dateCreated": "2024-01-01"
+        }
+        ,
+        {
+            "username": "julius",
+            "password": "password123",
+            "name": "Julius Caesar",
+            "role": "volunteer",
+            "department": "child care",
+            "position":"admin",
+            "status":"active",
+            "email": "michaelsantos@gmail.com",
+            "dateCreated": "2024-01-01"
+        }
+    ]
+}

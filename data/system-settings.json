@@ -1,0 +1,10 @@
+{
+  "operatingHoursStart": "07:00",
+  "operatingHoursEnd": "17:00",
+  "lateThresholdMinutes": "15",
+  "organizationName": "Tahanan ng Pagmamahal",
+  "lastUpdated": "2025-07-05 17:40:42",
+  "timezone": "Asia/Manila",
+  "requireLocationVerification": "yes",
+  "autoLogoutHours": "12"
+}

@@ -1,0 +1,146 @@
+[
+  {
+    "activityId": "ACT0001",
+    "userId": "admin",
+    "username": "admin",
+    "action": "Viewed System Activity",
+    "details": "Accessed system activity page",
+    "timestamp": "2025-07-05 17:40:20",
+    "ipAddress": "::1"
+  },
+  {
+    "activityId": "ACT0002",
+    "userId": "admin",
+    "username": "admin",
+    "action": "Updated System Settings",
+    "details": "Modified operating hours and system configuration",
+    "timestamp": "2025-07-05 17:40:42",
+    "ipAddress": "::1"
+  },
+  {
+    "activityId": "ACT0003",
+    "userId": "admin",
+    "username": "admin",
+    "action": "Viewed System Activity",
+    "details": "Accessed system activity page",
+    "timestamp": "2025-07-05 17:40:58",
+    "ipAddress": "::1"
+  },
+  {
+    "activityId": "ACT0004",
+    "userId": "admin",
+    "username": "admin",
+    "action": "Viewed System Activity",
+    "details": "Accessed system activity page",
+    "timestamp": "2025-07-05 17:41:02",
+    "ipAddress": "::1"
+  },
+  {
+    "activityId": "ACT0005",
+    "userId": "admin",
+    "username": "admin",
+    "action": "User Logout",
+    "details": "User logged out of the system",
+    "timestamp": "2025-07-05 17:41:08",
+    "ipAddress": "::1"
+  },
+  {
+    "activityId": "ACT0006",
+    "userId": "elena.mendoza",
+    "username": "elena.mendoza",
+    "action": "User Logout",
+    "details": "User logged out of the system",
+    "timestamp": "2025-07-05 17:41:56",
+    "ipAddress": "::1"
+  },
+  {
+    "activityId": "ACT0007",
+    "userId": "admin",
+    "username": "admin",
+    "action": "User Logout",
+    "details": "User logged out of the system",
+    "timestamp": "2025-07-05 17:42:38",
+    "ipAddress": "::1"
+  },
+  {
+    "activityId": "ACT0008",
+    "userId": "elena.mendoza",
+    "username": "elena.mendoza",
+    "action": "Time Out",
+    "details": "Timed out at 17:43",
+    "timestamp": "2025-07-05 17:43:05",
+    "ipAddress": "::1"
+  },
+  {
+    "activityId": "ACT0009",
+    "userId": "elena.mendoza",
+    "username": "elena.mendoza",
+    "action": "Leave Request",
+    "details": "Requested leave for 2025-07-09",
+    "timestamp": "2025-07-05 17:43:16",
+    "ipAddress": "::1"
+  },
+  {
+    "activityId": "ACT0010",
+    "userId": "elena.mendoza",
+    "username": "elena.mendoza",
+    "action": "User Logout",
+    "details": "User logged out of the system",
+    "timestamp": "2025-07-05 17:43:21",
+    "ipAddress": "::1"
+  },
+  {
+    "activityId": "ACT0011",
+    "userId": "admin",
+    "username": "admin",
+    "action": "User Logout",
+    "details": "User logged out of the system",
+    "timestamp": "2025-07-07 15:05:12",
+    "ipAddress": "::1"
+  },
+  {
+    "activityId": "ACT0012",
+    "userId": "elena.mendoza",
+    "username": "elena.mendoza",
+    "action": "Time In",
+    "details": "Timed in at 15:09",
+    "timestamp": "2025-07-07 15:09:09",
+    "ipAddress": "::1"
+  },
+  {
+    "activityId": "ACT0013",
+    "userId": "elena.mendoza",
+    "username": "elena.mendoza",
+    "action": "Leave Request",
+    "details": "Requested leave for 2025-07-15",
+    "timestamp": "2025-07-07 15:11:00",
+    "ipAddress": "::1"
+  },
+  {
+    "activityId": "ACT0014",
+    "userId": "admin",
+    "username": "admin",
+    "action": "Rejected Leave Request",
+    "details": "Rejected leave request ID: AT008",
+    "timestamp": "2025-07-07 15:11:12",
+    "ipAddress": "::1"
+  },
+  {
+    "activityId": "ACT0015",
+    "userId": "elena.mendoza",
+    "username": "elena.mendoza",
+    "action": "User Login",
+    "details": "User logged in of the system",
+    "timestamp": "2025-07-09 18:54:00",
+    "ipAddress": "::1"
+  },
+  {
+    "activityId": "ACT0016",
+    "userId": "admin",
+    "username": "admin",
+    "action": "Rejected Leave Request",
+    "details": "Rejected leave request ID: AT006",
+    "timestamp": "2025-07-07 15:16:10",
+    "ipAddress": "::1"
+  }
+]

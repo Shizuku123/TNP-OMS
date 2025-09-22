@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Attendance Records - Tahanan ng Pagmamahal OMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'red-primary': '#dc2626',
+                        'red-secondary': '#ef4444',
+                        'red-light': '#fef2f2'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="flex items-center text-gray-600 hover:text-red-primary">
+                        <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                    </a>
+                </div>
+                <h1 class="text-xl font-semibold text-gray-900">Staff Attendance Records</h1>
+                <div class="flex items-center space-x-4">
+                    <button onclick="exportToCSV()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors hidden">
+                        Export CSV
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Success/Error Messages -->
+        <div id="messageContainer" class="mb-4 hidden"></div>
+
+       
+        <!-- Search -->
+        <!-- Search -->
+    <div class="mb-6 bg-white rounded-lg shadow p-6">
+        <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
+
+            <!-- Search Input -->
+            <div class="flex-1 w-full hidden">
+                <input type="text" id="searchInput" placeholder="Search attendance records..."
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+            </div>
+
+            <!-- Date Filter (Dropdown + Date Picker) -->
+             <span id="record-count"
+                class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium hidden">
+                0 records
+            </span>
+            <div class="flex items-center space-x-2 w-full sm:w-auto">
+                
+                <select id="dateFilterOption"
+                    class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    <option value="today">Today</option>
+                    <option value="all">All</option>
+                    <option value="custom">Pick a date</option>
+                </select>
+
+                <input type="date" id="dateFilterInput" disabled
+                    class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+            </div>
+
+            <!-- Record Count -->
+            
+        </div>
+    </div>
+         <!-- Filter Tabs -->
+        <!-- <div class="mb-6 bg-white rounded-lg shadow">
+            <div class="border-b border-gray-200">
+                <nav class="-mb-px flex space-x-8 px-6">
+                    <button onclick="filterAttendance('all')" class="filter-tab active py-4 px-1 border-b-2 border-red-primary font-medium text-sm text-red-600">
+                        All Records
+                    </button>
+                    <button onclick="filterAttendance('present')" class="filter-tab py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                        Present Today
+                    </button>
+                    <button onclick="filterAttendance('leave')" class="filter-tab py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                        Leave Requests
+                    </button>
+                    <button onclick="filterAttendance('pending')" class="filter-tab py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                        Pending Approval
+                    </button>
+                </nav>
+            </div>
+        </div> -->
+
+
+        <!-- Attendance Table -->
+        <!-- Records Display -->
+<div class="bg-white rounded-lg shadow overflow-hidden">
+
+    <!-- No Records Message -->
+    <div id="no-records" class="text-center py-12 hidden">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
+            </path>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No attendance records found</h3>
+        <p class="mt-1 text-sm text-gray-500">Staff attendance records will appear here once they start using the system.</p>
+    </div>
+
+    <!-- Desktop Table -->
+    <div id="records-table" class="overflow-x-auto hidden sm:block">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Account Name
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Date
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                </tr>
+            </thead>
+            <tbody id="attendance-table-body" class="bg-white divide-y divide-gray-200">
+                <!-- Filled via JS -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Mobile Cards -->
+    <div id="records-cards" class="sm:hidden px-4 py-4 space-y-4">
+        <!-- Filled via JS -->
+    </div>
+
+</div>
+
+    </div>
+
+    <!-- Leave Request Approval Modal -->
+    <div id="leave-approval-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 lg:w-1/3 shadow-lg rounded-md bg-white">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Leave Request Approval</h3>
+                <button onclick="closeLeaveApprovalModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="leave-request-details" class="space-y-4 mb-6">
+                <!-- Leave request details will be populated here -->
+            </div>
+            <div class="flex justify-end space-x-4">
+                <button onclick="approveLeaveRequest()" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">Approve</button>
+                <button onclick="rejectLeaveRequest()" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">Reject</button>
+                <button onclick="closeLeaveApprovalModal()" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Full Details Modal -->
+    <div id="details-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg w-11/12 max-w-md p-6 relative">
+            <button onclick="closeDetailsModal()" class="absolute top-3 right-3 text-gray-500 hover:text-black">
+                &times;
+            </button>
+            <h2 class="text-lg font-semibold text-gray-800 mb-4">Attendance Details</h2>
+            <div id="details-content" class="space-y-2 text-sm text-gray-700">
+                <!-- Details go here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Div -->
+    <script>
+
+
+
+            document.getElementById('dateFilterOption').addEventListener('change', function () {
+                const dateInput = document.getElementById('dateFilterInput');
+
+                if (this.value === 'custom') {
+                    dateInput.disabled = false;
+                    dateInput.value = '';
+                } else {
+                    dateInput.disabled = true;
+                    dateInput.value = '';
+                }
+
+                applyFilters(); // <-- this is essential
+            });
+
+
+
+            document.getElementById('dateFilterInput').addEventListener('input', applyFilters);
+
+
+        function filterToToday() {
+            const today = new Date().toISOString().split('T')[0];
+            filteredRecords = allRecords.filter(record => 
+                record.date === today &&
+                (record.status === 'Present' || record.status === 'Late')
+            );
+            displayRecords();
+        }
+
+
+        document.getElementById('dateFilterInput').addEventListener('input', applyFilters);
+
+        function applyFilters() {
+            const option = document.getElementById('dateFilterOption').value;
+            const customDate = document.getElementById('dateFilterInput').value;
+            const today = new Date().toISOString().split('T')[0];
+
+            // Always start from allRecords
+            let baseRecords = [...allRecords];
+
+            if (option === 'today') {
+                filteredRecords = baseRecords.filter(record => record.date === today);
+            } else if (option === 'all') {
+                filteredRecords = baseRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
+            } else if (option === 'custom' && customDate) {
+                filteredRecords = baseRecords.filter(record => record.date === customDate);
+            } else {
+                filteredRecords = [];  // Fallback safety
+            }
+
+            displayRecords();
+        }
+
+
+
+
+    </script>
+
+    <script>
+        let currentUser = null;
+        let allRecords = [];
+        let filteredRecords = [];
+        let currentFilter = 'all';
+        let currentLeaveRequest = null;
+
+        // Session Manager
+        const sessionManager = {
+            getCurrentUser: function() {
+                const user = localStorage.getItem('currentUser');
+                return user ? JSON.parse(user) : null;
+            },
+            
+            requireLogin: function() {
+                if (!localStorage.getItem('currentUser')) {
+                    window.location.href = 'login.html';
+                    return false;
+                }
+                return true;
+            }
+        };
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!sessionManager.requireLogin()) {
+                return;
+            }
+
+            currentUser = sessionManager.getCurrentUser();
+            
+            if (currentUser.role !== 'admin') {
+                showMessage('Access denied. Only administrators can access this page.', 'error');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000);
+                return;
+            }
+
+            loadAttendanceRecords();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            document.getElementById('searchInput').addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                filteredRecords = allRecords.filter(record => {
+                    return record.accountName.toLowerCase().includes(searchTerm) ||
+                           record.date.includes(searchTerm) ||
+                           record.status.toLowerCase().includes(searchTerm) ||
+                           (record.remarks && record.remarks.toLowerCase().includes(searchTerm));
+                });
+                displayRecords();
+            });
+        }
+
+        // To be replaced with retrieving from firebase
+        function loadAttendanceRecords() {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onload = function() {
+                const attendanceData = JSON.parse(this.responseText);
+                allRecords = (attendanceData.attendance || []).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                applyFilters();  // Auto-trigger the selected filter (which defaults to Today)
+            };
+            xhttp.open("GET", "data/attendance.json", true);
+            xhttp.send();
+        }
+
+        window.addEventListener('resize', () => {
+            if (filteredRecords.length > 0) {
+                displayRecords();
+            }
+        });
+
+
+
+
+        // To be replaced with retrieving from firebase
+        // function displayRecords() {
+        //     const tableBody = document.getElementById('attendance-table-body');
+        //     const noRecords = document.getElementById('no-records');
+        //     const recordsTable = document.getElementById('records-table');
+        //     const recordCount = document.getElementById('record-count');
+
+        //     recordCount.textContent = `${filteredRecords.length} record${filteredRecords.length !== 1 ? 's' : ''}`;
+
+        //     if (filteredRecords.length === 0) {
+        //         noRecords.classList.remove('hidden');
+        //         recordsTable.classList.add('hidden');
+        //         return;
+        //     }
+
+        //     noRecords.classList.add('hidden');
+        //     recordsTable.classList.remove('hidden');
+
+        //     tableBody.innerHTML = filteredRecords.map(record => `
+        //         <tr class="hover:bg-gray-50">
+        //             <td class="px-6 py-4 whitespace-nowrap">
+        //                 <div class="text-sm font-medium text-gray-900">${record.accountName}</div>
+        //                 <div class="text-sm text-gray-500">${record.accountId}</div>
+        //             </td>
+        //             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+        //                 ${formatDate(record.date)}
+        //             </td>
+        //             <td class="px-6 py-4 whitespace-nowrap">
+        //                 <span class="px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(record.status)}">
+        //                     ${record.status}
+        //                 </span>
+        //                 ${record.leaveType ? `<div class="text-xs text-gray-500 mt-1">${record.leaveType}</div>` : ''}
+        //             </td>
+                   
+        //         </tr>
+        //     `).join('');
+        // }
+
+        function displayRecords() {
+            const tableBody = document.getElementById('attendance-table-body');
+            const recordsCards = document.getElementById('records-cards');
+            const recordsTable = document.getElementById('records-table');
+            const noRecords = document.getElementById('no-records');
+            const recordCount = document.getElementById('record-count');
+
+            // Update record count badge
+            recordCount.textContent = `${filteredRecords.length} record${filteredRecords.length !== 1 ? 's' : ''}`;
+            recordCount.classList.remove('hidden');
+
+            if (filteredRecords.length === 0) {
+                tableBody.innerHTML = '';
+                recordsCards.innerHTML = '';
+                recordsTable.classList.add('hidden');
+                recordsCards.classList.add('hidden');
+                noRecords.classList.remove('hidden');
+                return;
+            }
+
+            noRecords.classList.add('hidden');
+            recordCount.classList.remove('hidden');
+
+            // 🪄 Show the correct container depending on screen size
+            if (window.innerWidth >= 640) { // sm breakpoint ~ Tailwind
+                recordsTable.classList.remove('hidden');
+                recordsCards.classList.add('hidden');
+            } else {
+                recordsTable.classList.add('hidden');
+                recordsCards.classList.remove('hidden');
+            }
+
+            // Desktop Table Rows
+            tableBody.innerHTML = filteredRecords.map(record => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">${record.accountName}</div>
+                        <div class="text-sm text-gray-500">${record.accountId}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        ${formatDate(record.date)}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(record.status)}">
+                            ${record.status}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Mobile Cards
+            recordsCards.innerHTML = filteredRecords.map(record => `
+                <div onclick="viewDetails('${record.attendanceId}')" 
+                    class="bg-white p-3 rounded-lg shadow flex justify-between items-center text-sm font-medium text-gray-800 cursor-pointer">
+                    <div class="w-1/3 truncate">${record.accountName}</div>
+                    <div class="w-1/3 text-center truncate">${formatDate(record.date)}</div>
+                    <div class="w-1/3 text-right">
+                        <span class="inline-block px-2 py-1 text-xs rounded-full ${getStatusColor(record.status)}">
+                            ${record.status}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+
+
+
+        function filterAttendance(filter) {
+            currentFilter = filter;
+
+            // Reset filters visually AND logically
+            const datePicker = document.getElementById('datePicker');
+            const searchInput = document.getElementById('searchInput');
+            if (datePicker) {
+                datePicker.value = '';   // Clear date picker input
+            }
+            if (searchInput) {
+                searchInput.value = '';  // Clear search input
+            }
+
+            const today = new Date().toISOString().split('T')[0];
+
+            switch (filter) {
+                case 'all':
+                    filteredRecords = [...allRecords];
+                    break;
+                case 'present':
+                    filteredRecords = allRecords.filter(record =>
+                        record.date === today &&
+                        (record.status === 'Present' || record.status === 'Late')
+                    );
+                    break;
+                case 'leave':
+                    filteredRecords = allRecords.filter(record =>
+                        ['On Leave', 'Leave Requested', 'Rejected'].includes(record.status)
+                    );
+                    break;
+                case 'pending':
+                    filteredRecords = allRecords.filter(record =>
+                        record.status === 'Leave Requested'
+                    );
+                    break;
+            }
+
+            // Update tab styles
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('active', 'border-red-primary', 'text-red-600');
+                tab.classList.add('border-transparent', 'text-gray-500');
+            });
+
+            event.target.classList.add('active', 'border-red-primary', 'text-red-600');
+            event.target.classList.remove('border-transparent', 'text-gray-500');
+
+            displayRecords();
+        }
+
+        function getActionButtons(record) {
+            if (record.status === 'Leave Requested') {
+                return `
+                    <button onclick="showLeaveApprovalModal('${record.attendanceId}')" 
+                            class="text-blue-600 hover:text-blue-900 mr-2">Review</button>
+                `;
+            }
+            return `
+                <button onclick="viewDetails('${record.attendanceId}')" 
+                        class="text-blue-600 hover:text-blue-900">View</button>
+            `;
+        }
+
+        function getStatusColor(status) {
+            switch(status) {
+                case 'Present': return 'bg-green-100 text-green-800';
+                case 'Late': return 'bg-yellow-100 text-yellow-800';
+                case 'On Leave': return 'bg-blue-100 text-blue-800';
+                case 'Leave Requested': return 'bg-orange-100 text-orange-800';
+                case 'Rejected': return 'bg-red-100 text-red-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        function showLeaveApprovalModal(attendanceId) {
+            const record = allRecords.find(r => r.attendanceId === attendanceId);
+            if (!record) return;
+
+            currentLeaveRequest = record;
+            
+            document.getElementById('leave-request-details').innerHTML = `
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Staff Name</label>
+                        <p class="mt-1 text-sm text-gray-900">${record.accountName}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Leave Date</label>
+                        <p class="mt-1 text-sm text-gray-900">${formatDate(record.date)}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Leave Type</label>
+                        <p class="mt-1 text-sm text-gray-900">${record.leaveType}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Request Date</label>
+                        <p class="mt-1 text-sm text-gray-900">${formatDateTime(record.requestDate)}</p>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium text-gray-700">Reason</label>
+                        <p class="mt-1 text-sm text-gray-900">${record.reason}</p>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('leave-approval-modal').classList.remove('hidden');
+        }
+
+        function closeLeaveApprovalModal() {
+            document.getElementById('leave-approval-modal').classList.add('hidden');
+            currentLeaveRequest = null;
+        }
+
+        function approveLeaveRequest() {
+            if (!currentLeaveRequest) return;
+
+            const attendanceData = JSON.parse(localStorage.getItem('attendance-records') || '{"attendance": []}');
+            const recordIndex = attendanceData.attendance.findIndex(r => r.attendanceId === currentLeaveRequest.attendanceId);
+            
+            if (recordIndex !== -1) {
+                attendanceData.attendance[recordIndex].status = 'On Leave';
+                attendanceData.attendance[recordIndex].remarks = 'Approved by admin';
+                localStorage.setItem('attendance-records', JSON.stringify(attendanceData));
+
+                showMessage('Leave request approved successfully!', 'success');
+                
+                loadAttendanceRecords();
+                closeLeaveApprovalModal();
+            }
+        }
+
+        function rejectLeaveRequest() {
+            if (!currentLeaveRequest) return;
+
+            const reason = prompt('Please provide a reason for rejection (optional):') || 'Rejected by admin';
+            
+            const attendanceData = JSON.parse(localStorage.getItem('attendance-records') || '{"attendance": []}');
+            const recordIndex = attendanceData.attendance.findIndex(r => r.attendanceId === currentLeaveRequest.attendanceId);
+            
+            if (recordIndex !== -1) {
+                attendanceData.attendance[recordIndex].status = 'Rejected';
+                attendanceData.attendance[recordIndex].remarks = reason;
+                localStorage.setItem('attendance-records', JSON.stringify(attendanceData));
+
+                showMessage('Leave request rejected.', 'success');
+                
+                loadAttendanceRecords();
+                closeLeaveApprovalModal();
+            }
+        }
+
+        function viewDetails(attendanceId) {
+            const record = allRecords.find(r => r.attendanceId === attendanceId);
+            if (!record) return;
+
+            const content = `
+                <div><span class="font-medium">Name:</span> ${record.accountName}</div>
+                <div><span class="font-medium">Account ID:</span> ${record.accountId}</div>
+                <div><span class="font-medium">Date:</span> ${formatDate(record.date)}</div>
+                <div><span class="font-medium">Time In:</span> ${record.timeIn || 'N/A'}</div>
+                <div><span class="font-medium">Time Out:</span> ${record.timeOut || 'N/A'}</div>
+                <div><span class="font-medium">Status:</span> ${record.status}</div>
+                ${record.leaveType ? `<div><span class="font-medium">Leave Type:</span> ${record.leaveType}</div>` : ''}
+                ${record.reason ? `<div><span class="font-medium">Reason:</span> ${record.reason}</div>` : ''}
+                ${record.remarks ? `<div><span class="font-medium">Remarks:</span> ${record.remarks}</div>` : ''}
+            `;
+
+            document.getElementById('details-content').innerHTML = content;
+            document.getElementById('details-modal').classList.remove('hidden');
+        }
+
+        function closeDetailsModal() {
+            document.getElementById('details-modal').classList.add('hidden');
+        }
+
+        function exportToCSV() {
+            if (filteredRecords.length === 0) {
+                showMessage('No records to export.', 'error');
+                return;
+            }
+
+            const headers = ['Account Name', 'Account ID', 'Date', 'Time In', 'Time Out', 'Status', 'Location', 'Location Verified', 'Coordinates', 'Leave Type', 'Reason', 'Remarks', 'Date Added'];
+            
+            const csvContent = [
+                headers.join(','),
+                ...filteredRecords.map(record => [
+                    `"${record.accountName}"`,
+                    `"${record.accountId}"`,
+                    `"${record.date}"`,
+                    `"${record.timeIn || ''}"`,
+                    `"${record.timeOut || ''}"`,
+                    `"${record.status}"`,
+                    `"${record.location || ''}"`,
+                    `"${record.locationVerified ? 'Yes' : 'No'}"`,
+                    `"${record.coordinates || ''}"`,
+                    `"${record.leaveType || ''}"`,
+                    `"${record.reason || ''}"`,
+                    `"${record.remarks || ''}"`,
+                    `"${record.dateAdded}"`
+                ].join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `attendance_records_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showMessage('Attendance records exported successfully!', 'success');
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric' 
+                });
+            } catch (error) {
+                return dateString;
+            }
+        }
+
+        function formatDateTime(dateTimeString) {
+            if (!dateTimeString) return 'N/A';
+            try {
+                const date = new Date(dateTimeString);
+                return date.toLocaleString('en-US', { 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit'
+                });
+            } catch (error) {
+                return dateTimeString;
+            }
+        }
+
+        function formatTime(timeString) {
+            if (!timeString) return 'N/A';
+            try {
+                const [hours, minutes] = timeString.split(':');
+                const date = new Date();
+                date.setHours(parseInt(hours), parseInt(minutes));
+                return date.toLocaleTimeString('en-US', { 
+                    hour: 'numeric', 
+                    minute: '2-digit' 
+                });
+            } catch (error) {
+                return timeString;
+            }
+        }
+
+        function showMessage(message, type) {
+            const container = document.getElementById('messageContainer');
+            const bgColor = type === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700';
+            
+            container.innerHTML = `
+                <div class="${bgColor} px-4 py-3 rounded border">
+                    ${message}
+                </div>
+            `;
+            container.classList.remove('hidden');
+            
+            setTimeout(() => {
+                container.classList.add('hidden');
+            }, 5000);
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('leave-approval-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeLeaveApprovalModal();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Email Verification</title>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getAuth, applyActionCode } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
+    // 🔹 Replace with your Firebase config
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      appId: "YOUR_APP_ID"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // 🔹 Grab the oobCode from URL
+    const queryParams = new URLSearchParams(window.location.search);
+    const oobCode = queryParams.get("oobCode");
+
+    // 🔹 Try applying the verification code
+    applyActionCode(auth, oobCode)
+      .then(() => {
+        document.getElementById("status").innerHTML = 
+          "<h2 style='color:green;'>✅ Email verified successfully!</h2>";
+      })
+      .catch((error) => {
+        document.getElementById("status").innerHTML = 
+          "<h2 style='color:red;'>❌ Verification failed: " + error.message + "</h2>";
+      });
+  </script>
+</head>
+<body style="font-family: Arial, sans-serif; text-align:center; padding:50px;">
+  <h1>Email Verification</h1>
+  <p id="status">Verifying your email, please wait...</p>
+</body>
+</html>

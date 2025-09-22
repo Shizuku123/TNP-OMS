@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Tasks - Tahanan ng Pagmamahal OMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'red-primary': '#dc2626',
+                        'red-secondary': '#ef4444',
+                        'red-light': '#fef2f2'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="flex items-center text-gray-600 hover:text-red-primary">
+                        <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                    </a>
+                </div>
+                <h1 class="text-xl font-semibold text-gray-900">My Tasks</h1>
+                <div class="flex items-center space-x-4">
+                    <span id="userWelcome" class="text-sm text-gray-600"></span>
+                    <div class="w-8 h-8 bg-red-primary rounded-full flex items-center justify-center">
+                        <span id="userInitials" class="text-white text-sm font-medium"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Task Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">In Progress</p>
+                        <p class="text-2xl font-semibold text-gray-900" id="inProgressCount">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Available</p>
+                        <p class="text-2xl font-semibold text-gray-900" id="availableCount">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Completed</p>
+                        <p class="text-2xl font-semibold text-gray-900" id="completedCount">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="mb-6 bg-white rounded-lg shadow">
+            <div class="border-b border-gray-200">
+                <nav class="-mb-px flex space-x-8 px-6">
+                    <button onclick="filterTasks('all')" class="filter-tab py-4 px-1 border-b-2 border-red-primary font-medium text-sm text-red-600">
+                        All Tasks
+                    </button>
+                    <button onclick="filterTasks('in-progress')" class="filter-tab py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                        In Progress
+                    </button>
+                    <button onclick="filterTasks('completed')" class="filter-tab py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                        Completed
+                    </button>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Tasks Grid -->
+        <div id="tasksGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Tasks will be populated by JavaScript -->
+        </div>
+
+        <!-- No Tasks Message -->
+        <div id="noTasks" class="hidden text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No tasks found</h3>
+            <p class="mt-1 text-sm text-gray-500">You don't have any tasks assigned at the moment.</p>
+        </div>
+    </div>
+
+    <!-- Task Detail Modal -->
+    <div id="taskModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900" id="modalTitle">Task Details</h3>
+                    <button onclick="closeTaskModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div id="modalContent" class="space-y-6">
+                    <!-- Content will be loaded here -->
+                </div>
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button onclick="closeTaskModal()" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Close
+                    </button>
+                    <button id="acceptTaskBtn" onclick="acceptTask()" class="hidden px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
+                        Accept Task
+                    </button>
+                    <button id="completeTaskBtn" onclick="completeTask()" class="hidden px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700">
+                        Mark Complete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allTasks = [];
+        let filteredTasks = [];
+        let currentFilter = 'all';
+        let currentUser = null;
+        let selectedTask = null;
+        let accountsData = [];
+
+        // Session Manager
+        const sessionManager = {
+            getCurrentUser: function() {
+                const user = localStorage.getItem('currentUser');
+                return user ? JSON.parse(user) : null;
+            },
+            
+            requireLogin: function() {
+                if (!localStorage.getItem('currentUser')) {
+                    window.location.href = 'login.html';
+                    return false;
+                }
+                return true;
+            }
+        };
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication
+            if (!sessionManager.requireLogin()) {
+                return;
+            }
+
+            currentUser = sessionManager.getCurrentUser();
+            initializeUserInfo();
+            loadAccountsData();
+            loadTasks();
+            setupEventListeners();
+        });
+
+        function initializeUserInfo() {
+            if (currentUser) {
+                document.getElementById('userWelcome').textContent = `Welcome, ${currentUser.name.split(' ')[0]}`;
+                const initials = currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                document.getElementById('userInitials').textContent = initials;
+            }
+        }
+
+        function loadAccountsData() {
+            fetch('data/accounts.json')
+                .then(response => response.json())
+                .then(data => {
+                    accountsData = data.accounts || [];
+                })
+                .catch(error => {
+                    console.error('Error loading accounts data:', error);
+                });
+        }
+
+        function loadTasks() {
+            // Load tasks from JSON file
+            fetch('data/tasks.json')
+                .then(response => response.json())
+                .then(data => {
+                    const userEmail = currentUser.email;
+                    
+                    // Filter tasks for current user based on:
+                    // 1. Tasks assigned to "all"
+                    // 2. Tasks where user's email is in acceptedBy array
+                    // 3. Tasks where user's email is in completedBy array
+                    // 4. Show tasks that are globally completed ONLY if the user has completed them
+                    allTasks = data.tasks.filter(task => {
+                        const isAssignedToAll = task.assignedTo === 'all';
+                        const hasAccepted = task.acceptedBy.includes(userEmail);
+                        const hasCompleted = task.completedBy.includes(userEmail);
+                        const isTaskCompleted = task.status === 'completed';
+                        
+                        // Show task if:
+                        // - User is assigned/accepted/completed AND
+                        // - Either task is not globally completed OR user has completed it
+                        return (isAssignedToAll || hasAccepted || hasCompleted) && 
+                               (!isTaskCompleted || hasCompleted);
+                    }).map(task => {
+                        // Transform task data to match our display format
+                        return {
+                            id: task.taskId,
+                            title: task.title,
+                            description: task.description,
+                            category: task.assignedTo === 'all' ? 'General' : 'Assigned',
+                            status: getTaskStatus(task, userEmail),
+                            priority: task.priority,
+                            progress: getTaskProgress(task, userEmail),
+                            dueDate: task.dueDate,
+                            assignedBy: task.author,
+                            authorRole: task.authorRole,
+                            createdAt: task.createdAt,
+                            peopleNeeded: task.peopleNeeded,
+                            acceptedBy: task.acceptedBy,
+                            completedBy: task.completedBy,
+                            originalTask: task
+                        };
+                    });
+                    
+                    filteredTasks = [...allTasks];
+                    displayTasks();
+                    updateTaskCounts();
+                })
+                .catch(error => {
+                    console.error('Error loading tasks:', error);
+                    showNotification('Error loading tasks. Please try again.', 'error');
+                });
+        }
+
+        function getTaskStatus(task, userEmail) {
+            // Check if the user has completed this task (individual completion)
+            if (task.completedBy.includes(userEmail)) {
+                return 'completed';
+            }
+            // Check if the user has accepted this task but not completed it
+            else if (task.acceptedBy.includes(userEmail)) {
+                return 'in-progress';
+            }
+            // Check if the task is available for the user to accept
+            else {
+                // Only show as available if:
+                // 1. Task is assigned to "all" OR user's role matches
+                // 2. Task is not full (acceptedBy count < peopleNeeded)
+                // 3. Task's global status is not "completed"
+                const userRole = currentUser.role;
+                const isAssignedToUser = task.assignedTo === 'all' || 
+                                       (task.assignedTo === 'staff' && userRole === 'staff') ||
+                                       (task.assignedTo === 'volunteers' && userRole === 'volunteer');
+        
+                const isFull = task.acceptedBy.length >= task.peopleNeeded;
+                const isGloballyCompleted = task.status === 'completed';
+        
+                if (isAssignedToUser && !isFull && !isGloballyCompleted) {
+                    return 'available';
+                } else {
+                    return 'not-available';
+                }
+            }
+        }
+
+        function getTaskProgress(task, userEmail) {
+            if (task.completedBy.includes(userEmail)) {
+                return 100;
+            } else if (task.acceptedBy.includes(userEmail)) {
+                return 50;
+            } else {
+                return 0;
+            }
+        }
+
+        function filterTasks(filter) {
+            currentFilter = filter;
+            
+            // Update tab styles
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('border-red-primary', 'text-red-600');
+                tab.classList.add('border-transparent', 'text-gray-500');
+            });
+            
+            event.target.classList.remove('border-transparent', 'text-gray-500');
+            event.target.classList.add('border-red-primary', 'text-red-600');
+            
+            // Filter tasks - exclude 'not-available' tasks from all filters
+            const availableTasks = allTasks.filter(task => task.status !== 'not-available');
+            
+            if (filter === 'all') {
+                filteredTasks = availableTasks;
+            } else if (filter === 'in-progress') {
+                filteredTasks = availableTasks.filter(task => task.status === 'in-progress');
+            } else if (filter === 'completed') {
+                filteredTasks = availableTasks.filter(task => task.status === 'completed');
+            }
+            
+            displayTasks();
+        }
+
+        function displayTasks() {
+            const tasksGrid = document.getElementById('tasksGrid');
+            const noTasks = document.getElementById('noTasks');
+
+            if (filteredTasks.length === 0) {
+                tasksGrid.innerHTML = '';
+                noTasks.classList.remove('hidden');
+                return;
+            }
+
+            noTasks.classList.add('hidden');
+            
+            tasksGrid.innerHTML = filteredTasks.map(task => {
+                const statusConfig = getStatusConfig(task.status);
+                const priorityConfig = getPriorityConfig(task.priority);
+                
+                return `
+                    <div class="task-card bg-white rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer" 
+                        onclick="showTaskDetail('${task.id}')">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusConfig.bgColor} ${statusConfig.textColor}">
+                                    ${statusConfig.icon}
+                                    ${statusConfig.label}
+                                </span>
+                                <span class="text-xs text-gray-500">${task.category}</span>
+                            </div>
+                            
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">${task.title}</h3>
+                            <p class="text-sm text-gray-600 mb-4 line-clamp-2">${task.description}</p>
+                            
+                            <div class="mb-4">
+                                <div class="flex items-center justify-between text-sm text-gray-600 mb-1">
+                                    <span>Progress</span>
+                                    <span>${task.progress}%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="h-2 rounded-full ${getProgressColor(task.progress)}" style="width: ${task.progress}%"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="flex items-center text-xs text-gray-500 relative">
+                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 515.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                        </svg>
+                                        <span class="cursor-help hover:text-gray-700 transition-colors duration-200" 
+                                              onmouseenter="showTaskCardTooltip(event, '${task.id}')" 
+                                              onmouseleave="hideTaskCardTooltip()">${task.acceptedBy.length}/${task.peopleNeeded}</span>
+                                        
+                                        <!-- Tooltip for task card -->
+                                        <div id="taskCardTooltip-${task.id}" class="hidden absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg z-50 whitespace-nowrap">
+                                            <div class="taskCardTooltipContent"></div>
+                                            <!-- Arrow -->
+                                            <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${priorityConfig.bgColor} ${priorityConfig.textColor}">
+                                        ${priorityConfig.label}
+                                    </span>
+                                </div>
+                                
+                                <div class="text-right">
+                                    <div class="text-xs text-gray-500">Due</div>
+                                    <div class="text-sm font-medium ${isTaskOverdue(task.dueDate) ? 'text-red-600' : 'text-gray-900'}">${formatDate(task.dueDate)}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function showTaskDetail(taskId) {
+            selectedTask = allTasks.find(t => t.id === taskId);
+            if (!selectedTask) return;
+
+            const statusConfig = getStatusConfig(selectedTask.status);
+            const priorityConfig = getPriorityConfig(selectedTask.priority);
+            const taskOverdue = isTaskOverdue(selectedTask.dueDate);
+
+            document.getElementById('modalTitle').textContent = selectedTask.title;
+            
+            const modalContent = document.getElementById('modalContent');
+            const overallProgress = Math.round((selectedTask.completedBy.length / selectedTask.peopleNeeded) * 100);
+            const isGloballyCompleted = selectedTask.status === 'completed';
+
+            modalContent.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-medium text-gray-900 mb-2">Task Information</h4>
+                            <div class="space-y-2">
+                                <div class="flex justify-between">
+                                    <span class="text-sm text-gray-600">Your Status:</span>
+                                    <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium ${statusConfig.bgColor} ${statusConfig.textColor}">
+                                        ${statusConfig.label}
+                                    </span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-sm text-gray-600">Overall Status:</span>
+                                    <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium ${isGloballyCompleted ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'}">
+                                        ${isGloballyCompleted ? 'Completed' : 'In Progress'}
+                                    </span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-sm text-gray-600">Priority:</span>
+                                    <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium ${priorityConfig.bgColor} ${priorityConfig.textColor}">
+                                        ${priorityConfig.label}
+                                    </span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-sm text-gray-600">Category:</span>
+                                    <span class="text-sm font-medium">${selectedTask.category}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-sm text-gray-600">Due Date:</span>
+                                    <span class="text-sm font-medium ${taskOverdue ? 'text-red-600' : 'text-gray-900'}">${formatDate(selectedTask.dueDate)} ${taskOverdue ? '(OVERDUE)' : ''}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-sm text-gray-600">Assigned By:</span>
+                                    <span class="text-sm font-medium">${selectedTask.assignedBy}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-sm text-gray-600">People Needed:</span>
+                                    <span class="text-sm font-medium">${selectedTask.peopleNeeded}</span>
+                                </div>
+                            </div>
+                        </div>
+            
+                        <div>
+                            <h4 class="font-medium text-gray-900 mb-2">Your Progress</h4>
+                            <div class="flex items-center justify-between text-sm text-gray-600 mb-1">
+                                <span>Personal Progress</span>
+                                <span>${selectedTask.progress}%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-3 mb-3">
+                                <div class="h-3 rounded-full ${getProgressColor(selectedTask.progress)}" style="width: ${selectedTask.progress}%"></div>
+                            </div>
+            
+                            <div class="flex items-center justify-between text-sm text-gray-600 mb-1">
+                                <span>Overall Progress</span>
+                                <span>${overallProgress}% (${selectedTask.completedBy.length}/${selectedTask.peopleNeeded})</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-3">
+                                <div class="h-3 rounded-full ${getProgressColor(overallProgress)}" style="width: ${overallProgress}%"></div>
+                            </div>
+                        </div>
+                    </div>
+        
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-medium text-gray-900 mb-2">Description</h4>
+                            <p class="text-sm text-gray-600">${selectedTask.description}</p>
+                        </div>
+            
+                        <div>
+                            <h4 class="font-medium text-gray-900 mb-2">Accepted By (${selectedTask.acceptedBy.length}/${selectedTask.peopleNeeded})</h4>
+                            <div class="flex flex-wrap gap-2">
+                                ${selectedTask.acceptedBy.length > 0 ? selectedTask.acceptedBy.map(email => {
+                                    const account = getAccountByEmail(email);
+                                    const name = account ? account.name : 'Unknown';
+                                    const hasCompleted = selectedTask.completedBy.includes(email);
+                                    return `
+                                        <div class="flex items-center space-x-2 ${hasCompleted ? 'bg-green-100' : 'bg-blue-100'} rounded-full px-3 py-1">
+                                            <div class="w-6 h-6 ${hasCompleted ? 'bg-green-600' : 'bg-blue-600'} rounded-full flex items-center justify-center">
+                                                ${hasCompleted ? 
+                                                    '<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>' :
+                                                    `<span class="text-white text-xs font-medium">${name[0].toUpperCase()}</span>`
+                                                }
+                                            </div>
+                                            <span class="text-sm ${hasCompleted ? 'text-green-700' : 'text-blue-700'}">${name} ${hasCompleted ? '✓' : ''}</span>
+                                        </div>
+                                    `;
+                                }).join('') : '<span class="text-sm text-gray-500">No one has accepted this task yet</span>'}
+                            </div>
+                        </div>
+            
+                        <div>
+                            <h4 class="font-medium text-gray-900 mb-2">Completed By (${selectedTask.completedBy.length}/${selectedTask.peopleNeeded})</h4>
+                            <div class="flex flex-wrap gap-2">
+                                ${selectedTask.completedBy.length > 0 ? selectedTask.completedBy.map(email => {
+                                    const account = getAccountByEmail(email);
+                                    const name = account ? account.name : 'Unknown';
+                                    return `
+                                        <div class="flex items-center space-x-2 bg-green-100 rounded-full px-3 py-1">
+                                            <div class="w-6 h-6 bg-green-600 rounded-full flex items-center justify-center">
+                                                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                </svg>
+                                            </div>
+                                            <span class="text-sm text-green-700">${name}</span>
+                                        </div>
+                                    `;
+                                }).join('') : '<span class="text-sm text-gray-500">No one has completed this task yet</span>'}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Show appropriate buttons based on task status
+            const acceptBtn = document.getElementById('acceptTaskBtn');
+            const completeBtn = document.getElementById('completeTaskBtn');
+            
+            acceptBtn.classList.add('hidden');
+            completeBtn.classList.add('hidden');
+
+            if (selectedTask.status === 'available') {
+                acceptBtn.classList.remove('hidden');
+            } else if (selectedTask.status === 'in-progress') {
+                completeBtn.classList.remove('hidden');
+            }
+
+            document.getElementById('taskModal').classList.remove('hidden');
+        }
+
+        function acceptTask() {
+            if (!selectedTask) return;
+
+            const taskData = {
+                taskId: selectedTask.id,
+                userEmail: currentUser.email,
+                userName: currentUser.name,
+                userRole: currentUser.role
+            };
+
+            fetch('api/accept-task.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(taskData)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    showNotification('Task accepted successfully!', 'success');
+                    closeTaskModal();
+                    loadTasks(); // Reload tasks
+                } else {
+                    showNotification(result.message || 'Failed to accept task', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error accepting task:', error);
+                showNotification('Error accepting task. Please try again.', 'error');
+            });
+        }
+
+        function completeTask() {
+            if (!selectedTask) return;
+
+            const taskData = {
+                taskId: selectedTask.id,
+                userEmail: currentUser.email,
+                userName: currentUser.name
+            };
+
+            fetch('api/complete-task.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(taskData)
+            })
+            .then(response => {
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    return response.json();
+                } else {
+                    // If not JSON, get text to see what was returned
+                    return response.text().then(text => {
+                        console.error('Non-JSON response:', text);
+                        throw new Error('Server returned non-JSON response');
+                    });
+                }
+            })
+            .then(result => {
+                if (result.success) {
+                    showNotification('Task completed successfully!', 'success');
+                    closeTaskModal();
+                    loadTasks(); // Reload tasks to update the display
+                } else {
+                    showNotification(result.message || 'Failed to complete task', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error completing task:', error);
+                showNotification('Error completing task. Please try again.', 'error');
+            });
+        }
+
+        function closeTaskModal() {
+            document.getElementById('taskModal').classList.add('hidden');
+            selectedTask = null;
+        }
+
+        function getAccountByEmail(email) {
+            return accountsData.find(acc => acc.email === email);
+        }
+
+        function updateTaskCounts() {
+            let inProgress = 0;
+            let available = 0;
+            let completed = 0;
+
+            // Only count tasks that are visible to the user (exclude 'not-available')
+            const visibleTasks = allTasks.filter(task => task.status !== 'not-available');
+
+            visibleTasks.forEach(task => {
+                if (task.status === 'in-progress') {
+                    inProgress++;
+                } else if (task.status === 'available') {
+                    available++;
+                } else if (task.status === 'completed') {
+                    completed++;
+                }
+            });
+
+            document.getElementById('inProgressCount').textContent = inProgress;
+            document.getElementById('availableCount').textContent = available;
+            document.getElementById('completedCount').textContent = completed;
+        }
+
+        function getStatusConfig(status) {
+            const configs = {
+                'in-progress': {
+                    label: 'In Progress',
+                    bgColor: 'bg-orange-100',
+                    textColor: 'text-orange-800',
+                    icon: '<svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
+                },
+                'available': {
+                    label: 'Available',
+                    bgColor: 'bg-blue-100',
+                    textColor: 'text-blue-800',
+                    icon: '<svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
+                },
+                'completed': {
+                    label: 'Completed',
+                    bgColor: 'bg-green-100',
+                    textColor: 'text-green-800',
+                    icon: '<svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>'
+                }
+            };
+            return configs[status] || configs['available'];
+        }
+
+        function getPriorityConfig(priority) {
+            const configs = {
+                'high': { label: 'High', bgColor: 'bg-red-100', textColor: 'text-red-800' },
+                'medium': { label: 'Medium', bgColor: 'bg-yellow-100', textColor: 'text-yellow-800' },
+                'low': { label: 'Low', bgColor: 'bg-gray-100', textColor: 'text-gray-800' }
+            };
+            return configs[priority] || configs['medium'];
+        }
+
+        function getProgressColor(progress) {
+            if (progress >= 90) return 'bg-green-500';
+            if (progress >= 70) return 'bg-blue-500';
+            if (progress >= 50) return 'bg-yellow-500';
+            return 'bg-red-500';
+        }
+
+        function isTaskOverdue(dueDate) {
+            return new Date(dueDate) < new Date();
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
+
+        function showNotification(message, type) {
+            // Create a temporary message element
+            const messageEl = document.createElement('div');
+            messageEl.className = `fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg text-white max-w-sm`;
+            
+            switch (type) {
+                case 'success':
+                    messageEl.className += ' bg-green-500';
+                    break;
+                case 'error':
+                    messageEl.className += ' bg-red-500';
+                    break;
+                case 'info':
+                    messageEl.className += ' bg-blue-500';
+                    break;
+                default:
+                    messageEl.className += ' bg-gray-500';
+            }
+            
+            messageEl.textContent = message;
+            document.body.appendChild(messageEl);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                if (messageEl.parentNode) {
+                    messageEl.parentNode.removeChild(messageEl);
+                }
+            }, 3000);
+        }
+
+        function setupEventListeners() {
+            // Close modal when clicking outside
+            document.getElementById('taskModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeTaskModal();
+                }
+            });
+        }
+
+        function showTaskCardTooltip(event, taskId) {
+            const task = allTasks.find(t => t.id === taskId);
+            if (!task || !task.acceptedBy || task.acceptedBy.length === 0) {
+                return;
+            }
+
+            const tooltip = document.getElementById(`taskCardTooltip-${taskId}`);
+            const tooltipContent = tooltip.querySelector('.taskCardTooltipContent');
+            
+            // Get names of people who accepted
+            const acceptedNames = task.acceptedBy.map(email => {
+                const account = getAccountByEmail(email);
+                return account ? account.name : email;
+            });
+            
+            if (acceptedNames.length > 0) {
+                tooltipContent.innerHTML = `<strong>Accepted by:</strong><br>${acceptedNames.join('<br>')}`;
+                tooltip.classList.remove('hidden');
+            }
+        }
+
+        function hideTaskCardTooltip() {
+            // Hide all task card tooltips
+            document.querySelectorAll('[id^="taskCardTooltip-"]').forEach(tooltip => {
+                tooltip.classList.add('hidden');
+            });
+        }
+    </script>
+</body>
+</html>

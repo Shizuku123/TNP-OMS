@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Tahanan ng Pagmamahal OMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'red-primary': '#dc2626',
+                        'red-secondary': '#ef4444',
+                        'red-light': '#fef2f2'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        #loginContainer {
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(29px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center py-12 px-4 bg-[url('29.jpg')] bg-cover bg-center"></body>
+    <div class="min-h-screen flex items-center justify-center">
+  <div class="max-w-md w-full space-y-8" id="loginContainer">
+    <div class="bg-white py-10 px-9 shadow-lg rounded-lg h-[600px] flex flex-col justify-center">
+      <h2 class="text-center text-3xl font-bold text-gray-900 mb-2">
+        Tahanan ng Pagmamahal
+      </h2>
+      <p class="text-center text-gray-600 mb-8">
+        Organization Management System
+      </p>
+
+      <!-- Error Message -->
+      <div
+        id="errorMessage"
+        class="mb-4 hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded"
+      >
+      </div>
+
+      <form
+        id="loginForm"
+        method="POST"
+        action="login.php"
+        class="space-y-6"
+      >
+        <div>
+          <label
+            for="username"
+            class="block text-sm font-medium text-gray-700"
+          >
+            Username
+          </label>
+          <input
+            id="username"
+            name="username"
+            type="text"
+            required
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary"
+          />
+        </div>
+
+        <div>
+          <label
+            for="password"
+            class="block text-sm font-medium text-gray-700"
+          >
+            Password
+          </label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            required
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary"
+          />
+        </div>
+
+        <button
+          id="loginBtn"
+          type="submit"
+          class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-primary hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-primary"
+        >
+          <span id="loginText">Sign in</span>
+        </button>
+      </form>
+
+      <div class="mt-6 text-center">
+        <p class="text-sm text-gray-600">
+          <!-- Extra text if needed -->
+        </p>
+      </div>
+
+      <div>
+        <p
+          class="mt-6 text-center text-sm text-gray-500 hidden"
+        >
+          Demo credentials: <br />
+          Username: <strong>admin</strong> | Password:
+          <strong>admin123</strong> <br />
+          (Press <strong>Ctrl+D</strong> to auto-fill)<br /><br /><br /><br /><br /><br />
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <script type="module">
+    import { auth, db } from './firebase.js';
+    import { signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
+    import { doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js';
+
+    // --- EXECUTE create-user.js LOGIC ON PAGE LOAD (if user does not exist) ---
+    async function ensureAdminUser() {
+      const email = "guecoszanil4@gmail.com";
+      const password = "admin123";
+      const userDocRef = doc(db, "users", "admin-precreated");
+      // Check if already created in Firestore (avoid duplicate creation)
+      const userDoc = await getDoc(userDocRef);
+      if (userDoc.exists()) return;
+      try {
+        // Try to create user in Auth
+        const userCredential = await signInWithEmailAndPassword(auth, email, password).catch(async (err) => {
+          if (err.code === 'auth/user-not-found') {
+            // Create user if not found
+            const { createUserWithEmailAndPassword } = await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js');
+            return await createUserWithEmailAndPassword(auth, email, password);
+          }
+          throw err;
+        });
+        const user = userCredential.user;
+        // Save user data in Firestore (with uid as doc id)
+        const userData = {
+          uid: user.uid,
+          firstName: "Szanil",
+          middleName: "Iquitan",
+          lastName: "Gueco",
+          emailAddress: email,
+          contactNumber: "09171234567",
+          username: "szanilgueco",
+          photoString: "",
+          gender: "Male",
+          civilStatus: "Single",
+          nationality: "Filipino",
+          religion: "Catholic",
+          placeOfBirth: "Angeles City",
+          dateOfBirth: "1995-01-01",
+          currentAddress: "Angeles City, Pampanga",
+          assignedSchedule: "Day Shift",
+          department: "IT",
+          position: "Admin",
+          supervisor: "None",
+          employmentStatus: "Active",
+          createAccount: "System",
+          dateAdded: new Date().toISOString(),
+          dateHired: "2020-01-01",
+          role: "admin",
+          isActive: true,
+          isBlocked: false,
+          isVerified: false
+        };
+        await setDoc(doc(db, "users", user.uid), userData);
+        // Mark as created (for idempotency)
+        await setDoc(userDocRef, { created: true });
+      } catch (error) {
+        // Ignore if already exists
+        if (error.code !== 'auth/email-already-in-use') {
+          console.error('Error ensuring admin user:', error);
+        }
+      }
+    }
+    ensureAdminUser();
+
+    // --- LOGIN FORM HANDLING ---
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const userInput = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const loginBtn = document.getElementById('loginBtn');
+        const loginText = document.getElementById('loginText');
+        const errorMessage = document.getElementById('errorMessage');
+        errorMessage.classList.add('hidden');
+        loginBtn.disabled = true;
+        loginText.textContent = 'Signing in...';
+
+        try {
+          const { getDocs, collection, query, where } = await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js');
+          let userEmail = null;
+          let userData = null;
+          if (userInput.includes('@')) {
+            // Login by email
+            const q = query(collection(db, 'users'), where('emailAddress', '==', userInput));
+            const querySnapshot = await getDocs(q);
+            if (querySnapshot.empty) throw new Error('User not found');
+            const userDoc = querySnapshot.docs[0];
+            userData = userDoc.data();
+            userEmail = userData.emailAddress;
+          } else {
+            // Login by username
+            const q = query(collection(db, 'users'), where('username', '==', userInput));
+            const querySnapshot = await getDocs(q);
+            if (querySnapshot.empty) throw new Error('User not found');
+            const userDoc = querySnapshot.docs[0];
+            userData = userDoc.data();
+            userEmail = userData.emailAddress;
+          }
+          // Try to sign in
+          const userCredential = await signInWithEmailAndPassword(auth, userEmail, password);
+          // Save user info to localStorage
+          localStorage.setItem('currentUser', JSON.stringify(userData));
+          loginText.textContent = 'Success! Redirecting...';
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 500);
+        } catch (error) {
+          errorMessage.textContent = 'Invalid username/email or password. Please try again.';
+          errorMessage.classList.remove('hidden');
+          loginBtn.disabled = false;
+          loginText.textContent = 'Sign in';
+        }
+      });
+    });
+
+    // Auto-fill demo credentials (Ctrl+D)
+    document.addEventListener('keydown', function(e) {
+      if (e.ctrlKey && e.key === 'd') {
+        e.preventDefault();
+        document.getElementById('username').value = 'szanilgueco';
+        document.getElementById('password').value = 'admin123';
+      }
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Child Details - Tahanan ng Pagmamahal OMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="firebase.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'red-primary': '#dc2626',
+                        'red-secondary': '#ef4444',
+                        'red-light': '#fef2f2'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center min-w-0 flex-1">
+                    <a href="child-records.html" class="flex items-center text-gray-600 hover:text-red-primary transition-colors">
+                        <svg class="h-5 w-5 sm:h-6 sm:w-6 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                        <span class="hidden sm:inline">Back to Records</span>
+                        <span class="sm:hidden">Back</span>
+                    </a>
+                </div>
+                <h1 id="pageTitle" class="text-lg sm:text-xl font-semibold text-gray-900 text-center flex-1 min-w-0 truncate px-4">Child Details</h1>
+                <div class="flex space-x-1 sm:space-x-2 flex-shrink-0">
+                    <button id="dischargeBtn" class="px-2 sm:px-4 py-2 bg-orange-600 text-white text-xs sm:text-sm rounded-lg hover:bg-orange-700 transition-colors">
+                        <span class="hidden sm:inline">Discharge</span>
+                        <svg class="h-4 w-4 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                        </svg>
+                    </button>
+                    <button id="editBtn" class="px-2 sm:px-4 py-2 bg-blue-600 text-white text-xs sm:text-sm rounded-lg hover:bg-blue-700 transition-colors">
+                        <span class="hidden sm:inline">Edit</span>
+                        <svg class="h-4 w-4 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                        </svg>
+                    </button>
+                    <button id="printBtn" class="px-2 sm:px-4 py-2 bg-gray-600 text-white text-xs sm:text-sm rounded-lg hover:bg-gray-700 transition-colors">
+                        <span class="hidden sm:inline">Print</span>
+                        <svg class="h-4 w-4 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
+        
+        <!-- Child Basic Info Header -->
+        <div id="childHeader" class="bg-white rounded-lg shadow mb-4 sm:mb-6 p-4 sm:p-6"></div>
+
+        <!-- Tabs -->
+        <div class="bg-white rounded-lg shadow">
+            <div class="border-b border-gray-200 overflow-x-auto">
+                <nav class="-mb-px flex space-x-4 sm:space-x-8 px-4 sm:px-6 min-w-max" aria-label="Tabs">
+                    <button id="basicInfoTab" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-sm active flex-shrink-0">
+                        <span class="hidden sm:inline">Basic Information</span>
+                        <span class="sm:hidden">Basic Info</span>
+                    </button>
+                    <button id="checkupRecordsTab" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-sm flex-shrink-0">
+                        <span class="hidden sm:inline">Check-up Records</span>
+                        <span class="sm:hidden">Check-ups</span>
+                    </button>
+                    <button id="treatmentsTab" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-sm flex-shrink-0">
+                        <span class="hidden sm:inline">Treatments</span>
+                        <span class="sm:hidden">Treatments</span>
+                    </button>
+                    <button id="educationalTab" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-sm flex-shrink-0">
+                        <span class="hidden sm:inline">Educational Background</span>
+                        <span class="sm:hidden">Education</span>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="p-4 sm:p-6">
+                <div id="basicInfoContent" class="tab-content"></div>
+                <div id="checkupRecordsContent" class="tab-content hidden">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 space-y-4 sm:space-y-0">
+                        <h3 class="text-lg font-medium text-gray-900">Check-up Records</h3>
+                        <button id="addCheckupRecordBtn" class="w-full sm:w-auto px-4 py-2 bg-red-primary text-white rounded-lg hover:bg-red-700 transition-colors text-center">
+                            <svg class="inline h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                            Add Check-up Record
+                        </button>
+                    </div>
+                    <div id="checkupRecordsList"></div>
+                </div>
+                <div id="treatmentsContent" class="tab-content hidden">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 space-y-4 sm:space-y-0">
+                        <h3 class="text-lg font-medium text-gray-900">Medical Treatments</h3>
+                        <button id="addTreatmentBtn" class="w-full sm:w-auto px-4 py-2 bg-red-primary text-white rounded-lg hover:bg-red-700 transition-colors text-center">
+                            <svg class="inline h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                            Add Treatment Record
+                        </button>
+                    </div>
+                    <div id="treatmentsList"></div>
+                </div>
+                <div id="educationalContent" class="tab-content hidden">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 space-y-4 sm:space-y-0">
+                        <h3 class="text-lg font-medium text-gray-900">Educational Background</h3>
+                        <button id="addEducationalRecordBtn" class="w-full sm:w-auto px-4 py-2 bg-red-primary text-white rounded-lg hover:bg-red-700 transition-colors text-center">
+                            <svg class="inline h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                            Add Educational Record
+                        </button>
+                    </div>
+                    <div id="educationalRecordsList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals (keep as in your original file) -->
+    <!-- ... omitted for brevity ... -->
+
+    <script type="module">
+        import { db, collection, getDocs } from './firebase.js';
+
+        let currentChild = null;
+        let currentChildId = null;
+        let currentUser = null;
+
+        function getCurrentUser() {
+            const user = localStorage.getItem('currentUser');
+            return user ? JSON.parse(user) : null;
+        }
+        function requireLogin() {
+            if (!localStorage.getItem('currentUser')) {
+                window.location.href = 'login.html';
+                return false;
+            }
+            return true;
+        }
+        function getChildIdFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('id');
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            if (!requireLogin()) return;
+            currentUser = getCurrentUser();
+            currentChildId = getChildIdFromURL();
+            if (!currentChildId) {
+                window.location.href = 'child-records.html';
+                return;
+            }
+            await loadChildData();
+            setupEventListeners();
+            setupTabs();
+        });
+
+        async function loadChildData() {
+            try {
+                const childrenCol = collection(db, 'children');
+                const snapshot = await getDocs(childrenCol);
+                currentChild = null;
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if (data.childId === currentChildId) {
+                        currentChild = data;
+                        currentChild.photoData = data.photoString || `https://via.placeholder.com/200x200/e5e7eb/6b7280?text=${encodeURIComponent(data.firstName || 'Child')}`;
+                    }
+                });
+                if (!currentChild) {
+                    alert('Child record not found');
+                    window.location.href = 'child-records.html';
+                    return;
+                }
+                displayChildHeader();
+                displayBasicInfo();
+                await loadCheckupRecords();
+                await loadTreatmentRecords();
+                await loadEducationalRecords();
+            } catch (error) {
+                console.error('Error loading child data:', error);
+                alert('Error loading child data');
+                window.location.href = 'child-records.html';
+            }
+        }
+
+        function displayChildHeader() {
+            const fullName = `${currentChild.firstName || ''} ${currentChild.middleName || ''} ${currentChild.lastName || ''}`.trim();
+            const age = calculateAge(currentChild.dateOfBirth);
+            const photoSrc = currentChild.photoData;
+            let statusColor = getStatusColor(currentChild.currentStatus);
+            let statusText = currentChild.currentStatus || 'No Status';
+            document.getElementById('childHeader').innerHTML = `
+                <div class="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-6">
+                    <div class="flex-shrink-0 flex justify-center lg:justify-start">
+                        <img src="${photoSrc}" alt="${fullName}" class="h-24 w-24 sm:h-32 sm:w-32 rounded-lg object-cover">
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between space-y-4 lg:space-y-0">
+                            <div class="min-w-0 flex-1">
+                                <h2 class="text-xl sm:text-2xl font-bold text-gray-900 break-words">${fullName}</h2>
+                                <p class="text-gray-600 text-sm sm:text-base">Child ID: ${currentChild.childId}</p>
+                                <p class="text-gray-600 text-sm sm:text-base">Age: ${age} years old • Gender: ${currentChild.gender || 'Not specified'}</p>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${statusColor}">
+                                    ${statusText}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+                            <div>
+                                <span class="font-medium text-gray-900">Date of Birth:</span>
+                                <p class="text-gray-600 break-words">${formatDate(currentChild.dateOfBirth)}</p>
+                            </div>
+                            <div>
+                                <span class="font-medium text-gray-900">Entry Date:</span>
+                                <p class="text-gray-600 break-words">${formatDate(currentChild.entryDate)}</p>
+                            </div>
+                            <div>
+                                <span class="font-medium text-gray-900">Blood Type:</span>
+                                <p class="text-gray-600">${currentChild.bloodType || 'Not specified'}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayBasicInfo() {
+            document.getElementById('basicInfoContent').innerHTML = `
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
+                    <div>
+                        <h4 class="text-lg font-medium text-gray-900 mb-4">Personal Information</h4>
+                        <div class="space-y-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-gray-500">Full Name:</span>
+                                <span class="sm:col-span-2 text-sm text-gray-900 break-words">${currentChild.firstName || ''} ${currentChild.middleName || ''} ${currentChild.lastName || ''}</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-gray-500">Gender:</span>
+                                <span class="sm:col-span-2 text-sm text-gray-900">${currentChild.gender || 'Not specified'}</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-gray-500">Date of Birth:</span>
+                                <span class="sm:col-span-2 text-sm text-gray-900">${formatDate(currentChild.dateOfBirth)}</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-gray-500">Place of Birth:</span>
+                                <span class="sm:col-span-2 text-sm text-gray-900 break-words">${currentChild.placeOfBirth || 'Not specified'}</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-gray-500">Nationality:</span>
+                                <span class="sm:col-span-2 text-sm text-gray-900">${currentChild.nationality || 'Not specified'}</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-gray-500">Religion:</span>
+                                <span class="sm:col-span-2 text-sm text-gray-900">${currentChild.religion || 'Not specified'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-medium text-gray-900 mb-4">Orphanage Information</h4>
+                        <div class="space-y-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-gray-500">Entry Date:</span>
+                                <span class="sm:col-span-2 text-sm text-gray-900">${formatDate(currentChild.entryDate)}</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-gray-500">Entry Age:</span>
+                                <span class="sm:col-span-2 text-sm text-gray-900">${currentChild.entryAge || 'Not specified'}</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-gray-500">Reason for Admission:</span>
+                                <span class="sm:col-span-2 text-sm text-gray-900 break-words">${currentChild.reasonForAdmission || 'Not specified'}</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-gray-500">Current Status:</span>
+                                <span class="sm:col-span-2">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getStatusColor(currentChild.currentStatus)}">
+                                        ${currentChild.currentStatus || 'No Status'}
+                                    </span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    ${currentChild.fatherName || currentChild.motherName ? `
+                    <div>
+                        <h4 class="text-lg font-medium text-gray-900 mb-4">Family Information</h4>
+                        <div class="space-y-3">
+                            ${currentChild.fatherName ? `
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-gray-500">Father:</span>
+                                <span class="sm:col-span-2 text-sm text-gray-900 break-words">${currentChild.fatherName}</span>
+                            </div>
+                            ` : ''}
+                            ${currentChild.motherName ? `
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-gray-500">Mother:</span>
+                                <span class="sm:col-span-2 text-sm text-gray-900 break-words">${currentChild.motherName}</span>
+                            </div>
+                            ` : ''}
+                            ${currentChild.parentalStatus ? `
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-gray-500">Parental Status:</span>
+                                <span class="sm:col-span-2 text-sm text-gray-900 break-words">${currentChild.parentalStatus}</span>
+                            </div>
+                            ` : ''}
+                            ${currentChild.siblingsInOrphanage === 'Yes' ? `
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-gray-500">Siblings in Orphanage:</span>
+                                <span class="sm:col-span-2 text-sm text-gray-900">Yes</span>
+                            </div>
+                            ` : ''}
+                            ${currentChild.siblingsNamesList ? `
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-gray-500">Siblings:</span>
+                                <span class="sm:col-span-2 text-sm text-gray-900 break-words">${currentChild.siblingsNamesList}</span>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    ` : ''}
+                    <div>
+                        <h4 class="text-lg font-medium text-gray-900 mb-4">Basic Health Information</h4>
+                        <div class="space-y-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-gray-500">Blood Type:</span>
+                                <span class="sm:col-span-2 text-sm text-gray-900">${currentChild.bloodType || 'Not specified'}</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-gray-500">Allergies:</span>
+                                <span class="sm:col-span-2 text-sm text-gray-900 break-words">${currentChild.allergies || 'None known'}</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-gray-500">Medical Conditions:</span>
+                                <span class="sm:col-span-2 text-sm text-gray-900 break-words">${currentChild.medicalConditions || 'None known'}</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-gray-500">Last Checkup:</span>
+                                <span class="sm:col-span-2 text-sm text-gray-900">${formatDate(currentChild.lastCheckupDate)}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-8 pt-6 border-t">
+                    <p class="text-xs text-gray-400">Record added on ${formatDate(currentChild.dateAdded)}</p>
+                </div>
+            `;
+        }
+
+        async function loadCheckupRecords() {
+            try {
+                const checkupCol = collection(db, 'children-checkups-records');
+                const snapshot = await getDocs(checkupCol);
+                const childCheckupRecords = [];
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if (data.childId === currentChildId) childCheckupRecords.push(data);
+                });
+                const checkupRecordsList = document.getElementById('checkupRecordsList');
+                checkupRecordsList.innerHTML = childCheckupRecords.length === 0
+                    ? `<div class="text-center py-12 text-gray-500">No check-up records found for this child.</div>`
+                    : childCheckupRecords.map(record => `
+                        <div class="bg-white border rounded-lg p-4 mb-4">
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 space-y-2 sm:space-y-0">
+                                <div class="min-w-0 flex-1">
+                                    <h5 class="font-medium text-gray-900 break-words">Check-up - ${formatDate(record.checkupDate)}</h5>
+                                    <p class="text-sm text-gray-500">Dr. ${record.doctorName} • ${record.facilityName}</p>
+                                    ${record.purposeOfVisit ? `<span class="inline-block mt-1 px-2 py-1 text-xs rounded-full ${getPurposeColor(record.purposeOfVisit)}">${record.purposeOfVisit}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+            } catch (error) {
+                console.error('Error loading check-up records:', error);
+                document.getElementById('checkupRecordsList').innerHTML = `<div class="text-center py-12 text-red-500">Error loading check-up records.</div>`;
+            }
+        }
+
+        async function loadTreatmentRecords() {
+            try {
+                const treatmentCol = collection(db, 'children-treatment-records');
+                const snapshot = await getDocs(treatmentCol);
+                const childTreatmentRecords = [];
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if (data.childId === currentChildId) childTreatmentRecords.push(data);
+                });
+                const treatmentsList = document.getElementById('treatmentsList');
+                treatmentsList.innerHTML = childTreatmentRecords.length === 0
+                    ? `<div class="text-center py-12 text-gray-500">No treatment records found for this child.</div>`
+                    : childTreatmentRecords.map(record => `
+                        <div class="bg-white border rounded-lg p-4 mb-4">
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 space-y-2 sm:space-y-0">
+                                <div class="min-w-0 flex-1">
+                                    <h5 class="font-medium text-gray-900 break-words">${record.medicineName} - ${record.conditionTreated || 'Treatment'}</h5>
+                                    <p class="text-sm text-gray-500">Prescribed by ${record.prescribedBy || 'Unknown'}</p>
+                                    <span class="inline-block mt-1 px-2 py-1 text-xs rounded-full ${getStatusColor(record.status)}">${record.status}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+            } catch (error) {
+                console.error('Error loading treatment records:', error);
+                document.getElementById('treatmentsList').innerHTML = `<div class="text-center py-12 text-red-500">Error loading treatment records.</div>`;
+            }
+        }
+
+        async function loadEducationalRecords() {
+            try {
+                const educationalCol = collection(db, 'children-educational-background');
+                const snapshot = await getDocs(educationalCol);
+                const childEducationalRecords = [];
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if (data.childId === currentChildId) childEducationalRecords.push(data);
+                });
+                const educationalRecordsList = document.getElementById('educationalRecordsList');
+                educationalRecordsList.innerHTML = childEducationalRecords.length === 0
+                    ? `<div class="text-center py-12 text-gray-500">No educational records found for this child.</div>`
+                    : childEducationalRecords.map(record => `
+                        <div class="bg-white border rounded-lg p-4 mb-4">
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 space-y-2 sm:space-y-0">
+                                <div class="min-w-0 flex-1">
+                                    <h5 class="font-medium text-gray-900 break-words">${record.currentSchoolName} - ${record.schoolYear}</h5>
+                                    <p class="text-sm text-gray-500">${record.currentGradeLevel || 'Grade Level Not Specified'} • ${record.schoolType || 'School Type Not Specified'}</p>
+                                    ${record.generalAverage ? `<span class="inline-block mt-1 px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Average: ${record.generalAverage}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+            } catch (error) {
+                console.error('Error loading educational records:', error);
+                document.getElementById('educationalRecordsList').innerHTML = `<div class="text-center py-12 text-red-500">Error loading educational records.</div>`;
+            }
+        }
+
+        function setupEventListeners() {
+            document.getElementById('dischargeBtn').addEventListener('click', function() {
+                window.location.href = `discharge-children.html?id=${currentChildId}`;
+            });
+            document.getElementById('editBtn').addEventListener('click', function() {
+                window.location.href = `edit-child.html?id=${currentChildId}`;
+            });
+            document.getElementById('printBtn').addEventListener('click', function() {
+                window.print();
+            });
+            document.getElementById('addCheckupRecordBtn').addEventListener('click', function() {
+                // Modal logic for checkup record
+            });
+            document.getElementById('addTreatmentBtn').addEventListener('click', function() {
+                // Modal logic for treatment record
+            });
+            document.getElementById('addEducationalRecordBtn').addEventListener('click', function() {
+                // Modal logic for educational record
+            });
+        }
+
+        function setupTabs() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const tabId = this.id.replace('Tab', 'Content');
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('border-red-primary', 'text-red-primary', 'active');
+                        btn.classList.add('border-transparent', 'text-gray-500');
+                    });
+                    tabContents.forEach(content => {
+                        content.classList.add('hidden');
+                    });
+                    this.classList.remove('border-transparent', 'text-gray-500');
+                    this.classList.add('border-red-primary', 'text-red-primary', 'active');
+                    document.getElementById(tabId).classList.remove('hidden');
+                });
+            });
+        }
+
+        function calculateAge(birthDate) {
+            if (!birthDate) return 'Unknown';
+            const today = new Date();
+            const birth = new Date(birthDate);
+            let age = today.getFullYear() - birth.getFullYear();
+            const monthDiff = today.getMonth() - birth.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+                age--;
+            }
+            return age;
+        }
+        function formatDate(dateString) {
+            if (!dateString) return 'Not specified';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        }
+        function getStatusColor(status) {
+            switch (status) {
+                case 'Adoptable':
+                    return 'bg-green-100 text-green-800';
+                case 'Under legal custody':
+                    return 'bg-blue-100 text-blue-800';
+                case 'Temporary Shelter':
+                    return 'bg-yellow-100 text-yellow-800';
+                case 'Awaiting placement':
+                    return 'bg-purple-100 text-purple-800';
+                case 'Ongoing':
+                    return 'bg-blue-100 text-blue-800';
+                case 'Completed':
+                    return 'bg-green-100 text-green-800';
+                case 'Discontinued':
+                    return 'bg-red-100 text-red-800';
+                default:
+                    return 'bg-gray-100 text-gray-800';
+            }
+        }
+        function getPurposeColor(purpose) {
+            switch (purpose) {
+                case 'Routine':
+                    return 'bg-green-100 text-green-800';
+                case 'Illness':
+                    return 'bg-red-100 text-red-800';
+                case 'Follow-up':
+                    return 'bg-blue-100 text-blue-800';
+                case 'Emergency':
+                    return 'bg-red-200 text-red-900';
+                case 'Vaccination':
+                    return 'bg-purple-100 text-purple-800';
+                case 'Dental':
+                    return 'bg-yellow-100 text-yellow-800';
+                default:
+                    return 'bg-gray-100 text-gray-800';
+            }
+        }
+    </script>
+</body>
+</html>

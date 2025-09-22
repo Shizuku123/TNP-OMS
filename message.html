@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages - Tahanan ng Pagmamahal OMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'red-primary': '#dc2626',
+                        'red-secondary': '#ef4444',
+                        'red-light': '#fef2f2'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Mobile Menu Button -->
+    <div id="mobile-menu-container" class="lg:hidden fixed top-4 left-4 z-50">
+        <button id="mobile-menu-btn" class="bg-white p-3 hover:bg-red-light z-30 rounded-lg shadow-md">
+            <svg class="h-8 w-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Left Sidebar -->
+    <div id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-lg transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
+        <div class="flex flex-col h-screen overflow-y-auto">
+            <!-- Logo -->
+            <div class="flex items-center justify-center h-20 bg-white shrink-0">
+                <img src="tahanan-logo.png" alt="Tahanan ng Pagmamahal Logo" class="w-[90%]">
+            </div>
+
+            <!-- Navigation -->
+            <nav class="flex-1 mt-8 pb-6">
+                <!-- Back to Dashboard -->
+                <div class="px-4 mb-6">
+                    <a href="index.html" class="flex items-center px-4 py-3 text-base text-gray-700 hover:bg-red-light hover:text-red-primary rounded-md">
+                        <svg class="h-7 w-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        Back to Dashboard
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" class="lg:ml-64 min-h-screen bg-gray-50">
+        <!-- Top Header -->
+        <header class="bg-white shadow-sm border-b">
+            <div class="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
+                <!-- Messages Title -->
+                <div class="flex items-center">
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Messages</h1>
+                    <p class="ml-4 text-gray-600 hidden sm:block">Send and receive private messages</p>
+                </div>
+                
+                <!-- Header Actions -->
+                <div class="flex items-center space-x-2 sm:space-x-4">
+                    <!-- User Profile -->
+                    <div class="relative">
+                        <button id="profile-btn" class="flex items-center space-x-2 p-1 rounded-lg hover:bg-gray-100 transition-colors">
+                            <div class="w-8 h-8 sm:w-10 sm:h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-medium text-sm sm:text-base">
+                                <span id="userInitials">AD</span>
+                            </div>
+                        </button>
+
+                        <!-- Profile Dropdown -->
+                        <div id="profile-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 border">
+                            <div class="py-1">
+                                <div id="profileInfo" class="px-4 py-3 border-b">
+                                    <p class="text-sm font-medium text-gray-900" id="profileName">Administrator</p>
+                                    <p class="text-xs text-gray-500" id="profileRole">Admin</p>
+                                </div>
+                                <a href="account-settings.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Account Settings</a>
+                                <hr class="my-1">
+                                <button id="logoutBtn" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">Logout</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Messages Container -->
+        <div class="p-4 sm:p-6 lg:p-8">
+            <div class="max-w-6xl mx-auto">
+                <!-- Mobile: Single Panel Layout -->
+                <div class="lg:hidden">
+                    <!-- Users Panel (Mobile) -->
+                    <div id="mobileUsersPanel" class="bg-white rounded-lg shadow h-[600px]">
+                        <div class="p-4 border-b">
+                            <h2 class="text-lg font-semibold mb-3">Messages</h2>
+                            <input 
+                                type="text" 
+                                id="mobileUserSearch" 
+                                placeholder="Search users..." 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary text-sm"
+                            >
+                        </div>
+                        
+                        <div id="mobileUsersContainer" class="h-[480px] overflow-y-auto">
+                            <div id="mobileUsersLoading" class="flex items-center justify-center h-32">
+                                <div class="text-gray-500">Loading users...</div>
+                            </div>
+                            <div id="mobileUsersList" class="hidden"></div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Panel (Mobile) -->
+                    <div id="mobileChatPanel" class="hidden bg-white rounded-lg shadow h-[600px]">
+                        <!-- Chat Header with Back Button -->
+                        <div id="mobileChatHeader" class="p-4 border-b">
+                            <div class="flex items-center gap-3">
+                                <button id="backToUsersBtn" class="p-2 hover:bg-gray-100 rounded-full">
+                                    <svg class="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                                    </svg>
+                                </button>
+                                <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-semibold text-sm" id="mobileChatUserAvatar">
+                                    U
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold" id="mobileChatUserName">User Name</h3>
+                                    <p class="text-sm text-gray-500" id="mobileChatUsername">@username</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chat Content -->
+                        <div class="flex flex-col h-[552px]">
+                            <!-- Messages Area -->
+                            <div id="mobileMessagesContainer" class="flex-1 p-4 overflow-y-auto">
+                                <div id="mobileMessagesLoading" class="flex items-center justify-center h-32">
+                                    <div class="text-gray-500">Loading messages...</div>
+                                </div>
+                                <div id="mobileMessagesEmpty" class="hidden flex items-center justify-center h-32">
+                                    <div class="text-center text-gray-500">
+                                        <p>No messages yet. Start the conversation!</p>
+                                    </div>
+                                </div>
+                                <div id="mobileMessagesList" class="hidden space-y-4"></div>
+                            </div>
+
+                            <!-- Message Input -->
+                            <div class="border-t p-4">
+                                <div class="flex gap-2">
+                                    <input 
+                                        type="text" 
+                                        id="mobileMessageInput" 
+                                        placeholder="Type your message..." 
+                                        class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary"
+                                    >
+                                    <button 
+                                        id="mobileSendMessageBtn" 
+                                        class="px-4 py-2 bg-red-primary text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        Send
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Desktop: Two Panel Layout -->
+                <div class="hidden lg:grid lg:grid-cols-3 gap-6 h-[600px]">
+                    
+                    <!-- Users/Contacts Panel -->
+                    <div class="lg:col-span-1 bg-white rounded-lg shadow">
+                        <div class="p-4 border-b">
+                            <h2 class="text-lg font-semibold mb-3">Users</h2>
+                            <input 
+                                type="text" 
+                                id="userSearch" 
+                                placeholder="Search users..." 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary text-sm"
+                            >
+                        </div>
+                        
+                        <div id="usersContainer" class="h-[480px] overflow-y-auto">
+                            <div id="usersLoading" class="flex items-center justify-center h-32">
+                                <div class="text-gray-500">Loading users...</div>
+                            </div>
+                            <div id="usersList" class="hidden"></div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Panel -->
+                    <div class="lg:col-span-2 bg-white rounded-lg shadow">
+                        <!-- Chat Header -->
+                        <div id="chatHeader" class="hidden p-4 border-b">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-semibold text-sm" id="chatUserAvatar">
+                                    U
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold" id="chatUserName">User Name</h3>
+                                    <p class="text-sm text-gray-500" id="chatUsername">@username</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Default State -->
+                        <div id="chatDefault" class="flex items-center justify-center h-full">
+                            <div class="text-center text-gray-500">
+                                <div class="w-16 h-16 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-semibold">
+                                    💬
+                                </div>
+                                <h3 class="text-lg font-medium mb-2">Select a user to start messaging</h3>
+                                <p>Choose someone from the users list to begin a conversation</p>
+                            </div>
+                        </div>
+
+                        <!-- Chat Content -->
+                        <div id="chatContent" class="hidden flex flex-col h-[600px]">
+                            <!-- Messages Area -->
+                            <div id="messagesContainer" class="flex-1 p-4 overflow-y-auto">
+                                <div id="messagesLoading" class="flex items-center justify-center h-32">
+                                    <div class="text-gray-500">Loading messages...</div>
+                                </div>
+                                <div id="messagesEmpty" class="hidden flex items-center justify-center h-32">
+                                    <div class="text-center text-gray-500">
+                                        <p>No messages yet. Start the conversation!</p>
+                                    </div>
+                                </div>
+                                <div id="messagesList" class="hidden space-y-4"></div>
+                            </div>
+
+                            <!-- Message Input -->
+                            <div class="border-t p-4">
+                                <div class="flex gap-2">
+                                    <input 
+                                        type="text" 
+                                        id="messageInput" 
+                                        placeholder="Type your message..." 
+                                        class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary"
+                                    >
+                                    <button 
+                                        id="sendMessageBtn" 
+                                        class="px-4 py-2 bg-red-primary text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        Send
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay for mobile menu -->
+    <div id="overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"></div>
+
+    <script>
+        // Global variables
+        let currentUser = null;
+        let selectedUser = null;
+        let allUsers = [];
+        let isLoading = false;
+        let isMobile = window.innerWidth < 1024;
+
+        // Session Manager
+        const sessionManager = {
+            getCurrentUser: function() {
+                const user = localStorage.getItem('currentUser');
+                return user ? JSON.parse(user) : null;
+            },
+            
+            requireLogin: function() {
+                if (!localStorage.getItem('currentUser')) {
+                    window.location.href = 'login.html';
+                    return false;
+                }
+                return true;
+            },
+
+            logout: function() {
+                localStorage.removeItem('currentUser');
+                window.location.href = 'login.html';
+            }
+        };
+
+        // Check authentication
+        function checkAuth() {
+            if (!sessionManager.requireLogin()) {
+                return false;
+            }
+            currentUser = sessionManager.getCurrentUser();
+        
+            // Set user info in header
+            const initials = currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase();
+            document.getElementById('userInitials').textContent = initials;
+            document.getElementById('profileName').textContent = currentUser.name;
+            document.getElementById('profileRole').textContent = currentUser.role;
+        
+            return true;
+        }
+
+        // Load all users
+        async function loadUsers() {
+            const usersLoading = document.getElementById(isMobile ? 'mobileUsersLoading' : 'usersLoading');
+            const usersList = document.getElementById(isMobile ? 'mobileUsersList' : 'usersList');
+
+            try {
+                const response = await fetch('api/get-users.php');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch users');
+                }
+                const users = await response.json();
+            
+                // Filter out current user
+                allUsers = users.filter(user => user.username !== currentUser.username);
+            
+                usersLoading.classList.add('hidden');
+                usersList.classList.remove('hidden');
+                renderUsers(allUsers);
+            } catch (error) {
+                console.error('Error loading users:', error);
+                // Fallback to localStorage
+                try {
+                    const accounts = JSON.parse(localStorage.getItem('accounts') || '{"accounts": []}');
+                    allUsers = accounts.accounts.filter(user => user.username !== currentUser.username);
+                
+                    usersLoading.classList.add('hidden');
+                    usersList.classList.remove('hidden');
+                    renderUsers(allUsers);
+                } catch (fallbackError) {
+                    console.error('Fallback error:', fallbackError);
+                    usersLoading.innerHTML = '<div class="text-red-500 text-center">Error loading users</div>';
+                }
+            }
+        }
+
+        // Render users list
+        function renderUsers(users) {
+            const usersList = document.getElementById(isMobile ? 'mobileUsersList' : 'usersList');
+        
+            if (users.length === 0) {
+                usersList.innerHTML = '<div class="p-4 text-center text-gray-500">No users found</div>';
+                return;
+            }
+
+            usersList.innerHTML = users.map(user => {
+                const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                const isSelected = selectedUser === user.username;
+            
+                return `
+                <div class="user-item flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer border-b ${isSelected ? 'bg-blue-50 border-blue-200' : ''}" 
+                     data-username="${user.username}">
+                    <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-semibold text-sm">
+                        ${initials}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-medium text-sm truncate">${user.name}</p>
+                        <p class="text-xs text-gray-500">@${user.username} • ${user.role}</p>
+                        <p class="text-xs text-gray-400">${user.department || ''}</p>
+                    </div>
+                    ${isMobile ? '<div class="text-gray-400"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></div>' : ''}
+                </div>
+            `;
+            }).join('');
+
+            // Add click listeners
+            document.querySelectorAll('.user-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const username = this.dataset.username;
+                    selectUser(username);
+                });
+            });
+        }
+
+        // Select user to chat with
+        function selectUser(username) {
+            selectedUser = username;
+            const user = allUsers.find(u => u.username === username);
+        
+            if (user) {
+                // Update selection visual
+                document.querySelectorAll('.user-item').forEach(item => {
+                    if (item.dataset.username === username) {
+                        item.classList.add('bg-blue-50', 'border-blue-200');
+                    } else {
+                        item.classList.remove('bg-blue-50', 'border-blue-200');
+                    }
+                });
+
+                if (isMobile) {
+                    // Mobile: Switch to chat panel
+                    showMobileChatInterface(user);
+                    loadMobileChat(username);
+                } else {
+                    // Desktop: Show chat interface
+                    showChatInterface(user);
+                    loadChat(username);
+                }
+            }
+        }
+
+        // Show mobile chat interface
+        function showMobileChatInterface(user) {
+            const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+
+            document.getElementById('mobileChatUserAvatar').textContent = initials;
+            document.getElementById('mobileChatUserName').textContent = user.name;
+            document.getElementById('mobileChatUsername').textContent = `@${user.username}`;
+
+            // Hide users panel, show chat panel
+            document.getElementById('mobileUsersPanel').classList.add('hidden');
+            document.getElementById('mobileChatPanel').classList.remove('hidden');
+        }
+
+        // Show desktop chat interface
+        function showChatInterface(user) {
+            const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+
+            document.getElementById('chatUserAvatar').textContent = initials;
+            document.getElementById('chatUserName').textContent = user.name;
+            document.getElementById('chatUsername').textContent = `@${user.username}`;
+
+            document.getElementById('chatDefault').classList.add('hidden');
+            document.getElementById('chatHeader').classList.remove('hidden');
+            document.getElementById('chatContent').classList.remove('hidden');
+        }
+
+        // Load mobile chat messages
+        async function loadMobileChat(otherUser) {
+            const messagesLoading = document.getElementById('mobileMessagesLoading');
+            const messagesEmpty = document.getElementById('mobileMessagesEmpty');
+            const messagesList = document.getElementById('mobileMessagesList');
+
+            messagesLoading.classList.remove('hidden');
+            messagesEmpty.classList.add('hidden');
+            messagesList.classList.add('hidden');
+
+            try {
+                const response = await fetch(`api/get-chat.php?user1=${currentUser.username}&user2=${otherUser}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch messages');
+                }
+                const messages = await response.json();
+
+                messagesLoading.classList.add('hidden');
+
+                if (messages.length === 0) {
+                    messagesEmpty.classList.remove('hidden');
+                } else {
+                    messagesList.classList.remove('hidden');
+                    renderMobileMessages(messages);
+                }
+            } catch (error) {
+                console.error('Error loading chat:', error);
+                messagesLoading.classList.add('hidden');
+                messagesEmpty.classList.remove('hidden');
+            }
+        }
+
+        // Load desktop chat messages
+        async function loadChat(otherUser) {
+            const messagesLoading = document.getElementById('messagesLoading');
+            const messagesEmpty = document.getElementById('messagesEmpty');
+            const messagesList = document.getElementById('messagesList');
+
+            messagesLoading.classList.remove('hidden');
+            messagesEmpty.classList.add('hidden');
+            messagesList.classList.add('hidden');
+
+            try {
+                const response = await fetch(`api/get-chat.php?user1=${currentUser.username}&user2=${otherUser}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch messages');
+                }
+                const messages = await response.json();
+
+                messagesLoading.classList.add('hidden');
+
+                if (messages.length === 0) {
+                    messagesEmpty.classList.remove('hidden');
+                } else {
+                    messagesList.classList.remove('hidden');
+                    renderMessages(messages);
+                }
+            } catch (error) {
+                console.error('Error loading chat:', error);
+                messagesLoading.classList.add('hidden');
+                messagesEmpty.classList.remove('hidden');
+            }
+        }
+
+        // Render mobile messages
+        function renderMobileMessages(messages) {
+            const messagesList = document.getElementById('mobileMessagesList');
+            
+            messagesList.innerHTML = messages.map(msg => {
+                const isCurrentUser = msg.sender === currentUser.username;
+                const time = new Date(msg.timestamp).toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                return `
+                    <div class="flex ${isCurrentUser ? 'justify-end' : 'justify-start'}">
+                        <div class="max-w-[70%]">
+                            <div class="px-4 py-2 rounded-lg ${isCurrentUser ? 'bg-red-primary text-white' : 'bg-gray-100 text-gray-900'}">
+                                <p class="text-sm">${escapeHtml(msg.message)}</p>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1 ${isCurrentUser ? 'text-right' : 'text-left'}">
+                                ${time}
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Scroll to bottom
+            setTimeout(() => {
+                const container = document.getElementById('mobileMessagesContainer');
+                container.scrollTop = container.scrollHeight;
+            }, 100);
+        }
+
+        // Render desktop messages
+        function renderMessages(messages) {
+            const messagesList = document.getElementById('messagesList');
+            
+            messagesList.innerHTML = messages.map(msg => {
+                const isCurrentUser = msg.sender === currentUser.username;
+                const time = new Date(msg.timestamp).toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                return `
+                    <div class="flex ${isCurrentUser ? 'justify-end' : 'justify-start'}">
+                        <div class="max-w-[70%]">
+                            <div class="px-4 py-2 rounded-lg ${isCurrentUser ? 'bg-red-primary text-white' : 'bg-gray-100 text-gray-900'}">
+                                <p class="text-sm">${escapeHtml(msg.message)}</p>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1 ${isCurrentUser ? 'text-right' : 'text-left'}">
+                                ${time}
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Scroll to bottom
+            setTimeout(() => {
+                const container = document.getElementById('messagesContainer');
+                container.scrollTop = container.scrollHeight;
+            }, 100);
+        }
+
+        // Send message (mobile)
+        async function sendMobileMessage() {
+            const messageInput = document.getElementById('mobileMessageInput');
+            const message = messageInput.value.trim();
+            
+            if (!message || !selectedUser || isLoading) return;
+
+            isLoading = true;
+            const sendBtn = document.getElementById('mobileSendMessageBtn');
+            sendBtn.disabled = true;
+
+            try {
+                const response = await fetch('api/send-message.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        sender: currentUser.username,
+                        receiver: selectedUser,
+                        message: message
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    messageInput.value = '';
+                    await loadMobileChat(selectedUser);
+                } else {
+                    alert('Error sending message: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                alert('Error sending message');
+            } finally {
+                isLoading = false;
+                sendBtn.disabled = false;
+            }
+        }
+
+        // Send message (desktop)
+        async function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            
+            if (!message || !selectedUser || isLoading) return;
+
+            isLoading = true;
+            const sendBtn = document.getElementById('sendMessageBtn');
+            sendBtn.disabled = true;
+
+            try {
+                const response = await fetch('api/send-message.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        sender: currentUser.username,
+                        receiver: selectedUser,
+                        message: message
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    messageInput.value = '';
+                    await loadChat(selectedUser);
+                } else {
+                    alert('Error sending message: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                alert('Error sending message');
+            } finally {
+                isLoading = false;
+                sendBtn.disabled = false;
+            }
+        }
+
+        // Search users
+        function searchUsers(query) {
+            const filteredUsers = allUsers.filter(user => 
+                user.name.toLowerCase().includes(query.toLowerCase()) ||
+                user.username.toLowerCase().includes(query.toLowerCase()) ||
+                user.role.toLowerCase().includes(query.toLowerCase())
+            );
+            renderUsers(filteredUsers);
+        }
+
+        // Back to users (mobile)
+        function backToUsers() {
+            document.getElementById('mobileChatPanel').classList.add('hidden');
+            document.getElementById('mobileUsersPanel').classList.remove('hidden');
+            selectedUser = null;
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Check if mobile on resize
+            window.addEventListener('resize', function() {
+                const wasMobile = isMobile;
+                isMobile = window.innerWidth < 1024;
+            
+                if (wasMobile !== isMobile) {
+                    // Reload page to reset layout
+                    location.reload();
+                }
+            });
+
+            // Mobile menu
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+
+            mobileMenuBtn.addEventListener('click', function () {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                mobileMenuBtn.classList.add('hidden');
+            });
+
+            overlay.addEventListener('click', function () {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+                mobileMenuBtn.classList.remove('hidden');
+            });
+
+            // Profile dropdown
+            document.getElementById('profile-btn').addEventListener('click', function() {
+                document.getElementById('profile-dropdown').classList.toggle('hidden');
+            });
+
+            // Logout
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                sessionManager.logout();
+            });
+
+            // Back to users button (mobile)
+            const backBtn = document.getElementById('backToUsersBtn');
+            if (backBtn) {
+                backBtn.addEventListener('click', backToUsers);
+            }
+
+            // Send message buttons
+            const sendBtn = document.getElementById('sendMessageBtn');
+            const mobileSendBtn = document.getElementById('mobileSendMessageBtn');
+            
+            if (sendBtn) {
+                sendBtn.addEventListener('click', sendMessage);
+            }
+            if (mobileSendBtn) {
+                mobileSendBtn.addEventListener('click', sendMobileMessage);
+            }
+
+            // Enter key to send
+            const messageInput = document.getElementById('messageInput');
+            const mobileMessageInput = document.getElementById('mobileMessageInput');
+            
+            if (messageInput) {
+                messageInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        sendMessage();
+                    }
+                });
+            }
+            
+            if (mobileMessageInput) {
+                mobileMessageInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        sendMobileMessage();
+                    }
+                });
+            }
+
+            // Search users
+            const userSearch = document.getElementById('userSearch');
+            const mobileUserSearch = document.getElementById('mobileUserSearch');
+            
+            if (userSearch) {
+                userSearch.addEventListener('input', function(e) {
+                    searchUsers(e.target.value);
+                });
+            }
+            
+            if (mobileUserSearch) {
+                mobileUserSearch.addEventListener('input', function(e) {
+                    searchUsers(e.target.value);
+                });
+            }
+
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('#profile-btn') && !event.target.closest('#profile-dropdown')) {
+                    document.getElementById('profile-dropdown').classList.add('hidden');
+                }
+            });
+        }
+
+        // Utility function
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            if (checkAuth()) {
+                setupEventListeners();
+                loadUsers();
+            }
+        });
+    </script>
+</body>
+</html>

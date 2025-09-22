@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homepage - Tahanan ng Pagmamahal OMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'red-primary': '#dc2626',
+                        'red-secondary': '#ef4444',
+                        'red-light': '#fef2f2'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Mobile Menu Button -->
+    <div id="mobile-menu-container" class="lg:hidden fixed top-4 left-4 z-50">
+        <button id="mobile-menu-btn" class="bg-white p-3 rounded-md shadow-md hover:bg-red-light">
+            <svg class="h-8 w-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Left Sidebar -->
+    <div id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-lg transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
+        <div class="flex items-center justify-center h-20 bg-white border-b">
+            <img src="/placeholder.svg?height=60&width=200" alt="Tahanan ng Pagmamahal Logo" class="w-[90%]">
+        </div>
+        
+        <nav class="mt-8">
+            <div class="px-4">
+                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Recording</h3>
+                <ul class="space-y-2">
+                    <li><a href="add-child.html" class="flex items-center px-4 py-3 text-base text-gray-700 hover:bg-red-light hover:text-red-primary rounded-md">
+                        <svg class="h-7 w-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                        </svg>
+                        Add New Child
+                    </a></li>
+                    <li><a href="add-staff.html" class="flex items-center px-4 py-3 text-base text-gray-700 hover:bg-red-light hover:text-red-primary rounded-md">
+                        <svg class="h-7 w-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                        </svg>
+                        Add New Staff
+                    </a></li>
+                    <li><a href="add-volunteer.html" class="flex items-center px-4 py-3 text-base text-gray-700 hover:bg-red-light hover:text-red-primary rounded-md">
+                        <svg class="h-7 w-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                        </svg>
+                        Add New Volunteer
+                    </a></li>
+                    <li><a href="record-donation.html" class="flex items-center px-4 py-3 text-base text-gray-700 hover:bg-red-light hover:text-red-primary rounded-md">
+                        <svg class="h-7 w-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                        </svg>
+                        Record donation
+                    </a></li>
+                </ul>
+            </div>
+            
+            <div class="px-4 mt-8">
+                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Records</h3>
+                <ul class="space-y-2">
+                    <li><a href="child-records.html" class="flex items-center px-4 py-3 text-base text-gray-700 hover:bg-red-light hover:text-red-primary rounded-md">
+                        <svg class="h-7 w-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Child records
+                    </a></li>
+                    <li><a href="staff-records.html" class="flex items-center px-4 py-3 text-base text-gray-700 hover:bg-red-light hover:text-red-primary rounded-md">
+                        <svg class="h-7 w-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                        Staff records
+                    </a></li>
+                    <li><a href="volunteer-records.html" class="flex items-center px-4 py-3 text-base text-gray-700 hover:bg-red-light hover:text-red-primary rounded-md">
+                        <svg class="h-7 w-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                        </svg>
+                        Volunteer records
+                    </a></li>
+                    <li><a href="donation-records.html" class="flex items-center px-4 py-3 text-base text-gray-700 hover:bg-red-light hover:text-red-primary rounded-md">
+                        <svg class="h-7 w-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                        </svg>
+                        Donation records
+                    </a></li>
+                    <li id="attendanceRecordsLink" class="hidden"><a href="attendance-records.html" class="flex items-center px-4 py-3 text-base text-gray-700 hover:bg-red-light hover:text-red-primary rounded-md">
+                        <svg class="h-7 w-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                        </svg>
+                        Staff attendance
+                    </a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" class="lg:ml-64 min-h-screen">
+        <!-- Top Header -->
+        <header class="bg-white shadow-sm border-b">
+            <div class="flex items-center justify-between px-4 py-4">
+                <div id="desktop-greeting" class="flex-1 hidden lg:block">
+                    <h1 id="greeting" class="text-2xl font-semibold text-gray-900"></h1>
+                    <p id="currentDate" class="text-lg text-gray-600"></p>
+                </div>
+                
+                <div class="flex-1 lg:hidden"></div>
+                
+                <div class="flex items-center space-x-4">
+                    <!-- Account Icon (Staff & Volunteers) -->
+                    <div id="accountSection" class="relative hidden">
+                        <button id="account-btn" class="relative p-3 text-gray-600 hover:text-red-primary hover:bg-red-light rounded-full">
+                            <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                        </button>
+                        
+                        <!-- Account Dropdown -->
+                        <div id="account-dropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg z-50">
+                            <div class="py-1">
+                                <div id="accountInfo" class="px-4 py-3 border-b">
+                                    <!-- Account info will be populated by JavaScript -->
+                                </div>
+                                <div class="px-4 py-2">
+                                    <a href="account-settings.html" class="block px-3 py-2 text-sm text-gray-700 hover:bg-red-light hover:text-red-primary rounded-md">
+                                        Account Settings
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Messages -->
+                    <div class="relative">
+                        <button id="message-btn" class="relative p-3 text-gray-600 hover:text-red-primary hover:bg-red-light rounded-full">
+                            <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <!-- Notifications -->
+                    <div class="relative">
+                        <button id="notifications-btn" class="relative p-3 text-gray-600 hover:text-red-primary hover:bg-red-light rounded-full">
+                            <svg class="h-8 w-8" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+                            </svg>
+                            <span id="notificationBadge" class="hidden absolute top-2 right-2 h-3 w-3 bg-red-primary rounded-full"></span>
+                        </button>
+                        
+                        <!-- Notifications Dropdown -->
+                        <div id="notifications-dropdown" class="hidden absolute right-0 mt-2 w-96 bg-white rounded-md shadow-lg z-50 max-h-96 overflow-y-auto">
+                            <div class="py-1">
+                                <div id="notificationsContent">
+                                    <!-- Notifications will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Settings -->
+                    <div class="relative">
+                        <button id="settings-btn" class="p-3 text-gray-600 hover:text-red-primary hover:bg-red-light rounded-full">
+                            <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                        </button>
+                        
+                        <div id="settings-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50">
+                            <div class="py-1">
+                                <a href="account-settings.html" class="block px-4 py-3 text-base text-gray-700 hover:bg-red-light hover:text-red-primary">Account settings</a>
+                                <div id="adminSettings" class="hidden">
+                                    <a href="system-activity.html" class="block px-4 py-3 text-base text-gray-700 hover:bg-red-light hover:text-red-primary">System activity</a>
+                                    <a href="system-settings.html" class="block px-4 py-3 text-base text-gray-700 hover:bg-red-light hover:text-red-primary">System settings</a>
+                                </div>
+                                <a href="#" class="block px-4 py-3 text-base text-gray-700 hover:bg-red-light hover:text-red-primary">About</a>
+                                <hr class="my-1">
+                                <a href="#" id="logoutBtn" class="block px-4 py-3 text-base text-red-600 hover:bg-red-light">Logout</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Success/Error Messages -->
+        <div id="messageContainer" class="mx-4 mt-4 hidden"></div>
+
+        <!-- Dashboard Stats -->
+        <div class="p-4 lg:p-6">
+            <div id="mobile-greeting" class="lg:hidden mb-6 bg-white rounded-lg shadow p-4">
+                <h1 id="mobileGreeting" class="text-2xl font-semibold text-gray-900"></h1>
+                <p id="mobileCurrentDate" class="text-lg text-gray-600"></p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-blue-100 rounded-lg">
+                            <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-base font-medium text-gray-600">Total Children</p>
+                            <p id="childCount" class="text-3xl font-semibold text-gray-900">0</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-green-100 rounded-lg">
+                            <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-base font-medium text-gray-600">Total Staff</p>
+                            <p id="staffCount" class="text-3xl font-semibold text-gray-900">0</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-purple-100 rounded-lg">
+                            <svg class="h-8 w-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-base font-medium text-gray-600">Active Volunteers</p>
+                            <p id="volunteerCount" class="text-3xl font-semibold text-gray-900">0</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-red-100 rounded-lg">
+                            <svg class="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-base font-medium text-gray-600">Total Donations</p>
+                            <p id="totalDonations" class="text-3xl font-semibold text-gray-900">₱0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Staff Attendance Summary -->
+            <div id="attendanceSummary" class="mb-8 hidden">
+                <div class="bg-white rounded-lg shadow">
+                    <div class="p-6 border-b">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xl font-semibold text-gray-900">Staff Attendance Today</h2>
+                            <a href="attendance-records.html" class="text-red-primary hover:text-red-700 text-sm font-medium">View All →</a>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="text-center">
+                                <div id="presentCount" class="text-2xl font-bold text-green-600">0</div>
+                                <div class="text-sm text-gray-600">Present</div>
+                            </div>
+                            <div class="text-center">
+                                <div id="leaveCount" class="text-2xl font-bold text-yellow-600">0</div>
+                                <div class="text-sm text-gray-600">On Leave</div>
+                            </div>
+                            <div class="text-center">
+                                <div id="pendingCount" class="text-2xl font-bold text-red-600">0</div>
+                                <div class="text-sm text-gray-600">Pending Requests</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-lg shadow">
+                    <div class="p-6 border-b">
+                        <h2 class="text-xl font-semibold text-gray-900">Recent Posts</h2>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div class="border-l-4 border-blue-500 pl-4">
+                            <h3 class="font-medium text-gray-900 text-lg">Weekly Activity Report</h3>
+                            <p class="text-base text-gray-600 mt-1">This week we organized art classes for the children and received positive feedback from both kids and volunteers.</p>
+                            <p class="text-sm text-gray-400 mt-2">2 hours ago</p>
+                        </div>
+                        <div class="border-l-4 border-blue-500 pl-4">
+                            <h3 class="font-medium text-gray-900 text-lg">New Volunteer Orientation</h3>
+                            <p class="text-base text-gray-600 mt-1">Welcome to our new volunteers who joined us this month. Your dedication makes a difference in these children's lives.</p>
+                            <p class="text-sm text-gray-400 mt-2">1 day ago</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow">
+                    <div class="p-6 border-b">
+                        <h2 class="text-xl font-semibold text-gray-900">Announcements</h2>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div class="border-l-4 border-red-primary pl-4">
+                            <h3 class="font-medium text-gray-900 text-lg">Medical Check-up Schedule</h3>
+                            <p class="text-base text-gray-600 mt-1">Annual medical check-ups will be conducted next week. Please ensure all children are available during scheduled times.</p>
+                            <p class="text-sm text-gray-400 mt-2">3 hours ago</p>
+                        </div>
+                        <div class="border-l-4 border-red-primary pl-4">
+                            <h3 class="font-medium text-gray-900 text-lg">Donation Drive Success</h3>
+                            <p class="text-base text-gray-600 mt-1">Thank you to everyone who participated in our recent donation drive. We collected ₱50,000 worth of supplies and donations.</p>
+                            <p class="text-sm text-gray-400 mt-2">2 days ago</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Volunteer Tasks -->
+            <div id="volunteerTasks" class="mt-6 hidden">
+                <div class="bg-white rounded-lg shadow">
+                    <div class="p-6 border-b">
+                        <h2 class="text-xl font-semibold text-gray-900">My Assigned Tasks</h2>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div class="border-l-4 border-yellow-500 pl-4">
+                            <h3 class="font-medium text-gray-900 text-lg">Organize Children's Library</h3>
+                            <p class="text-base text-gray-600 mt-1">Sort and catalog new books donated this week</p>
+                            <p class="text-sm text-gray-400 mt-2">Due: Tomorrow</p>
+                        </div>
+                        <div class="border-l-4 border-green-500 pl-4">
+                            <h3 class="font-medium text-gray-900 text-lg">Art Class Preparation</h3>
+                            <p class="text-base text-gray-600 mt-1">Prepare materials for Friday's art class</p>
+                            <p class="text-sm text-gray-400 mt-2">Due: Friday</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Staff Attendance Floating Button (Only for Staff) -->
+    <div id="attendanceButton" class="fixed bottom-6 right-6 z-50 hidden">
+        <button id="attendance-btn" class="bg-red-primary hover:bg-red-700 text-white rounded-full p-4 shadow-lg transition-all duration-300 transform hover:scale-110">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Overlay for mobile menu -->
+    <div id="overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"></div>
+
+    <script src="js/JSONHandler.js"></script>
+    <script src="js/session.js"></script>
+    <script>
+        // Check if user is logged in
+        if (!sessionManager.requireLogin()) {
+            // Will redirect to login if not logged in
+        }
+
+        const currentUser = sessionManager.getCurrentUser();
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+            loadDashboardData();
+            setupEventListeners();
+        });
+
+        function initializePage() {
+            // Set greeting
+            const hour = new Date().getHours();
+            const greeting = hour < 12 ? 'Good Morning' : (hour < 18 ? 'Good Afternoon' : 'Good Evening');
+            const greetingText = `${greeting} ${currentUser.name}!`;
+            const dateText = `Today is: ${new Date().toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit'
+            })}`;
+
+            document.getElementById('greeting').textContent = greetingText;
+            document.getElementById('currentDate').textContent = dateText;
+            document.getElementById('mobileGreeting').textContent = greetingText;
+            document.getElementById('mobileCurrentDate').textContent = dateText;
+
+            // Show/hide elements based on user role
+            if (currentUser.role === 'admin') {
+                document.getElementById('attendanceRecordsLink').classList.remove('hidden');
+                document.getElementById('adminSettings').classList.remove('hidden');
+                document.getElementById('attendanceSummary').classList.remove('hidden');
+                loadAttendanceSummary();
+                loadPendingLeaveRequests();
+            }
+
+            if (currentUser.role === 'staff') {
+                document.getElementById('attendanceButton').classList.remove('hidden');
+                document.getElementById('accountSection').classList.remove('hidden');
+                loadAccountInfo();
+            }
+
+            if (currentUser.role === 'volunteer') {
+                document.getElementById('accountSection').classList.remove('hidden');
+                document.getElementById('volunteerTasks').classList.remove('hidden');
+                loadAccountInfo();
+            }
+        }
+
+        function loadDashboardData() {
+            // Load dashboard statistics
+            document.getElementById('childCount').textContent = jsonHandler.getRecordCount('children-records');
+            document.getElementById('staffCount').textContent = jsonHandler.getRecordCount('staff-records');
+            document.getElementById('volunteerCount').textContent = jsonHandler.getRecordCount('volunteer-records');
+            document.getElementById('totalDonations').textContent = '₱' + jsonHandler.getTotalDonations().toLocaleString();
+        }
+
+        function loadAttendanceSummary() {
+            const summary = jsonHandler.getAttendanceSummary();
+            document.getElementById('presentCount').textContent = summary.present;
+            document.getElementById('leaveCount').textContent = summary.leave;
+            document.getElementById('pendingCount').textContent = summary.pending;
+        }
+
+        function loadPendingLeaveRequests() {
+            const pendingRequests = jsonHandler.getPendingLeaveRequests();
+            
+            if (pendingRequests.length > 0) {
+                document.getElementById('notificationBadge').classList.remove('hidden');
+                
+                const notificationsContent = document.getElementById('notificationsContent');
+                notificationsContent.innerHTML = `
+                    <div class="px-4 py-2 text-sm font-medium text-gray-900 border-b">Leave Requests (${pendingRequests.length})</div>
+                    ${pendingRequests.map(request => `
+                        <div class="px-4 py-3 border-b hover:bg-gray-50">
+                            <div class="flex justify-between items-start">
+                                <div class="flex-1">
+                                    <div class="text-sm font-medium text-gray-900">${request.accountName}</div>
+                                    <div class="text-sm text-gray-500">${request.leaveType || 'Leave Request'}</div>
+                                    <div class="text-sm text-gray-500">Date: ${new Date(request.date).toLocaleDateString()}</div>
+                                    <div class="text-xs text-gray-400 mt-1">${request.reason || ''}</div>
+                                </div>
+                                <div class="flex space-x-2 ml-4">
+                                    <button onclick="approveLeaveRequest('${request.attendanceId}')" class="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700">
+                                        Accept
+                                    </button>
+                                    <button onclick="rejectLeaveRequest('${request.attendanceId}')" class="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700">
+                                        Reject
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                    <div class="px-4 py-2 border-t">
+                        <a href="attendance-records.html" class="text-sm text-red-primary hover:text-red-700">View all requests →</a>
+                    </div>
+                `;
+            }
+        }
+
+        function loadAccountInfo() {
+            const userDetails = jsonHandler.getUserDetails(currentUser.username);
+            if (userDetails) {
+                const accountInfo = document.getElementById('accountInfo');
+                accountInfo.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            ${userDetails.photoData ? 
+                                `<img class="h-12 w-12 rounded-full object-cover" src="${userDetails.photoData}" alt="Profile Photo">` :
+                                `<div class="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center">
+                                    <span class="text-lg font-medium text-gray-700">${currentUser.name.charAt(0).toUpperCase()}</span>
+                                </div>`
+                            }
+                        </div>
+                        <div class="ml-3">
+                            <div class="text-sm font-medium text-gray-900">${currentUser.name}</div>
+                            <div class="text-sm text-gray-500">${currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1)}</div>
+                            ${userDetails.staffId ? `<div class="text-xs text-gray-400">ID: ${userDetails.staffId}</div>` : ''}
+                            ${userDetails.volunteerId ? `<div class="text-xs text-gray-400">ID: ${userDetails.volunteerId}</div>` : ''}
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-3 border-t">
+                        <div class="text-xs text-gray-500 uppercase tracking-wider mb-2">Contact Information</div>
+                        <div class="text-sm text-gray-900">${userDetails.emailAddress || currentUser.email}</div>
+                        ${userDetails.contactNumber ? `<div class="text-sm text-gray-600">${userDetails.contactNumber}</div>` : ''}
+                    </div>
+                    ${currentUser.role === 'staff' ? `
+                        <div class="mt-3 pt-3 border-t">
+                            <div class="text-xs text-gray-500 uppercase tracking-wider mb-2">Employment Details</div>
+                            ${userDetails.position ? `<div class="text-sm text-gray-900">${userDetails.position}</div>` : ''}
+                            ${userDetails.department ? `<div class="text-sm text-gray-600">${userDetails.department}</div>` : ''}
+                            ${userDetails.dateHired ? `<div class="text-xs text-gray-500">Hired: ${new Date(userDetails.dateHired).toLocaleDateString()}</div>` : ''}
+                        </div>
+                    ` : ''}
+                    ${currentUser.role === 'volunteer' ? `
+                        <div class="mt-3 pt-3 border-t">
+                            <div class="text-xs text-gray-500 uppercase tracking-wider mb-2">Volunteer Details</div>
+                            ${userDetails.preferredDepartment ? `<div class="text-sm text-gray-900">${userDetails.preferredDepartment}</div>` : ''}
+                            ${userDetails.volunteerStatus ? `<div class="text-sm text-gray-600">Status: ${userDetails.volunteerStatus}</div>` : ''}
+                            ${userDetails.dateAdded ? `<div class="text-xs text-gray-500">Joined: ${new Date(userDetails.dateAdded).toLocaleDateString()}</div>` : ''}
+                        </div>
+                    ` : ''}
+                `;
+            }
+        }
+
+        function setupEventListeners() {
+            // Mobile menu functionality
+            document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+                document.getElementById('sidebar').classList.toggle('-translate-x-full');
+                document.getElementById('overlay').classList.toggle('hidden');
+            });
+
+            document.getElementById('overlay').addEventListener('click', function() {
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+                document.getElementById('overlay').classList.add('hidden');
+            });
+
+            // Settings dropdown
+            document.getElementById('settings-btn').addEventListener('click', function() {
+                document.getElementById('settings-dropdown').classList.toggle('hidden');
+            });
+
+            // Account dropdown (for staff and volunteers)
+            if (currentUser.role === 'staff' || currentUser.role === 'volunteer') {
+                document.getElementById('account-btn').addEventListener('click', function() {
+                    document.getElementById('account-dropdown').classList.toggle('hidden');
+                });
+            }
+
+            // Notifications dropdown
+            document.getElementById('notifications-btn').addEventListener('click', function() {
+                const dropdown = document.getElementById('notifications-dropdown');
+                dropdown.classList.toggle('hidden');
+            });
+
+            // Staff attendance button
+            if (currentUser.role === 'staff') {
+                document.getElementById('attendance-btn').addEventListener('click', function() {
+                    window.location.href = 'staff-attendance.html';
+                });
+            }
+
+            // Logout button
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                sessionManager.logout();
+                window.location.href = 'login.html';
+            });
+
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('#settings-btn') && !event.target.closest('#settings-dropdown')) {
+                    document.getElementById('settings-dropdown').classList.add('hidden');
+                }
+                
+                if (currentUser.role === 'staff' || currentUser.role === 'volunteer') {
+                    if (!event.target.closest('#account-btn') && !event.target.closest('#account-dropdown')) {
+                        document.getElementById('account-dropdown').classList.add('hidden');
+                    }
+                }
+                
+                const notificationsDropdown = document.getElementById('notifications-dropdown');
+                if (notificationsDropdown && !event.target.closest('#notifications-btn') && !event.target.closest('#notifications-dropdown')) {
+                    notificationsDropdown.classList.add('hidden');
+                }
+            });
+        }
+
+        function approveLeaveRequest(attendanceId) {
+            if (jsonHandler.updateAttendanceRecord(attendanceId, {
+                status: 'On Leave',
+                remarks: 'Approved by admin'
+            })) {
+                jsonHandler.logActivity(currentUser.id, currentUser.username, 'Approved Leave Request', `Approved leave request ID: ${attendanceId}`);
+                showMessage('Leave request approved successfully!', 'success');
+                loadPendingLeaveRequests();
+                loadAttendanceSummary();
+            } else {
+                showMessage('Error approving leave request.', 'error');
+            }
+        }
+
+        function rejectLeaveRequest(attendanceId) {
+            if (jsonHandler.updateAttendanceRecord(attendanceId, {
+                status: 'Rejected',
+                remarks: 'Rejected by admin'
+            })) {
+                jsonHandler.logActivity(currentUser.id, currentUser.username, 'Rejected Leave Request', `Rejected leave request ID: ${attendanceId}`);
+                showMessage('Leave request rejected.', 'success');
+                loadPendingLeaveRequests();
+                loadAttendanceSummary();
+            } else {
+                showMessage('Error rejecting leave request.', 'error');
+            }
+        }
+
+        function showMessage(message, type) {
+            const messageContainer = document.getElementById('messageContainer');
+            const bgColor = type === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700';
+            
+            messageContainer.innerHTML = `<div class="${bgColor} border px-4 py-3 rounded">${message}</div>`;
+            messageContainer.classList.remove('hidden');
+            
+            setTimeout(() => {
+                messageContainer.classList.add('hidden');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

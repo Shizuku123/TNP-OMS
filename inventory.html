@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management - Tahanan ng Pagmamahal OMS</title>
+    <!-- Added Firebase module import -->
+    <script type="module" src="firebase.js"></script>
+    <!-- Added SheetJS library for Excel parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'red-primary': '#dc2626',
+                        'red-secondary': '#ef4444',
+                        'red-light': '#fef2f2'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Hide scrollbar for category tabs */
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        
+        /* Ensure category tabs don't wrap */
+        .category-tab {
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="flex items-center text-gray-600 hover:text-red-primary">
+                        <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                    </a>
+                </div>
+                <h1 class="text-xl font-semibold text-gray-900">Inventory Management</h1>
+                <div></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Added Excel Upload Section -->
+        <!-- Excel Upload Section -->
+        <div class="mb-6 bg-white rounded-lg shadow p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Upload Inventory from Excel</h3>
+                <button id="toggleUploadBtn" onclick="toggleUploadSection()" class="px-4 py-2 bg-red-primary text-white rounded-lg hover:bg-red-700 transition-colors text-sm">
+                    Upload Excel File
+                </button>
+            </div>
+            
+            <div id="uploadSection" class="hidden">
+                <!-- Upload Area -->
+                <div id="uploadArea" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-red-primary transition-colors cursor-pointer">
+                    <div id="uploadContent">
+                        <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                        <p class="text-lg font-medium text-gray-900 mb-2">Drop your Excel file here</p>
+                        <p class="text-sm text-gray-500 mb-4">or click to browse files</p>
+                        <p class="text-xs text-gray-400">Supports .xlsx, .xls files up to 10MB</p>
+                    </div>
+                    <input type="file" id="excelFileInput" accept=".xlsx,.xls" class="hidden">
+                </div>
+
+                <!-- Upload Progress -->
+                <div id="uploadProgress" class="hidden mt-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium text-gray-700">Uploading...</span>
+                        <span id="progressPercent" class="text-sm text-gray-500">0%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div id="progressBar" class="bg-red-primary h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- File Info -->
+                <div id="fileInfo" class="hidden mt-4 p-4 bg-gray-50 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <div>
+                                <p id="fileName" class="font-medium text-gray-900"></p>
+                                <p id="fileSize" class="text-sm text-gray-500"></p>
+                            </div>
+                        </div>
+                        <button id="removeFileBtn" onclick="removeFile()" class="text-red-600 hover:text-red-800">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Upload Actions -->
+                <div id="uploadActions" class="hidden mt-4 flex space-x-4">
+                    <button id="processFileBtn" onclick="processExcelFile()" class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                        Process & Upload to Firebase
+                    </button>
+                    <button onclick="downloadTemplate()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                        Download Template
+                    </button>
+                </div>
+
+                <!-- Processing Status -->
+                <div id="processingStatus" class="hidden mt-4">
+                    <div class="flex items-center space-x-3 p-4 bg-blue-50 rounded-lg">
+                        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                        <div>
+                            <p class="font-medium text-blue-900">Processing Excel file...</p>
+                            <p id="processingMessage" class="text-sm text-blue-700">Reading file contents...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Summary -->
+                <div id="uploadResults" class="hidden mt-4">
+                    <div class="p-4 rounded-lg">
+                        <h4 class="font-medium text-gray-900 mb-2">Upload Results</h4>
+                        <div class="grid grid-cols-3 gap-4 text-center">
+                            <div class="bg-green-50 p-3 rounded-lg">
+                                <p id="successCount" class="text-2xl font-bold text-green-600">0</p>
+                                <p class="text-sm text-green-700">Successfully Added</p>
+                            </div>
+                            <div class="bg-yellow-50 p-3 rounded-lg">
+                                <p id="skippedCount" class="text-2xl font-bold text-yellow-600">0</p>
+                                <p class="text-sm text-yellow-700">Skipped (Duplicates)</p>
+                            </div>
+                            <div class="bg-red-50 p-3 rounded-lg">
+                                <p id="errorCount" class="text-2xl font-bold text-red-600">0</p>
+                                <p class="text-sm text-red-700">Errors</p>
+                            </div>
+                        </div>
+                        <div id="errorDetails" class="hidden mt-4 p-3 bg-red-50 rounded-lg">
+                            <h5 class="font-medium text-red-900 mb-2">Errors Found:</h5>
+                            <ul id="errorList" class="text-sm text-red-700 space-y-1"></ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Expected Format Info -->
+                <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                    <h4 class="font-medium text-blue-900 mb-2">Expected Excel Format</h4>
+                    <p class="text-sm text-blue-700 mb-3">Your Excel file should have the following columns (in any order):</p>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                        <span class="bg-white px-2 py-1 rounded">Item Name</span>
+                        <span class="bg-white px-2 py-1 rounded">Category</span>
+                        <span class="bg-white px-2 py-1 rounded">Quantity</span>
+                        <span class="bg-white px-2 py-1 rounded">Unit</span>
+                        <span class="bg-white px-2 py-1 rounded">Condition</span>
+                        <span class="bg-white px-2 py-1 rounded">Expiry Date</span>
+                        <span class="bg-white px-2 py-1 rounded">Donor Name</span>
+                        <span class="bg-white px-2 py-1 rounded">Notes</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="mb-6 bg-white rounded-lg shadow p-6">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+                <div class="flex-1 max-w-lg">
+                    <input type="text" id="searchInput" placeholder="Search items by name, category, or description..."
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                </div>
+                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
+                    <select id="categoryFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        <option value="">All Categories</option>
+                    </select>
+                    <select id="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        <option value="">All Status</option>
+                        <option value="normal">Normal Stock</option>
+                        <option value="low">Low Stock</option>
+                        <option value="expiring">Expiring Soon</option>
+                        <option value="expired">Expired</option>
+                    </select>
+                    <button onclick="exportToCSV()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-center">
+                        Export CSV
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Total Items</p>
+                        <p id="totalItems" class="text-2xl font-semibold text-gray-900">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-8 w-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Low Stock</p>
+                        <p id="lowStockItems" class="text-2xl font-semibold text-orange-600">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Expiring Soon</p>
+                        <p id="expiringSoonItems" class="text-2xl font-semibold text-red-600">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-8 w-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Categories</p>
+                        <p id="totalCategories" class="text-2xl font-semibold text-purple-600">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Navigation -->
+        <div class="bg-white rounded-lg shadow mb-6">
+            <div class="p-6 border-b">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900">Categories</h3>
+                    <button id="showRecentBtn" onclick="toggleRecentItems()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                        Show Recent Items
+                    </button>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="relative">
+                    <select id="categoryDropdown" onchange="selectCategoryFromDropdown()" class="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        <!-- Category options will be populated here -->
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Content with Pagination -->
+        <div id="categoryContent" class="bg-white rounded-lg shadow mb-6">
+            <div class="p-6 border-b">
+                <div class="flex items-center justify-between">
+                    <h2 id="currentCategoryTitle" class="text-2xl font-bold text-gray-900">All Items</h2>
+                    <span id="currentCategoryCount" class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">0 items</span>
+                </div>
+            </div>
+            <div class="p-6">
+                <div id="itemsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 min-h-[200px]">
+                    <!-- Items will be populated here -->
+                </div>
+                
+                <!-- Pagination -->
+                <div id="paginationContainer" class="mt-6 flex items-center justify-between border-t pt-6">
+                    <div class="text-sm text-gray-700">
+                        Showing <span id="itemsInfo">0-0 of 0</span> items
+                    </div>
+                    <div class="flex space-x-2">
+                        <button id="prevPageBtn" onclick="changePage(-1)" class="px-3 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            Previous
+                        </button>
+                        <span id="pageNumbers" class="flex space-x-1">
+                            <!-- Page numbers will be populated here -->
+                        </span>
+                        <button id="nextPageBtn" onclick="changePage(1)" class="px-3 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            Next
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recently Added Items Modal -->
+        <div id="recentItemsModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div class="relative top-10 mx-auto p-5 border w-11/12 md:w-4/5 lg:w-3/4 xl:w-2/3 shadow-lg rounded-md bg-white max-h-screen overflow-y-auto">
+                <div class="mt-3">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">Recently Added Items</h3>
+                        <button onclick="toggleRecentItems()" class="text-gray-400 hover:text-gray-600">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div id="recentItems" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Recent items will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- No Records Message -->
+        <div id="noRecords" class="hidden text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No inventory items found</h3>
+            <p class="mt-1 text-sm text-gray-500">Start by recording in-kind donations to build your inventory.</p>
+            <div class="mt-6">
+                <a href="record-donation.html" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-primary hover:bg-red-700">
+                    <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Record Donation
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Item Detail Modal -->
+    <div id="itemModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-10 mx-auto p-5 border w-11/12 md:w-4/5 lg:w-3/4 xl:w-2/3 shadow-lg rounded-md bg-white max-h-screen overflow-y-auto">
+            <div class="mt-3">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">Item Details</h3>
+                    <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div id="modalContent" class="space-y-6">
+                    <!-- Content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Converted script to ES6 module with Firebase integration -->
+    <script type="module">
+        import {
+            db,
+            collection,
+            getDocs,
+            addDoc,
+            query,
+            where,
+            getDoc,
+            doc
+        } from './firebase.js';
+
+        let allItems = [];
+        let filteredItems = [];
+        let categories = [];
+        let currentUser = null;
+        let currentPage = 1;
+        let itemsPerPage = 12;
+        let currentCategory = '';
+        let currentCategoryItems = [];
+
+        // Excel Upload State
+        let uploadedFile = null;
+        let uploadProgress = 0;
+        let processingStatus = 'idle'; // idle, uploading, processing, completed, error
+        let uploadResults = { success: 0, skipped: 0, error: 0 };
+        let errorDetails = [];
+
+        // Session Manager
+        const sessionManager = {
+            getCurrentUser: function() {
+                const user = localStorage.getItem('currentUser');
+                return user ? JSON.parse(user) : null;
+            },
+            
+            requireLogin: function() {
+                if (!localStorage.getItem('currentUser')) {
+                    window.location.href = 'login.html';
+                    return false;
+                }
+                return true;
+            }
+        };
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Check authentication
+            if (!sessionManager.requireLogin()) {
+                return;
+            }
+
+            currentUser = sessionManager.getCurrentUser();
+            await loadInventoryData();
+            setupEventListeners();
+            setupExcelUpload(); // Setup Excel upload listeners
+        });
+
+        let num = 0; // to stop showSuccessMessage on initial load
+
+        async function loadInventoryData() {
+            try {
+                // Modified to fetch from 'inventory' collection instead of 'donations'
+                const inventoryCol = collection(db, 'inventory');
+                const snapshot = await getDocs(inventoryCol);
+                const inventoryItems = [];
+                
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    data.inventoryId = docSnap.id; // Use inventoryId from document
+                    inventoryItems.push(data);
+                });
+                
+                allItems = inventoryItems;
+                
+                processInventoryData();
+                displayInventory();
+                updateStatistics();
+                resetUploadUI();
+
+                // to stop showSuccessMessage on initial load
+                if(num !== 0){
+                    showSuccessMessage('Inventory data uploaded and loaded successfully!');
+                }
+                num++;
+            } catch (error) {
+                console.error('Failed to load inventory data from Firebase:', error);
+                showErrorMessage('Error loading inventory data from Firebase. Please check your connection.');
+            }
+        }
+
+        function processInventoryData() {
+            // Define all predefined categories from the donation form
+            const predefinedCategories = [
+                'Food',
+                'Clothing', 
+                'School Supplies',
+                'Toys',
+                'Medical Supplies',
+                'Furniture',
+                'Electronics',
+                'Books',
+                'Hygiene Products',
+                'Other'
+            ];
+            
+            // Extract categories from existing items
+            const existingCategories = new Set();
+            allItems.forEach(item => {
+                if (item.itemCategory) {
+                    existingCategories.add(item.itemCategory);
+                }
+            });
+            
+            // Combine predefined categories with any additional categories from items
+            const allCategories = new Set([...predefinedCategories, ...existingCategories]);
+            categories = Array.from(allCategories).sort();
+            
+            // Populate category filter
+            const categoryFilter = document.getElementById('categoryFilter');
+            categoryFilter.innerHTML = '<option value="">All Categories</option>';
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categoryFilter.appendChild(option);
+            });
+
+            // Create category dropdown
+            createCategoryDropdown();
+
+            filteredItems = [...allItems];
+        }
+
+        function createCategoryDropdown() {
+            const dropdown = document.getElementById('categoryDropdown');
+            
+            // Add "All" option
+            let optionsHTML = `<option value="">All Items (${allItems.length})</option>`;
+            
+            // Add category options
+            categories.forEach(category => {
+                const count = allItems.filter(item => item.itemCategory === category).length;
+                optionsHTML += `<option value="${category}">${category} (${count})</option>`;
+            });
+            
+            dropdown.innerHTML = optionsHTML;
+        }
+
+        window.selectCategoryFromDropdown = function() {
+            const dropdown = document.getElementById('categoryDropdown');
+            const selectedCategory = dropdown.value;
+            
+            currentCategory = selectedCategory;
+            currentPage = 1;
+            
+            // Update category filter to match
+            document.getElementById('categoryFilter').value = selectedCategory;
+            
+            // Filter and display items
+            filterItemsForCategory();
+            displayCurrentPage();
+        };
+
+        window.selectCategory = function(category) {
+            currentCategory = category;
+            currentPage = 1;
+            
+            // Update dropdown to match
+            document.getElementById('categoryDropdown').value = category;
+            
+            // Update category filter to match
+            document.getElementById('categoryFilter').value = category;
+            
+            // Filter and display items
+            filterItemsForCategory();
+            displayCurrentPage();
+        };
+
+        function filterItemsForCategory() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+
+            // Start with all items or category-specific items
+            let baseItems = currentCategory ? 
+                allItems.filter(item => item.itemCategory === currentCategory) : 
+                allItems;
+
+            // Apply additional filters
+            currentCategoryItems = baseItems.filter(item => {
+                // Search filter
+                const searchMatch = !searchTerm || 
+                    item.itemDescription.toLowerCase().includes(searchTerm) ||
+                    (item.itemCategory || '').toLowerCase().includes(searchTerm) ||
+                    item.donorName.toLowerCase().includes(searchTerm);
+
+                // Status filter
+                let statusMatch = true;
+                if (statusFilter) {
+                    const itemStatus = getItemStatus(item);
+                    statusMatch = itemStatus === statusFilter;
+                }
+
+                return searchMatch && statusMatch;
+            });
+
+            // Update title and count
+            const title = currentCategory || 'All Items';
+            document.getElementById('currentCategoryTitle').textContent = title;
+            document.getElementById('currentCategoryCount').textContent = `${currentCategoryItems.length} item${currentCategoryItems.length !== 1 ? 's' : ''}`;
+        }
+
+        function displayCurrentPage() {
+            const itemsGrid = document.getElementById('itemsGrid');
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageItems = currentCategoryItems.slice(startIndex, endIndex);
+
+            if (pageItems.length === 0) {
+                itemsGrid.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <svg class="mx-auto h-12 w-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                        </svg>
+                        <p class="text-gray-500 text-lg">No Items</p>
+                        <p class="text-gray-400 text-sm mt-1">No items found in this category</p>
+                    </div>
+                `;
+            } else {
+                itemsGrid.innerHTML = pageItems.map(item => createItemCard(item)).join('');
+            }
+
+            updatePagination();
+        }
+
+        function updatePagination() {
+            const totalItems = currentCategoryItems.length;
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            const startItem = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+            const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+
+            // Update items info
+            document.getElementById('itemsInfo').textContent = `${startItem}-${endItem} of ${totalItems}`;
+
+            // Update pagination buttons
+            document.getElementById('prevPageBtn').disabled = currentPage <= 1;
+            document.getElementById('nextPageBtn').disabled = currentPage >= totalPages;
+
+            // Update page numbers
+            const pageNumbers = document.getElementById('pageNumbers');
+            let pageNumbersHTML = '';
+            
+            if (totalPages <= 7) {
+                // Show all pages if 7 or fewer
+                for (let i = 1; i <= totalPages; i++) {
+                    pageNumbersHTML += `
+                        <button onclick="goToPage(${i})" 
+                                class="px-3 py-2 text-sm border rounded-md ${i === currentPage ? 'bg-red-primary text-white border-red-primary' : 'border-gray-300 hover:bg-gray-50'}">
+                            ${i}
+                        </button>
+                    `;
+                }
+            } else {
+                // Show abbreviated pagination for more than 7 pages
+                if (currentPage <= 4) {
+                    for (let i = 1; i <= 5; i++) {
+                        pageNumbersHTML += `
+                            <button onclick="goToPage(${i})" 
+                                    class="px-3 py-2 text-sm border rounded-md ${i === currentPage ? 'bg-red-primary text-white border-red-primary' : 'border-gray-300 hover:bg-gray-50'}">
+                                ${i}
+                            </button>
+                        `;
+                    }
+                    pageNumbersHTML += '<span class="px-2 py-2 text-sm text-gray-500">...</span>';
+                    pageNumbersHTML += `
+                        <button onclick="goToPage(${totalPages})" 
+                                class="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
+                            ${totalPages}
+                        </button>
+                    `;
+                } else if (currentPage >= totalPages - 3) {
+                    pageNumbersHTML += `
+                        <button onclick="goToPage(1)" 
+                                class="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
+                            1
+                        </button>
+                    `;
+                    pageNumbersHTML += '<span class="px-2 py-2 text-sm text-gray-500">...</span>';
+                    for (let i = totalPages - 4; i <= totalPages; i++) {
+                        pageNumbersHTML += `
+                            <button onclick="goToPage(${i})" 
+                                    class="px-3 py-2 text-sm border rounded-md ${i === currentPage ? 'bg-red-primary text-white border-red-primary' : 'border-gray-300 hover:bg-gray-50'}">
+                                ${i}
+                            </button>
+                        `;
+                    }
+                } else {
+                    pageNumbersHTML += `
+                        <button onclick="goToPage(1)" 
+                                class="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
+                            1
+                        </button>
+                    `;
+                    pageNumbersHTML += '<span class="px-2 py-2 text-sm text-gray-500">...</span>';
+                    for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+                        pageNumbersHTML += `
+                            <button onclick="goToPage(${i})" 
+                                    class="px-3 py-2 text-sm border rounded-md ${i === currentPage ? 'bg-red-primary text-white border-red-primary' : 'border-gray-300 hover:bg-gray-50'}">
+                                ${i}
+                            </button>
+                        `;
+                    }
+                    pageNumbersHTML += '<span class="px-2 py-2 text-sm text-gray-500">...</span>';
+                    pageNumbersHTML += `
+                        <button onclick="goToPage(${totalPages})" 
+                                class="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
+                            ${totalPages}
+                        </button>
+                    `;
+                }
+            }
+            
+            pageNumbers.innerHTML = pageNumbersHTML;
+            
+            // Show/hide pagination if needed
+            const paginationContainer = document.getElementById('paginationContainer');
+            if (totalPages <= 1) {
+                paginationContainer.style.display = 'none';
+            } else {
+                paginationContainer.style.display = 'flex';
+            }
+        }
+
+        window.changePage = function(direction) {
+            const totalPages = Math.ceil(currentCategoryItems.length / itemsPerPage);
+            const newPage = currentPage + direction;
+            
+            if (newPage >= 1 && newPage <= totalPages) {
+                currentPage = newPage;
+                displayCurrentPage();
+            }
+        };
+
+        window.goToPage = function(page) {
+            const totalPages = Math.ceil(currentCategoryItems.length / itemsPerPage);
+            if (page >= 1 && page <= totalPages) {
+                currentPage = page;
+                displayCurrentPage();
+            }
+        };
+
+        window.toggleRecentItems = function() {
+            const recentModal = document.getElementById('recentItemsModal');
+            const showBtn = document.getElementById('showRecentBtn');
+            
+            if (recentModal.classList.contains('hidden')) {
+                recentModal.classList.remove('hidden');
+                showBtn.textContent = 'Hide Recent Items';
+                displayRecentItems();
+            } else {
+                recentModal.classList.add('hidden');
+                showBtn.textContent = 'Show Recent Items';
+            }
+        };
+
+        function displayInventory() {
+            const noRecords = document.getElementById('noRecords');
+            const categoryContent = document.getElementById('categoryContent');
+
+            if (allItems.length === 0) {
+                categoryContent.style.display = 'none';
+                noRecords.classList.remove('hidden');
+                return;
+            }
+
+            noRecords.classList.add('hidden');
+            categoryContent.style.display = 'block';
+            
+            // Initialize with all items
+            currentCategory = '';
+            currentPage = 1;
+            filterItemsForCategory();
+            displayCurrentPage();
+        }
+
+        function createItemCard(item) {
+            const status = getItemStatus(item);
+            const statusClass = getStatusClass(status);
+            const daysUntilExpiry = getDaysUntilExpiry(item.expiryDate);
+            
+            return `
+                <div class="item-card bg-white border rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer ${status === 'expiring' || status === 'expired' ? 'ring-2 ring-red-200' : ''}" 
+                    onclick="showItemDetail('${item.inventoryId}')">
+                    <div class="p-4">
+                        ${item.photoData ? `
+                            <div class="mb-4">
+                                <img src="${item.photoData}" alt="${item.itemDescription}" 
+                                     class="w-full h-32 object-cover rounded-lg">
+                            </div>
+                        ` : `
+                            <div class="mb-4 h-32 bg-gray-100 rounded-lg flex items-center justify-center">
+                                <svg class="h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                </svg>
+                            </div>
+                        `}
+                        
+                        <div class="space-y-2">
+                            <div class="flex items-start justify-between">
+                                <h4 class="font-medium text-gray-900 text-sm line-clamp-2">${item.itemDescription}</h4>
+                                <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded ml-2 flex-shrink-0">${item.inventoryId}</span>
+                            </div>
+                            
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-600">Qty: ${item.quantity} ${item.unit || 'pcs'}</span>
+                                <span class="px-2 py-1 text-xs rounded-full ${statusClass}">
+                                    ${status.charAt(0).toUpperCase() + status.slice(1)}
+                                </span>
+                            </div>
+                            
+                            <div class="text-xs text-gray-500">
+                                <p>Condition: ${item.conditionOfItems}</p>
+                                <p>Donor: ${item.donorName}</p>
+                                ${item.expiryDate ? `
+                                    <p class="${daysUntilExpiry <= 7 ? 'text-red-600 font-medium' : daysUntilExpiry <= 30 ? 'text-orange-600' : ''}">
+                                        ${daysUntilExpiry < 0 ? 'Expired' : daysUntilExpiry === 0 ? 'Expires today' : `Expires in ${daysUntilExpiry} day${daysUntilExpiry !== 1 ? 's' : ''}`}
+                                    </p>
+                                ` : ''}
+                            </div>
+                            
+                            <div class="pt-2 border-t border-gray-100">
+                                <p class="text-xs text-gray-400">Added: ${formatDate(item.dateAdded)}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayRecentItems() {
+            const recentContainer = document.getElementById('recentItems');
+            
+            // Get 6 most recent items
+            const recentItems = [...allItems]
+                .sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded))
+                .slice(0, 6);
+
+            if (recentItems.length === 0) {
+                recentContainer.innerHTML = '<p class="text-gray-500 text-center col-span-full py-8">No recent items</p>';
+                return;
+            }
+
+            recentContainer.innerHTML = recentItems.map(item => `
+                <div class="bg-white border rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer p-4" 
+                     onclick="showItemDetail('${item.inventoryId}')">
+                    <div class="flex items-center space-x-4">
+                        ${item.photoData ? `
+                            <img src="${item.photoData}" alt="${item.itemDescription}" 
+                                 class="w-16 h-16 object-cover rounded-lg flex-shrink-0">
+                        ` : `
+                            <div class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                </svg>
+                            </div>
+                        `}
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-semibold text-gray-900 text-sm truncate">${item.itemDescription}</h4>
+                            <p class="text-sm text-gray-600">${item.itemCategory}</p>
+                            <div class="flex items-center justify-between mt-2">
+                                <span class="text-sm text-gray-500">Qty: ${item.quantity} ${item.unit || 'pcs'}</span>
+                                <span class="text-xs text-gray-400">${formatDate(item.dateAdded)}</span>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">Donor: ${item.donorName}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getItemStatus(item) {
+            const quantity = parseInt(item.quantity) || 0;
+            const daysUntilExpiry = getDaysUntilExpiry(item.expiryDate);
+            
+            if (item.expiryDate && daysUntilExpiry < 0) {
+                return 'expired';
+            }
+            if (item.expiryDate && daysUntilExpiry <= 7) {
+                return 'expiring';
+            }
+            if (quantity <= 5) { // Low stock threshold
+                return 'low';
+            }
+            return 'normal';
+        }
+
+        function getStatusClass(status) {
+            switch (status) {
+                case 'expired':
+                    return 'bg-red-100 text-red-800';
+                case 'expiring':
+                    return 'bg-orange-100 text-orange-800';
+                case 'low':
+                    return 'bg-yellow-100 text-yellow-800';
+                case 'normal':
+                default:
+                    return 'bg-green-100 text-green-800';
+            }
+        }
+
+        function getDaysUntilExpiry(expiryDate) {
+            if (!expiryDate) return null;
+            
+            const today = new Date();
+            const expiry = new Date(expiryDate);
+            const diffTime = expiry - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            return diffDays;
+        }
+
+        function setupEventListeners() {
+            // Search functionality
+            document.getElementById('searchInput').addEventListener('input', filterItems);
+            document.getElementById('categoryFilter').addEventListener('change', filterItems);
+            document.getElementById('statusFilter').addEventListener('change', filterItems);
+
+            // Modal event listeners
+            document.getElementById('itemModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal();
+                }
+            });
+
+            // Recent items modal event listeners
+            document.getElementById('recentItemsModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    toggleRecentItems();
+                }
+            });
+        }
+
+        function filterItems() {
+            filterItemsForCategory();
+            currentPage = 1; // Reset to first page when filtering
+            displayCurrentPage();
+            updateStatistics();
+        }
+
+        window.showItemDetail = function(inventoryId) {
+            const item = allItems.find(i => i.inventoryId === inventoryId);
+            if (!item) return;
+
+            const status = getItemStatus(item);
+            const statusClass = getStatusClass(status);
+            const daysUntilExpiry = getDaysUntilExpiry(item.expiryDate);
+
+            const modalContent = document.getElementById('modalContent');
+            modalContent.innerHTML = `
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Item Image -->
+                    <div>
+                        ${item.photoData ? `
+                            <img src="${item.photoData}" alt="${item.itemDescription}" 
+                                 class="w-full h-64 object-cover rounded-lg">
+                        ` : `
+                            <div class="w-full h-64 bg-gray-100 rounded-lg flex items-center justify-center">
+                                <svg class="h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                </svg>
+                            </div>
+                        `}
+                    </div>
+
+                    <!-- Item Details -->
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <h2 class="text-xl font-bold text-gray-900">${item.itemDescription}</h2>
+                                <span class="text-sm bg-gray-100 text-gray-600 px-3 py-1 rounded">${item.inventoryId}</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="px-3 py-1 text-sm rounded-full ${statusClass}">
+                                    ${status.charAt(0).toUpperCase() + status.slice(1)}
+                                </span>
+                                <span class="text-sm text-gray-500">${item.itemCategory}</span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <p class="text-sm text-gray-600">Quantity</p>
+                                <p class="text-lg font-semibold text-gray-900">${item.quantity} ${item.unit || 'pcs'}</p>
+                            </div>
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <p class="text-sm text-gray-600">Condition</p>
+                                <p class="text-lg font-semibold text-gray-900">${item.conditionOfItems}</p>
+                            </div>
+                        </div>
+
+                        ${item.expiryDate ? `
+                            <div class="bg-${daysUntilExpiry <= 7 ? 'red' : daysUntilExpiry <= 30 ? 'orange' : 'gray'}-50 rounded-lg p-4">
+                                <p class="text-sm text-gray-600">Expiry Information</p>
+                                <p class="text-lg font-semibold ${daysUntilExpiry <= 7 ? 'text-red-600' : daysUntilExpiry <= 30 ? 'text-orange-600' : 'text-gray-900'}">
+                                    ${formatDate(item.expiryDate)}
+                                </p>
+                                <p class="text-sm ${daysUntilExpiry <= 7 ? 'text-red-600' : daysUntilExpiry <= 30 ? 'text-orange-600' : 'text-gray-600'}">
+                                    ${daysUntilExpiry < 0 ? 'Expired' : daysUntilExpiry === 0 ? 'Expires today' : `${daysUntilExpiry} day${daysUntilExpiry !== 1 ? 's' : ''} remaining`}
+                                </p>
+                            </div>
+                        ` : ''}
+
+                        <div class="space-y-3">
+                            <div>
+                                <p class="text-sm font-medium text-gray-700">Donor Information</p>
+                                <p class="text-gray-900">${item.donorName}</p>
+                                ${item.emailAddress && item.emailAddress !== 'anonymous@donation.com' ? `
+                                    <p class="text-sm text-gray-600">${item.emailAddress}</p>
+                                ` : ''}
+                                ${item.contactNumber ? `
+                                    <p class="text-sm text-gray-600">${item.contactNumber}</p>
+                                ` : ''}
+                            </div>
+
+                            ${item.receiverName ? `
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700">Received By</p>
+                                    <p class="text-gray-900">${item.receiverName}</p>
+                                </div>
+                            ` : ''}
+
+                            <div>
+                                <p class="text-sm font-medium text-gray-700">Donation Date</p>
+                                <p class="text-gray-900">${formatDate(item.dateOfDonation)}</p>
+                            </div>
+
+                            <div>
+                                <p class="text-sm font-medium text-gray-700">Added to System</p>
+                                <p class="text-gray-900">${formatDateTime(item.dateAdded)}</p>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="pt-4 border-t">
+                            <button class="w-full px-4 py-2 bg-red-primary text-white rounded-lg hover:bg-red-700 transition-colors">
+                                Edit Quantity
+                            </button>
+                            <p class="text-xs text-gray-500 mt-2 text-center">
+                                Editing requires appropriate permissions
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('itemModal').classList.remove('hidden');
+        };
+
+        window.closeModal = function() {
+            document.getElementById('itemModal').classList.add('hidden');
+        };
+
+        function updateStatistics() {
+            const totalItems = filteredItems.length;
+            const lowStockItems = filteredItems.filter(item => getItemStatus(item) === 'low').length;
+            const expiringSoonItems = filteredItems.filter(item => {
+                const status = getItemStatus(item);
+                return status === 'expiring' || status === 'expired';
+            }).length;
+            const totalCategories = new Set(filteredItems.map(item => item.itemCategory).filter(Boolean)).size;
+
+            document.getElementById('totalItems').textContent = totalItems;
+            document.getElementById('lowStockItems').textContent = lowStockItems;
+            document.getElementById('expiringSoonItems').textContent = expiringSoonItems;
+            document.getElementById('totalCategories').textContent = totalCategories;
+        }
+
+        window.exportToCSV = function() {
+            const headers = ['Inventory ID', 'Category', 'Description', 'Quantity', 'Unit', 'Condition', 'Expiry Date', 'Status', 'Donor', 'Notes', 'Date Added'];
+            const csvContent = [
+                headers.join(','),
+                ...filteredItems.map(item => [
+                    item.inventoryId,
+                    item.itemCategory || '',
+                    item.itemDescription,
+                    item.quantity,
+                    item.unit || 'pcs',
+                    item.conditionOfItems,
+                    item.expiryDate || '',
+                    getItemStatus(item),
+                    item.donorName,
+                    item.notes || '',
+                    item.dateAdded
+                ].map(field => `"${field}"`).join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `inventory-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        };
+
+        function showErrorMessage(message) {
+            document.getElementById('categoryContent').style.display = 'none';
+            document.getElementById('noRecords').innerHTML = `
+                <div class="text-center py-12">
+                    <div class="text-red-600 mb-4">
+                        <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Error Loading Data</h3>
+                    <p class="text-gray-600">${message}</p>
+                </div>
+            `;
+            document.getElementById('noRecords').classList.remove('hidden');
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+
+        function formatDateTime(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // --- Excel Upload Functionality ---
+
+        function setupExcelUpload() {
+            const uploadArea = document.getElementById('uploadArea');
+            const excelFileInput = document.getElementById('excelFileInput');
+            const toggleUploadBtn = document.getElementById('toggleUploadBtn');
+
+            window.toggleUploadSection = function() {
+                const uploadSection = document.getElementById('uploadSection');
+                const toggleUploadBtn = document.getElementById('toggleUploadBtn');
+                uploadSection.classList.toggle('hidden');
+                if (!uploadSection.classList.contains('hidden')) {
+                    toggleUploadBtn.textContent = 'Hide Upload Section';
+                    // Reset UI if section is shown again
+                    if (typeof resetUploadUI === 'function') resetUploadUI();
+                } else {
+                    toggleUploadBtn.textContent = 'Upload Excel File';
+                }
+            };
+
+            // Drag and Drop Event Listeners
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('border-red-primary');
+            });
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('border-red-primary');
+            });
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('border-red-primary');
+                const files = e.dataTransfer.files;
+                if (files.length) {
+                    handleFileSelect(files[0]);
+                }
+            });
+
+            // File Input Change Listener
+            excelFileInput.addEventListener('change', (e) => {
+                if (e.target.files.length) {
+                    handleFileSelect(e.target.files[0]);
+                }
+            });
+
+            // Click to trigger file input
+            uploadArea.addEventListener('click', () => {
+                excelFileInput.click();
+            });
+        }
+
+        function handleFileSelect(file) {
+            const maxSize = 10 * 1024 * 1024; // 10MB
+            if (file.size > maxSize) {
+                showUploadError('File is too large. Maximum size is 10MB.');
+                return;
+            }
+
+            const allowedTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
+            if (!allowedTypes.includes(file.type)) {
+                showUploadError('Invalid file type. Please upload an Excel file (.xlsx or .xls).');
+                return;
+            }
+
+            uploadedFile = file;
+            displayFileInfo(file);
+            document.getElementById('uploadArea').classList.add('hidden');
+            document.getElementById('uploadActions').classList.remove('hidden');
+            document.getElementById('fileInfo').classList.remove('hidden');
+        }
+
+        function displayFileInfo(file) {
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatBytes(file.size);
+        }
+
+        window.removeFile = function() {
+            uploadedFile = null;
+            document.getElementById('excelFileInput').value = ''; // Clear file input
+            resetUploadUI();
+        };
+
+        function resetUploadUI() {
+            document.getElementById('uploadArea').classList.remove('hidden');
+            document.getElementById('uploadProgress').classList.add('hidden');
+            document.getElementById('uploadActions').classList.add('hidden');
+            document.getElementById('fileInfo').classList.add('hidden');
+            document.getElementById('processingStatus').classList.add('hidden');
+            document.getElementById('uploadResults').classList.add('hidden');
+            document.getElementById('errorDetails').classList.add('hidden');
+            
+            // Reset progress bar and counts
+            uploadProgress = 0;
+            document.getElementById('progressBar').style.width = '0%';
+            document.getElementById('progressPercent').textContent = '0%';
+            uploadResults = { success: 0, skipped: 0, error: 0 };
+            errorDetails = [];
+            document.getElementById('successCount').textContent = '0';
+            document.getElementById('skippedCount').textContent = '0';
+            document.getElementById('errorCount').textContent = '0';
+            document.getElementById('errorList').innerHTML = '';
+        }
+
+        function showUploadError(message) {
+            // Display error in a more prominent way, e.g., a temporary alert or within the upload area
+            alert(message); // Simple alert for now
+        }
+
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+
+        window.downloadTemplate = function() {
+            const templateData = [
+                ['Item Name', 'Category', 'Quantity', 'Unit', 'Condition', 'Expiry Date', 'Donor Name', 'Notes'],
+                ['Rice 5kg bag', 'Food', '10', 'bags', 'Good', '2024-12-31', 'John Doe', 'White rice'],
+                ['School notebooks', 'School Supplies', '50', 'pcs', 'New', '', 'ABC Foundation', 'Spiral notebooks'],
+                ['Canned goods', 'Food', '24', 'cans', 'Good', '2025-06-15', 'Local Store', 'Mixed vegetables']
+            ];
+            
+            const ws = XLSX.utils.aoa_to_sheet(templateData);
+            
+            // Set column widths
+            ws['!cols'] = [
+                { wch: 20 }, // Item Name
+                { wch: 15 }, // Category
+                { wch: 10 }, // Quantity
+                { wch: 8 },  // Unit
+                { wch: 12 }, // Condition
+                { wch: 12 }, // Expiry Date
+                { wch: 15 }, // Donor Name
+                { wch: 25 }  // Notes
+            ];
+            
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Inventory Template");
+            XLSX.writeFile(wb, 'inventory_template.xlsx');
+        };
+
+        let expiredProducts = [];
+
+        window.processExcelFile = async function() {
+            if (!uploadedFile) return;
+
+            document.getElementById('uploadActions').classList.add('hidden');
+            document.getElementById('processingStatus').classList.remove('hidden');
+            document.getElementById('uploadProgress').classList.add('hidden');
+            document.getElementById('processingMessage').textContent = 'Reading file contents...';
+
+            try {
+                const fileReader = new FileReader();
+                fileReader.onload = async (e) => {
+                    const arrayBuffer = e.target.result;
+                    
+                    let workbook;
+                    try {
+                        workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                    } catch (parseError) {
+                        throw new Error('Failed to parse Excel file. Please ensure it\'s a valid Excel file.');
+                    }
+
+                    if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
+                        throw new Error('Excel file contains no worksheets.');
+                    }
+
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    
+                    if (!worksheet) {
+                        throw new Error('Failed to read the first worksheet.');
+                    }
+
+                    let jsonData;
+                    try {
+                        jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+                    } catch (jsonError) {
+                        throw new Error('Failed to convert Excel data to JSON format.');
+                    }
+
+                    if (jsonData.length === 0) {
+                        throw new Error('Excel file appears to be empty or has no data rows.');
+                    }
+
+                    document.getElementById('processingMessage').textContent = `Processing ${jsonData.length} rows...`;
+                    
+                    const columnMappings = {
+                        itemDescription: ['Item Name', 'Item', 'Product Name', 'Description', 'Name'],
+                        itemCategory: ['Category', 'Type', 'Item Category'],
+                        quantity: ['Quantity', 'Qty', 'Amount', 'Count'],
+                        unit: ['Unit', 'Units', 'Measurement', 'UOM'],
+                        conditionOfItems: ['Condition', 'State', 'Quality'],
+                        expiryDate: ['Expiry Date', 'Expiration Date', 'Expires', 'Best Before'],
+                        donorName: ['Donor Name', 'Donor', 'From', 'Source'],
+                        notes: ['Notes', 'Comments', 'Remarks', 'Description']
+                    };
+
+                    function findColumnValue(row, possibleHeaders) {
+                        for (const header of possibleHeaders) {
+                            if (row[header] !== undefined && row[header] !== '') {
+                                return row[header];
+                            }
+                        }
+                        return '';
+                    }
+
+                    // Reset counters
+                    uploadResults = { success: 0, skipped: 0, error: 0 };
+                    errorDetails = [];
+
+                    const processedData = jsonData.map((row, index) => {
+                        const rowNumber = index + 2; // +2 because Excel rows start at 1 and we skip header
+                        
+                        const item = {
+                            itemDescription: String(findColumnValue(row, columnMappings.itemDescription)).trim(),
+                            itemCategory: String(findColumnValue(row, columnMappings.itemCategory)).trim(),
+                            quantity: parseInt(findColumnValue(row, columnMappings.quantity)) || 0,
+                            unit: String(findColumnValue(row, columnMappings.unit)).trim() || 'pcs',
+                            conditionOfItems: String(findColumnValue(row, columnMappings.conditionOfItems)).trim() || 'Good',
+                            expiryDate: findColumnValue(row, columnMappings.expiryDate),
+                            donorName: String(findColumnValue(row, columnMappings.donorName)).trim() || 'Anonymous',
+                            notes: String(findColumnValue(row, columnMappings.notes)).trim()
+                        };
+
+                        // Enhanced validation
+                        const errors = [];
+                        
+                        if (!item.itemDescription) {
+                            errors.push('Item Name is required');
+                        }
+                        
+                        if (item.quantity <= 0) {
+                            errors.push('Quantity must be greater than 0');
+                        }
+                        
+                        if (item.itemCategory && !categories.includes(item.itemCategory)) {
+                            // Add new category to the list if it's not empty
+                            if (item.itemCategory.trim()) {
+                                categories.push(item.itemCategory);
+                            }
+                        }
+                        
+                        // Validate and format expiry date, and check for expired
+                        if (item.expiryDate) {
+                            let date;
+                            const dateStr = String(item.expiryDate).trim();
+
+                            if (!isNaN(dateStr) && dateStr !== '') {
+                                const excelEpoch = new Date(Date.UTC(1899, 11, 30));
+                                date = new Date(excelEpoch.getTime() + (parseInt(dateStr, 10) * 86400000));
+                            } else if (dateStr.includes('/')) {
+                                const parts = dateStr.split('/');
+                                if (parts.length === 3) {
+                                    let day = parseInt(parts[0], 10);
+                                    let month = parseInt(parts[1], 10);
+                                    let year = parseInt(parts[2], 10);
+                                    if (year < 100) year += 2000;
+                                    if (day > 12) {
+                                        date = new Date(year, month - 1, day);
+                                    } else if (month > 12) {
+                                        date = new Date(year, day - 1, month);
+                                    } else {
+                                        date = new Date(year, month - 1, day);
+                                    }
+                                }
+                            } else if (dateStr.includes('-')) {
+                                date = new Date(dateStr);
+                            } else if (dateStr.match(/^\d{4} \d{2} \d{2}$/)) {
+                                const [year, month, day] = dateStr.split(' ').map(Number);
+                                date = new Date(year, month - 1, day);
+                            } else {
+                                date = new Date(dateStr);
+                            }
+
+                            if (date && !isNaN(date.getTime())) {
+                                // Check if expired (date before today, ignoring time)
+                                const today = new Date();
+                                today.setHours(0,0,0,0);
+                                date.setHours(0,0,0,0);
+                                if (date < today) {
+                                    expiredProducts.push(item.itemDescription);
+                                    errors.push('Product is expired');
+                                }
+                                item.expiryDate = date.toISOString().split('T')[0];
+                            } else {
+                                errors.push('Invalid expiry date format');
+                                item.expiryDate = '';
+                            }
+                        }
+
+                        if (errors.length > 0) {
+                            return { 
+                                ...item, 
+                                _error: `Row ${rowNumber}: ${errors.join(', ')}`,
+                                _rowNumber: rowNumber
+                            };
+                        }
+                        
+                        return { ...item, _rowNumber: rowNumber };
+                    });
+
+                    // Show popup and stop upload if there are expired products
+                    if (expiredProducts.length > 0) {
+                        showExpiredPopup(expiredProducts);
+                        document.getElementById('processingStatus').classList.add('hidden');
+                        document.getElementById('uploadActions').classList.remove('hidden');
+                        return; // Prevent further processing
+                    }
+
+                    // Separate valid items from errors
+                    const validItems = processedData.filter(item => !item._error);
+                    const errorItems = processedData.filter(item => item._error);
+                    
+                    errorDetails = errorItems.map(item => item._error);
+                    uploadResults.error = errorDetails.length;
+
+                    if (validItems.length === 0) {
+                        throw new Error(`All ${jsonData.length} rows contained errors. Please check your data format.`);
+                    }
+
+                    document.getElementById('processingMessage').textContent = `Uploading ${validItems.length} valid items to Firebase...`;
+                    document.getElementById('uploadProgress').classList.remove('hidden');
+
+                    // Upload to Firebase
+                    const donationCollection = collection(db, 'inventory');
+                    let processedCount = 0;
+
+                    for (const item of validItems) {
+                        try {
+                            // Generate a unique ID for the inventory item
+                            const inventoryId = `INV-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                            
+                            // Check for potential duplicates
+                            const duplicateQuery = query(
+                                donationCollection, 
+                                where("itemDescription", "==", item.itemDescription),
+                                where("donorName", "==", item.donorName)
+                            );
+                            const duplicateSnapshot = await getDocs(duplicateQuery);
+
+                            if (!duplicateSnapshot.empty) {
+                                uploadResults.skipped++;
+                                errorDetails.push(`Row ${item._rowNumber}: Skipped - Similar item already exists`);
+                            } else {
+                                // Add to Firebase inventory collection
+                                await addDoc(donationCollection, {
+                                    inventoryId: inventoryId,
+                                    itemDescription: item.itemDescription,
+                                    itemCategory: item.itemCategory,
+                                    quantity: item.quantity,
+                                    unit: item.unit,
+                                    conditionOfItems: item.conditionOfItems,
+                                    expiryDate: item.expiryDate || null,
+                                    donorName: item.donorName,
+                                    notes: item.notes,
+                                    dateAdded: new Date().toISOString(),
+                                    addedBy: currentUser?.email || 'system',
+                                    source: 'excel_upload'
+                                });
+                                
+                                uploadResults.success++;
+                            }
+                        } catch (uploadError) {
+                            console.error('Error uploading item:', uploadError);
+                            uploadResults.error++;
+                            errorDetails.push(`Row ${item._rowNumber}: Upload failed - ${uploadError.message}`);
+                        }
+                        
+                        processedCount++;
+                        
+                        // Update progress
+                        const progress = Math.round((processedCount / validItems.length) * 100);
+                        document.getElementById('progressBar').style.width = `${progress}%`;
+                        document.getElementById('progressPercent').textContent = `${progress}%`;
+                    }
+
+                    // Complete the upload process
+                    document.getElementById('processingStatus').classList.add('hidden');
+                    document.getElementById('uploadResults').classList.remove('hidden');
+                    updateUploadResultsUI();
+
+                    // Reload inventory data to show new items
+                    await loadInventoryData();
+                    
+                    processingStatus = 'completed';
+                };
+
+                fileReader.onerror = (e) => {
+                    console.error('File reading error:', e);
+                    showUploadError('Failed to read the file. Please try again.');
+                    processingStatus = 'error';
+                    document.getElementById('processingStatus').classList.add('hidden');
+                };
+
+                fileReader.readAsArrayBuffer(uploadedFile);
+
+            } catch (error) {
+                console.error('Error processing Excel file:', error);
+                showUploadError(error.message);
+                document.getElementById('processingStatus').classList.add('hidden');
+                processingStatus = 'error';
+            }
+        };
+
+        function updateUploadResultsUI() {
+            document.getElementById('successCount').textContent = uploadResults.success;
+            document.getElementById('skippedCount').textContent = uploadResults.skipped;
+            document.getElementById('errorCount').textContent = uploadResults.error;
+
+            const errorDetailsDiv = document.getElementById('errorDetails');
+            const errorList = document.getElementById('errorList');
+
+            if (errorDetails.length > 0) {
+                errorDetailsDiv.classList.remove('hidden');
+                errorList.innerHTML = errorDetails.map(err => `<li>${err}</li>`).join('');
+            } else {
+                errorDetailsDiv.classList.add('hidden');
+            }
+        }
+
+        function updateUploadStatusUI() {
+            const processingStatusDiv = document.getElementById('processingStatus');
+            const uploadProgressDiv = document.getElementById('uploadProgress');
+
+            if (processingStatus === 'error') {
+                processingStatusDiv.classList.remove('hidden');
+                uploadProgressDiv.classList.add('hidden');
+                document.getElementById('processingMessage').textContent = 'An error occurred during upload.';
+            } else if (processingStatus === 'completed') {
+                processingStatusDiv.classList.add('hidden');
+                uploadProgressDiv.classList.add('hidden');
+            }
+            // Other states handled within processExcelFile
+        }
+
+        function showExpiredPopup(expiredProducts) {
+            const popup = document.getElementById('expiredPopup');
+            const msg = document.getElementById('expiredPopupMsg');
+            const closeBtn = document.getElementById('closeExpiredPopup');
+
+            // Oxford comma formatting
+            let names = '';
+            if (expiredProducts.length === 1) {
+                names = expiredProducts[0];
+            } else if (expiredProducts.length === 2) {
+                names = expiredProducts.join(' and ');
+            } else {
+                names = expiredProducts.slice(0, -1).join(', ') + ', and ' + expiredProducts.slice(-1);
+            }
+
+            msg.innerHTML = `The following product${expiredProducts.length > 1 ? 's are' : ' is'} expired and cannot be accepted: <span class="font-semibold text-red-700">${names}</span>.`;
+
+            popup.classList.remove('hidden');
+            closeBtn.onclick = () => {
+                popup.classList.add('hidden');
+            };
+        }
+
+        function showSuccessMessage(message) {
+            // Create or reuse a notification div
+            let notif = document.getElementById('successNotification');
+            if (!notif) {
+                notif = document.createElement('div');
+                notif.id = 'successNotification';
+                notif.className = 'fixed top-6 right-6 z-50 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-3';
+                document.body.appendChild(notif);
+            }
+            notif.innerHTML = `
+                <svg class="h-6 w-6 text-white mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span>${message}</span>
+                <button onclick="this.parentElement.style.display='none'" class="ml-4 text-white text-xl leading-none font-bold">&times;</button>
+            `;
+            notif.style.display = 'flex';
+            setTimeout(() => { notif.style.display = 'none'; }, 5000);
+        }
+
+        
+
+    </script>
+
+    <div id="expiredPopup" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+        <div class="bg-white rounded-lg shadow-lg p-6 max-w-md w-full relative">
+            <button id="closeExpiredPopup" class="absolute top-2 right-2 text-red-600 hover:text-red-800 text-2xl font-bold leading-none">&times;</button>
+            <h3 class="text-lg font-semibold text-red-700 mb-2">Expired Products Not Accepted</h3>
+            <p id="expiredPopupMsg" class="text-gray-700"></p>
+        </div>
+    </div>
+
+</body>
+</html>

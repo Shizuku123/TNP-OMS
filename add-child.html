@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Child - Tahanan ng Pagmamahal OMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="firebase.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'red-primary': '#dc2626',
+                        'red-secondary': '#ef4444',
+                        'red-light': '#fef2f2'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                 <a href="index.html" class="flex items-center text-gray-600 hover:text-red-primary transition-colors">
+                 <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                                </a>
+                <h1 class="text-xl sm:text-2xl font-semibold text-gray-900 text-center flex-1">Add New Child</h1>
+                <div class="hidden sm:flex items-center opacity-0">
+                    <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Success/Error Messages -->
+        <div id="messageContainer" class="mb-4 hidden"></div>
+
+        <form id="childForm" class="space-y-6 sm:space-y-8">
+            <!-- Photo Upload -->
+            <div class="bg-white shadow rounded-lg p-4 sm:p-6">
+                <h2 class="text-lg font-medium text-gray-900 mb-6">Photo</h2>
+                <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
+                    <div class="shrink-0">
+                        <img id="photoPreview" class="h-24 w-24 sm:h-32 sm:w-32 object-cover rounded-full" src="user.png" alt="Photo preview">
+                    </div>
+                    <div class="flex-1 w-full">
+                        <label for="photo" class="block text-sm font-medium text-gray-700 mb-2">Upload Photo</label>
+                        <input type="file" id="photo" name="photo" accept="image/*"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        <p class="mt-2 text-sm text-gray-500">JPG, PNG or GIF up to 2MB</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Basic Information -->
+            <div class="bg-white shadow rounded-lg p-4 sm:p-6">
+                <h2 class="text-lg font-medium text-gray-900 mb-6">Basic Information</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                    <div>
+                        <label for="firstName" class="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
+                        <input type="text" id="firstName" name="firstName" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                    <div>
+                        <label for="middleName" class="block text-sm font-medium text-gray-700 mb-2">Middle Name</label>
+                        <input type="text" id="middleName" name="middleName"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                    <div>
+                        <label for="lastName" class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                        <input type="text" id="lastName" name="lastName"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Gender *</label>
+                        <div class="flex space-x-4">
+                            <label class="flex items-center">
+                                <input type="radio" name="gender" value="Male" required class="text-red-primary focus:ring-red-primary">
+                                <span class="ml-2">Male</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="gender" value="Female" required class="text-red-primary focus:ring-red-primary">
+                                <span class="ml-2">Female</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="dateOfBirth" class="block text-sm font-medium text-gray-700 mb-2">Date of Birth *</label>
+                        <input type="date" id="dateOfBirth" name="dateOfBirth" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                    <div>
+                        <label for="placeOfBirth" class="block text-sm font-medium text-gray-700 mb-2">Place of Birth</label>
+                        <input type="text" id="placeOfBirth" name="placeOfBirth" placeholder="Municipality, City, Province"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                    <div>
+                        <label for="nationality" class="block text-sm font-medium text-gray-700 mb-2">Nationality</label>
+                        <input type="text" id="nationality" name="nationality" value="Filipino"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                    <div>
+                        <label for="religion" class="block text-sm font-medium text-gray-700 mb-2">Religion</label>
+                        <input type="text" id="religion" name="religion"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Background Information -->
+            <div class="bg-white shadow rounded-lg p-4 sm:p-6">
+                <h2 class="text-lg font-medium text-gray-900 mb-6">Background Information</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                    <div>
+                        <label for="entryDate" class="block text-sm font-medium text-gray-700 mb-2">Entry Date to Orphanage *</label>
+                        <input type="date" id="entryDate" name="entryDate" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                    <div>
+                        <label for="entryAge" class="block text-sm font-medium text-gray-700 mb-2">Entry Age</label>
+                        <input type="number" id="entryAge" name="entryAge" min="0" max="18"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                    <div>
+                        <label for="reasonForAdmission" class="block text-sm font-medium text-gray-700 mb-2">Reason for Admission</label>
+                        <select id="reasonForAdmission" name="reasonForAdmission"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <option value="">Select reason</option>
+                            <option value="Orphaned">Orphaned</option>
+                            <option value="Abandoned">Abandoned</option>
+                            <option value="Rescue">Rescue</option>
+                            <option value="Surrendered">Surrendered</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2 lg:col-span-3">
+                        <label for="currentStatus" class="block text-sm font-medium text-gray-700 mb-2">Current Status</label>
+                        <select id="currentStatus" name="currentStatus"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <option value="">Select status</option>
+                            <option value="Adoptable">Adoptable</option>
+                            <option value="Under legal custody">Under legal custody</option>
+                            <option value="Temporary Shelter">Temporary Shelter</option>
+                            <option value="Awaiting placement">Awaiting placement</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Family & Legal Info -->
+            <div class="bg-white shadow rounded-lg p-4 sm:p-6">
+                <h2 class="text-lg font-medium text-gray-900 mb-6">Family & Legal Information</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                    <div>
+                        <label for="fatherName" class="block text-sm font-medium text-gray-700 mb-2">Father's Name</label>
+                        <input type="text" id="fatherName" name="fatherName"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                    <div>
+                        <label for="motherName" class="block text-sm font-medium text-gray-700 mb-2">Mother's Name</label>
+                        <input type="text" id="motherName" name="motherName"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                    <div>
+                        <label for="parentalStatus" class="block text-sm font-medium text-gray-700 mb-2">Parental Status</label>
+                        <select id="parentalStatus" name="parentalStatus"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <option value="">Select status</option>
+                            <option value="Both deceased">Both deceased</option>
+                            <option value="Unknown">Unknown</option>
+                            <option value="Alive but unable to care">Alive but unable to care</option>
+                            <option value="Incarcerated">Incarcerated</option>
+                            <option value="Mother missing">Mother missing</option>
+                            <option value="Father missing">Father missing</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="siblingsInOrphanage" class="block text-sm font-medium text-gray-700 mb-2">Siblings in Orphanage</label>
+                        <select id="siblingsInOrphanage" name="siblingsInOrphanage"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                    </div>
+                    <div id="siblingsNames" class="hidden sm:col-span-2">
+                        <label for="siblingsNamesList" class="block text-sm font-medium text-gray-700 mb-2">Siblings Names</label>
+                        <textarea id="siblingsNamesList" name="siblingsNamesList" rows="3"
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary"
+                                  placeholder="List sibling names, separated by commas"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Health & Medical Info -->
+            <div class="bg-white shadow rounded-lg p-4 sm:p-6">
+                <h2 class="text-lg font-medium text-gray-900 mb-6">Health & Medical Information</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                    <div>
+                        <label for="bloodType" class="block text-sm font-medium text-gray-700 mb-2">Blood Type</label>
+                        <select id="bloodType" name="bloodType"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <option value="">Unknown</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="allergies" class="block text-sm font-medium text-gray-700 mb-2">Allergies</label>
+                        <input type="text" id="allergies" name="allergies" placeholder="Food, medicine, etc."
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                    <div class="sm:col-span-2 lg:col-span-3">
+                        <label for="medicalConditions" class="block text-sm font-medium text-gray-700 mb-2">Medical Conditions</label>
+                        <textarea id="medicalConditions" name="medicalConditions" rows="3"
+                                  placeholder="Asthma, disabilities, chronic conditions, etc."
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary"></textarea>
+                    </div>
+                    <div>
+                        <label for="lastCheckupDate" class="block text-sm font-medium text-gray-700 mb-2">Last Medical Checkup</label>
+                        <input type="date" id="lastCheckupDate" name="lastCheckupDate"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4">
+                <a href="child-records.html" class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-center">
+                    Cancel
+                </a>
+                <button type="submit" class="px-6 py-2 bg-red-primary text-white rounded-md hover:bg-red-700 transition-colors">
+                    Add Child Record
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script type="module">
+        import { db, collection, setDoc, doc } from './firebase.js';
+
+        // Siblings names field toggle
+        document.getElementById('siblingsInOrphanage').addEventListener('change', function() {
+            const siblingsNames = document.getElementById('siblingsNames');
+            if (this.value === 'Yes') {
+                siblingsNames.classList.remove('hidden');
+            } else {
+                siblingsNames.classList.add('hidden');
+            }
+        });
+
+        // Photo preview
+        document.getElementById('photo').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('photoPreview').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Entry age auto-calc
+        document.getElementById('dateOfBirth').addEventListener('change', calculateEntryAge);
+        document.getElementById('entryDate').addEventListener('change', calculateEntryAge);
+
+        function calculateEntryAge() {
+            const dob = document.getElementById('dateOfBirth').value;
+            const entryDate = document.getElementById('entryDate').value;
+            if (dob && entryDate) {
+                const dobDate = new Date(dob);
+                const entryDateObj = new Date(entryDate);
+                const ageInMs = entryDateObj - dobDate;
+                const ageInYears = Math.floor(ageInMs / (1000 * 60 * 60 * 24 * 365.25));
+                if (ageInYears >= 0) {
+                    document.getElementById('entryAge').value = ageInYears;
+                }
+            }
+        }
+
+        // Form submit: save to Firestore as stringified object (including photo as base64 string)
+        document.getElementById('childForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const form = e.target;
+            const data = {};
+            // Gather all fields
+            for (const el of form.elements) {
+                if (el.name && el.type !== 'file' && (el.type !== 'radio' || el.checked)) {
+                    data[el.name] = el.value;
+                }
+            }
+            // Siblings names textarea (may be hidden)
+            if (document.getElementById('siblingsNamesList')) {
+                data['siblingsNamesList'] = document.getElementById('siblingsNamesList').value;
+            }
+
+            // Photo file to base64 string
+            const photoFile = document.getElementById('photo').files[0];
+            let photoString = '';
+            if (photoFile) {
+                photoString = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(photoFile);
+                });
+            }
+            data.photoString = photoString;
+
+            // Add metadata
+            data.dateAdded = new Date().toISOString().split('T')[0];
+            data.childId = await generateChildId();
+
+            // Save to Firestore
+            try {
+                const childrenCol = collection(db, 'children');
+                const newChildRef = doc(childrenCol);
+                await setDoc(newChildRef, data);
+
+                showMessage('Child record added successfully!', 'success');
+                form.reset();
+                document.getElementById('photoPreview').src = 'user.png';
+                document.getElementById('siblingsNames').classList.add('hidden');
+                document.getElementById('nationality').value = 'Filipino';
+
+                setTimeout(() => {
+                    window.location.href = 'child-records.html';
+                }, 2000);
+            } catch (err) {
+                console.error(err);
+                showMessage('Error saving child record. Please try again.', 'error');
+            }
+        });
+
+        // Generate unique childId by checking Firestore
+        async function generateChildId() {
+            try {
+                const childrenCol = collection(db, 'children');
+                // load all children to find max childId
+                const snapshot = await (await import('./firebase.js')).getDocs(childrenCol);
+                let lastId = 0;
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if (data.childId && /^CH\d+$/.test(data.childId)) {
+                        const idNum = parseInt(data.childId.replace('CH', ''), 10);
+                        if (idNum > lastId) lastId = idNum;
+                    }
+                });
+                return `CH${String(lastId + 1).padStart(3, '0')}`;
+            } catch (error) {
+                console.error('Failed to generate Child ID:', error);
+                return 'CH001';
+            }
+        }
+
+        function showMessage(message, type) {
+            const messageContainer = document.getElementById('messageContainer');
+            const bgColor = type === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700';
+            messageContainer.innerHTML = `<div class="${bgColor} border px-4 py-3 rounded">${message}</div>`;
+            messageContainer.classList.remove('hidden');
+            setTimeout(() => {
+                messageContainer.classList.add('hidden');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

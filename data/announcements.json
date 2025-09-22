@@ -1,0 +1,31 @@
+{
+    "announcements": [
+        {
+            "announcementId": "ANN001",
+            "title": "Sample Announcement",
+            "content": "Announcement Sample Content",
+            "priority": "normal",
+            "author": "System Administrator",
+            "authorRole": "admin",
+            "createdAt": "2025-07-31T09:58:07.034Z"
+        },
+        {
+            "announcementId": "ANN002",
+            "title": "Hello",
+            "content": "Hello sample",
+            "priority": "normal",
+            "author": "System Administrator",
+            "authorRole": "admin",
+            "createdAt": "2025-08-21T04:31:29.878Z"
+        },
+        {
+            "announcementId": "ANN003",
+            "title": "hello",
+            "content": "jello",
+            "priority": "normal",
+            "author": "System Administrator",
+            "authorRole": "admin",
+            "createdAt": "2025-08-21T13:27:25.362Z"
+        }
+    ]
+}

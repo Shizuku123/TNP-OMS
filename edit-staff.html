@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Staff Record - Tahanan ng Pagmamahal OMS</title>
+    <script type="module" src="firebase.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'red-primary': '#dc2626',
+                        'red-secondary': '#ef4444',
+                        'red-light': '#fef2f2'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="staff-records.html" class="flex items-center text-gray-600 hover:text-red-primary transition-colors">
+                    <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                </a>
+                <h1 class="text-xl sm:text-2xl font-semibold text-gray-900 text-center flex-1">Edit Staff Info</h1>
+                <div class="hidden sm:flex items-center opacity-0">
+                    <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Success/Error Messages -->
+        <div id="messageContainer" class="mb-4 hidden"></div>
+
+        <form id="staffForm" class="space-y-6 sm:space-y-8">
+            <!-- Photo Upload -->
+            <div class="bg-white shadow rounded-lg p-4 sm:p-6">
+                <h2 class="text-lg font-medium text-gray-900 mb-6">Photo</h2>
+                <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
+                    <div class="shrink-0">
+                        <img id="photoPreview" class="h-24 w-24 sm:h-32 sm:w-32 object-cover rounded-full" src="user.png" alt="Photo preview">
+                    </div>
+                    <div class="flex-1 w-full">
+                        <label for="photo" class="block text-sm font-medium text-gray-700 mb-2">Upload Photo</label>
+                        <input type="file" id="photo" name="photo" accept="image/*"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        <p class="mt-2 text-sm text-gray-500">JPG, PNG or GIF up to 2MB</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personal Information -->
+            <div class="bg-white shadow rounded-lg p-4 sm:p-6">
+                <h2 class="text-lg font-medium text-gray-900 mb-6">Personal Information</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                    <div>
+                        <label for="firstName" class="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
+                        <input type="text" id="firstName" name="firstName" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                    <div>
+                        <label for="middleName" class="block text-sm font-medium text-gray-700 mb-2">Middle Name</label>
+                        <input type="text" id="middleName" name="middleName"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                    <div>
+                        <label for="lastName" class="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
+                        <input type="text" id="lastName" name="lastName" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Gender *</label>
+                        <div class="flex space-x-4">
+                            <label class="flex items-center">
+                                <input type="radio" name="gender" value="Male" required class="text-red-primary focus:ring-red-primary" id="genderMale">
+                                <span class="ml-2">Male</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="gender" value="Female" required class="text-red-primary focus:ring-red-primary" id="genderFemale">
+                                <span class="ml-2">Female</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="dateOfBirth" class="block text-sm font-medium text-gray-700 mb-2">Date of Birth *</label>
+                        <input type="date" id="dateOfBirth" name="dateOfBirth" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                    <div>
+                        <label for="placeOfBirth" class="block text-sm font-medium text-gray-700 mb-2">Place of Birth</label>
+                        <input type="text" id="placeOfBirth" name="placeOfBirth" placeholder="Municipality, City, Province"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                    <div>
+                        <label for="nationality" class="block text-sm font-medium text-gray-700 mb-2">Nationality</label>
+                        <input type="text" id="nationality" name="nationality"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                    <div>
+                        <label for="religion" class="block text-sm font-medium text-gray-700 mb-2">Religion</label>
+                        <input type="text" id="religion" name="religion"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                    <div>
+                        <label for="civilStatus" class="block text-sm font-medium text-gray-700 mb-2">Civil Status</label>
+                        <select id="civilStatus" name="civilStatus"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <option value="">Select status</option>
+                            <option value="Single">Single</option>
+                            <option value="Married">Married</option>
+                            <option value="Separated">Separated</option>
+                            <option value="Divorced">Divorced</option>
+                            <option value="Widowed">Widowed</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2 lg:col-span-3">
+                        <label for="currentAddress" class="block text-sm font-medium text-gray-700 mb-2">Current Address *</label>
+                        <textarea id="currentAddress" name="currentAddress" rows="3" required
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary"></textarea>
+                    </div>
+                    <div>
+                        <label for="contactNumber" class="block text-sm font-medium text-gray-700 mb-2">Contact Number *</label>
+                        <input type="tel" id="contactNumber" name="contactNumber" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                    <div>
+                        <label for="emailAddress" class="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+                        <input type="email" id="emailAddress" name="emailAddress" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Employment Information -->
+            <div class="bg-white shadow rounded-lg p-4 sm:p-6">
+                <h2 class="text-lg font-medium text-gray-900 mb-6">Employment Information</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                    <div>
+                        <label for="position" class="block text-sm font-medium text-gray-700 mb-2">Position *</label>
+                        <select id="position" name="position" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <option value="">Select position</option>
+                            <option value="Director">Director</option>
+                            <option value="Assistant Director">Assistant Director</option>
+                            <option value="Social Worker">Social Worker</option>
+                            <option value="Child Care Worker">Child Care Worker</option>
+                            <option value="Teacher">Teacher</option>
+                            <option value="Nurse">Nurse</option>
+                            <option value="Cook">Cook</option>
+                            <option value="Security Guard">Security Guard</option>
+                            <option value="Maintenance">Maintenance</option>
+                            <option value="Administrative Assistant">Administrative Assistant</option>
+                            <option value="Counselor">Counselor</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="department" class="block text-sm font-medium text-gray-700 mb-2">Department / Unit</label>
+                        <select id="department" name="department"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <option value="">Select department</option>
+                            <option value="Administration">Administration</option>
+                            <option value="Child Care">Child Care</option>
+                            <option value="Education">Education</option>
+                            <option value="Health Services">Health Services</option>
+                            <option value="Social Services">Social Services</option>
+                            <option value="Kitchen">Kitchen</option>
+                            <option value="Maintenance">Maintenance</option>
+                            <option value="Security">Security</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="employmentStatus" class="block text-sm font-medium text-gray-700 mb-2">Employment Status</label>
+                        <select id="employmentStatus" name="employmentStatus"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <option value="">Select status</option>
+                            <option value="Regular">Regular</option>
+                            <option value="Contractual">Contractual</option>
+                            <option value="Part-time">Part-time</option>
+                            <option value="Probationary">Probationary</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="dateHired" class="block text-sm font-medium text-gray-700 mb-2">Date Hired</label>
+                        <input type="date" id="dateHired" name="dateHired"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                    <div>
+                        <label for="assignedSchedule" class="block text-sm font-medium text-gray-700 mb-2">Assigned Schedule</label>
+                        <input type="text" id="assignedSchedule" name="assignedSchedule" placeholder="e.g., Monday-Friday 8AM-5PM"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                    <div>
+                        <label for="supervisor" class="block text-sm font-medium text-gray-700 mb-2">Supervisor</label>
+                        <input type="text" id="supervisor" name="supervisor"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4">
+                <a href="staff-records.html" class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-center">
+                    Cancel
+                </a>
+                <button type="submit" class="px-6 py-2 bg-red-primary text-white rounded-md hover:bg-red-700 transition-colors">
+                    Update Staff Record
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script type="module">
+        import {
+            db,
+            collection,
+            getDocs,
+            doc,
+            updateDoc
+        } from './firebase.js';
+
+        // Get staffId from URL
+        function getStaffIdFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('id');
+        }
+
+        let docId = null; // The Firestore document ID for updating
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            setupEventListeners();
+            await loadStaffInfo();
+        });
+
+        function setupEventListeners() {
+            document.getElementById('photo').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById('photoPreview').src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            document.getElementById('staffForm').addEventListener('submit', handleSubmit);
+        }
+
+        async function loadStaffInfo() {
+            const staffId = getStaffIdFromUrl();
+            if (!staffId) {
+                showMessage('No staff ID provided.', 'error');
+                return;
+            }
+
+            try {
+                // Find Firestore doc by staffId in users collection, only for staff
+                const usersCol = collection(db, 'users');
+                const snapshot = await getDocs(usersCol);
+                let staffData = null;
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if ((data.staffId === staffId || data.uid === staffId) && data.role === 'staff') {
+                        staffData = data;
+                        docId = docSnap.id;
+                    }
+                });
+
+                if (!staffData) {
+                    showMessage('Staff record not found.', 'error');
+                    return;
+                }
+
+                // Populate the form fields
+                setFieldValue('firstName', staffData.firstName);
+                setFieldValue('middleName', staffData.middleName);
+                setFieldValue('lastName', staffData.lastName);
+                setFieldValue('dateOfBirth', staffData.dateOfBirth);
+                setFieldValue('placeOfBirth', staffData.placeOfBirth);
+                setFieldValue('nationality', staffData.nationality || 'Filipino');
+                setFieldValue('religion', staffData.religion);
+                setFieldValue('civilStatus', staffData.civilStatus);
+                setFieldValue('currentAddress', staffData.currentAddress);
+                setFieldValue('contactNumber', staffData.contactNumber);
+                setFieldValue('emailAddress', staffData.emailAddress);
+
+                setFieldValue('position', staffData.position);
+                setFieldValue('department', staffData.department);
+                setFieldValue('employmentStatus', staffData.employmentStatus);
+                setFieldValue('dateHired', staffData.dateHired);
+                setFieldValue('assignedSchedule', staffData.assignedSchedule);
+                setFieldValue('supervisor', staffData.supervisor);
+
+                // Gender radio
+                if (staffData.gender === 'Male') {
+                    document.getElementById('genderMale').checked = true;
+                } else if (staffData.gender === 'Female') {
+                    document.getElementById('genderFemale').checked = true;
+                }
+
+                // Photo preview
+                if (staffData.photoString) {
+                    document.getElementById('photoPreview').src = staffData.photoString;
+                } else {
+                    document.getElementById('photoPreview').src = 'user.png';
+                }
+
+            } catch (error) {
+                console.error('Failed to load staff info:', error);
+                showMessage('Failed to load staff info.', 'error');
+            }
+        }
+
+        function setFieldValue(id, value) {
+            const el = document.getElementById(id);
+            if (el) el.value = value || '';
+        }
+
+        async function handleSubmit(e) {
+            e.preventDefault();
+
+            if (!docId) {
+                showMessage('Staff record not found for update.', 'error');
+                return;
+            }
+
+            const formData = new FormData(e.target);
+            const data = {};
+
+            // Collect form data (plain text only, not files)
+            for (let [key, value] of formData.entries()) {
+                if (key !== "photo") {
+                    data[key] = value;
+                }
+            }
+
+            // Gender radio
+            data.gender = document.getElementById('genderMale').checked ? 'Male'
+                : document.getElementById('genderFemale').checked ? 'Female'
+                : '';
+
+            // Handle photo base64
+            const photoFile = document.getElementById('photo').files[0];
+            if (photoFile) {
+                data.photoString = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(photoFile);
+                });
+            } else {
+                // If no new file, keep the current preview src as photoString
+                data.photoString = document.getElementById('photoPreview').src;
+            }
+
+            try {
+                // Validate required fields
+                const requiredFields = ['firstName', 'lastName', 'gender', 'dateOfBirth', 'currentAddress', 'contactNumber', 'emailAddress', 'position'];
+                for (const field of requiredFields) {
+                    if (!data[field]) {
+                        showMessage(`Please fill in the ${field.replace(/([A-Z])/g, ' $1').toLowerCase()} field.`, 'error');
+                        return;
+                    }
+                }
+
+                // Update Firestore document in users collection
+                await updateDoc(doc(collection(db, 'users'), docId), data);
+
+                showMessage('Staff record updated successfully!', 'success');
+                setTimeout(() => {
+                    window.location.href = 'staff-records.html';
+                }, 2000);
+
+            } catch (error) {
+                console.error('Error updating staff record:', error);
+                showMessage('Error updating staff record. Please try again.', 'error');
+            }
+        }
+
+        function showMessage(message, type) {
+            const messageContainer = document.getElementById('messageContainer');
+            const bgColor = type === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700';
+            messageContainer.innerHTML = `<div class="${bgColor} border px-4 py-3 rounded">${message}</div>`;
+            messageContainer.classList.remove('hidden');
+            setTimeout(() => {
+                messageContainer.classList.add('hidden');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

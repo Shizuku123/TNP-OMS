@@ -1,0 +1,84 @@
+{
+    "tasks": [
+        {
+            "taskId": "TSK001",
+            "title": "General Cleaning",
+            "description": "asdasdasdas",
+            "assignedTo": "all",
+            "authority": 1,
+            "dueDate": "2025-08-03",
+            "priority": "low",
+            "author": "System Administrator",
+            "authorRole": "admin",
+            "createdAt": "2025-08-01T06:18:01+02:00",
+            "status": "completed",
+            "acceptedBy": [
+                "szanil123@gmail.com",
+                "michaelsantos@gmail.com"
+            ],
+            "completedBy": [
+                "szanil123@gmail.com",
+                "michaelsantos@gmail.com"
+            ],
+            "peopleNeeded": 2
+        },
+        {
+            "taskId": "TSK002",
+            "title": "try",
+            "description": "try",
+            "assignedTo": "all",
+            "authority": 2,
+            "dueDate": "2025-08-12",
+            "priority": "medium",
+            "author": "System Administrator",
+            "authorRole": "admin",
+            "createdAt": "2025-08-04T14:36:27+02:00",
+            "status": "completed",
+            "acceptedBy": [
+                "michaelsantos@gmail.com"
+            ],
+            "completedBy": [
+                "michaelsantos@gmail.com"
+            ],
+            "peopleNeeded": 1
+        },
+        {
+            "taskId": "TSK003",
+            "title": "sample2",
+            "description": "sample2",
+            "assignedTo": "volunteers",
+            "authority": 3,
+            "dueDate": "2025-08-06",
+            "priority": "medium",
+            "author": "System Administrator",
+            "authorRole": "admin",
+            "createdAt": "2025-08-04T15:27:40+02:00",
+            "status": "completed",
+            "acceptedBy": [
+                "michaelsantos@gmail.com"
+            ],
+            "completedBy": [
+                "michaelsantos@gmail.com"
+            ],
+            "peopleNeeded": 1
+        },
+        {
+            "taskId": "TSK004",
+            "title": "sample",
+            "description": "Wala sample to",
+            "assignedTo": "staff",
+            "authority": 2,
+            "dueDate": "2025-08-19",
+            "priority": "medium",
+            "author": "System Administrator",
+            "authorRole": "admin",
+            "createdAt": "2025-08-18T14:28:20+02:00",
+            "status": "In Progress",
+            "acceptedBy": [
+                "michaelsantos@gmail.com"
+            ],
+            "completedBy": [],
+            "peopleNeeded": 2
+        }
+    ]
+}

@@ -1,0 +1,2620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Tahanan ng Pagmamahal OMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'red-primary': '#dc2626',
+                        'red-secondary': '#ef4444',
+                        'red-light': '#fef2f2'
+                    }
+                }
+            }
+        }
+    </script>
+    <script>
+    // Show logged-in user info (name and role) on dashboard
+    document.addEventListener('DOMContentLoaded', function() {
+        const user = localStorage.getItem('currentUser');
+        if (!user) {
+            window.location.href = 'login.html';
+            return;
+        }
+        const userData = JSON.parse(user);
+        // Set profile name and role
+        if (userData.firstName && userData.lastName) {
+            document.getElementById('profileName').textContent = `${userData.firstName} ${userData.lastName}`;
+        } else if (userData.name) {
+            document.getElementById('profileName').textContent = userData.name;
+        }
+        if (userData.role) {
+            document.getElementById('profileRole').textContent = userData.role.charAt(0).toUpperCase() + userData.role.slice(1);
+        }
+        // Set greeting
+        if (userData.firstName) {
+            document.getElementById('greeting').textContent = `Hello, ${userData.firstName}!`;
+        }
+        // Optionally, show role in greeting subtext
+        if (userData.role) {
+            document.getElementById('greetingSubtext').textContent = `Role: ${userData.role.charAt(0).toUpperCase() + userData.role.slice(1)}`;
+        }
+    });
+    </script>
+</head>
+<body class="bg-gray-50">
+    <!-- Mobile Menu Button -->
+    <div id="mobile-menu-container" class="lg:hidden fixed top-4 left-4 z-50">
+        <button id="mobile-menu-btn" class="bg-white p-3 hover:bg-red-light z-30 rounded-lg shadow-md">
+            <svg class="h-8 w-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Left Sidebar -->
+    <div id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-lg transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
+        <div class="flex flex-col h-screen overflow-y-auto">
+            <!-- Logo -->
+            <div class="flex items-center justify-center h-20 bg-white shrink-0">
+                <img src="tahanan-logo.png" alt="Tahanan ng Pagmamahal Logo" class="w-[90%]">
+            </div>
+
+            <!-- Navigation -->
+            <nav class="flex-1 mt-8 pb-6">
+                <!-- Recording Section -->
+                <div class="px-4">
+                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Recording</h3>
+                    <ul class="space-y-2">
+                        <li>
+                            <a href="add-child.html" class="flex items-center px-4 py-3 text-base text-gray-700 hover:bg-red-light hover:text-red-primary rounded-md">
+                                <svg class="h-7 w-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z">
+                                    </path>
+                                </svg>
+                                Add New Child
+                            </a>
+                        </li>
+                        <li id="addStaffLink">
+                            <a href="add-staff.html" class="flex items-center px-4 py-3 text-base text-gray-700 hover:bg-red-light hover:text-red-primary rounded-md">
+                                <svg class="h-7 w-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z">
+                                    </path>
+                                </svg>
+                                Add New Staff
+                            </a>
+                        </li>
+                        <li>
+                            <a href="add-volunteer.html" class="flex items-center px-4 py-3 text-base text-gray-700 hover:bg-red-light hover:text-red-primary rounded-md">
+                                <svg class="h-7 w-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
+                                    </path>
+                                </svg>
+                                Add New Volunteer
+                            </a>
+                        </li>
+                        <li>
+                            <a href="record-donation.html" class="flex items-center px-4 py-3 text-base text-gray-700 hover:bg-red-light hover:text-red-primary rounded-md">
+                                <svg class="h-7 w-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1">
+                                    </path>
+                                </svg>
+                                Record donation
+                            </a>
+                            
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Records Section -->
+                <div class="px-4 mt-8">
+                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Records</h3>
+                    <ul class="space-y-2">
+                        <li><a href="child-records.html" class="flex items-center px-4 py-3 text-base text-gray-700 hover:bg-red-light hover:text-red-primary rounded-md">
+                            <svg class="h-7 w-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                </path>
+                            </svg>
+                            Child records
+                        </a></li>
+                        <li><a href="staff-records.html" class="flex items-center px-4 py-3 text-base text-gray-700 hover:bg-red-light hover:text-red-primary rounded-md">
+                            <svg class="h-7 w-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 20H2v-2a3 3 0 0 1 5.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                                </path>
+                            </svg>
+                            Staff records
+                        </a></li>
+                        <li><a href="volunteer-records.html" class="flex items-center px-4 py-3 text-base text-gray-700 hover:bg-red-light hover:text-red-primary rounded-md">
+                            <svg class="h-7 w-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
+                                </path>
+                            </svg>
+                            Volunteer records
+                        </a></li>
+                        <li><a href="donation-records.html" class="flex items-center px-4 py-3 text-base text-gray-700 hover:bg-red-light hover:text-red-primary rounded-md">
+                            <svg class="h-7 w-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1">
+                                </path>
+                            </svg>
+                            Donation records
+                        </a></li>
+                        <li><a href="donors-records.html" class="flex items-center px-4 py-3 text-base text-gray-700 hover:bg-red-light hover:text-red-primary rounded-md">
+                            <svg class="h-7 w-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 14a4 4 0 01-8 0M12 14V6m0 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            Donors records
+                        </a></li>
+                        <li><a href="inventory.html" class="flex items-center px-4 py-3 text-base text-gray-700 hover:bg-red-light hover:text-red-primary rounded-md">
+                            <svg class="h-7 w-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 14a4 4 0 01-8 0M12 14V6m0 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            Inventory records
+                        </a></li>
+                         <li><a href="transaction.html" class="flex items-center px-4 py-3 text-base text-gray-700 hover:bg-red-light hover:text-red-primary rounded-md">
+                            <svg class="h-7 w-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 14a4 4 0 01-8 0M12 14V6m0 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            Expenses records
+                        </a></li>
+                        <li><a href="discharge-children-records.html" class="flex items-center px-4 py-3 text-base text-gray-700 hover:bg-red-light hover:text-red-primary rounded-md">
+                            <svg class="h-7 w-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 12H9m0 0H6a2 2 0 00-2 2v6h16v-6a2 2 0 00-2-2h-3m0 0V6a3 3 0 00-6 0v6z" />
+                            </svg>
+                            Discharged Children Records
+                        </a></li>
+                        <li id="deletedRecordsLink" class="hidden">
+                            <a href="deleted-records-viewer.html" class="flex items-center px-4 py-3 text-base text-gray-700 hover:bg-red-light hover:text-red-primary rounded-md">
+                                <svg class="h-7 w-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1-1H8a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                                Deleted Records
+                            </a>
+                        </li>
+                        <li id="attendanceRecordsLink" class="hidden">
+                            <a href="attendance-records.html" class="flex items-center px-4 py-3 text-base text-gray-700 hover:bg-red-light hover:text-red-primary rounded-md">
+                                <svg class="h-7 w-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
+                                    </path>
+                                </svg>
+                                Staff attendance
+                            </a>
+                        </li>
+                        <li id="myTasksLink" class="hidden">
+                            <a href="my-task.html" class="flex items-center px-4 py-3 text-base text-gray-700 hover:bg-red-light hover:text-red-primary rounded-md">
+                                <svg class="h-7 w-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01">
+                                    </path>
+                                </svg>
+                                My Tasks
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" class="lg:ml-64 bg-gray-50 min-h-screen">
+        <!-- Top Header -->
+        <header class="bg-white shadow-sm border-b flex-shrink-0">
+            <div class="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
+                <!-- Dashboard Title -->
+                <div class="flex items-center">
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
+                </div>
+                
+                <!-- Header Actions -->
+                <div class="flex items-center space-x-2 sm:space-x-4">
+                    <!-- Create Button (Admin Only) -->
+                    <div id="adminCreateButton" class="relative hidden">
+                        <button id="create-btn" class="flex items-center px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base">
+                            <svg class="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                            <span class="hidden sm:inline">Create</span>
+                        </button>
+                        
+                        <div id="create-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 border">
+                            <div class="py-1">
+                                <button onclick="showAnnouncementModal()" class="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">Create Announcement</button>
+                                <button onclick="showTaskModal()" class="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">Create Task</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Messages Button -->
+                    <button id="messages-btn" class="p-2 sm:p-3 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                        <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                        </svg>
+                    </button>
+
+                    <!-- History Button -->
+                    <button id="history-btn" class="p-2 sm:p-3 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors">
+                        <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </button>
+
+                    <!-- Notifications -->
+                    <div class="relative">
+                        <button id="notifications-btn" class="relative p-2 sm:p-3 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                            <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
+                            </svg>
+                            <span id="notificationBadge" class="hidden absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center">3</span>
+                        </button>
+
+                        <!-- Notifications Dropdown -->
+                        <div id="notifications-dropdown" class="hidden absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-md shadow-lg z-50 max-h-96 overflow-y-auto border">
+                            <div class="py-1">
+                                <div class="px-4 py-2 border-b border-gray-200">
+                                    <h3 class="text-sm font-medium text-gray-900">Notifications</h3>
+                                </div>
+                                <div id="notificationsContent">
+                                    <!-- Notifications will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- User Profile -->
+                    <div class="relative">
+                        <button id="profile-btn" class="flex items-center space-x-2 p-1 rounded-lg hover:bg-gray-100 transition-colors">
+                            <div class="w-8 h-8 sm:w-10 sm:h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-medium text-sm sm:text-base">
+                                <span id="userInitials">AD</span>
+                            </div>
+                        </button>
+
+                        <!-- Profile Dropdown -->
+                        <div id="profile-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 border">
+                            <div class="py-1">
+                                <div id="profileInfo" class="px-4 py-3 border-b">
+                                    <p class="text-sm font-medium text-gray-900" id="profileName">Administrator</p>
+                                    <p class="text-xs text-gray-500" id="profileRole">Admin</p>
+                                </div>
+                                <a href="account-settings.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Account Settings</a>
+                                <div id="adminSettings" class="hidden">
+                                    <a href="system-activity.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">System Activity</a>
+                                    <a href="system-settings.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">System Settings</a>
+                                </div>
+                                <hr class="my-1">
+                                <button id="logoutBtn" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">Logout</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <div class="p-4 sm:p-6 lg:p-5">
+            <!-- Greeting Section -->
+            <div class="mb-6">
+                <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+                    <h2 id="greeting" class="text-xl sm:text-5xl font-semibold text-gray-900 mb-2">Hello!</h2>
+                    <p id="greetingSubtext" class="text-gray-600 text-sm sm:text-3xl">Good Morning, Administrator</p>
+                    <p id="currentDateTime" class="text-gray-500 text-xs sm:text-sm mt-1">Today is Monday, July 21, 2025 at 9:53 PM</p>
+                </div>
+            </div>
+
+            <!-- Main Dashboard Grid -->
+            <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+                <!-- Left Column - Stats and Info -->
+                <div class="xl:col-span-3 space-y-6">
+                    <!-- Stats Cards Row -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                        <!-- Total Children Card -->
+                         <a href="child-records.html">
+                        <div class="bg-white rounded-lg shadow-sm p-6 sm:p-8 hover:bg-gray-100 transition-colors duration-200 rounded-lg cursor-pointer">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <p class="text-sm sm:text-base text-gray-600 mb-1">Total Children <br><br></p>
+                                    <p class="text-sm sm:text-base text-gray-600">In Care</p>
+                                </div>
+                                <div class="text-right">
+                                    <!-- Added loading spinner for children count -->
+                                    <div class="text-3xl sm:text-4xl font-bold text-gray-900" id="childrenCount">
+                                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto" id="childrenLoader"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center text-sm sm:text-base">
+                                <span class="text-green-600 font-medium" id="childrenWeekly">+0 Child added this week</span>
+                            </div>
+                        </div>
+                        </a>
+
+                        <!-- Total Staff Card -->
+                        <a href="staff-records.html" >
+                        <div class="bg-white rounded-lg shadow-sm p-6 sm:p-8 hover:bg-gray-100 transition-colors duration-200 rounded-lg cursor-pointer" >
+                            <div class="flex items-center justify-between mb-4 ">
+                                <div>
+                                    <p class="text-sm sm:text-base text-gray-600">Total Staff<br><br><br></p>
+                                </div>
+                                <div class="text-right">
+                                    <!-- Added loading spinner for staff count -->
+                                    <div class="text-3xl sm:text-4xl font-bold text-gray-900" id="staffCount">
+                                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto" id="staffLoader"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center text-sm sm:text-base">
+                                <span class="text-green-600 font-medium" id="staffWeekly">+0 Staff added this week</span>
+                            </div>
+                        </div>
+                        </a>
+
+                        <!-- Total Volunteers Card -->
+                         <a href="volunteer-records.html">
+                        <div class="bg-white rounded-lg shadow-sm p-6 sm:p-8 hover:bg-gray-100 transition-colors duration-200 rounded-lg cursor-pointer">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <p class="text-sm sm:text-base text-gray-600">Total Volunteers</p>
+                                </div>
+                                <div class="text-right">
+                                    <!-- Added loading spinner for volunteers count -->
+                                    <div class="text-3xl sm:text-4xl font-bold text-gray-900" id="volunteersCount">
+                                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto" id="volunteersLoader"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center text-sm sm:text-base">
+                                <span class="text-green-600 font-medium" id="volunteersWeekly">+0 Volunteer added this week</span>
+                            </div>
+                        </div>
+                         </a>
+
+                        <!-- Total Donors Card -->
+                        <a href="donors-records.html">
+                        <div class="bg-white rounded-lg shadow-sm p-6 sm:p-8 hover:bg-gray-100 transition-colors duration-200 rounded-lg cursor-pointer">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <p class="text-sm sm:text-base text-gray-600">Total Donors<br><br><br></p>
+                                </div>
+                                <div class="text-right">
+                                    <!-- Added loading spinner for donors count -->
+                                    <div class="text-3xl sm:text-4xl font-bold text-gray-900" id="donorsCount">
+                                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto" id="donorsLoader"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center text-sm sm:text-base">
+                                <span class="text-green-600 font-medium" id="donorsWeekly">+0 Donors this week</span>
+                            </div>
+                        </div>
+                        </a>
+                    </div>
+
+                    <!-- Second Row: Total Donation and Staff Attendance -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Total Donation Card -->
+                        <a href="transaction.html">
+                        <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6 hover:bg-gray-100 transition-colors duration-200 rounded-lg cursor-pointer">
+                            <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Total Donation</h3>
+                            <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between">
+                                <div class="flex-1">
+                                    <!-- Added loading spinner and Cash/GCash breakdown -->
+                                    <div class="text-3xl sm:text-4xl font-bold text-gray-900 mb-2" id="totalDonationAmount">
+                                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" id="donationLoader"></div>
+                                    </div>
+                                    <p class="text-sm text-green-600 font-medium mb-3" id="donationIncrease">+0% from the last month</p>
+                                    
+                                    <!-- Added Cash and GCash breakdown display -->
+                                    <div class="flex justify-between items-center text-sm text-gray-600 border-t pt-3" id="paymentBreakdown" style="display: none;">
+                                        <div class="flex space-x-8">
+                                            <div>
+                                                <span class="font-medium">Cash</span>
+                                                <div class="text-lg font-semibold text-gray-900" id="cashAmount">₱ 0.00</div>
+                                            </div>
+                                            <div>
+                                                <span class="font-medium">GCash</span>
+                                                <div class="text-lg font-semibold text-gray-900" id="gcashAmount">₱ 0.00</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        </a>
+
+                        <!-- Staff Attendance Summary (Admin Only) -->
+                        <div id="attendanceSummary" class="bg-white rounded-lg shadow-sm p-4 sm:p-6 hidden">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg sm:text-xl font-semibold text-gray-900">Staff Attendance Today</h3>
+                                <a href="attendance-records.html" class="text-blue-600 hover:text-blue-800 text-sm font-medium">View All →</a>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div class="text-center">
+                                    <div id="presentCount" class="text-2xl font-bold text-green-600">0</div>
+                                    <div class="text-sm text-gray-600">Present</div>
+                                </div>
+                                <div class="text-center">
+                                    <div id="leaveCount" class="text-2xl font-bold text-yellow-600">0</div>
+                                    <div class="text-sm text-gray-600">On Leave</div>
+                                </div>
+                                <div class="text-center">
+                                    <div id="pendingCount" class="text-2xl font-bold text-red-600">0</div>
+                                    <div class="text-sm text-gray-600">Pending Requests</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                </div>
+
+                <!-- Right Column - Calendar -->
+                <div class="xl:col-span-1">
+                    <div class="bg-white rounded-lg shadow-sm p-2 sm:p-6 h-65">
+                        <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Calendar</h3>
+                        <div id="calendar" class="w-full h-[250px]">
+                            <!-- Calendar will be generated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+             <!-- Announcements & Tasks Card - Positioned Higher -->
+                    <div class="bg-white rounded-lg shadow-sm  p-4 sm:p-6 gap-4 mt-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg sm:text-xl font-semibold text-gray-900">Announcements & Tasks</h3>
+                        </div>
+                        
+                        <!-- Skeleton Loader -->
+                        <div id="announcementsTasksLoader" class="flex flex-row gap-6 items-start w-full" style="display: none;">
+                            <!-- Announcements Skeleton -->
+                            <div class="flex-1 space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="h-5 w-32 bg-gray-200 rounded animate-pulse"></div>
+                                    <div class="flex items-center space-x-2">
+                                        <div class="h-4 w-12 bg-gray-200 rounded animate-pulse"></div>
+                                        <div class="flex items-center space-x-1">
+                                            <div class="h-4 w-4 bg-gray-200 rounded-full animate-pulse"></div>
+                                            <div class="h-4 w-10 bg-gray-200 rounded animate-pulse"></div>
+                                            <div class="h-4 w-4 bg-gray-200 rounded-full animate-pulse"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="h-14 bg-gray-200 rounded-lg animate-pulse"></div>
+                                    <div class="h-14 bg-gray-200 rounded-lg animate-pulse"></div>
+                                    <div class="h-14 bg-gray-200 rounded-lg animate-pulse"></div>
+                                </div>
+                            </div>
+                            <!-- Tasks Skeleton -->
+                            <div class="flex-1 space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="h-5 w-20 bg-gray-200 rounded animate-pulse"></div>
+                                    <div class="flex items-center space-x-2">
+                                        <div class="h-4 w-12 bg-gray-200 rounded animate-pulse"></div>
+                                        <div class="flex items-center space-x-1">
+                                            <div class="h-4 w-4 bg-gray-200 rounded-full animate-pulse"></div>
+                                            <div class="h-4 w-10 bg-gray-200 rounded animate-pulse"></div>
+                                            <div class="h-4 w-4 bg-gray-200 rounded-full animate-pulse"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="h-14 bg-gray-200 rounded-lg animate-pulse"></div>
+                                    <div class="h-14 bg-gray-200 rounded-lg animate-pulse"></div>
+                                    <div class="h-14 bg-gray-200 rounded-lg animate-pulse"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Split Layout: Announcements & Tasks Side by Side -->
+                        <div id="announcementsTasksContent" class="grid grid-cols-1 lg:grid-cols-2 gap-2">
+                            <!-- Announcements Section -->
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="text-md font-medium text-gray-800">Announcements</h4>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-xs text-gray-500" id="announcementCount">0 items</span>
+                                        <div class="flex items-center space-x-1" id="announcementPagination">
+                                            <button id="prevAnnouncements" class="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-50" disabled>
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                                </svg>
+                                            </button>
+                                            <span class="text-xs text-gray-500" id="announcementPageInfo">1 / 1</span>
+                                            <button id="nextAnnouncements" class="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-50" disabled>
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="announcementsList" class="space-y-3 max-h-80 overflow-y-auto">
+                                    <!-- Announcements will be populated by JavaScript -->
+                                </div>
+                            </div>
+
+                            <!-- Tasks Section -->
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="text-md font-medium text-gray-800">Tasks</h4>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-xs text-gray-500" id="taskCount">0 items</span>
+                                        <div class="flex items-center space-x-1" id="taskPagination">
+                                            <button id="prevTasks" class="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-50" disabled>
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                                </svg>
+                                            </button>
+                                            <span class="text-xs text-gray-500" id="taskPageInfo">1 / 1</span>
+                                            <button id="nextTasks" class="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-50" disabled>
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="tasksList" class="space-y-3 max-h-80 overflow-y-auto">
+                                    <!-- Tasks will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Empty State -->
+                        <div id="emptyState" class="text-center py-8 text-gray-500 hidden">
+                            <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-8l-4 4m0 0l-4-4m4 4V3"></path>
+                            </svg>
+                            <p>No items to display</p>
+                        </div>
+                        
+                    </div>
+        </div>
+
+        
+       
+    </div>
+
+    
+    <!-- Staff Attendance Floating Button (Only for Staff) -->
+    <div id="attendanceButton" class="fixed bottom-6 right-6 z-50 hidden">
+        <button id="attendance-btn" class="bg-red-primary hover:bg-red-700 text-white rounded-full p-4 shadow-lg transition-all duration-300 transform hover:scale-110">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Overlay for mobile menu -->
+    <div id="overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"></div>
+
+    <!-- Announcement/Task Detail Modal - Centered -->
+    <div id="detailModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+        <div class="relative bg-white border w-full max-w-2xl shadow-lg rounded-md">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 id="detailModalTitle" class="text-lg font-medium text-gray-900">Details</h3>
+                    <button onclick="closeDetailModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div id="detailModalContent" class="space-y-4">
+                    <!-- Content will be populated by JavaScript -->
+                </div>
+                <!-- Admin Edit/Delete Actions -->
+                <div id="detailModalActions" class="hidden mt-6 pt-4 border-t border-gray-200 flex justify-end space-x-3">
+                    <button id="editItemBtn" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm">
+                        Edit
+                    </button>
+                    <button id="deleteItemBtn" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm">
+                        Delete
+                    </button>
+                </div>
+                <!-- Staff/Volunteer Accept Button -->
+                <div id="taskAcceptActions" class="hidden mt-6 pt-4 border-t border-gray-200 flex justify-end">
+                    <button id="acceptTaskBtn" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm">
+                        Accept Task
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Announcement Modal (Admin Only) - Centered -->
+    <div id="announcementModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+        <div class="relative bg-white border w-full max-w-md shadow-lg rounded-md">
+            <div class="p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Create Announcement</h3>
+                <form id="announcementForm">
+                    <div class="mb-4">
+                        <label for="announcementTitle" class="block text-sm font-medium text-gray-700 mb-2">Title *</label>
+                        <input type="text" id="announcementTitle" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="announcementContent" class="block text-sm font-medium text-gray-700 mb-2">Content *</label>
+                        <textarea id="announcementContent" rows="4" required
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                  placeholder="Write your announcement here..."></textarea>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label for="announcementPriority" class="block text-sm font-medium text-gray-700 mb-2">Priority</label>
+                        <select id="announcementPriority"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <option value="normal">Normal</option>
+                            <option value="important">Important</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="closeAnnouncementModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                            Create Announcement
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Task Modal (Admin Only) - Centered -->
+    <div id="taskModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+        <div class="relative bg-white border w-full max-w-md shadow-lg rounded-md">
+            <div class="p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Create Task</h3>
+                <form id="taskForm">
+                    <div class="mb-4">
+                        <label for="taskTitle" class="block text-sm font-medium text-gray-700 mb-2">Task Title *</label>
+                        <input type="text" id="taskTitle" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="taskDescription" class="block text-sm font-medium text-gray-700 mb-2">Description *</label>
+                        <textarea id="taskDescription" rows="3" required
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                  placeholder="Describe the task..."></textarea>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="taskAssignedTo" class="block text-sm font-medium text-gray-700 mb-2">Assign To</label>
+                        <select id="taskAssignedTo"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <option value="all">All Staff & Volunteers</option>
+                            <option value="staff">Staff Only</option>
+                            <option value="volunteers">Volunteers Only</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="taskDueDate" class="block text-sm font-medium text-gray-700 mb-2">Due Date</label>
+                        <input type="date" id="taskDueDate"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label for="taskPriority" class="block text-sm font-medium text-gray-700 mb-2">Priority</label>
+                        <select id="taskPriority"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-6">
+                        <label for="taskPeopleNeeded" class="block text-sm font-medium text-gray-700 mb-2">People Needed *</label>
+                        <input type="number" id="taskPeopleNeeded" min="1" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Enter number of people needed">
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="closeTaskModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                            Create Task
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Announcement Modal (Admin Only) - Centered -->
+    <div id="editAnnouncementModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+        <div class="relative bg-white border w-full max-w-md shadow-lg rounded-md">
+            <div class="p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Edit Announcement</h3>
+                <form id="editAnnouncementForm">
+                    <input type="hidden" id="editAnnouncementId">
+                    <div class="mb-4">
+                        <label for="editAnnouncementTitle" class="block text-sm font-medium text-gray-700 mb-2">Title *</label>
+                        <input type="text" id="editAnnouncementTitle" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="editAnnouncementContent" class="block text-sm font-medium text-gray-700 mb-2">Content *</label>
+                        <textarea id="editAnnouncementContent" rows="4" required
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label for="editAnnouncementPriority" class="block text-sm font-medium text-gray-700 mb-2">Priority</label>
+                        <select id="editAnnouncementPriority"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <option value="normal">Normal</option>
+                            <option value="important">Important</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="closeEditAnnouncementModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                            Update Announcement
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Task Modal (Admin Only) - Centered -->
+    <div id="editTaskModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+        <div class="relative bg-white border w-full max-w-md shadow-lg rounded-md">
+            <div class="p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Edit Task</h3>
+                <form id="editTaskForm">
+                    <input type="hidden" id="editTaskId">
+                    <div class="mb-4">
+                        <label for="editTaskTitle" class="block text-sm font-medium text-gray-700 mb-2">Task Title *</label>
+                        <input type="text" id="editTaskTitle" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="editTaskDescription" class="block text-sm font-medium text-gray-700 mb-2">Description *</label>
+                        <textarea id="editTaskDescription" rows="3" required
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="editTaskAssignedTo" class="block text-sm font-medium text-gray-700 mb-2">Assign To</label>
+                        <select id="editTaskAssignedTo"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <option value="all">All Staff & Volunteers</option>
+                            <option value="staff">Staff Only</option>
+                            <option value="volunteers">Volunteers Only</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="editTaskDueDate" class="block text-sm font-medium text-gray-700 mb-2">Due Date</label>
+                        <input type="date" id="editTaskDueDate"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label for="editTaskPriority" class="block text-sm font-medium text-gray-700 mb-2">Priority</label>
+                        <select id="editTaskPriority"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="closeEditTaskModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                            Update Task
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let allAnnouncements = [];
+        let allTasks = [];
+        let currentDetailItem = null;
+        let currentDetailType = null;
+        let accountsData = [];
+
+        // Pagination variables
+        let currentAnnouncementPage = 1;
+        let currentTaskPage = 1;
+        const itemsPerPage = 5;
+
+        // Philippines Holidays 2025 (sample data)
+        const philippineHolidays = [
+            '2025-01-01', // New Year's Day
+            '2025-02-25', // EDSA People Power Revolution Anniversary
+            '2025-04-09', // Araw ng Kagitingan (Day of Valor)
+            '2025-04-17', // Maundy Thursday
+            '2025-04-18', // Good Friday
+            '2025-05-01', // Labor Day
+            '2025-06-12', // Independence Day
+            '2025-08-21', // Ninoy Aquino Day
+            '2025-08-25', // National Heroes Day
+            '2025-11-30', // Bonifacio Day
+            '2025-12-25', // Christmas Day
+            '2025-12-30', // Rizal Day
+        ];
+
+        // Session Manager
+        const sessionManager = {
+            getCurrentUser: function() {
+                const user = localStorage.getItem('currentUser');
+                return user ? JSON.parse(user) : null;
+            },
+            
+            requireLogin: function() {
+                if (!localStorage.getItem('currentUser')) {
+                    window.location.href = 'login.html';
+                    return false;
+                }
+                return true;
+            },
+
+            logout: function() {
+                localStorage.removeItem('currentUser');
+                window.location.href = 'login.html';
+            }
+        };
+
+        // Check if user needs to record attendance
+        async function checkAttendanceRequired() {
+            if (currentUser.role !== 'staff' && currentUser.role !== 'volunteer') {
+                return false;
+            }
+
+            const today = new Date().toISOString().split('T')[0];
+            const lastLoginKey = `lastLogin_${currentUser.username}`;
+            const lastLogin = localStorage.getItem(lastLoginKey);
+
+            const userEmail = currentUser.email;
+
+            // If it's a new day or first login
+            if (lastLogin !== today) {
+                try {
+                    // Check if attendance already recorded for today
+                    const response = await fetch(`api/get-attendance.php?accountId=${currentUser.username}&date=${today}`);
+                    const data = await response.json();
+                    
+                    if (data.attendance && data.attendance.length > 0) {
+                        // Already has attendance record for today
+                        localStorage.setItem(lastLoginKey, today);
+                        return false;
+                    } else {
+                        // No attendance record, redirect to attendance page
+                        return true;
+                    }
+                } catch (error) {
+                    console.error('Error checking attendance:', error);
+                    return false;
+                }
+            }
+            
+            return false;
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Check authentication
+            if (!sessionManager.requireLogin()) {
+                return;
+            }
+
+            currentUser = sessionManager.getCurrentUser();
+            
+            // Check if attendance is required
+            const needsAttendance = await checkAttendanceRequired();
+            if (needsAttendance) {
+                window.location.href = 'staff-attendance.html';
+                return;
+            }
+            
+            initializePage();
+            loadDashboardData();
+            setupEventListeners();
+            generateCalendar();
+            loadAnnouncementsAndTasks();
+        });
+
+        function initializePage() {
+            // Set greeting and user info
+            const hour = new Date().getHours();
+            const greeting = hour < 12 ? 'Good Morning' : (hour < 18 ? 'Good Afternoon' : 'Good Evening');
+            let greetName = '';
+            if (currentUser.name) {
+                greetName = currentUser.name;
+            } else if (currentUser.firstName) {
+                greetName = currentUser.firstName;
+            } else {
+                greetName = 'User';
+            }
+            const greetingText = `${greeting}, ${greetName}`;
+            const dateText = new Date().toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit'
+            });
+
+            document.getElementById('greetingSubtext').textContent = greetingText;
+            document.getElementById('currentDateTime').textContent = `Today is ${dateText}`;
+
+            // Set user initials and info (robust to missing name)
+            let displayName = '';
+            if (currentUser.name) {
+                displayName = currentUser.name;
+            } else if (currentUser.firstName && currentUser.lastName) {
+                displayName = `${currentUser.firstName} ${currentUser.lastName}`;
+            } else if (currentUser.firstName) {
+                displayName = currentUser.firstName;
+            } else {
+                displayName = 'User';
+            }
+            // Initials fallback
+            let initials = '';
+            if (displayName) {
+                initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase();
+            } else {
+                initials = 'U';
+            }
+            document.getElementById('userInitials').textContent = initials;
+            document.getElementById('profileName').textContent = displayName;
+            document.getElementById('profileRole').textContent = currentUser.role ? currentUser.role : '';
+
+            // Show/hide elements based on user role
+            if (currentUser.role === 'admin') {
+                document.getElementById('attendanceRecordsLink').classList.remove('hidden');
+                document.getElementById('adminSettings').classList.remove('hidden');
+                document.getElementById('attendanceSummary').classList.remove('hidden');
+                document.getElementById('adminCreateButton').classList.remove('hidden');
+                document.getElementById('deletedRecordsLink').classList.remove('hidden');
+                loadAttendanceSummary();
+                loadNotifications();
+            } else {
+                document.getElementById('addStaffLink').style.display = 'none';
+            }
+
+            if (currentUser.position === 'director' || currentUser.position === 'assistant director') {
+                document.getElementById('deletedRecordsLink').classList.remove('hidden');
+            }
+
+            if (currentUser.role === 'staff') {
+                document.getElementById('attendanceButton').classList.remove('hidden');
+                document.getElementById('myTasksLink').classList.remove('hidden');
+            }
+
+            if (currentUser.role === 'volunteer') {
+                document.getElementById('sidebar').style.display = 'none';
+                document.getElementById('main-content').classList.remove('lg:ml-64');
+                document.getElementById('mobile-menu-container').style.display = 'none';
+                document.getElementById('myTasksLink').classList.remove('hidden');
+                
+                const childRecordsLink = document.querySelector('a[href="child-records.html"]');
+                if (currentUser.department === 'child care' || currentUser.department === 'education') {
+                    // Allow access to child records for child care and education volunteers
+                    childRecordsLink.classList.remove('hidden');
+                } else {
+                    // Hide child records for other department volunteers
+                    childRecordsLink.style.display = 'none';
+                }
+            }
+        }
+
+        function loadDashboardData() {
+            loadChildrenData();
+            loadStaffData();
+            loadVolunteerData();
+            loadDonationData();
+            loadDonorsData();
+        }
+
+        async function loadChildrenData() {
+    try {
+        const childrenCol = collection(db, 'children');
+        const snapshot = await getDocs(childrenCol);
+        const children = [];
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.currentStatus !== "deleted") {
+                children.push(data);
+            }
+        });
+        
+        document.getElementById('childrenCount').textContent = children.length;
+        
+        // Calculate weekly additions
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        
+        const weeklyAdditions = children.filter(child => {
+            const addedDate = new Date(child.dateAdded || child.entryDate);
+            return addedDate >= oneWeekAgo;
+        }).length;
+        
+        document.getElementById('childrenWeekly').textContent = `+${weeklyAdditions} Child${weeklyAdditions !== 1 ? 'ren' : ''} added this week`;
+    } catch (error) {
+        console.error('Error loading children data:', error);
+        document.getElementById('childrenCount').textContent = '0';
+        document.getElementById('childrenWeekly').textContent = '+0 Children added this week';
+    }
+}
+
+async function loadStaffData() {
+    try {
+        const staffCol = collection(db, 'staff');
+        const snapshot = await getDocs(staffCol);
+        const staff = [];
+        snapshot.forEach(doc => {
+            staff.push(doc.data());
+        });
+        
+        document.getElementById('staffCount').textContent = staff.length;
+        
+        // Calculate weekly additions
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        
+        const weeklyAdditions = staff.filter(member => {
+            const addedDate = new Date(member.dateAdded);
+            return addedDate >= oneWeekAgo;
+        }).length;
+        
+        document.getElementById('staffWeekly').textContent = `+${weeklyAdditions} Staff added this week`;
+    } catch (error) {
+        console.error('Error loading staff data:', error);
+        document.getElementById('staffCount').textContent = '0';
+        document.getElementById('staffWeekly').textContent = '+0 Staff added this week';
+    }
+}
+
+async function loadVolunteerData() {
+    try {
+        const volunteersCol = collection(db, 'volunteers');
+        const snapshot = await getDocs(volunteersCol);
+        const volunteers = [];
+        snapshot.forEach(doc => {
+            volunteers.push(doc.data());
+        });
+        
+        const activeVolunteers = volunteers.filter(v => v.volunteerStatus === 'Active');
+        
+        document.getElementById('volunteersCount').textContent = activeVolunteers.length;
+        
+        // Calculate weekly additions
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        
+        const weeklyAdditions = volunteers.filter(volunteer => {
+            const addedDate = new Date(volunteer.dateAdded || volunteer.dateJoined);
+            return addedDate >= oneWeekAgo;
+        }).length;
+        
+        document.getElementById('volunteersWeekly').textContent = `+${weeklyAdditions} Volunteer${weeklyAdditions !== 1 ? 's' : ''} added this week`;
+    } catch (error) {
+        console.error('Error loading volunteer data:', error);
+        document.getElementById('volunteersCount').textContent = '0';
+        document.getElementById('volunteersWeekly').textContent = '+0 Volunteers added this week';
+    }
+}
+
+async function loadDonationData() {
+    try {
+        const donationsCol = collection(db, 'donations');
+        const snapshot = await getDocs(donationsCol);
+        const donations = [];
+        snapshot.forEach(doc => {
+            donations.push(doc.data());
+        });
+        
+        // Calculate total donations
+        const totalDonations = donations.reduce((sum, donation) => {
+            return sum + (parseFloat(donation.amount) || 0);
+        }, 0);
+        
+        document.getElementById('totalDonationAmount').textContent = `₱ ${totalDonations.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+        
+        // Calculate monthly increase (simplified calculation)
+        const oneMonthAgo = new Date();
+        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+        
+        const thisMonthDonations = donations.filter(donation => {
+            const donationDate = new Date(donation.dateOfDonation);
+            return donationDate >= oneMonthAgo;
+        }).reduce((sum, donation) => sum + (parseFloat(donation.amount) || 0), 0);
+        
+        const lastMonthDonations = donations.filter(donation => {
+            const donationDate = new Date(donation.dateOfDonation);
+            const twoMonthsAgo = new Date();
+            twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+            return donationDate >= twoMonthsAgo && donationDate < oneMonthAgo;
+        }).reduce((sum, donation) => sum + (parseFloat(donation.amount) || 0), 0);
+        
+        const increasePercent = lastMonthDonations > 0 ? 
+            Math.round(((thisMonthDonations - lastMonthDonations) / lastMonthDonations) * 100) : 0;
+        
+        document.getElementById('donationIncrease').textContent = 
+            `${increasePercent >= 0 ? '+' : ''}${increasePercent}% ${increasePercent >= 0 ? 'Increase' : 'Decrease'} from the last month`;
+    } catch (error) {
+        console.error('Error loading donation data:', error);
+        document.getElementById('totalDonationAmount').textContent = '₱ 0.00';
+        document.getElementById('donationIncrease').textContent = '+0% from the last month';
+    }
+}
+
+async function loadDonorsData() {
+    try {
+        const donationsCol = collection(db, 'donations');
+        const snapshot = await getDocs(donationsCol);
+        const donations = [];
+        snapshot.forEach(doc => {
+            donations.push(doc.data());
+        });
+        
+        // Process donations to create unique donors (same logic as donors-records.html)
+        const donorMap = new Map();
+        
+        donations.forEach(donation => {
+            const donorName = donation.donorName || 'Anonymous';
+            const donorEmail = donation.emailAddress || '';
+            
+            // Create unique key using name + email combination
+            const uniqueKey = `${donorName}|${donorEmail}`;
+            
+            if (!donorMap.has(uniqueKey)) {
+                donorMap.set(uniqueKey, {
+                    uniqueKey: uniqueKey,
+                    name: donorName,
+                    emailAddress: donorEmail,
+                    donations: [],
+                    lastDonationDate: null
+                });
+            }
+
+            const donor = donorMap.get(uniqueKey);
+            donor.donations.push(donation);
+
+            const donationDate = new Date(donation.dateOfDonation);
+            if (!donor.lastDonationDate || donationDate > donor.lastDonationDate) {
+                donor.lastDonationDate = donationDate;
+            }
+        });
+
+        const uniqueDonors = Array.from(donorMap.values());
+        const totalDonors = uniqueDonors.length;
+        
+        // Calculate weekly donors
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        
+        const weeklyDonors = uniqueDonors.filter(donor => {
+            return donor.lastDonationDate >= oneWeekAgo;
+        }).length;
+        
+        // Update the display
+        document.getElementById('donorsCount').textContent = totalDonors;
+        document.getElementById('donorsWeekly').textContent = `+${weeklyDonors} Donors this week`;
+    } catch (error) {
+        console.error('Error loading donors data:', error);
+        // Fallback to 0 if file doesn't exist or is empty
+        document.getElementById('donorsCount').textContent = '0';
+        document.getElementById('donorsWeekly').textContent = '+0 Donors this week';
+    }
+}
+
+        async function loadAttendanceSummary() {
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                const response = await fetch(`api/get-attendance.php?date=${today}`);
+                const data = await response.json();
+                
+                if (data.attendance) {
+                    const todayRecords = data.attendance;
+                    const presentCount = todayRecords.filter(record => record.status === 'Present' || record.status === 'Late').length;
+                    const leaveCount = todayRecords.filter(record => record.status === 'On Leave').length;
+                    const pendingCount = todayRecords.filter(record => record.status === 'Leave Requested').length;
+                    
+                    document.getElementById('presentCount').textContent = presentCount;
+                    document.getElementById('leaveCount').textContent = leaveCount;
+                    document.getElementById('pendingCount').textContent = pendingCount;
+                }
+            } catch (error) {
+                console.error('Error loading attendance summary:', error);
+            }
+        }
+
+        function loadNotifications() {
+            // Sample notifications
+            const notifications = [
+                {
+                    title: 'New Volunteer Application',
+                    message: 'Maria Santos has submitted a volunteer application',
+                    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+                    read: false
+                },
+                {
+                    title: 'Donation Received',
+                    message: 'New donation of ₱5,000 received from John Doe',
+                    timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+                    read: false
+                },
+                {
+                    title: 'Staff Meeting Reminder',
+                    message: 'Monthly staff meeting scheduled for tomorrow at 2 PM',
+                    timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
+                    read: true
+                }
+            ];
+
+            displayNotifications(notifications);
+        }
+
+        function displayNotifications(notifications) {
+            const notificationsContent = document.getElementById('notificationsContent');
+            const notificationBadge = document.getElementById('notificationBadge');
+            
+            const unreadCount = notifications.filter(n => !n.read).length;
+            
+            if (unreadCount > 0) {
+                notificationBadge.textContent = unreadCount;
+                notificationBadge.classList.remove('hidden');
+            } else {
+                notificationBadge.classList.add('hidden');
+            }
+
+            if (notifications.length === 0) {
+                notificationsContent.innerHTML = `
+                    <div class="px-4 py-3 text-center text-gray-500">
+                        No notifications
+                    </div>
+                `;
+                return;
+            }
+
+            notificationsContent.innerHTML = notifications.map(notification => `
+                <div class="px-4 py-3 border-b border-gray-200 ${notification.read ? 'bg-gray-50' : 'bg-blue-50'} hover:bg-gray-100">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <h4 class="text-sm font-medium text-gray-900">${notification.title}</h4>
+                            <p class="text-sm text-gray-600 mt-1">${notification.message}</p>
+                            <p class="text-xs text-gray-400 mt-1">${formatTimeAgo(notification.timestamp)}</p>
+                        </div>
+                        ${!notification.read ? '<div class="w-2 h-2 bg-blue-500 rounded-full mt-1 ml-2"></div>' : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadAccountsData() {
+            fetch('data/accounts.json')
+                .then(response => response.json())
+                .then(data => {
+                    accountsData = data.accounts || [];
+                })
+                .catch(error => {
+                    console.error('Error loading accounts data:', error);
+                });
+        }
+
+        async function loadAnnouncementsAndTasks() {
+            loadAccountsData();
+            
+            try {
+                // Load announcements from Firestore
+                const announcementCol = collection(db, 'announcements');
+                const announcementSnapshot = await getDocs(announcementCol);
+                allAnnouncements = [];
+                announcementSnapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    allAnnouncements.push(data);
+                });
+                displayAnnouncements();
+            } catch (error) {
+                console.error('Error loading announcements from Firestore:', error);
+                allAnnouncements = [];
+                displayAnnouncements();
+            }
+
+            try {
+                // Load tasks from Firestore
+                const taskCol = collection(db, 'tasks');
+                const taskSnapshot = await getDocs(taskCol);
+                allTasks = [];
+                taskSnapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    allTasks.push(data);
+                });
+                displayTasks();
+            } catch (error) {
+                console.error('Error loading tasks from Firestore:', error);
+                allTasks = [];
+                displayTasks();
+            }
+        }
+
+        function displayAnnouncements() {
+            const announcementsList = document.getElementById('announcementsList');
+            const announcementCount = document.getElementById('announcementCount');
+        
+            // Sort by creation date (newest first)
+            const sortedAnnouncements = allAnnouncements.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            
+            // Calculate pagination
+            const totalPages = Math.ceil(sortedAnnouncements.length / itemsPerPage);
+            const startIndex = (currentAnnouncementPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedAnnouncements = sortedAnnouncements.slice(startIndex, endIndex);
+        
+            announcementCount.textContent = `${sortedAnnouncements.length} items`;
+        
+            // Update pagination controls
+            updateAnnouncementPagination(totalPages);
+        
+            if (sortedAnnouncements.length === 0) {
+                announcementsList.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <svg class="mx-auto h-8 w-8 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-8l-4 4m0 0l-4-4m4 4V3"></path>
+                        </svg>
+                        <p class="text-sm">No announcements</p>
+                    </div>
+                `;
+                hideAnnouncementsTasksLoader();
+                return;
+            }
+            
+            announcementsList.innerHTML = paginatedAnnouncements.map(announcement => {
+                const priorityColor = announcement.priority === 'urgent' ? 'bg-red-100 text-red-800' : 
+                                   announcement.priority === 'important' ? 'bg-yellow-100 text-yellow-800' : 
+                                   'bg-blue-100 text-blue-800';
+                
+                return `
+                    <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 cursor-pointer transition-colors relative" onclick="showAnnouncementDetail('${announcement.announcementId}')">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1 min-w-0 pr-2">
+                                <h4 class="text-sm font-medium text-gray-900 truncate">${announcement.title}</h4>
+                                <p class="text-xs text-gray-600 mt-1 line-clamp-2">${announcement.content}</p>
+                                <div class="flex items-center mt-2 space-x-2">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${priorityColor}">
+                                        ${announcement.priority}
+                                    </span>
+                                    <span class="text-xs text-gray-500">${formatTimeAgo(announcement.createdAt)}</span>
+                                </div>
+                            </div>
+                            ${currentUser && currentUser.role === 'admin' ? `
+                                <div class="flex items-center space-x-1 ml-2">
+                                    <button onclick="editAnnouncement('${announcement.announcementId}', event)" class="p-1 text-gray-400 hover:text-blue-600 transition-colors" title="Edit">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                        </svg>
+                                    </button>
+                                    <button onclick="deleteAnnouncement('${announcement.announcementId}', event)" class="p-1 text-gray-400 hover:text-red-600 transition-colors" title="Delete">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1-1H8a1 1 0 00-1 1v3M4 7h16"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            ` : `
+                                <svg class="h-4 w-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            `}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+                hideAnnouncementsTasksLoader();
+            }
+        
+    
+    // Move displayTasks to global scope
+    function displayTasks() {
+        const tasksList = document.getElementById('tasksList');
+        const taskCount = document.getElementById('taskCount');
+    
+        // Filter tasks based on user role using assignedTo field only
+        let filteredTasks = allTasks;
+        if (currentUser && currentUser.role === 'staff') {
+            filteredTasks = allTasks.filter(task => task.assignedTo === 'all' || task.assignedTo === 'staff');
+        } else if (currentUser && currentUser.role === 'volunteer') {
+            filteredTasks = allTasks.filter(task => task.assignedTo === 'all' || task.assignedTo === 'volunteers');
+        }
+    
+        // Filter out completed tasks
+        filteredTasks = filteredTasks.filter(task => task.status !== 'completed');
+    
+        // Sort by due date (nearest first)
+        const sortedTasks = filteredTasks.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+        
+        // Calculate pagination
+        const totalPages = Math.ceil(sortedTasks.length / itemsPerPage);
+        const startIndex = (currentTaskPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const paginatedTasks = sortedTasks.slice(startIndex, endIndex);
+    
+        taskCount.textContent = `${sortedTasks.length} items`;
+    
+        // Update pagination controls
+        updateTaskPagination(totalPages);
+    
+        if (sortedTasks.length === 0) {
+            tasksList.innerHTML = `
+                <div class="text-center py-8 text-gray-500">
+                    <svg class="mx-auto h-8 w-8 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                    </svg>
+                    <p class="text-sm">No tasks assigned</p>
+                </div>
+            `;
+            hideAnnouncementsTasksLoader();
+            return;
+        }
+        
+        tasksList.innerHTML = paginatedTasks.map(task => {
+            const priorityColor = task.priority === 'high' ? 'bg-red-100 text-red-800' : 
+                                task.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' : 
+                                'bg-green-100 text-green-800';
+            
+            const dueDate = new Date(task.dueDate);
+            const today = new Date();
+            const isOverdue = dueDate < today;
+            const dueDateColor = isOverdue ? 'text-red-600' : 'text-gray-600';
+    
+            // People Needed and Accepted
+            const peopleNeeded = task.peopleNeeded || 0;
+            const acceptedCount = Array.isArray(task.acceptedBy) ? task.acceptedBy.length : 0;
+            const isFull = acceptedCount >= peopleNeeded && peopleNeeded > 0;
+    
+            // Check if current user already accepted this task
+            const alreadyAccepted = Array.isArray(task.acceptedBy) && currentUser && task.acceptedBy.includes(currentUser.email);
+    
+            // Authority display text based on assignedTo
+            let authorityText = '';
+            switch(task.assignedTo) {
+                case 'all': authorityText = 'All Staff & Volunteers'; break;
+                case 'staff': authorityText = 'Staff Only'; break;
+                case 'volunteers': authorityText = 'Volunteers Only'; break;
+                default: authorityText = task.assignedTo || 'Unknown';
+            }
+    
+            return `
+                <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 cursor-pointer transition-colors relative" onclick="showTaskDetail('${task.taskId}')">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1 min-w-0 pr-2">
+                            <h4 class="text-sm font-medium text-gray-900 truncate">${task.title}</h4>
+                            <p class="text-xs text-gray-600 mt-1 line-clamp-2">${task.description}</p>
+                            <div class="flex items-center mt-2 space-x-2">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${priorityColor}">
+                                    ${task.priority}
+                                </span>
+                                <span class="text-xs ${dueDateColor}">Due: ${formatDate(task.dueDate)}</span>
+                                ${isOverdue ? '<span class="text-xs text-red-600 font-medium">OVERDUE</span>' : ''}
+                            </div>
+                            <div class="flex items-center mt-2 space-x-2">
+                                <span class="text-xs text-gray-700 font-medium">
+                                    People Needed: ${peopleNeeded}
+                                </span>
+                                <div class="flex items-center relative">
+                                    <span class="text-xs text-blue-700 font-medium cursor-help hover:text-blue-900 transition-colors duration-200" 
+                                          onmouseenter="showDashboardTooltip(event, '${task.taskId}')" 
+                                          onmouseleave="hideDashboardTooltip()">Accepted: ${acceptedCount}</span>
+                                    
+                                    <!-- Dashboard tooltip -->
+                                    <div id="dashboardTooltip-${task.taskId}" class="hidden absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg z-50 whitespace-nowrap max-w-xs">
+                                        <div class="dashboardTooltipContent"></div>
+                                        <!-- Arrow -->
+                                        <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                                    </div>
+                                </div>
+                                ${isFull ? `<span class="inline-block px-2 py-0.5 rounded bg-red-100 text-red-700 text-xs font-semibold ml-2">FULL</span>` : ''}
+                                ${alreadyAccepted ? `<span class="inline-block px-2 py-0.5 rounded bg-green-100 text-green-700 text-xs font-semibold ml-2">ACCEPTED</span>` : ''}
+                            </div>
+                        </div>
+                        ${currentUser && currentUser.role === 'admin' ? `
+                            <div class="flex items-center space-x-1 ml-2">
+                                <button onclick="editTask('${task.taskId}', event)" class="p-1 text-gray-400 hover:text-blue-600 transition-colors" title="Edit">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                    </svg>
+                                </button>
+                                <button onclick="deleteTask('${task.taskId}', event)" class="p-1 text-gray-400 hover:text-red-600 transition-colors" title="Delete">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1-1H8a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        ` : `
+                            <svg class="h-4 w-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        `}
+                    </div>
+                </div>
+            `;
+        }).join('');
+        hideAnnouncementsTasksLoader();
+    }
+
+        function updateAnnouncementPagination(totalPages) {
+            const pageInfo = document.getElementById('announcementPageInfo');
+            const prevBtn = document.getElementById('prevAnnouncements');
+            const nextBtn = document.getElementById('nextAnnouncements');
+
+            pageInfo.textContent = `${currentAnnouncementPage} / ${Math.max(1, totalPages)}`;
+            
+            prevBtn.disabled = currentAnnouncementPage <= 1;
+            nextBtn.disabled = currentAnnouncementPage >= totalPages;
+            
+            if (prevBtn.disabled) {
+                prevBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                prevBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+            
+            if (nextBtn.disabled) {
+                nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        function updateTaskPagination(totalPages) {
+            const pageInfo = document.getElementById('taskPageInfo');
+            const prevBtn = document.getElementById('prevTasks');
+            const nextBtn = document.getElementById('nextTasks');
+
+            pageInfo.textContent = `${currentTaskPage} / ${Math.max(1, totalPages)}`;
+            
+            prevBtn.disabled = currentTaskPage <= 1;
+            nextBtn.disabled = currentTaskPage >= totalPages;
+            
+            if (prevBtn.disabled) {
+                prevBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                prevBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+            
+            if (nextBtn.disabled) {
+                nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        function showAnnouncementDetail(announcementId) {
+            const announcement = allAnnouncements.find(a => a.announcementId === announcementId);
+            if (!announcement) return;
+
+            currentDetailItem = announcement;
+            currentDetailType = 'announcement';
+
+            document.getElementById('detailModalTitle').textContent = announcement.title;
+            document.getElementById('detailModalContent').innerHTML = `
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700">Content</h4>
+                        <p class="text-sm text-gray-900 mt-1">${announcement.content}</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-700">Priority</h4>
+                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
+                                announcement.priority === 'urgent' ? 'bg-red-100 text-red-800' : 
+                                announcement.priority === 'important' ? 'bg-yellow-100 text-yellow-800' : 
+                                'bg-blue-100 text-blue-800'
+                            }">${announcement.priority}</span>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-700">Author</h4>
+                            <p class="text-sm text-gray-900">${announcement.author}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700">Created</h4>
+                        <p class="text-sm text-gray-900">${formatDateTime(announcement.createdAt)}</p>
+                    </div>
+                </div>
+            `;
+
+            // Show admin actions if user is admin
+            const actionsDiv = document.getElementById('detailModalActions');
+            const taskAcceptDiv = document.getElementById('taskAcceptActions');
+            
+            if (currentUser && currentUser.role === 'admin') {
+                actionsDiv.classList.remove('hidden');
+                taskAcceptDiv.classList.add('hidden');
+                document.getElementById('editItemBtn').onclick = () => editAnnouncement(announcementId);
+                document.getElementById('deleteItemBtn').onclick = () => deleteAnnouncement(announcementId);
+            } else {
+                actionsDiv.classList.add('hidden');
+                taskAcceptDiv.classList.add('hidden');
+            }
+
+            document.getElementById('detailModal').classList.remove('hidden');
+        }
+
+        function showTaskDetail(taskId) {
+            const task = allTasks.find(t => t.taskId === taskId);
+            if (!task) return;
+
+            currentDetailItem = task;
+            currentDetailType = 'task';
+
+            const dueDate = new Date(task.dueDate);
+            const today = new Date();
+            const isOverdue = dueDate < today;
+
+            // Get authority display text based on assignedTo
+            let authorityText = '';
+            switch(task.assignedTo) {
+                case 'all': authorityText = 'All Staff & Volunteers'; break;
+                case 'staff': authorityText = 'Staff Only'; break;
+                case 'volunteers': authorityText = 'Volunteers Only'; break;
+                default: authorityText = task.assignedTo || 'Unknown';
+            }
+
+            // People Needed and Accepted
+            const peopleNeeded = task.peopleNeeded || 0;
+            const acceptedCount = Array.isArray(task.acceptedBy) ? task.acceptedBy.length : 0;
+            const isFull = acceptedCount >= peopleNeeded && peopleNeeded > 0;
+            const alreadyAccepted = Array.isArray(task.acceptedBy) && currentUser && task.acceptedBy.includes(currentUser.email);
+
+            document.getElementById('detailModalTitle').textContent = task.title;
+            document.getElementById('detailModalContent').innerHTML = `
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700">Description</h4>
+                        <p class="text-sm text-gray-900 mt-1">${task.description}</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-700">Priority</h4>
+                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
+                                task.priority === 'high' ? 'bg-red-100 text-red-800' : 
+                                task.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' : 
+                                'bg-green-100 text-green-800'
+                            }">${task.priority}</span>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-700">Assigned To</h4>
+                            <p class="text-sm text-gray-900">${authorityText}</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-700">Due Date</h4>
+                            <p class="text-sm ${isOverdue ? 'text-red-600 font-medium' : 'text-gray-900'}">${formatDate(task.dueDate)} ${isOverdue ? '(OVERDUE)' : ''}</p>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-700">Author</h4>
+                            <p class="text-sm text-gray-900">${task.author}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700">Status</h4>
+                        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">${task.status}</span>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700">People Needed</h4>
+                        <span class="text-sm text-gray-900">${task.peopleNeeded}</span>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700">Accepted</h4>
+                        <div class="flex items-center relative">
+                            <span class="text-sm text-blue-700 cursor-help hover:text-blue-900 transition-colors duration-200" 
+                                  onmouseenter="showModalTooltip(event, '${task.taskId}')" 
+                                  onmouseleave="hideModalTooltip()">${acceptedCount}</span>
+                            ${isFull ? `<span class="inline-block px-2 py-0.5 rounded bg-red-100 text-red-700 text-xs font-semibold ml-2">FULL</span>` : ''}
+                            
+                            <!-- Modal tooltip -->
+                            <div id="modalTooltip" class="hidden absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg z-50 whitespace-nowrap max-w-xs">
+                                <div id="modalTooltipContent"></div>
+                                <!-- Arrow -->
+                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Show appropriate actions based on user role
+            const actionsDiv = document.getElementById('detailModalActions');
+            const taskAcceptDiv = document.getElementById('taskAcceptActions');
+            const acceptBtn = document.getElementById('acceptTaskBtn');
+
+            if (currentUser && currentUser.role === 'admin') {
+                actionsDiv.classList.remove('hidden');
+                taskAcceptDiv.classList.add('hidden');
+                document.getElementById('editItemBtn').onclick = () => editTask(taskId);
+                document.getElementById('deleteItemBtn').onclick = () => deleteTask(taskId);
+            } else if (currentUser && (currentUser.role === 'staff' || currentUser.role === 'volunteer')) {
+                actionsDiv.classList.add('hidden');
+                
+                // Check if user can accept this task based on assignedTo
+                const canAcceptByRole = (task.assignedTo === 'all') || 
+                                       (task.assignedTo === 'staff' && userRole === 'staff') ||
+                                       (task.assignedTo === 'volunteers' && userRole === 'volunteer');
+                
+                const canAccept = !isFull && !alreadyAccepted && canAcceptByRole;
+                taskAcceptDiv.classList.remove('hidden');
+                acceptBtn.disabled = !canAccept;
+                acceptBtn.textContent = alreadyAccepted ? 'Task Already Accepted' : (isFull ? 'Task Full' : 'Accept Task');
+                acceptBtn.classList.toggle('opacity-50', !canAccept);
+                acceptBtn.classList.toggle('cursor-not-allowed', !canAccept);
+                acceptBtn.onclick = function() {
+                    if (canAccept) {
+                        acceptTask(taskId, currentUser.name, currentUser.role, currentUser.email);
+                    }
+                };
+            } else {
+                actionsDiv.classList.add('hidden');
+                taskAcceptDiv.classList.add('hidden');
+            }
+
+            document.getElementById('detailModal').classList.remove('hidden');
+        }
+
+        function acceptTask(taskId, userName, userRole, userEmail) {
+            // Find the task
+            const task = allTasks.find(t => t.taskId === taskId);
+            if (!task) {
+                showMessage('Task not found.', 'error');
+                return;
+            }
+
+            // Check role match based on assignedTo
+            const canAcceptByRole = (task.assignedTo === 'all') || 
+                                   (task.assignedTo === 'staff' && userRole === 'staff') ||
+                                   (task.assignedTo === 'volunteers' && userRole === 'volunteer');
+            
+            if (!canAcceptByRole) {
+                showMessage('You are not allowed to accept this task.', 'error');
+                return;
+            }
+
+            // Check if already accepted
+            if (Array.isArray(task.acceptedBy) && task.acceptedBy.includes(userEmail)) {
+                showMessage('You have already accepted this task.', 'error');
+                return;
+            }
+
+            // Check if full
+            const acceptedCount = Array.isArray(task.acceptedBy) ? task.acceptedBy.length : 0;
+            if (acceptedCount >= task.peopleNeeded) {
+                showMessage('Task is already full.', 'error');
+                return;
+            }
+
+            // Send accept request to backend
+            fetch('api/accept-task.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ taskId, userEmail, userName, userRole })
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.success) {
+                    showMessage('Task accepted!', 'success');
+                    closeDetailModal();
+                    loadAnnouncementsAndTasks(); // Refresh UI
+                } else {
+                    showMessage(result.message || 'Failed to accept task.', 'error');
+                }
+            })
+            .catch(() => {
+                showMessage('Network error. Please try again.', 'error');
+            });
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detailModal').classList.add('hidden');
+            currentDetailItem = null;
+            currentDetailType = null;
+        }
+
+        // Admin Edit/Delete Functions
+        function editAnnouncement(announcementId, event) {
+            if (event) {
+                event.stopPropagation();
+            }
+            
+            if (currentUser.role !== 'admin') return;
+            
+            const announcement = allAnnouncements.find(a => a.announcementId === announcementId);
+            if (!announcement) return;
+
+            // Populate edit form
+            document.getElementById('editAnnouncementId').value = announcementId;
+            document.getElementById('editAnnouncementTitle').value = announcement.title;
+            document.getElementById('editAnnouncementContent').value = announcement.content;
+            document.getElementById('editAnnouncementPriority').value = announcement.priority;
+
+            // Close detail modal if open
+            closeDetailModal();
+            
+            // Show edit modal
+            document.getElementById('editAnnouncementModal').classList.remove('hidden');
+        }
+
+        function editTask(taskId, event) {
+            if (event) {
+                event.stopPropagation();
+            }
+            
+            if (currentUser.role !== 'admin') return;
+            
+            const task = allTasks.find(t => t.taskId === taskId);
+            if (!task) return;
+
+            // Populate edit form
+            document.getElementById('editTaskId').value = taskId;
+            document.getElementById('editTaskTitle').value = task.title;
+            document.getElementById('editTaskDescription').value = task.description;
+            document.getElementById('editTaskAssignedTo').value = task.assignedTo;
+            document.getElementById('editTaskDueDate').value = task.dueDate;
+            document.getElementById('editTaskPriority').value = task.priority;
+
+            // Close detail modal if open
+            closeDetailModal();
+            
+            // Show edit modal
+            document.getElementById('editTaskModal').classList.remove('hidden');
+        }
+
+        
+        function deleteAnnouncement(announcementId, event) {
+            if (event) {
+                event.stopPropagation();
+            }
+            
+            if (currentUser.role !== 'admin') return;
+            
+            const announcement = allAnnouncements.find(a => a.announcementId === announcementId);
+            if (!announcement) return;
+
+            if (confirm(`Are you sure you want to delete the announcement "${announcement.title}"?`)) {
+                window.deleteDoc(window.doc(window.db, 'announcements', announcementId))
+                .then(() => {
+                    showMessage('Announcement deleted successfully!', 'success');
+                    closeDetailModal();
+                    loadAnnouncementsAndTasks(); // Reload data
+                })
+                .catch((error) => {
+                    console.error('Error deleting announcement:', error);
+                    showMessage('Failed to delete announcement.', 'error');
+                });
+            }
+        }
+
+        function deleteTask(taskId, event) {
+            if (event) {
+                event.stopPropagation();
+            }
+            
+            if (currentUser.role !== 'admin') return;
+            
+            const task = allTasks.find(t => t.taskId === taskId);
+            if (!task) return;
+
+            if (confirm(`Are you sure you want to delete the task "${task.title}"?`)) {
+                window.deleteDoc(window.doc(window.db, 'tasks', taskId))
+                .then(() => {
+                    showMessage('Task deleted successfully!', 'success');
+                    closeDetailModal();
+                    loadAnnouncementsAndTasks(); // Reload data
+                })
+                .catch((error) => {
+                    console.error('Error deleting task:', error);
+                    showMessage('Failed to delete task.', 'error');
+                });
+            }
+        }
+
+        function generateCalendar() {
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+            const today = now.getDate();
+            
+            const firstDay = new Date(currentYear, currentMonth, 1);
+            const lastDay = new Date(currentYear, currentMonth + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startingDayOfWeek = firstDay.getDay();
+            
+            const monthNames = [
+                'January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'
+            ];
+            
+            const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+            
+            let calendarHTML = `
+                <div class="text-center mb-3">
+                    <h4 class="text-lg font-semibold text-gray-900">${monthNames[currentMonth]} ${currentYear}</h4>
+                </div>
+                <div class="grid grid-cols-7 gap-1 mb-1">
+            `;
+            
+            // Day headers
+            dayNames.forEach(day => {
+                calendarHTML += `<div class="text-center text-xs font-medium text-gray-500 py-0.5">${day}</div>`;
+            });
+            
+            calendarHTML += '</div><div class="grid grid-cols-7 gap-1">';
+            
+            // Empty cells for days before the first day of the month
+            for (let i = 0; i < startingDayOfWeek; i++) {
+                calendarHTML += '<div class="h-8 sm:h-10"></div>';
+            }
+            
+            // Days of the month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateString = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const isToday = day === today;
+                const isHoliday = philippineHolidays.includes(dateString);
+                
+                let dayClass = 'h-8 sm:h-7 flex items-center justify-center text-sm rounded-lg cursor-pointer hover:bg-gray-100';
+                
+                if (isToday) {
+                    dayClass += ' bg-yellow-400 text-white font-bold hover:bg-yellow-500';
+                } else if (isHoliday) {
+                    dayClass += ' bg-green-500 text-white font-medium hover:bg-green-600';
+                } else {
+                    dayClass += ' text-gray-700';
+                }
+                
+                calendarHTML += `<div class="${dayClass}" title="${isHoliday ? 'Holiday' : ''}">${day}</div>`;
+            }
+            
+            calendarHTML += '</div>';
+            
+            document.getElementById('calendar').innerHTML = calendarHTML;
+        }
+
+        function setupEventListeners() {
+            // Mobile menu
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+
+            mobileMenuBtn.addEventListener('click', function () {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                mobileMenuBtn.classList.add('hidden');
+            });
+
+            overlay.addEventListener('click', function () {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+                mobileMenuBtn.classList.remove('hidden');
+            });
+
+            // Header buttons
+            const createBtn = document.getElementById('create-btn');
+            if (createBtn) {
+                createBtn.addEventListener('click', function() {
+                    document.getElementById('create-dropdown').classList.toggle('hidden');
+                });
+            }
+
+            document.getElementById('messages-btn').addEventListener('click', function() {
+                window.location.href = 'messages.html';
+            });
+
+            document.getElementById('history-btn').addEventListener('click', function() {
+                window.location.href = 'system-activity.html';
+            });
+
+            document.getElementById('notifications-btn').addEventListener('click', function() {
+                document.getElementById('notifications-dropdown').classList.toggle('hidden');
+            });
+
+            document.getElementById('profile-btn').addEventListener('click', function() {
+                document.getElementById('profile-dropdown').classList.toggle('hidden');
+            });
+
+            // Staff attendance button
+            if (currentUser && currentUser.role === 'staff') {
+                document.getElementById('attendance-btn').addEventListener('click', function() {
+                    window.location.href = 'staff-attendance.html';
+                });
+            }
+
+            // Logout button
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                sessionManager.logout();
+            });
+
+            // Pagination buttons
+            document.getElementById('prevAnnouncements').addEventListener('click', function() {
+                if (currentAnnouncementPage > 1) {
+                    currentAnnouncementPage--;
+                    displayAnnouncements();
+                }
+            });
+
+            document.getElementById('nextAnnouncements').addEventListener('click', function() {
+                const totalPages = Math.ceil(allAnnouncements.length / itemsPerPage);
+                if (currentAnnouncementPage < totalPages) {
+                    currentAnnouncementPage++;
+                    displayAnnouncements();
+                }
+            });
+
+            document.getElementById('prevTasks').addEventListener('click', function() {
+                if (currentTaskPage > 1) {
+                    currentTaskPage--;
+                    displayTasks();
+                }
+            });
+
+            document.getElementById('nextTasks').addEventListener('click', function() {
+                let filteredTasks = allTasks;
+                if (currentUser && currentUser.role === 'staff') {
+                    filteredTasks = allTasks.filter(task => task.assignedTo === 'all' || task.assignedTo === 'staff');
+                } else if (currentUser && currentUser.role === 'volunteer') {
+                    filteredTasks = allTasks.filter(task => task.assignedTo === 'all' || task.assignedTo === 'volunteers');
+                }
+                // Filter out completed tasks
+                filteredTasks = filteredTasks.filter(task => task.status !== 'completed');
+                const totalPages = Math.ceil(filteredTasks.length / itemsPerPage);
+                if (currentTaskPage < totalPages) {
+                    currentTaskPage++;
+                    displayTasks();
+                }
+            });
+
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function(event) {
+                const createBtn = document.getElementById('create-btn');
+                if (createBtn && !event.target.closest('#create-btn') && !event.target.closest('#create-dropdown')) {
+                    document.getElementById('create-dropdown').classList.add('hidden');
+                }
+                
+                if (!event.target.closest('#notifications-btn') && !event.target.closest('#notifications-dropdown')) {
+                    document.getElementById('notifications-dropdown').classList.add('hidden');
+                }
+
+                if (!event.target.closest('#profile-btn') && !event.target.closest('#profile-dropdown')) {
+                    document.getElementById('profile-dropdown').classList.add('hidden');
+                }
+            });
+
+            // Form submissions (Admin only)
+            const announcementForm = document.getElementById('announcementForm');
+            if (announcementForm) {
+                announcementForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    createAnnouncement();
+                });
+            }
+
+            const taskForm = document.getElementById('taskForm');
+            if (taskForm) {
+                taskForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    createTask();
+                });
+            }
+
+            // Edit form submissions
+            const editAnnouncementForm = document.getElementById('editAnnouncementForm');
+            if (editAnnouncementForm) {
+                editAnnouncementForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    updateAnnouncement();
+                });
+            }
+
+            const editTaskForm = document.getElementById('editTaskForm');
+            if (editTaskForm) {
+                editTaskForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    updateTask();
+                });
+            }
+        }
+
+        // Modal functions (Admin only)
+        function showAnnouncementModal() {
+            if (currentUser.role !== 'admin') return;
+            document.getElementById('announcementModal').classList.remove('hidden');
+            document.getElementById('create-dropdown').classList.add('hidden');
+        }
+
+        function closeAnnouncementModal() {
+            document.getElementById('announcementModal').classList.add('hidden');
+            document.getElementById('announcementForm').reset();
+        }
+
+        function showTaskModal() {
+            if (currentUser.role !== 'admin') return;
+            document.getElementById('taskModal').classList.remove('hidden');
+            document.getElementById('create-dropdown').classList.add('hidden');
+            
+            // Set minimum date to today
+            document.getElementById('taskDueDate').min = new Date().toISOString().split('T')[0];
+        }
+
+        function closeTaskModal() {
+            document.getElementById('taskModal').classList.add('hidden');
+            document.getElementById('taskForm').reset();
+        }
+
+        function closeEditAnnouncementModal() {
+            document.getElementById('editAnnouncementModal').classList.add('hidden');
+            document.getElementById('editAnnouncementForm').reset();
+        }
+
+        function closeEditTaskModal() {
+            document.getElementById('editTaskModal').classList.add('hidden');
+            document.getElementById('editTaskForm').reset();
+        }
+
+        function createAnnouncement() {
+            if (currentUser.role !== 'admin') return;
+            
+            const title = document.getElementById('announcementTitle').value.trim();
+            const content = document.getElementById('announcementContent').value.trim();
+            const priority = document.getElementById('announcementPriority').value;
+            const author = currentUser ? currentUser.name : 'Unknown';
+            const authorRole = currentUser ? currentUser.role : 'unknown';
+            const createdAt = new Date().toISOString();
+
+            // Client-side validation
+            if (!title || !content) {
+                showMessage('Title and content are required.', 'error');
+                return;
+            }
+            if (title.length > 100) {
+                showMessage('Title must be less than 100 characters.', 'error');
+                return;
+            }
+            if (content.length > 1000) {
+                showMessage('Content must be less than 1000 characters.', 'error');
+                return;
+            }
+
+            const announcementData = {
+                title,
+                content,
+                priority,
+                author,
+                authorRole,
+                createdAt
+            };
+
+            // Save to Firestore
+            const announcementsCol = window.collection(window.db, 'announcements');
+            const newAnnouncementRef = window.doc(announcementsCol);
+            
+            window.setDoc(newAnnouncementRef, announcementData)
+                .then(() => {
+                    showMessage('Announcement created successfully!', 'success');
+                    closeAnnouncementModal();
+                    loadAnnouncementsAndTasks(); // Reload data
+                })
+                .catch((error) => {
+                    console.error('Error saving announcement:', error);
+                    showMessage('Failed to save announcement. Please try again.', 'error');
+                });
+        }
+
+        function createTask() {
+            if (currentUser.role !== 'admin') return;
+            
+            const title = document.getElementById('taskTitle').value.trim();
+            const description = document.getElementById('taskDescription').value.trim();
+            const assignedTo = document.getElementById('taskAssignedTo').value;
+            const dueDate = document.getElementById('taskDueDate').value;
+            const priority = document.getElementById('taskPriority').value;
+            const peopleNeeded = parseInt(document.getElementById('taskPeopleNeeded').value, 10);
+            const author = currentUser ? currentUser.name : 'Unknown';
+            const authorRole = currentUser ? currentUser.role : 'unknown';
+            const createdAt = new Date().toISOString();
+
+            // Client-side validation
+            if (!title || !description || !assignedTo || !dueDate || !priority || !author || !authorRole) {
+                showMessage('All fields are required.', 'error');
+                return;
+            }
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(dueDate)) {
+                showMessage('Due date must be in YYYY-MM-DD format.', 'error');
+                return;
+            }
+            if (!['low', 'medium', 'high'].includes(priority)) {
+                showMessage('Priority must be low, medium, or high.', 'error');
+                return;
+            }
+            if (isNaN(peopleNeeded) || peopleNeeded < 1) {
+                showMessage('People Needed must be a positive integer.', 'error');
+                return;
+            }
+
+            const taskData = {
+                title,
+                description,
+                assignedTo,
+                dueDate,
+                priority,
+                author,
+                authorRole,
+                peopleNeeded,
+                createdAt,
+                status: 'pending' // Default status for new tasks
+            };
+
+            // Save to Firestore
+            const tasksCol = window.collection(window.db, 'tasks');
+            const newTaskRef = window.doc(tasksCol);
+            
+            window.setDoc(newTaskRef, taskData)
+                .then(() => {
+                    showMessage('Task created successfully!', 'success');
+                    closeTaskModal();
+                    loadAnnouncementsAndTasks();
+                })
+                .catch((error) => {
+                    console.error('Error saving task:', error);
+                    showMessage('Failed to save task. Please try again.', 'error');
+                });
+        }
+
+        function updateAnnouncement() {
+            if (currentUser.role !== 'admin') return;
+            
+            const announcementId = document.getElementById('editAnnouncementId').value;
+            const title = document.getElementById('editAnnouncementTitle').value.trim();
+            const content = document.getElementById('editAnnouncementContent').value.trim();
+            const priority = document.getElementById('editAnnouncementPriority').value;
+
+            // Client-side validation
+            if (!title || !content) {
+                showMessage('Title and content are required.', 'error');
+                return;
+            }
+            if (title.length > 100) {
+                showMessage('Title must be less than 100 characters.', 'error');
+                return;
+            }
+            if (content.length > 1000) {
+                showMessage('Content must be less than 1000 characters.', 'error');
+                return;
+            }
+
+            const announcementData = {
+                announcementId,
+                title,
+                content,
+                priority
+            };
+
+            fetch('api/update-announcement.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(announcementData)
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.success) {
+                    showMessage('Announcement updated successfully!', 'success');
+                    closeEditAnnouncementModal();
+                    loadAnnouncementsAndTasks(); // Reload data
+                } else {
+                    showMessage(result.message || 'Failed to update announcement.', 'error');
+                }
+            })
+            .catch(() => {
+                showMessage('Network error. Please try again.', 'error');
+            });
+        }
+
+        function updateTask() {
+            if (currentUser.role !== 'admin') return;
+            
+            const taskId = document.getElementById('editTaskId').value;
+            const title = document.getElementById('editTaskTitle').value.trim();
+            const description = document.getElementById('editTaskDescription').value.trim();
+            const assignedTo = document.getElementById('editTaskAssignedTo').value;
+            const dueDate = document.getElementById('editTaskDueDate').value;
+            const priority = document.getElementById('editTaskPriority').value;
+
+            // Client-side validation
+            if (!title || !description || !assignedTo || !dueDate || !priority) {
+                showMessage('All fields are required.', 'error');
+                return;
+            }
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(dueDate)) {
+                showMessage('Due date must be in YYYY-MM-DD format.', 'error');
+                return;
+            }
+            if (!['low', 'medium', 'high'].includes(priority)) {
+                showMessage('Priority must be low, medium, or high.', 'error');
+                return;
+            }
+
+            const taskData = {
+                taskId,
+                title,
+                description,
+                assignedTo,
+                dueDate,
+                priority
+            };
+
+            fetch('api/update-task.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(taskData)
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.success) {
+                    showMessage('Task updated successfully!', 'success');
+                    closeEditTaskModal();
+                    loadAnnouncementsAndTasks(); // Reload data
+                } else {
+                    showMessage(result.message || 'Failed to update task.', 'error');
+                }
+            })
+            .catch(() => {
+                showMessage('Network error. Please try again.', 'error');
+            });
+        }
+
+        function formatTimeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffInHours = Math.floor((now - date) / (1000 * 60 * 60));
+            
+            if (diffInHours < 1) return 'Just now';
+            if (diffInHours < 24) return `${diffInHours} hours ago`;
+            return `${Math.floor(diffInHours / 24)} days ago`;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+
+        function formatDateTime(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit'
+            });
+        }
+
+        function showMessage(message, type) {
+            // Create a temporary message element
+            const messageEl = document.createElement('div');
+            messageEl.className = `fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg text-white max-w-sm`;
+            
+            switch (type) {
+                case 'success':
+                    messageEl.className += ' bg-green-500';
+                    break;
+                case 'error':
+                    messageEl.className += ' bg-red-500';
+                    break;
+                case 'info':
+                    messageEl.className += ' bg-blue-500';
+                    break;
+                default:
+                    messageEl.className += ' bg-gray-500';
+            }
+            
+            messageEl.textContent = message;
+            document.body.appendChild(messageEl);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                if (messageEl.parentNode) {
+                    messageEl.parentNode.removeChild(messageEl);
+                }
+            }, 3000);
+        }
+
+        // Close modals when clicking outside
+        document.getElementById('detailModal').addEventListener('click', function(e) {
+            if (e.target === this) closeDetailModal();
+        });
+
+        const announcementModal = document.getElementById('announcementModal');
+        if (announcementModal) {
+            announcementModal.addEventListener('click', function(e) {
+                if (e.target === this) closeAnnouncementModal();
+            });
+        }
+
+        const taskModal = document.getElementById('taskModal');
+        if (taskModal) {
+            taskModal.addEventListener('click', function(e) {
+                if (e.target === this) closeTaskModal();
+            });
+        }
+
+        const editAnnouncementModal = document.getElementById('editAnnouncementModal');
+        if (editAnnouncementModal) {
+            editAnnouncementModal.addEventListener('click', function(e) {
+                if (e.target === this) closeEditAnnouncementModal();
+            });
+        }
+
+        const editTaskModal = document.getElementById('editTaskModal');
+        if (editTaskModal) {
+            editTaskModal.addEventListener('click', function(e) {
+                if (e.target === this) closeEditTaskModal();
+            });
+        }
+
+        function getAccountByEmail(email) {
+            return accountsData.find(acc => acc.email === email);
+        }
+
+        // Tooltip functions for dashboard task cards
+        function showDashboardTooltip(event, taskId) {
+            const task = allTasks.find(t => t.taskId === taskId);
+            if (!task || !task.acceptedBy || task.acceptedBy.length === 0) {
+                return;
+            }
+
+            const tooltip = document.getElementById(`dashboardTooltip-${taskId}`);
+            const tooltipContent = tooltip.querySelector('.dashboardTooltipContent');
+            
+            // Get names of people who accepted
+            const acceptedNames = task.acceptedBy.map(email => {
+                const account = getAccountByEmail(email);
+                return account ? account.name : email;
+            });
+            
+            if (acceptedNames.length > 0) {
+                tooltipContent.innerHTML = `<strong>Accepted by:</strong><br>${acceptedNames.join('<br>')}`;
+                tooltip.classList.remove('hidden');
+            }
+        }
+
+        function hideDashboardTooltip() {
+            // Hide all dashboard tooltips
+            document.querySelectorAll('[id^="dashboardTooltip-"]').forEach(tooltip => {
+                tooltip.classList.add('hidden');
+            });
+        }
+
+        // Tooltip functions for modal
+        function showModalTooltip(event, taskId) {
+            const task = allTasks.find(t => t.taskId === taskId);
+            if (!task || !task.acceptedBy || task.acceptedBy.length === 0) {
+                return;
+            }
+
+            const tooltip = document.getElementById('modalTooltip');
+            const tooltipContent = document.getElementById('modalTooltipContent');
+            
+            // Get names of people who accepted
+            const acceptedNames = task.acceptedBy.map(email => {
+                const account = getAccountByEmail(email);
+                return account ? account.name : email;
+            });
+            
+            if (acceptedNames.length > 0) {
+                tooltipContent.innerHTML = `<strong>Accepted by:</strong><br>${acceptedNames.join('<br>')}`;
+                tooltip.classList.remove('hidden');
+            }
+        }
+
+        function hideModalTooltip() {
+            const tooltip = document.getElementById('modalTooltip');
+            tooltip.classList.add('hidden');
+        }
+
+            function showCountLoaders() {
+                document.getElementById('childrenLoader').style.display = 'block';
+                document.getElementById('staffLoader').style.display = 'block';
+                document.getElementById('volunteersLoader').style.display = 'block';
+                document.getElementById('donorsLoader').style.display = 'block';
+                document.getElementById('donationLoader').style.display = 'block';
+            }
+
+            function hideCountLoaders() {
+                document.getElementById('childrenLoader').style.display = 'none';
+                document.getElementById('staffLoader').style.display = 'none';
+                document.getElementById('volunteersLoader').style.display = 'none';
+                document.getElementById('donorsLoader').style.display = 'none';
+                document.getElementById('donationLoader').style.display = 'none';
+            }
+
+            function showAnnouncementsTasksLoader() {
+                document.getElementById('announcementsTasksLoader').style.display = 'flex';
+                document.getElementById('announcementsTasksContent').style.display = 'none';
+            }
+
+            function hideAnnouncementsTasksLoader() {
+                document.getElementById('announcementsTasksLoader').style.display = 'none';
+                document.getElementById('announcementsTasksContent').style.display = 'grid';
+            }
+
+            function updateDonationBreakdown(cashAmount, gcashAmount) {
+                document.getElementById('cashAmount').textContent = `₱ ${cashAmount.toLocaleString()}`;
+                document.getElementById('gcashAmount').textContent = `₱ ${gcashAmount.toLocaleString()}`;
+                document.getElementById('paymentBreakdown').style.display = 'flex';
+            }
+
+            // Call loaders on page load
+            document.addEventListener('DOMContentLoaded', function() {
+                showCountLoaders();
+                showAnnouncementsTasksLoader();
+                
+            });
+    </script>
+    
+    <script type="module">
+        import { db, collection, getDocs, setDoc, doc, updateDoc, deleteDoc } from './firebase.js';
+
+        // Make Firebase functions globally accessible
+        window.db = db;
+        window.collection = collection;
+        window.setDoc = setDoc;
+        window.doc = doc;
+        window.getDocs = getDocs;
+        window.updateDoc = updateDoc;
+        window.deleteDoc = deleteDoc;
+
+        window.showAnnouncementDetail = showAnnouncementDetail;
+        window.showTaskDetail = showTaskDetail;
+        window.editAnnouncement = editAnnouncement;
+        window.editTask = editTask;
+        window.deleteAnnouncement = deleteAnnouncement;
+        window.deleteTask = deleteTask;
+        window.closeDetailModal = closeDetailModal;
+    </script>
+</body>
+</html>

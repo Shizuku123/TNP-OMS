@@ -1,0 +1,174 @@
+[
+    {
+        "dischargeId": "DC20256348",
+        "childId": "CH002",
+        "childName": "Michael Rana Santos",
+        "dischargeDate": "2025-07-19",
+        "dischargeType": "Temporary",
+        "dischargeReason": "Adoption",
+        "otherReasonExplanation": "",
+        "remarks": "CH",
+        "status": "Completed",
+        "submittedBy": "admin",
+        "submittedDate": "2025-07-19 16:41:29",
+        "documents": {
+            "medicalClearance": "DC20256348_medicalClearance_1752936089.png",
+            "educationalReport": "DC20256348_educationalReport_1752936089.png",
+            "socialWorkDocuments": "DC20256348_socialWorkDocuments_1752936089.png",
+            "legalDocuments": "DC20256348_legalDocuments_1752936089.png"
+        },
+        "adminRemarks": "",
+        "reviewedBy": "admin",
+        "reviewedDate": "2025-07-20 09:32:45",
+        "finalDischargeDate": "2025-07-19",
+        "handoverDetails": {
+            "recipientName": "Tirso Santos",
+            "relationship": "Father",
+            "recipientAddress": "Plaridel",
+            "recipientContact": "09123122342343",
+            "handoverCompletedBy": "admin",
+            "completedDate": "2025-07-20 11:59:26",
+            "documents": {
+                "validId": "DC20256348_validId_1753005566.jpg",
+                "acknowledgmentForm": "DC20256348_acknowledgmentForm_1753005566.jpg"
+            }
+        }
+    },
+    {
+        "dischargeId": "DC20254559",
+        "childId": "CH005",
+        "childName": "Chloe Rana Santos",
+        "dischargeDate": "2025-07-20",
+        "dischargeType": "Permanent",
+        "dischargeReason": "Adoption",
+        "otherReasonExplanation": "",
+        "remarks": "Basta",
+        "status": "Completed",
+        "submittedBy": "elena.mendoza",
+        "submittedDate": "2025-07-20 09:54:34",
+        "documents": {
+            "medicalClearance": "DC20254559_medicalClearance_1752998074.png",
+            "educationalReport": "DC20254559_educationalReport_1752998074.png",
+            "socialWorkDocuments": "DC20254559_socialWorkDocuments_1752998074.jpg",
+            "legalDocuments": "DC20254559_legalDocuments_1752998074.png"
+        },
+        "adminRemarks": "",
+        "reviewedBy": "admin",
+        "reviewedDate": "2025-07-20 11:59:39",
+        "finalDischargeDate": "2025-07-20",
+        "handoverDetails": {
+            "recipientName": "Tirso Santos",
+            "relationship": "Father",
+            "recipientAddress": "Plaridel",
+            "recipientContact": "09123456789",
+            "handoverCompletedBy": "elena.mendoza",
+            "completedDate": "2025-07-20 12:12:15",
+            "documents": {
+                "validId": "DC20254559_validId_1753006335.png",
+                "acknowledgmentForm": "DC20254559_acknowledgmentForm_1753006335.png"
+            }
+        }
+    },
+    {
+        "dischargeId": "DIS20250720_687cc1b79739d",
+        "childId": "CH004",
+        "childName": "Alden",
+        "dischargeDate": "2025-07-20",
+        "dischargeType": "Permanent",
+        "dischargeReason": "Adoption",
+        "remarks": "Basta boy",
+        "submittedBy": "admin",
+        "submittedDate": "2025-07-20 12:15:19",
+        "status": "Completed",
+        "documents": {
+            "medicalClearance": "DIS20250720_687cc1b79739d_medicalClearance_1753006519.jpg",
+            "educationalReport": "DIS20250720_687cc1b79739d_educationalReport_1753006519.jpg",
+            "socialWorkDocuments": "DIS20250720_687cc1b79739d_socialWorkDocuments_1753006519.jpg",
+            "legalDocuments": "DIS20250720_687cc1b79739d_legalDocuments_1753006519.jpg"
+        },
+        "finalDischargeDate": "2025-07-20",
+        "adminRemarks": "basta boy",
+        "reviewedBy": "admin",
+        "reviewedDate": "2025-07-20 12:15:43",
+        "handoverDetails": {
+            "recipientName": "Tirso Santos",
+            "relationship": "Father",
+            "recipientAddress": "Plaridel",
+            "recipientContact": "09123456789",
+            "handoverCompletedBy": "admin",
+            "completedDate": "2025-07-20 12:16:11",
+            "documents": {
+                "validId": "DIS20250720_687cc1b79739d_validId_1753006571.jpg",
+                "acknowledgmentForm": "DIS20250720_687cc1b79739d_acknowledgmentForm_1753006571.jpg"
+            }
+        }
+    },
+    {
+        "dischargeId": "DIS20250730_688a250f8c6b1",
+        "childId": "CH007",
+        "childName": "Jose John Mendoza",
+        "dischargeDate": "2025-07-30",
+        "dischargeType": "Permanent",
+        "dischargeReason": "Adoption",
+        "remarks": "basta",
+        "submittedBy": "admin",
+        "submittedDate": "2025-07-30 15:58:39",
+        "status": "Completed",
+        "documents": {
+            "medicalClearance": "DIS20250730_688a250f8c6b1_medicalClearance_1753883919.png",
+            "educationalReport": "DIS20250730_688a250f8c6b1_educationalReport_1753883919.jpg",
+            "socialWorkDocuments": "DIS20250730_688a250f8c6b1_socialWorkDocuments_1753883919.jpg",
+            "legalDocuments": "DIS20250730_688a250f8c6b1_legalDocuments_1753883919.png"
+        },
+        "finalDischargeDate": "2025-07-30",
+        "adminRemarks": "dasdas",
+        "reviewedBy": "admin",
+        "reviewedDate": "2025-07-30 16:24:47",
+        "handoverDetails": {
+            "recipientName": "sam",
+            "relationship": "Mother",
+            "recipientAddress": "plaridel",
+            "recipientContact": "09212345678",
+            "handoverCompletedBy": "admin",
+            "completedDate": "2025-07-30 16:31:48",
+            "documents": {
+                "validId": "DIS20250730_688a250f8c6b1_validId_1753885908.png",
+                "acknowledgmentForm": "DIS20250730_688a250f8c6b1_acknowledgmentForm_1753885908.png"
+            }
+        }
+    },
+    {
+        "dischargeId": "DIS20250730_688a32c70247f",
+        "childId": "CH009",
+        "childName": "Killua s Zoldyck",
+        "dischargeDate": "2025-07-30",
+        "dischargeType": "Permanent",
+        "dischargeReason": "Adoption",
+        "remarks": "ashjkbdasbjkdas",
+        "submittedBy": "admin",
+        "submittedDate": "2025-07-30 16:57:11",
+        "status": "Completed",
+        "documents": {
+            "medicalClearance": "DIS20250730_688a32c70247f_medicalClearance_1753887431.png",
+            "educationalReport": "DIS20250730_688a32c70247f_educationalReport_1753887431.png",
+            "socialWorkDocuments": "DIS20250730_688a32c70247f_socialWorkDocuments_1753887431.jpg",
+            "legalDocuments": "DIS20250730_688a32c70247f_legalDocuments_1753887431.png"
+        },
+        "finalDischargeDate": "2025-07-30",
+        "adminRemarks": "sdasdasdasdasdas",
+        "reviewedBy": "admin",
+        "reviewedDate": "2025-07-30 16:57:22",
+        "handoverDetails": {
+            "recipientName": "sample",
+            "relationship": "Guardian",
+            "recipientAddress": "sample",
+            "recipientContact": "09123456789",
+            "handoverCompletedBy": "admin",
+            "completedDate": "2025-07-30 16:58:05",
+            "documents": {
+                "validId": "DIS20250730_688a32c70247f_validId_1753887485.jpg",
+                "acknowledgmentForm": "DIS20250730_688a32c70247f_acknowledgmentForm_1753887485.png"
+            }
+        }
+    }
+]

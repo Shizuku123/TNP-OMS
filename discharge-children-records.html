@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discharge Records - Tahanan ng Pagmamahal OMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Replaced Firebase CDN imports with local firebase.js import -->
+    <script type="module" src="firebase.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'red-primary': '#dc2626',
+                        'red-secondary': '#ef4444',
+                        'red-light': '#fef2f2'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="flex items-center text-gray-600 hover:text-red-primary transition-colors">
+                        <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                       
+                    </a>
+                </div>
+                <h1 class="text-lg sm:text-xl font-semibold text-gray-900">Discharge Records</h1>
+                <div class="w-6"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Success/Error Messages -->
+    <div id="messageContainer" class="fixed top-20 right-4 z-50 max-w-sm hidden"></div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-4 sm:mb-6">
+            <div class="bg-white rounded-lg shadow p-3 sm:p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-2 sm:ml-4 min-w-0">
+                        <p class="text-xs sm:text-sm font-medium text-gray-500 truncate">Total</p>
+                        <p id="totalRequests" class="text-lg sm:text-2xl font-semibold text-gray-900">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-3 sm:p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-6 w-6 sm:h-8 sm:w-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-2 sm:ml-4 min-w-0">
+                        <p class="text-xs sm:text-sm font-medium text-gray-500 truncate">Waiting</p>
+                        <p id="waitingApproval" class="text-lg sm:text-2xl font-semibold text-gray-900">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-3 sm:p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-6 w-6 sm:h-8 sm:w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-2 sm:ml-4 min-w-0">
+                        <p class="text-xs sm:text-sm font-medium text-gray-500 truncate">Approved</p>
+                        <p id="approvedCount" class="text-lg sm:text-2xl font-semibold text-gray-900">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-3 sm:p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-6 w-6 sm:h-8 sm:w-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-2 sm:ml-4 min-w-0">
+                        <p class="text-xs sm:text-sm font-medium text-gray-500 truncate">Completed</p>
+                        <p id="completedCount" class="text-lg sm:text-2xl font-semibold text-gray-900">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="bg-white rounded-lg shadow mb-4 sm:mb-6">
+            <div class="border-b border-gray-200 overflow-x-auto">
+                <nav class="-mb-px flex px-4 sm:px-6" aria-label="Tabs">
+                    <button id="allTab" class="status-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-2 sm:px-4 border-b-2 font-medium text-xs sm:text-sm active flex-shrink-0 mr-4 sm:mr-8">
+                        <span class="hidden sm:inline">All Records</span>
+                        <span class="sm:hidden">All</span>
+                    </button>
+                    <button id="waitingTab" class="status-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-2 sm:px-4 border-b-2 font-medium text-xs sm:text-sm flex-shrink-0 mr-4 sm:mr-8">
+                        <span class="hidden sm:inline">Waiting for Approval</span>
+                        <span class="sm:hidden">Waiting</span>
+                    </button>
+                    <button id="approvedTab" class="status-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-2 sm:px-4 border-b-2 font-medium text-xs sm:text-sm flex-shrink-0 mr-4 sm:mr-8">
+                        <span class="hidden sm:inline">Approved</span>
+                        <span class="sm:hidden">Approved</span>
+                    </button>
+                    <button id="completedTab" class="status-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-2 sm:px-4 border-b-2 font-medium text-xs sm:text-sm flex-shrink-0 mr-4 sm:mr-8">
+                        <span class="hidden sm:inline">Completed</span>
+                        <span class="sm:hidden">Completed</span>
+                    </button>
+                    <button id="rejectedTab" class="status-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-2 sm:px-4 border-b-2 font-medium text-xs sm:text-sm flex-shrink-0">
+                        <span class="hidden sm:inline">Rejected</span>
+                        <span class="sm:hidden">Rejected</span>
+                    </button>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Records List -->
+        <div id="recordsList" class="space-y-3 sm:space-y-4">
+            <!-- Records will be populated by JavaScript -->
+        </div>
+
+        <!-- Added skeleton loading container -->
+        <!-- Skeleton Loading -->
+        <div id="skeletonLoading" class="space-y-3 sm:space-y-4 hidden">
+            <!-- Skeleton items will be populated by JavaScript -->
+        </div>
+
+        <!-- No Records Message -->
+        <div id="noRecords" class="hidden text-center py-8 sm:py-12">
+            <svg class="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No discharge records found</h3>
+            <p class="mt-1 text-sm text-gray-500">No discharge requests match the current filter.</p>
+        </div>
+    </div>
+
+    <!-- Review Modal (Admin Only) -->
+    <div id="reviewModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-2 sm:p-4">
+        <div class="relative mx-auto border w-full max-w-4xl shadow-lg rounded-md bg-white max-h-[95vh] overflow-y-auto my-2 sm:my-4">
+            <div class="sticky top-0 bg-white border-b px-4 sm:px-6 py-4 rounded-t-md">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg sm:text-xl font-medium text-gray-900">Review Discharge Request</h3>
+                    <button onclick="closeReviewModal()" class="text-gray-400 hover:text-gray-600 p-1 -m-1">
+                        <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="p-4 sm:p-6">
+                <div id="reviewContent" class="space-y-4 sm:space-y-6">
+                    <!-- Content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Handover Modal -->
+    <div id="handoverModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-2 sm:p-4">
+        <div class="relative mx-auto border w-full max-w-4xl shadow-lg rounded-md bg-white max-h-[95vh] overflow-y-auto my-2 sm:my-4">
+            <div class="sticky top-0 bg-white border-b px-4 sm:px-6 py-4 rounded-t-md">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg sm:text-xl font-medium text-gray-900">Complete Handover Process</h3>
+                    <button onclick="closeHandoverModal()" class="text-gray-400 hover:text-gray-600 p-1 -m-1">
+                        <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="p-4 sm:p-6">
+                <form id="handoverForm" class="space-y-4 sm:space-y-6">
+                    <!-- Handover form content will be loaded here -->
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Updated script to use firebase.js imports instead of inline Firebase initialization -->
+    <script type="module">
+        import { 
+            db, 
+            storage,
+            collection, 
+            getDocs, 
+            doc, 
+            updateDoc, 
+            addDoc, 
+            deleteDoc, // Added deleteDoc import for child deletion
+            query, 
+            orderBy,
+            ref,
+            uploadBytes,
+            getDownloadURL
+        } from './firebase.js';
+
+        let allRecords = [];
+        let filteredRecords = [];
+        let currentUser = null;
+        let currentFilter = 'all';
+
+        // Session Manager
+        const sessionManager = {
+            getCurrentUser: function() {
+                const user = localStorage.getItem('currentUser');
+                return user ? JSON.parse(user) : null;
+            },
+            
+            requireLogin: function() {
+                if (!localStorage.getItem('currentUser')) {
+                    window.location.href = 'login.html';
+                    return false;
+                }
+                return true;
+            }
+        };
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication
+            if (!sessionManager.requireLogin()) {
+                return;
+            }
+
+            currentUser = sessionManager.getCurrentUser();
+            loadDischargeRecords();
+            setupEventListeners();
+        });
+
+        async function loadDischargeRecords() {
+            try {
+                showSkeletonLoading();
+                
+                // Query discharge requests from Firestore, ordered by submission date
+                const dischargeQuery = query(
+                    collection(db, 'dischargeRequests'),
+                    orderBy('submittedDate', 'desc')
+                );
+                
+                const querySnapshot = await getDocs(dischargeQuery);
+                allRecords = [];
+                
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    allRecords.push({
+                        id: docSnap.id,
+                        dischargeId: data.dischargeId || docSnap.id,
+                        childName: data.childName,
+                        childId: data.childId,
+                        dischargeDate: data.dischargeDate,
+                        dischargeType: data.dischargeType,
+                        dischargeReason: data.dischargeReason,
+                        status: data.status || 'Waiting for approval',
+                        submittedBy: data.submittedBy,
+                        submittedDate: data.submittedDate,
+                        remarks: data.remarks,
+                        adminRemarks: data.adminRemarks,
+                        reviewedBy: data.reviewedBy,
+                        reviewedDate: data.reviewedDate,
+                        finalDischargeDate: data.finalDischargeDate,
+                        documents: data.documents,
+                        handoverDetails: data.handoverDetails
+                    });
+                });
+                
+                // Filter records based on user role
+                if (currentUser.role !== 'admin') {
+                    // Staff can only see their own discharge requests
+                    allRecords = allRecords.filter(record => record.submittedBy === currentUser.username);
+                }
+                
+                hideSkeletonLoading();
+                
+                filterRecords();
+                updateStatistics();
+                
+                // Check for highlight parameter
+                const urlParams = new URLSearchParams(window.location.search);
+                const highlightId = urlParams.get('highlight');
+                if (highlightId) {
+                    setTimeout(() => {
+                        highlightRecord(highlightId);
+                    }, 500);
+                }
+                
+            } catch (error) {
+                console.error('Error loading discharge records:', error);
+                hideSkeletonLoading();
+                showMessage('Error loading discharge records: ' + error.message, 'error');
+            }
+        }
+
+        function highlightRecord(dischargeId) {
+            const recordElement = document.querySelector(`[data-discharge-id="${dischargeId}"]`);
+            if (recordElement) {
+                recordElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                recordElement.classList.add('ring-2', 'ring-blue-500', 'ring-opacity-50');
+                setTimeout(() => {
+                    recordElement.classList.remove('ring-2', 'ring-blue-500', 'ring-opacity-50');
+                }, 3000);
+            }
+        }
+
+        function setupEventListeners() {
+            // Status tab buttons
+            document.querySelectorAll('.status-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.id.replace('Tab', '');
+                    currentFilter = tabId === 'all' ? 'all' : 
+                                   tabId === 'waiting' ? 'Waiting for approval' :
+                                   tabId === 'approved' ? 'Approved' :
+                                   tabId === 'completed' ? 'Completed' :
+                                   tabId === 'rejected' ? 'Rejected' : 'all';
+                    
+                    // Update active tab
+                    document.querySelectorAll('.status-tab').forEach(t => {
+                        t.classList.remove('border-red-primary', 'text-red-primary', 'active');
+                        t.classList.add('border-transparent', 'text-gray-500');
+                    });
+                    this.classList.remove('border-transparent', 'text-gray-500');
+                    this.classList.add('border-red-primary', 'text-red-primary', 'active');
+                    
+                    filterRecords();
+                });
+            });
+
+            // Modal close on outside click
+            document.getElementById('reviewModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeReviewModal();
+                }
+            });
+
+            document.getElementById('handoverModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeHandoverModal();
+                }
+            });
+        }
+
+        function filterRecords() {
+            if (currentFilter === 'all') {
+                filteredRecords = [...allRecords];
+            } else {
+                filteredRecords = allRecords.filter(record => record.status === currentFilter);
+            }
+            
+            displayRecords();
+        }
+
+        function displayRecords() {
+            const recordsList = document.getElementById('recordsList');
+            const noRecords = document.getElementById('noRecords');
+
+            if (filteredRecords.length === 0) {
+                recordsList.innerHTML = '';
+                noRecords.classList.remove('hidden');
+                return;
+            }
+
+            noRecords.classList.add('hidden');
+            
+            recordsList.innerHTML = filteredRecords.map(record => {
+                const statusColor = getStatusColor(record.status);
+                const canReview = currentUser.role === 'admin' && record.status === 'Waiting for approval';
+                const canHandover = record.status === 'Approved' && record.submittedBy === currentUser.username;
+                
+                return `
+                    <div class="bg-white rounded-lg shadow p-4 sm:p-6 transition-all duration-300" data-discharge-id="${record.dischargeId}">
+                        <div class="space-y-3 sm:space-y-4">
+                            <!-- Header Section -->
+                            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-3 sm:space-y-0">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex flex-col space-y-2 mb-3">
+                                        <div class="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+                                            <h3 class="text-lg font-medium text-gray-900 break-words">${record.childName}</h3>
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor} self-start">
+                                                ${record.status}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Action Buttons -->
+                                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 flex-shrink-0">
+                                    ${canReview ? `
+                                    <button onclick="reviewRequest('${record.dischargeId}')" 
+                                            class="w-full sm:w-auto px-3 sm:px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors text-center">
+                                        <span class="hidden sm:inline">Review Request</span>
+                                        <span class="sm:hidden">Review</span>
+                                    </button>
+                                    ` : ''}
+                                    
+                                    ${canHandover ? `
+                                    <button onclick="startHandover('${record.dischargeId}')" 
+                                            class="w-full sm:w-auto px-3 sm:px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors text-center">
+                                        <span class="hidden sm:inline">Complete Handover</span>
+                                        <span class="sm:hidden">Handover</span>
+                                    </button>
+                                    ` : ''}
+                                    
+                                    ${record.status === 'Completed' ? `
+                                    <button onclick="viewHandoverDetails('${record.dischargeId}')" 
+                                            class="w-full sm:w-auto px-3 sm:px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition-colors text-center">
+                                        <span class="hidden sm:inline">View Handover</span>
+                                        <span class="sm:hidden">View Handover</span>
+                                    </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            
+                            <!-- Details Grid -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 text-sm text-gray-600">
+                                <div class="break-words">
+                                    <span class="font-medium">Child ID:</span> ${record.childId}
+                                </div>
+                                <div class="break-words">
+                                    <span class="font-medium">Discharge Date:</span> ${formatDate(record.dischargeDate)}
+                                </div>
+                                <div class="break-words">
+                                    <span class="font-medium">Type:</span> ${record.dischargeType}
+                                </div>
+                                <div class="break-words">
+                                    <span class="font-medium">Reason:</span> ${record.dischargeReason}
+                                </div>
+                                <div class="break-words">
+                                    <span class="font-medium">Submitted by:</span> ${record.submittedBy}
+                                </div>
+                                <div class="break-words">
+                                    <span class="font-medium">Submitted:</span> ${formatDate(record.submittedDate)}
+                                </div>
+                            </div>
+                            
+                            ${record.remarks ? `
+                            <div class="pt-2 border-t">
+                                <p class="text-sm text-gray-600 break-words"><span class="font-medium">Remarks:</span> ${record.remarks}</p>
+                            </div>
+                            ` : ''}
+                            
+                            ${record.adminRemarks ? `
+                            <div class="p-3 bg-blue-50 rounded-lg">
+                                <p class="text-sm text-blue-800 break-words"><span class="font-medium">Admin Remarks:</span> ${record.adminRemarks}</p>
+                                <p class="text-xs text-blue-600 mt-1">Reviewed by ${record.reviewedBy} on ${formatDate(record.reviewedDate)}</p>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateStatistics() {
+            const total = allRecords.length;
+            const waiting = allRecords.filter(r => r.status === 'Waiting for approval').length;
+            const approved = allRecords.filter(r => r.status === 'Approved').length;
+            const completed = allRecords.filter(r => r.status === 'Completed').length;
+
+            document.getElementById('totalRequests').textContent = total;
+            document.getElementById('waitingApproval').textContent = waiting;
+            document.getElementById('approvedCount').textContent = approved;
+            document.getElementById('completedCount').textContent = completed;
+        }
+
+        function reviewRequest(dischargeId) {
+            const record = allRecords.find(r => r.dischargeId === dischargeId);
+            if (!record) return;
+
+            document.getElementById('reviewContent').innerHTML = `
+                <div class="bg-gray-50 rounded-lg p-4 sm:p-6 mb-4 sm:mb-6">
+                    <h4 class="font-medium text-gray-900 mb-3 sm:mb-4">Discharge Request Details</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
+                        <div class="break-words"><span class="font-medium">Child:</span> ${record.childName}</div>
+                        <div class="break-words"><span class="font-medium">Child ID:</span> ${record.childId}</div>
+                        <div class="break-words"><span class="font-medium">Discharge Date:</span> ${formatDate(record.dischargeDate)}</div>
+                        <div class="break-words"><span class="font-medium">Type:</span> ${record.dischargeType}</div>
+                        <div class="break-words"><span class="font-medium">Reason:</span> ${record.dischargeReason}</div>
+                        <div class="break-words"><span class="font-medium">Submitted by:</span> ${record.submittedBy}</div>
+                    </div>
+                    ${record.remarks ? `
+                    <div class="mt-3 sm:mt-4">
+                        <span class="font-medium">Remarks:</span>
+                        <p class="text-gray-600 mt-1 break-words">${record.remarks}</p>
+                    </div>
+                    ` : ''}
+                </div>
+
+                <div class="bg-white border rounded-lg p-4 sm:p-6 mb-4 sm:mb-6">
+                    <h4 class="font-medium text-gray-900 mb-3 sm:mb-4">Uploaded Documents</h4>
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between p-2 sm:p-3 bg-gray-50 rounded">
+                            <span class="text-sm break-words">Medical Clearance</span>
+                            <button onclick="viewDocument('${record.documents?.medicalClearance || ''}')" class="text-blue-600 hover:text-blue-800 text-sm flex-shrink-0 ml-2">View</button>
+                        </div>
+                        <div class="flex items-center justify-between p-2 sm:p-3 bg-gray-50 rounded">
+                            <span class="text-sm break-words">Educational Report</span>
+                            <button onclick="viewDocument('${record.documents?.educationalReport || ''}')" class="text-blue-600 hover:text-blue-800 text-sm flex-shrink-0 ml-2">View</button>
+                        </div>
+                        <div class="flex items-center justify-between p-2 sm:p-3 bg-gray-50 rounded">
+                            <span class="text-sm break-words">Social Work Documents</span>
+                            <button onclick="viewDocument('${record.documents?.socialWorkDocuments || ''}')" class="text-blue-600 hover:text-blue-800 text-sm flex-shrink-0 ml-2">View</button>
+                        </div>
+                        ${record.documents?.legalDocuments ? `
+                        <div class="flex items-center justify-between p-2 sm:p-3 bg-gray-50 rounded">
+                            <span class="text-sm break-words">Legal Documents</span>
+                            <button onclick="viewDocument('${record.documents.legalDocuments}')" class="text-blue-600 hover:text-blue-800 text-sm flex-shrink-0 ml-2">View</button>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+
+                <form id="reviewForm" class="space-y-4 sm:space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Final Discharge Date</label>
+                        <input type="date" name="finalDischargeDate" value="${record.dischargeDate}" required 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Admin Remarks</label>
+                        <textarea name="adminRemarks" rows="4" required
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary resize-none text-sm"
+                                  placeholder="Enter your review comments and decision rationale..."></textarea>
+                    </div>
+                    
+                    <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4 pt-4 border-t">
+                        <button type="button" onclick="closeReviewModal()" 
+                                class="w-full sm:w-auto px-4 sm:px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-center text-sm">
+                            Cancel
+                        </button>
+                        <button type="button" onclick="rejectRequest('${dischargeId}')" 
+                                class="w-full sm:w-auto px-4 sm:px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-center text-sm">
+                            Reject
+                        </button>
+                        <button type="button" onclick="approveRequest('${dischargeId}')" 
+                                class="w-full sm:w-auto px-4 sm:px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-center text-sm">
+                            Approve
+                        </button>
+                    </div>
+                </form>
+            `;
+
+            document.getElementById('reviewModal').classList.remove('hidden');
+        }
+
+        async function approveRequest(dischargeId) {
+            try {
+                const formData = new FormData(document.getElementById('reviewForm'));
+                
+                const record = allRecords.find(r => r.dischargeId === dischargeId);
+                if (!record) throw new Error('Record not found');
+                
+                const updateData = {
+                    status: 'Approved',
+                    finalDischargeDate: formData.get('finalDischargeDate'),
+                    adminRemarks: formData.get('adminRemarks'),
+                    reviewedBy: currentUser.username,
+                    reviewedDate: new Date().toISOString()
+                };
+
+                await updateDoc(doc(db, 'dischargeRequests', record.id), updateData);
+                
+                showMessage('Discharge request approved successfully!', 'success');
+                closeReviewModal();
+                loadDischargeRecords();
+                
+            } catch (error) {
+                console.error('Error approving request:', error);
+                showMessage('Error approving request: ' + error.message, 'error');
+            }
+        }
+
+        async function rejectRequest(dischargeId) {
+            try {
+                const formData = new FormData(document.getElementById('reviewForm'));
+                
+                const record = allRecords.find(r => r.dischargeId === dischargeId);
+                if (!record) throw new Error('Record not found');
+                
+                const updateData = {
+                    status: 'Rejected',
+                    adminRemarks: formData.get('adminRemarks'),
+                    reviewedBy: currentUser.username,
+                    reviewedDate: new Date().toISOString()
+                };
+
+                await updateDoc(doc(db, 'dischargeRequests', record.id), updateData);
+                
+                showMessage('Discharge request rejected.', 'success');
+                closeReviewModal();
+                loadDischargeRecords();
+                
+            } catch (error) {
+                console.error('Error rejecting request:', error);
+                showMessage('Error rejecting request: ' + error.message, 'error');
+            }
+        }
+
+        function startHandover(dischargeId) {
+            const record = allRecords.find(r => r.dischargeId === dischargeId);
+            if (!record) return;
+
+            document.getElementById('handoverForm').innerHTML = `
+                <div class="bg-gray-50 rounded-lg p-4 sm:p-6 mb-4 sm:mb-6">
+                    <h4 class="font-medium text-gray-900 mb-3 sm:mb-4">Child Information</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
+                        <div class="break-words"><span class="font-medium">Child:</span> ${record.childName}</div>
+                        <div class="break-words"><span class="font-medium">Child ID:</span> ${record.childId}</div>
+                        <div class="break-words"><span class="font-medium">Discharge Date:</span> ${formatDate(record.finalDischargeDate || record.dischargeDate)}</div>
+                        <div class="break-words"><span class="font-medium">Reason:</span> ${record.dischargeReason}</div>
+                    </div>
+                </div>
+
+                <div class="space-y-4 sm:space-y-6">
+                    <h4 class="text-lg font-medium text-gray-900">Recipient Information</h4>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Recipient Full Name <span class="text-red-500">*</span></label>
+                            <input type="text" name="recipientName" required 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm">
+                            <p class="text-xs text-gray-500 mt-1">The person receiving the child</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Relationship to Child <span class="text-red-500">*</span></label>
+                            <select name="relationship" required 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm">
+                                <option value="">Select relationship</option>
+                                <option value="Mother">Mother</option>
+                                <option value="Father">Father</option>
+                                <option value="Guardian">Guardian</option>
+                                <option value="Relative">Relative</option>
+                                <option value="Adoptive Parent">Adoptive Parent</option>
+                                <option value="Institution">Institution</option>
+                            </select>
+                        </div>
+                        
+                        <div class="sm:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Recipient Address <span class="text-red-500">*</span></label>
+                            <textarea name="recipientAddress" rows="3" required
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary resize-none text-sm"
+                                      placeholder="Where the child will be living post-discharge"></textarea>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Recipient Contact Number <span class="text-red-500">*</span></label>
+                            <input type="tel" name="recipientContact" required 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm">
+                            <p class="text-xs text-gray-500 mt-1">For follow-up and verification</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Valid ID Uploaded <span class="text-red-500">*</span></label>
+                            <input type="file" name="validId" required accept=".pdf,.jpg,.jpeg,.png"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm">
+                            <p class="text-xs text-gray-500 mt-1">Government-issued ID of the recipient</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Acknowledgment Form <span class="text-red-500">*</span></label>
+                            <input type="file" name="acknowledgmentForm" required accept=".pdf,.jpg,.jpeg,.png"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm">
+                            <p class="text-xs text-gray-500 mt-1">Signed discharge/handover form (PDF or image)</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Handover Completed By <span class="text-red-500">*</span></label>
+                            <input type="text" name="handoverCompletedBy" value="${currentUser.username}" required 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm">
+                            <p class="text-xs text-gray-500 mt-1">Staff who finalized the transfer</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4 pt-4 border-t">
+                        <button type="button" onclick="closeHandoverModal()" 
+                                class="w-full sm:w-auto px-4 sm:px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-center text-sm">
+                            Cancel
+                        </button>
+                        <button type="button" onclick="completeHandover('${dischargeId}')" 
+                                class="w-full sm:w-auto px-4 sm:px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-center text-sm">
+                            Complete Handover
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('handoverModal').classList.remove('hidden');
+        }
+
+        async function completeHandover(dischargeId) {
+            try {
+                const formData = new FormData(document.getElementById('handoverForm'));
+                
+                const record = allRecords.find(r => r.dischargeId === dischargeId);
+                if (!record) throw new Error('Record not found');
+                
+                const validIdFile = formData.get('validId');
+                const acknowledgmentFile = formData.get('acknowledgmentForm');
+                
+                let validIdString = '';
+                let acknowledgmentString = '';
+                
+                // Convert validId file to base64 string
+                if (validIdFile && validIdFile.size > 0) {
+                    validIdString = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(validIdFile);
+                    });
+                }
+                
+                // Convert acknowledgment file to base64 string
+                if (acknowledgmentFile && acknowledgmentFile.size > 0) {
+                    acknowledgmentString = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(acknowledgmentFile);
+                    });
+                }
+                
+                const handoverDetails = {
+                    recipientName: formData.get('recipientName'),
+                    relationship: formData.get('relationship'),
+                    recipientAddress: formData.get('recipientAddress'),
+                    recipientContact: formData.get('recipientContact'),
+                    handoverCompletedBy: formData.get('handoverCompletedBy'),
+                    completedDate: new Date().toISOString(),
+                    documents: {
+                        validId: validIdString,
+                        acknowledgmentForm: acknowledgmentString
+                    }
+                };
+                
+                const updateData = {
+                    status: 'Completed',
+                    handoverDetails: handoverDetails
+                };
+
+                // Update discharge request status
+                await updateDoc(doc(db, 'dischargeRequests', record.id), updateData);
+                
+                await deleteChildFromDatabase(record.childId);
+                
+                showMessage('Handover completed successfully! Child discharge is now complete and child record has been removed.', 'success');
+                closeHandoverModal();
+                loadDischargeRecords();
+                
+            } catch (error) {
+                console.error('Error completing handover:', error);
+                showMessage('Error completing handover: ' + error.message, 'error');
+            }
+        }
+
+        async function deleteChildFromDatabase(childId) {
+            try {
+                // Find the child document by childId
+                const childrenQuery = query(collection(db, 'children'));
+                const querySnapshot = await getDocs(childrenQuery);
+                
+                let childDocId = null;
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    if (data.childId === childId) {
+                        childDocId = docSnap.id;
+                    }
+                });
+                
+                if (childDocId) {
+                    // Delete the child document
+                    await deleteDoc(doc(db, 'children', childDocId));
+                    console.log(`Child ${childId} successfully deleted from database`);
+                } else {
+                    console.warn(`Child with ID ${childId} not found in children collection`);
+                }
+                
+            } catch (error) {
+                console.error('Error deleting child from database:', error);
+                throw new Error('Failed to delete child record: ' + error.message);
+            }
+        }
+
+        function viewHandoverDetails(dischargeId) {
+            const record = allRecords.find(r => r.dischargeId === dischargeId);
+            if (!record || !record.handoverDetails) return;
+
+            const handover = record.handoverDetails;
+            
+            document.getElementById('reviewContent').innerHTML = `
+                <div class="bg-gray-50 rounded-lg p-4 sm:p-6 mb-4 sm:mb-6">
+                    <h4 class="font-medium text-gray-900 mb-3 sm:mb-4">Child Information</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
+                        <div class="break-words"><span class="font-medium">Child:</span> ${record.childName}</div>
+                        <div class="break-words"><span class="font-medium">Child ID:</span> ${record.childId}</div>
+                        <div class="break-words"><span class="font-medium">Discharge Date:</span> ${formatDate(record.finalDischargeDate || record.dischargeDate)}</div>
+                        <div class="break-words"><span class="font-medium">Reason:</span> ${record.dischargeReason}</div>
+                    </div>
+                </div>
+
+                <div class="bg-white border rounded-lg p-4 sm:p-6 mb-4 sm:mb-6">
+                    <h4 class="font-medium text-gray-900 mb-3 sm:mb-4">Handover Details</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
+                        <div class="break-words"><span class="font-medium">Recipient Name:</span> ${handover.recipientName}</div>
+                        <div class="break-words"><span class="font-medium">Relationship:</span> ${handover.relationship}</div>
+                        <div class="break-words"><span class="font-medium">Contact:</span> ${handover.recipientContact}</div>
+                        <div class="break-words"><span class="font-medium">Completed By:</span> ${handover.handoverCompletedBy}</div>
+                        <div class="break-words"><span class="font-medium">Completed Date:</span> ${formatDate(handover.completedDate)}</div>
+                    </div>
+                    <div class="mt-3 sm:mt-4">
+                        <span class="font-medium">Address:</span>
+                        <p class="text-gray-600 mt-1 break-words">${handover.recipientAddress}</p>
+                    </div>
+                </div>
+
+                <div class="bg-white border rounded-lg p-4 sm:p-6 mb-4 sm:mb-6">
+                    <h4 class="font-medium text-gray-900 mb-3 sm:mb-4">Handover Documents</h4>
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between p-2 sm:p-3 bg-gray-50 rounded">
+                            <span class="text-sm break-words">Valid ID</span>
+                            <button onclick="viewHandoverDocument('${handover.documents?.validId || ''}')" class="text-blue-600 hover:text-blue-800 text-sm flex-shrink-0 ml-2">View</button>
+                        </div>
+                        <div class="flex items-center justify-between p-2 sm:p-3 bg-gray-50 rounded">
+                            <span class="text-sm break-words">Acknowledgment Form</span>
+                            <button onclick="viewHandoverDocument('${handover.documents?.acknowledgmentForm || ''}')" class="text-blue-600 hover:text-blue-800 text-sm flex-shrink-0 ml-2">View</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end pt-4 border-t">
+                    <button type="button" onclick="closeReviewModal()" 
+                            class="px-4 sm:px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-center text-sm">
+                        Close
+                    </button>
+                </div>
+            `;
+
+            document.getElementById('reviewModal').classList.remove('hidden');
+        }
+
+        function showSkeletonLoading() {
+            const skeletonContainer = document.getElementById('skeletonLoading');
+            const recordsList = document.getElementById('recordsList');
+            const noRecords = document.getElementById('noRecords');
+            
+            // Hide actual content
+            recordsList.classList.add('hidden');
+            noRecords.classList.add('hidden');
+            
+            // Show skeleton with default count of 6 items
+            const skeletonCount = 6;
+            skeletonContainer.innerHTML = generateSkeletonItems(skeletonCount);
+            skeletonContainer.classList.remove('hidden');
+        }
+
+        function hideSkeletonLoading() {
+            const skeletonContainer = document.getElementById('skeletonLoading');
+            const recordsList = document.getElementById('recordsList');
+            
+            // Hide skeleton
+            skeletonContainer.classList.add('hidden');
+            
+            // Show actual content
+            recordsList.classList.remove('hidden');
+        }
+
+        function generateSkeletonItems(count) {
+            let skeletonHTML = '';
+            
+            for (let i = 0; i < count; i++) {
+                skeletonHTML += `
+                    <div class="bg-white rounded-lg shadow p-4 sm:p-6 animate-pulse">
+                        <div class="space-y-3 sm:space-y-4">
+                            <!-- Header Section -->
+                            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-3 sm:space-y-0">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex flex-col space-y-2 mb-3">
+                                        <div class="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+                                            <div class="h-6 bg-gray-300 rounded w-48"></div>
+                                            <div class="h-5 bg-gray-200 rounded-full w-24"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Action Buttons -->
+                                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 flex-shrink-0">
+                                    <div class="h-8 bg-gray-200 rounded w-24"></div>
+                                    <div class="h-8 bg-gray-200 rounded w-24"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Details Grid -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
+                                <div class="h-4 bg-gray-200 rounded w-32"></div>
+                                <div class="h-4 bg-gray-200 rounded w-36"></div>
+                                <div class="h-4 bg-gray-200 rounded w-28"></div>
+                                <div class="h-4 bg-gray-200 rounded w-40"></div>
+                                <div class="h-4 bg-gray-200 rounded w-32"></div>
+                                <div class="h-4 bg-gray-200 rounded w-36"></div>
+                            </div>
+                            
+                            <!-- Remarks Section -->
+                            <div class="pt-2 border-t">
+                                <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                                <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            return skeletonHTML;
+        }
+
+        // Make functions globally accessible for onclick handlers
+        window.reviewRequest = reviewRequest;
+        window.approveRequest = approveRequest;
+        window.rejectRequest = rejectRequest;
+        window.startHandover = startHandover;
+        window.completeHandover = completeHandover;
+        window.viewHandoverDetails = viewHandoverDetails;
+        window.closeReviewModal = closeReviewModal;
+        window.closeHandoverModal = closeHandoverModal;
+        window.viewDocument = viewDocument;
+        window.viewHandoverDocument = viewHandoverDocument;
+
+        function viewDocument(url) {
+            if (url) {
+                if (url.startsWith('data:')) {
+                    // Handle base64 encoded documents
+                    const newWindow = window.open();
+                    newWindow.document.write(`
+                        <html>
+                            <head><title>Document Viewer</title></head>
+                            <body style="margin:0; display:flex; justify-content:center; align-items:center; min-height:100vh; background:#f5f5f5;">
+                                <img src="${url}" style="max-width:100%; max-height:100%; object-fit:contain;" alt="Document">
+                            </body>
+                        </html>
+                    `);
+                } else {
+                    // Handle regular URLs
+                    window.open(url, '_blank');
+                }
+            } else {
+                showMessage('Document not available', 'error');
+            }
+        }
+
+        function viewHandoverDocument(url) {
+            if (url) {
+                window.open(url, '_blank');
+            }
+        }
+
+        function closeReviewModal() {
+            document.getElementById('reviewModal').classList.add('hidden');
+        }
+
+        function closeHandoverModal() {
+            document.getElementById('handoverModal').classList.add('hidden');
+        }
+
+        function getStatusColor(status) {
+            switch (status) {
+                case 'Waiting for approval':
+                    return 'bg-yellow-100 text-yellow-800';
+                case 'Approved':
+                    return 'bg-green-100 text-green-800';
+                case 'Completed':
+                    return 'bg-blue-100 text-blue-800';
+                case 'Rejected':
+                    return 'bg-red-100 text-red-800';
+                default:
+                    return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'Not specified';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+
+        function showMessage(message, type) {
+            const container = document.getElementById('messageContainer');
+            let bgColor = '';
+            let icon = '';
+            
+            if (type === 'success') {
+                bgColor = 'bg-green-100 border-green-400 text-green-700';
+                icon = '✓';
+            } else if (type === 'error') {
+                bgColor = 'bg-red-100 border-red-400 text-red-700';
+                icon = '✗';
+            } else {
+                bgColor = 'bg-blue-100 border-blue-400 text-blue-700';
+                icon = 'ℹ';
+            }
+
+            container.innerHTML = `
+                <div class="${bgColor} px-4 py-3 rounded border flex items-center shadow-lg">
+                    <span class="mr-2 font-bold">${icon}</span>
+                    ${message}
+                </div>
+            `;
+            container.classList.remove('hidden');
+            
+            // Auto-hide messages after 5 seconds
+            setTimeout(() => {
+                container.classList.add('hidden');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

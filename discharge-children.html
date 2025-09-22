@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discharge Child - Tahanan ng Pagmamahal OMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="firebase.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'red-primary': '#dc2626',
+                        'red-secondary': '#ef4444',
+                        'red-light': '#fef2f2'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <a href="javascript:history.back()" class="flex items-center text-gray-600 hover:text-red-primary transition-colors">
+                        <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                        Back
+                    </a>
+                </div>
+                <h1 class="text-xl font-semibold text-gray-900">Discharge Child</h1>
+                <div></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Child Information Header -->
+        <div id="childInfo" class="bg-white rounded-lg shadow mb-6 p-6">
+            <!-- Child info will be loaded here -->
+        </div>
+
+        <!-- Discharge Form -->
+        <form id="dischargeForm" class="space-y-6">
+            <!-- Discharge Details -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-6">📋 Discharge Details</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Date of Discharge <span class="text-red-500">*</span></label>
+                        <input type="date" name="dischargeDate" required 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        <p class="text-xs text-gray-500 mt-1">Actual date child leaves the institution</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Discharge Type <span class="text-red-500">*</span></label>
+                        <select name="dischargeType" required 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <option value="">Select discharge type</option>
+                            <option value="Temporary">Temporary</option>
+                            <option value="Permanent">Permanent</option>
+                        </select>
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Reason for Discharge <span class="text-red-500">*</span></label>
+                        <select name="dischargeReason" required 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary"
+                                onchange="toggleOtherReason()">
+                            <option value="">Choose one</option>
+                            <option value="Reunification with family">Reunification with family</option>
+                            <option value="Adoption">Adoption</option>
+                            <option value="Transfer to another institution">Transfer to another institution</option>
+                            <option value="Aging out">Aging out</option>
+                            <option value="Legal mandate">Legal mandate</option>
+                            <option value="Deceased">Deceased</option>
+                            <option value="Other">Other (with explanation)</option>
+                        </select>
+                    </div>
+                    
+                    <div id="otherReasonDiv" class="md:col-span-2 hidden">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Other Reason Explanation <span class="text-red-500">*</span></label>
+                        <textarea name="otherReasonExplanation" rows="3" 
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary resize-none"
+                                  placeholder="Please explain the other reason for discharge..."></textarea>
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Remarks or Notes</label>
+                        <textarea name="remarks" rows="4" 
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary resize-none"
+                                  placeholder="Summary of reason or situation behind the discharge..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Clearance Documents -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-6">📎 Clearance Documents</h3>
+                <p class="text-sm text-gray-600 mb-6">Upload digital copies of required clearance documents</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Medical Clearance <span class="text-red-500">*</span></label>
+                        <input type="file" name="medicalClearance" required accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        <p class="text-xs text-gray-500 mt-1">Final health status from clinic/doctor</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Educational Report <span class="text-red-500">*</span></label>
+                        <input type="file" name="educationalReport" required accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        <p class="text-xs text-gray-500 mt-1">Grades / schooling status</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Social Work Documents <span class="text-red-500">*</span></label>
+                        <input type="file" name="socialWorkDocuments" required accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        <p class="text-xs text-gray-500 mt-1">Final case study, home visit reports, recommendations</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Supporting Legal Documents</label>
+                        <input type="file" name="legalDocuments" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        <p class="text-xs text-gray-500 mt-1">Court orders, adoption papers, custody agreements, etc.</p>
+                    </div>
+                </div>
+                
+                <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                    <p class="text-sm text-blue-800">
+                        <strong>Supported formats:</strong> PDF, JPG, PNG, DOC, DOCX (Max size: 10MB per file)
+                    </p>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4">
+                    <button type="button" onclick="history.back()" 
+                            class="w-full sm:w-auto px-6 py-3 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-center">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="w-full sm:w-auto px-6 py-3 bg-red-primary text-white rounded-md hover:bg-red-700 transition-colors text-center">
+                        Submit Discharge Request
+                    </button>
+                </div>
+                
+                <div class="mt-4 p-4 bg-yellow-50 rounded-lg">
+                    <div class="flex items-start space-x-2">
+                        <svg class="h-5 w-5 text-yellow-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                        <div class="text-sm text-yellow-800">
+                            <p class="font-medium">Important:</p>
+                            <p>Once submitted, this discharge request will be saved with status "Waiting for approval" and will require admin approval before proceeding to the handover process.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script type="module">
+        import { db, collection, getDocs, setDoc, doc } from './firebase.js';
+
+        let currentChild = null;
+        let currentChildId = null;
+        let currentUser = null;
+
+        // Session Manager
+        const sessionManager = {
+            getCurrentUser: function() {
+                const user = localStorage.getItem('currentUser');
+                return user ? JSON.parse(user) : null;
+            },
+            
+            requireLogin: function() {
+                if (!localStorage.getItem('currentUser')) {
+                    window.location.href = 'login.html';
+                    return false;
+                }
+                return true;
+            }
+        };
+
+        // Get child ID from URL parameters
+        function getChildIdFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('id');
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication
+            if (!sessionManager.requireLogin()) {
+                return;
+            }
+
+            currentUser = sessionManager.getCurrentUser();
+            currentChildId = getChildIdFromURL();
+            if (!currentChildId) {
+                alert('Child ID is required');
+                history.back();
+                return;
+            }
+
+            loadChildData();
+            setupEventListeners();
+            
+            // Set default discharge date to today
+            document.querySelector('input[name="dischargeDate"]').value = new Date().toISOString().split('T')[0];
+        });
+
+        async function loadChildData() {
+            try {
+                const childrenCol = collection(db, 'children');
+                const snapshot = await getDocs(childrenCol);
+                
+                let foundChild = null;
+                snapshot.forEach(docSnap => {
+                    const childData = docSnap.data();
+                    if (childData.childId === currentChildId) {
+                        foundChild = childData;
+                    }
+                });
+                
+                if (!foundChild) {
+                    alert('Child record not found');
+                    history.back();
+                    return;
+                }
+
+                currentChild = foundChild;
+                displayChildInfo();
+                
+            } catch (error) {
+                console.error('Error loading child data from Firestore:', error);
+                alert('Error loading child data');
+                history.back();
+            }
+        }
+
+        function displayChildInfo() {
+            const fullName = `${currentChild.firstName || ''} ${currentChild.middleName || ''} ${currentChild.lastName || ''}`.trim();
+            const age = calculateAge(currentChild.dateOfBirth);
+            const photoSrc = currentChild.photoString || `https://via.placeholder.com/100x100/e5e7eb/6b7280?text=${encodeURIComponent(currentChild.firstName || 'Child')}`;
+            const statusColor = getStatusColor(currentChild.currentStatus);
+
+            document.getElementById('childInfo').innerHTML = `
+                <div class="flex items-center space-x-4">
+                    <img src="${photoSrc}" alt="${fullName}" class="h-16 w-16 rounded-lg object-cover">
+                    <div class="flex-1">
+                        <h2 class="text-xl font-bold text-gray-900">${fullName}</h2>
+                        <p class="text-gray-600">Child ID: ${currentChild.childId}</p>
+                        <p class="text-gray-600">Age: ${age} years old • Gender: ${currentChild.gender || 'Not specified'}</p>
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${statusColor} mt-1">
+                            ${currentChild.currentStatus || 'No Status'}
+                        </span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function setupEventListeners() {
+            // Form submission
+            document.getElementById('dischargeForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitDischargeRequest();
+            });
+        }
+
+        async function submitDischargeRequest() {
+            const form = document.getElementById('dischargeForm');
+            const formData = new FormData(form);
+            
+            // Show loading state
+            const submitBtn = document.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Submitting...';
+            submitBtn.disabled = true;
+
+            // Validate required files
+            const requiredFiles = ['medicalClearance', 'educationalReport', 'socialWorkDocuments'];
+            for (let fileName of requiredFiles) {
+                const fileInput = document.querySelector(`input[name="${fileName}"]`);
+                if (!fileInput.files[0]) {
+                    alert(`Please upload ${fileName.replace(/([A-Z])/g, ' $1').toLowerCase()}`);
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                    return;
+                }
+            }
+
+            try {
+                // Convert form data to object
+                const dischargeData = {};
+                for (const [key, value] of formData.entries()) {
+                    if (key !== 'medicalClearance' && key !== 'educationalReport' && 
+                        key !== 'socialWorkDocuments' && key !== 'legalDocuments') {
+                        dischargeData[key] = value;
+                    }
+                }
+
+                // Convert files to base64 strings
+                const fileFields = ['medicalClearance', 'educationalReport', 'socialWorkDocuments', 'legalDocuments'];
+                for (const fieldName of fileFields) {
+                    const fileInput = document.querySelector(`input[name="${fieldName}"]`);
+                    if (fileInput.files[0]) {
+                        const fileString = await new Promise((resolve, reject) => {
+                            const reader = new FileReader();
+                            reader.onload = () => resolve(reader.result);
+                            reader.onerror = reject;
+                            reader.readAsDataURL(fileInput.files[0]);
+                        });
+                        dischargeData[fieldName] = fileString;
+                        dischargeData[fieldName + 'Name'] = fileInput.files[0].name;
+                    }
+                }
+
+                // Add metadata
+                dischargeData.childId = currentChildId;
+                dischargeData.childName = `${currentChild.firstName || ''} ${currentChild.middleName || ''} ${currentChild.lastName || ''}`.trim();
+                dischargeData.submittedBy = currentUser.username;
+                dischargeData.submittedDate = new Date().toISOString().split('T')[0];
+                dischargeData.status = 'Waiting for approval';
+
+                // Save to Firestore
+                const dischargeCol = collection(db, 'dischargeRequests');
+                const newDischargeRef = doc(dischargeCol);
+                await setDoc(newDischargeRef, dischargeData);
+
+                showMessage('Discharge request submitted successfully! Status: Waiting for approval', 'success');
+                
+                // Redirect after delay
+                setTimeout(() => {
+                    window.location.href = 'discharge-children-records.html';
+                }, 2000);
+
+            } catch (error) {
+                console.error('Error submitting discharge request:', error);
+                showMessage('Error submitting discharge request: ' + error.message, 'error');
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Make functions globally accessible for onclick handlers
+        window.toggleOtherReason = function() {
+            const reasonSelect = document.querySelector('select[name="dischargeReason"]');
+            const otherReasonDiv = document.getElementById('otherReasonDiv');
+            const otherReasonTextarea = document.querySelector('textarea[name="otherReasonExplanation"]');
+            
+            if (reasonSelect.value === 'Other') {
+                otherReasonDiv.classList.remove('hidden');
+                otherReasonTextarea.required = true;
+            } else {
+                otherReasonDiv.classList.add('hidden');
+                otherReasonTextarea.required = false;
+                otherReasonTextarea.value = '';
+            }
+        };
+
+        function calculateAge(birthDate) {
+            if (!birthDate) return 'Unknown';
+            const today = new Date();
+            const birth = new Date(birthDate);
+            let age = today.getFullYear() - birth.getFullYear();
+            const monthDiff = today.getMonth() - birth.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+                age--;
+            }
+            return age;
+        }
+
+        function getStatusColor(status) {
+            switch (status) {
+                case 'Adoptable':
+                    return 'bg-green-100 text-green-800';
+                case 'Under legal custody':
+                    return 'bg-blue-100 text-blue-800';
+                case 'Temporary Shelter':
+                    return 'bg-yellow-100 text-yellow-800';
+                case 'Awaiting placement':
+                    return 'bg-purple-100 text-purple-800';
+                default:
+                    return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        function showMessage(message, type) {
+            // Create message element if it doesn't exist
+            let messageContainer = document.getElementById('messageContainer');
+            if (!messageContainer) {
+                messageContainer = document.createElement('div');
+                messageContainer.id = 'messageContainer';
+                messageContainer.className = 'fixed top-4 right-4 z-50 max-w-sm';
+                document.body.appendChild(messageContainer);
+            }
+            
+            const bgColor = type === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700';
+            
+            messageContainer.innerHTML = `<div class="${bgColor} border px-4 py-3 rounded shadow-lg text-sm">${message}</div>`;
+            messageContainer.classList.remove('hidden');
+            
+            setTimeout(() => {
+                messageContainer.classList.add('hidden');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

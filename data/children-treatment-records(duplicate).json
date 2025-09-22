@@ -1,0 +1,17 @@
+[
+    {
+        "recordId": "TR20250721_687e6d8b78edd",
+        "childId": "CH003",
+        "conditionTreated": "Sipon",
+        "medicineName": "Biogesic",
+        "dosage": "2 tablets",
+        "startDate": "2025-07-15",
+        "endDate": "2025-07-24",
+        "status": "Ongoing",
+        "prescribedBy": "Wala",
+        "notes": "Goods lang",
+        "createdBy": "admin",
+        "dateCreated": "2025-07-21 18:40:43",
+        "lastModified": "2025-07-21 18:40:43"
+    }
+]

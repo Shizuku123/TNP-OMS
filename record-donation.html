@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Record Donation - Tahanan ng Pagmamahal OMS</title>
+    <script type="module" src="firebase.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'red-primary': '#dc2626',
+                        'red-secondary': '#ef4444',
+                        'red-light': '#fef2f2'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Top Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+               <a href="index.html" class="flex items-center text-red-600 hover:text-red-primary">
+                        <svg class="h-6 w-6 mr-2" fill="none" stroke="black" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                    </a>
+                <h1 class="text-xl font-semibold text-gray-900">Record Donation</h1>
+                <div></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Success/Error Messages -->
+    <div id="messageContainer" class="fixed top-20 right-4 z-50 max-w-sm hidden"></div>
+
+    <!-- Main Content -->
+    <div class="flex items-center justify-center min-h-screen bg-gray-100">
+        <!-- Form Content -->
+        <div class="p-4 lg:p-6 flex justify-center items-start min-h-[80vh]">
+            <!-- Donation Type Selection -->
+            <div id="donation-type-selection" class="max-w-2xl w-full mt-12">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-6 text-center">
+                    What type of donation is this?
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <button onclick="selectDonationType('money')" class="p-6 border-2 border-gray-200 rounded-lg hover:border-red-primary hover:bg-red-light transition-colors text-center">
+                            <svg class="h-12 w-12 mx-auto mb-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                            </svg>
+                            <h3 class="text-lg font-medium text-gray-900">Money Donation</h3>
+                            <p class="text-sm text-gray-600 mt-2">Cash or monetary contributions</p>
+                        </button>
+                        <button onclick="selectDonationType('in-kind')" class="p-6 border-2 border-gray-200 rounded-lg hover:border-red-primary hover:bg-red-light transition-colors text-center">
+                            <svg class="h-12 w-12 mx-auto mb-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                            </svg>
+                            <h3 class="text-lg font-medium text-gray-900">In-Kind Donation</h3>
+                            <p class="text-sm text-gray-600 mt-2">Goods, items, or services</p>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Money Donation Form -->
+            <div id="money-donation-form" class="hidden max-w-4xl mx-auto">
+                <div class="bg-white rounded-lg shadow">
+                    <div class="px-6 py-4 border-b">
+                        <h2 class="text-xl font-semibold text-gray-900">Money Donation Details</h2>
+                        <button type="button" onclick="goBack()" class="text-red-primary hover:text-red-700 text-sm">← Back to selection</button>
+                    </div>
+                    <form id="moneyDonationForm" class="p-6 space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Donation Information -->
+                            <div class="space-y-4">
+                                <h3 class="text-lg font-medium text-gray-900">Donation Information</h3>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Date of Donation *</label>
+                                    <input type="date" name="dateOfDonation" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Type of Donation *</label>
+                                    <select name="typeOfDonation" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
+                                        <option value="">Select type</option>
+                                        <option value="Cash">Cash</option>
+                                        <option value="Check">Check</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Amount *</label>
+                                    <div class="relative">
+                                        <span class="absolute left-3 top-2 text-gray-500">₱</span>
+                                        <input type="number" name="amount" step="0.01" min="0" required class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Purpose / Designation</label>
+                                    <textarea name="purpose" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="e.g., General fund, Education, Medical expenses"></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Donor Information -->
+                            <div class="space-y-4">
+                                <h3 class="text-lg font-medium text-gray-900">Donor Information</h3>
+                                <div class="flex items-center space-x-2 mb-4">
+                                    <input type="checkbox" id="anonymousCheckboxMoney" name="anonymous" class="h-4 w-4 text-red-primary focus:ring-red-primary border-gray-300 rounded" onchange="toggleAnonymousMoney()">
+                                    <label for="anonymousCheckboxMoney" class="text-sm font-medium text-gray-700">Donate as Anonymous</label>
+                                </div>
+                                <div id="moneyDonorFields">
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Donor Name *</label>
+                                            <input type="text" name="donorName" id="moneyDonorName" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Contact Number</label>
+                                            <input type="tel" name="contactNumber" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+                                            <input type="email" name="emailAddress" id="moneyEmailAddress" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                                            <textarea name="address" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary"></textarea>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">TIN</label>
+                                            <input type="text" name="tin" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end space-x-4 pt-6 border-t">
+                            <button type="button" onclick="goBack()" class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button type="submit" class="px-6 py-2 bg-red-primary text-white rounded-md hover:bg-red-700 transition-colors">Save Donation</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- In-Kind Donation Form -->
+            <div id="in-kind-donation-form" class="hidden max-w-4xl mx-auto">
+                <div class="bg-white rounded-lg shadow">
+                    <div class="px-6 py-4 border-b">
+                        <h2 class="text-xl font-semibold text-gray-900">In-Kind Donation Details</h2>
+                        <button type="button" onclick="goBack()" class="text-red-primary hover:text-red-700 text-sm">← Back to selection</button>
+                    </div>
+                    <form id="inKindDonationForm" class="p-6 space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Donation Information -->
+                            <div class="space-y-4">
+                                <h3 class="text-lg font-medium text-gray-900">Donation Information</h3>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Date of Donation *</label>
+                                    <input type="date" name="dateOfDonation" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Item Category *</label>
+                                    <select name="itemCategory" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" onchange="toggleExpiryDate()">
+                                        <option value="">Select category</option>
+                                        <option value="Food">Food</option>
+                                        <option value="Clothing">Clothing</option>
+                                        <option value="School Supplies">School Supplies</option>
+                                        <option value="Toys">Toys</option>
+                                        <option value="Medical Supplies">Medical Supplies</option>
+                                        <option value="Furniture">Furniture</option>
+                                        <option value="Electronics">Electronics</option>
+                                        <option value="Books">Books</option>
+                                        <option value="Hygiene Products">Hygiene Products</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Item Description *</label>
+                                    <textarea name="itemDescription" rows="3" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="Describe the donated items"></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Quantity *</label>
+                                    <input type="number" name="quantity" min="1" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="e.g., 10">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Unit</label>
+                                    <select name="unit" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
+                                        <option value="pieces">Pieces</option>
+                                        <option value="boxes">Boxes</option>
+                                        <option value="bags">Bags</option>
+                                        <option value="sets">Sets</option>
+                                        <option value="kilograms">Kilograms</option>
+                                        <option value="liters">Liters</option>
+                                        <option value="packs">Packs</option>
+                                        <option value="bottles">Bottles</option>
+                                        <option value="cans">Cans</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div id="expiryDateField" class="hidden">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Expiry Date</label>
+                                    <input type="date" name="expiryDate" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Condition of Items *</label>
+                                    <select name="conditionOfItems" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
+                                        <option value="">Select condition</option>
+                                        <option value="New">New</option>
+                                        <option value="Like New">Like New</option>
+                                        <option value="Good">Good</option>
+                                        <option value="Fair">Fair</option>
+                                        <option value="Used">Used</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Receiver Name</label>
+                                    <input type="text" name="receiverName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="Staff member who received the donation">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Photo of Donated Items</label>
+                                    <input type="file" name="photo" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
+                                </div>
+                            </div>
+
+                            <!-- Donor Information -->
+                            <div class="space-y-4">
+                                <h3 class="text-lg font-medium text-gray-900">Donor Information</h3>
+                                <div class="flex items-center space-x-2 mb-4">
+                                    <input type="checkbox" id="anonymousCheckboxInKind" name="anonymous" class="h-4 w-4 text-red-primary focus:ring-red-primary border-gray-300 rounded" onchange="toggleAnonymousInKind()">
+                                    <label for="anonymousCheckboxInKind" class="text-sm font-medium text-gray-700">Donate as Anonymous</label>
+                                </div>
+                                <div id="inKindDonorFields">
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Donor Name *</label>
+                                            <input type="text" name="donorName" id="inKindDonorName" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Contact Number</label>
+                                            <input type="tel" name="contactNumber" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+                                            <input type="email" name="emailAddress" id="inKindEmailAddress" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                                            <textarea name="address" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end space-x-4 pt-6 border-t">
+                            <button type="button" onclick="goBack()" class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button type="submit" class="px-6 py-2 bg-red-primary text-white rounded-md hover:bg-red-700 transition-colors">Save Donation</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { db, collection, setDoc, doc, getDocs } from './firebase.js';
+
+        let currentDonationType = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            // Set today's date as default
+            const today = new Date().toISOString().split('T')[0];
+            document.querySelectorAll('input[name="dateOfDonation"]').forEach(input => {
+                input.value = today;
+            });
+        });
+
+        function setupEventListeners() {
+            document.getElementById('moneyDonationForm').addEventListener('submit', handleMoneyDonationSubmit);
+            document.getElementById('inKindDonationForm').addEventListener('submit', handleInKindDonationSubmit);
+        }
+
+        function selectDonationType(type) {
+            currentDonationType = type;
+            document.getElementById('donation-type-selection').classList.add('hidden');
+            if (type === 'money') {
+                document.getElementById('money-donation-form').classList.remove('hidden');
+            } else if (type === 'in-kind') {
+                document.getElementById('in-kind-donation-form').classList.remove('hidden');
+            }
+        }
+
+        function goBack() {
+            document.getElementById('donation-type-selection').classList.remove('hidden');
+            document.getElementById('money-donation-form').classList.add('hidden');
+            document.getElementById('in-kind-donation-form').classList.add('hidden');
+            currentDonationType = null;
+        }
+
+        function toggleAnonymousMoney() {
+            const checkbox = document.getElementById('anonymousCheckboxMoney');
+            const donorFields = document.getElementById('moneyDonorFields');
+            const donorName = document.getElementById('moneyDonorName');
+            const emailAddress = document.getElementById('moneyEmailAddress');
+            if (checkbox.checked) {
+                donorFields.style.opacity = '0.5';
+                donorFields.style.pointerEvents = 'none';
+                donorName.required = false;
+                emailAddress.required = false;
+                donorName.value = '';
+                emailAddress.value = '';
+                donorFields.querySelectorAll('input, textarea').forEach(field => {
+                    if (field !== donorName && field !== emailAddress) {
+                        field.value = '';
+                    }
+                });
+            } else {
+                donorFields.style.opacity = '1';
+                donorFields.style.pointerEvents = 'auto';
+                donorName.required = true;
+                emailAddress.required = true;
+            }
+        }
+
+        function toggleAnonymousInKind() {
+            const checkbox = document.getElementById('anonymousCheckboxInKind');
+            const donorFields = document.getElementById('inKindDonorFields');
+            const donorName = document.getElementById('inKindDonorName');
+            const emailAddress = document.getElementById('inKindEmailAddress');
+            if (checkbox.checked) {
+                donorFields.style.opacity = '0.5';
+                donorFields.style.pointerEvents = 'none';
+                donorName.required = false;
+                emailAddress.required = false;
+                donorName.value = '';
+                emailAddress.value = '';
+                donorFields.querySelectorAll('input, textarea').forEach(field => {
+                    if (field !== donorName && field !== emailAddress) {
+                        field.value = '';
+                    }
+                });
+            } else {
+                donorFields.style.opacity = '1';
+                donorFields.style.pointerEvents = 'auto';
+                donorName.required = true;
+                emailAddress.required = true;
+            }
+        }
+
+        function toggleExpiryDate() {
+            const categorySelect = document.querySelector('select[name="itemCategory"]');
+            const expiryDateField = document.getElementById('expiryDateField');
+            if (categorySelect.value === 'Food') {
+                expiryDateField.classList.remove('hidden');
+                document.querySelector('input[name="expiryDate"]').required = true;
+            } else {
+                expiryDateField.classList.add('hidden');
+                document.querySelector('input[name="expiryDate"]').required = false;
+                document.querySelector('input[name="expiryDate"]').value = '';
+            }
+        }
+
+        async function handleMoneyDonationSubmit(e) {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const isAnonymous = formData.get('anonymous') === 'on';
+
+            const donationData = {
+                donationType: 'money',
+                dateOfDonation: formData.get('dateOfDonation'),
+                donorName: isAnonymous ? 'Anonymous' : formData.get('donorName'),
+                contactNumber: formData.get('contactNumber') || '',
+                emailAddress: isAnonymous ? '' : formData.get('emailAddress'),
+                address: formData.get('address') || '',
+                typeOfDonation: formData.get('typeOfDonation'),
+                amount: parseFloat(formData.get('amount')),
+                purpose: formData.get('purpose') || '',
+                tin: formData.get('tin') || '',
+                isAnonymous: isAnonymous,
+                dateAdded: new Date().toISOString().split('T')[0],
+                donationId: await generateDonationId()
+            };
+
+            await saveDonationToFirestore(donationData);
+        }
+
+        async function handleInKindDonationSubmit(e) {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const isAnonymous = formData.get('anonymous') === 'on';
+
+            const donationData = {
+                donationType: 'in-kind',
+                dateOfDonation: formData.get('dateOfDonation'),
+                itemCategory: formData.get('itemCategory'),
+                itemDescription: formData.get('itemDescription'),
+                quantity: parseInt(formData.get('quantity'), 10),
+                unit: formData.get('unit'),
+                expiryDate: formData.get('expiryDate') || '',
+                conditionOfItems: formData.get('conditionOfItems'),
+                receiverName: formData.get('receiverName') || '',
+                donorName: isAnonymous ? 'Anonymous' : formData.get('donorName'),
+                contactNumber: formData.get('contactNumber') || '',
+                emailAddress: isAnonymous ? '' : formData.get('emailAddress'),
+                address: formData.get('address') || '',
+                isAnonymous: isAnonymous,
+                dateAdded: new Date().toISOString().split('T')[0],
+                donationId: await generateDonationId()
+            };
+
+            // Handle photo upload (base64 string)
+            const photoFile = form.querySelector('input[name="photo"]').files[0];
+            if (photoFile) {
+                donationData.photoString = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(photoFile);
+                });
+            } else {
+                donationData.photoString = '';
+            }
+
+            await saveDonationToFirestore(donationData);
+        }
+
+        // Save donation record to Firestore
+        async function saveDonationToFirestore(data) {
+            try {
+                // Validate required fields
+                if (data.donationType === 'money') {
+                    if (!data.dateOfDonation || !data.typeOfDonation || isNaN(data.amount)) {
+                        showMessage('Please fill in all required fields.', 'error');
+                        return;
+                    }
+                } else if (data.donationType === 'in-kind') {
+                    if (!data.dateOfDonation || !data.itemCategory || !data.itemDescription || isNaN(data.quantity) || !data.conditionOfItems) {
+                        showMessage('Please fill in all required fields.', 'error');
+                        return;
+                    }
+                }
+
+                const donationCol = collection(db, 'donations');
+                const newDonationRef = doc(donationCol); // auto-id
+                await setDoc(newDonationRef, data);
+
+                showMessage('Donation saved successfully!', 'success');
+                // Reset form and UI after a delay
+                setTimeout(() => {
+                    goBack();
+                    document.getElementById('moneyDonationForm').reset();
+                    document.getElementById('inKindDonationForm').reset();
+                    document.getElementById('anonymousCheckboxMoney').checked = false;
+                    document.getElementById('anonymousCheckboxInKind').checked = false;
+                    toggleAnonymousMoney();
+                    toggleAnonymousInKind();
+                    const today = new Date().toISOString().split('T')[0];
+                    document.querySelectorAll('input[name="dateOfDonation"]').forEach(input => {
+                        input.value = today;
+                    });
+                    document.getElementById('expiryDateField').classList.add('hidden');
+                }, 2000);
+            } catch (err) {
+                console.error(err);
+                showMessage('Error saving donation. Please try again.', 'error');
+            }
+        }
+
+        // Generate unique donationId by checking Firestore
+        async function generateDonationId() {
+            try {
+                const donationCol = collection(db, 'donations');
+                const snapshot = await getDocs(donationCol);
+                let lastId = 0;
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if (data.donationId && /^DN\d+$/.test(data.donationId)) {
+                        const idNum = parseInt(data.donationId.replace('DN', ''), 10);
+                        if (idNum > lastId) lastId = idNum;
+                    }
+                });
+                return `DN${String(lastId + 1).padStart(3, '0')}`;
+            } catch (error) {
+                console.error('Failed to generate Donation ID:', error);
+                return 'DN001';
+            }
+        }
+
+        function showMessage(message, type) {
+            const container = document.getElementById('messageContainer');
+            let bgColor = '';
+            let icon = '';
+            if (type === 'success') {
+                bgColor = 'bg-green-100 border-green-400 text-green-700';
+                icon = '✓';
+            } else if (type === 'error') {
+                bgColor = 'bg-red-100 border-red-400 text-red-700';
+                icon = '✗';
+            } else {
+                bgColor = 'bg-blue-100 border-blue-400 text-blue-700';
+                icon = 'ℹ';
+            }
+            container.innerHTML = `
+                <div class="${bgColor} px-4 py-3 rounded border flex items-center shadow-lg">
+                    <span class="mr-2 font-bold">${icon}</span>
+                    ${message}
+                </div>
+            `;
+            container.classList.remove('hidden');
+            setTimeout(() => {
+                container.classList.add('hidden');
+            }, 5000);
+        }
+
+        window.selectDonationType = selectDonationType;
+        window.goBack = goBack;
+        window.toggleAnonymousMoney = toggleAnonymousMoney;
+        window.toggleAnonymousInKind = toggleAnonymousInKind;
+        window.toggleExpiryDate = toggleExpiryDate;
+    </script>
+</body>
+</html>

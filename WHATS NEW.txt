@@ -1,0 +1,22 @@
+TNP OMS 1.2.1
+What's New:
+✅ Add Child Records
+You can now add child records directly through the form.
+
+✅ Edit Existing Children
+Child records can now be edited using the same form interface, with pre-filled data.
+
+✅ Delete Child Records
+Admins can now delete child entries from the system.
+
+🛠️ Improved Record Display
+Fixed bugs related to how child data is displayed.
+
+File Storage:
+🗂️ All child records are saved in:
+\data\children-records.json
+
+🖼️ Uploaded profile pictures are stored in:
+\data\profilepictures\
+
+📷 If no photo is uploaded, a default placeholder image is used.

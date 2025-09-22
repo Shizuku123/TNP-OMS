@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donor Records - Tahanan ng Pagmamahal OMS</title>
+    <script type="module" src="firebase.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'red-primary': '#dc2626',
+                        'red-secondary': '#ef4444',
+                        'red-light': '#fef2f2'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="flex items-center text-gray-600 hover:text-red-primary">
+                        <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                    </a>
+                </div>
+                <h1 class="text-xl font-semibold text-gray-900">Donor Records</h1>
+                <div></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Search and Filter -->
+        <div class="mb-6 bg-white rounded-lg shadow p-6">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+                <div class="flex-1 max-w-lg">
+                    <input type="text" id="searchInput" placeholder="Search donors by name, email, or address..."
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                </div>
+                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
+                    <select id="sortFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        <option value="name">Sort by Name</option>
+                        <option value="total">Sort by Total Donated</option>
+                        <option value="recent">Sort by Recent Donation</option>
+                        <option value="count">Sort by Donation Count</option>
+                    </select>
+                    <button id="exportCSVBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-center">
+                        Export CSV
+                    </button>
+                    <a href="record-donation.html" class="px-4 py-2 bg-red-primary text-white rounded-lg hover:bg-red-700 transition-colors text-center">
+                        Add Donation
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Total Donors</p>
+                        <p id="totalDonors" class="text-2xl font-semibold text-gray-900">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Total Donated</p>
+                        <p id="totalAmount" class="text-2xl font-semibold text-gray-900">₱0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-8 w-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Active Donors</p>
+                        <p id="activeDonors" class="text-2xl font-semibold text-gray-900">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-8 w-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Avg. Donation</p>
+                        <p id="avgDonation" class="text-2xl font-semibold text-gray-900">₱0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Donors Grid -->
+        <div id="donorsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Donor cards will be populated by JavaScript -->
+        </div>
+
+        <!-- Skeleton Loading -->
+        <div id="skeletonGrid" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Skeleton items will be populated by JavaScript -->
+        </div>
+
+        <!-- No Records Message -->
+        <div id="noRecords" class="hidden text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No donor records found</h3>
+            <p class="mt-1 text-sm text-gray-500">Get started by recording a new donation.</p>
+            <div class="mt-6">
+                <a href="record-donation.html" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-primary hover:bg-red-700">
+                    <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Record Donation
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Donor Detail Modal -->
+    <div id="donorModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-10 mx-auto p-5 border w-11/12 md:w-4/5 lg:w-3/4 xl:w-2/3 shadow-lg rounded-md bg-white max-h-screen overflow-y-auto">
+            <div class="mt-3">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">Donor Details & Donation History</h3>
+                    <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div id="modalContent" class="space-y-6">
+                    <!-- Content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import {
+            db,
+            collection,
+            getDocs
+        } from './firebase.js';
+
+        let allRecords = [];
+        let donorData = [];
+        let filteredDonors = [];
+        let currentUser = null;
+
+        // Session Manager
+        const sessionManager = {
+            getCurrentUser: function() {
+                const user = localStorage.getItem('currentUser');
+                return user ? JSON.parse(user) : null;
+            },
+            requireLogin: function() {
+                if (!localStorage.getItem('currentUser')) {
+                    window.location.href = 'login.html';
+                    return false;
+                }
+                return true;
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            if (!sessionManager.requireLogin()) {
+                return;
+            }
+            currentUser = sessionManager.getCurrentUser();
+            await loadRecordsFromFirebase();
+            setupEventListeners();
+        });
+
+        async function loadRecordsFromFirebase() {
+            try {
+                showSkeletonLoading();
+                
+                const donationCol = collection(db, 'donations');
+                const snapshot = await getDocs(donationCol);
+                allRecords = [];
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    allRecords.push(data);
+                });
+                processDonorData();
+                
+                hideSkeletonLoading();
+                displayDonors();
+                updateStatistics();
+            } catch (error) {
+                console.error('Error loading donation records from Firestore:', error);
+                hideSkeletonLoading();
+                document.getElementById('donorsGrid').innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <div class="text-red-600 mb-4">
+                            <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Error Loading Data</h3>
+                        <p class="text-gray-600">Unable to load donation records. Please check your connection.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function processDonorData() {
+            const donorMap = new Map();
+            allRecords.forEach(donation => {
+                const donorName = donation.donorName || 'Anonymous';
+                const donorEmail = donation.emailAddress || '';
+                const uniqueKey = `${donorName}|${donorEmail}`;
+                if (!donorMap.has(uniqueKey)) {
+                    donorMap.set(uniqueKey, {
+                        uniqueKey: uniqueKey,
+                        name: donorName,
+                        contactNumber: donation.contactNumber || '',
+                        emailAddress: donorEmail,
+                        address: donation.address || '',
+                        tin: donation.tin || '',
+                        donations: [],
+                        totalAmount: 0,
+                        donationCount: 0,
+                        lastDonationDate: null,
+                        moneyDonations: 0,
+                        inKindDonations: 0
+                    });
+                }
+                const donor = donorMap.get(uniqueKey);
+                donor.donations.push(donation);
+                donor.donationCount++;
+                if (!donor.contactNumber && donation.contactNumber) {
+                    donor.contactNumber = donation.contactNumber;
+                }
+                if (!donor.address && donation.address) {
+                    donor.address = donation.address;
+                }
+                if (!donor.tin && donation.tin) {
+                    donor.tin = donation.tin;
+                }
+                if (donation.donationType === 'money') {
+                    donor.totalAmount += parseFloat(donation.amount || 0);
+                    donor.moneyDonations++;
+                } else {
+                    donor.inKindDonations++;
+                }
+                const donationDate = new Date(donation.dateOfDonation);
+                if (!donor.lastDonationDate || donationDate > donor.lastDonationDate) {
+                    donor.lastDonationDate = donationDate;
+                }
+            });
+            donorData = Array.from(donorMap.values());
+            filteredDonors = [...donorData];
+        }
+
+        function displayDonors() {
+            const donorsGrid = document.getElementById('donorsGrid');
+            const noRecords = document.getElementById('noRecords');
+            if (filteredDonors.length === 0) {
+                donorsGrid.innerHTML = '';
+                noRecords.classList.remove('hidden');
+                return;
+            }
+            noRecords.classList.add('hidden');
+            donorsGrid.innerHTML = filteredDonors.map(donor => {
+                const recentDonation = donor.donations.sort((a, b) => new Date(b.dateOfDonation) - new Date(a.dateOfDonation))[0];
+                return `
+                    <div class="donor-card bg-white rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer" 
+                        onclick="window.showDonorDetail && window.showDonorDetail('${donor.uniqueKey}')">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="flex-shrink-0">
+                                        <div class="h-10 w-10 bg-red-100 rounded-full flex items-center justify-center">
+                                            <span class="text-red-600 font-medium text-lg">${donor.name.charAt(0).toUpperCase()}</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-medium text-gray-900">${donor.name}</h3>
+                                        <p class="text-sm text-gray-500">${donor.donationCount} donation${donor.donationCount !== 1 ? 's' : ''}</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-lg font-bold text-green-600">₱${donor.totalAmount.toLocaleString()}</p>
+                                    <p class="text-xs text-gray-500">Total donated</p>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                ${donor.emailAddress ? `
+                                    <div class="flex items-center text-sm text-gray-600">
+                                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                        </svg>
+                                        <span class="truncate">${donor.emailAddress}</span>
+                                    </div>
+                                ` : `
+                                    <div class="flex items-center text-sm text-gray-400">
+                                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                        </svg>
+                                        <span class="truncate">No email provided</span>
+                                    </div>
+                                `}
+                                ${donor.contactNumber ? `
+                                    <div class="flex items-center text-sm text-gray-600">
+                                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                                        </svg>
+                                        <span>${donor.contactNumber}</span>
+                                    </div>
+                                ` : ''}
+                                ${donor.address ? `
+                                    <div class="flex items-center text-sm text-gray-600">
+                                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        </svg>
+                                        <span class="truncate">${donor.address}</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-200">
+                                <div class="flex items-center justify-between text-sm">
+                                    <div class="flex space-x-4">
+                                        <span class="text-blue-600">${donor.moneyDonations} Money</span>
+                                        <span class="text-purple-600">${donor.inKindDonations} In-Kind</span>
+                                    </div>
+                                    <span class="text-gray-500">Last: ${formatDate(donor.lastDonationDate)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function setupEventListeners() {
+            document.getElementById('searchInput').addEventListener('input', filterDonors);
+            document.getElementById('sortFilter').addEventListener('change', sortDonors);
+            document.getElementById('exportCSVBtn').addEventListener('click', exportToCSV);
+            document.getElementById('donorModal').addEventListener('click', function(e) {
+                if (e.target === this) closeModal();
+            });
+        }
+
+        function filterDonors() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            if (!searchTerm) {
+                filteredDonors = [...donorData];
+            } else {
+                filteredDonors = donorData.filter(donor => {
+                    const searchFields = [
+                        donor.name,
+                        donor.emailAddress,
+                        donor.address,
+                        donor.contactNumber
+                    ].filter(Boolean).join(' ').toLowerCase();
+                    return searchFields.includes(searchTerm);
+                });
+            }
+            displayDonors();
+            updateStatistics();
+        }
+
+        function sortDonors() {
+            const sortBy = document.getElementById('sortFilter').value;
+            switch (sortBy) {
+                case 'name':
+                    filteredDonors.sort((a, b) => a.name.localeCompare(b.name));
+                    break;
+                case 'total':
+                    filteredDonors.sort((a, b) => b.totalAmount - a.totalAmount);
+                    break;
+                case 'recent':
+                    filteredDonors.sort((a, b) => b.lastDonationDate - a.lastDonationDate);
+                    break;
+                case 'count':
+                    filteredDonors.sort((a, b) => b.donationCount - a.donationCount);
+                    break;
+            }
+            displayDonors();
+        }
+
+        window.showDonorDetail = function(uniqueKey) {
+            const donor = donorData.find(d => d.uniqueKey === uniqueKey);
+            if (!donor) return;
+            const sortedDonations = donor.donations.sort((a, b) => new Date(b.dateOfDonation) - new Date(a.dateOfDonation));
+            const modalContent = document.getElementById('modalContent');
+            modalContent.innerHTML = `
+                <div class="bg-gray-50 rounded-lg p-6 mb-6">
+                    <div class="flex items-center space-x-4 mb-4">
+                        <div class="h-16 w-16 bg-red-100 rounded-full flex items-center justify-center">
+                            <span class="text-red-600 font-bold text-2xl">${donor.name.charAt(0).toUpperCase()}</span>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-900">${donor.name}</h2>
+                            <p class="text-gray-600">${donor.donationCount} total donations</p>
+                            ${donor.emailAddress ? `<p class="text-sm text-gray-500">${donor.emailAddress}</p>` : `<p class="text-sm text-gray-400">No email provided</p>`}
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-white rounded-lg p-4">
+                            <p class="text-sm text-gray-600">Total Donated</p>
+                            <p class="text-xl font-bold text-green-600">₱${donor.totalAmount.toLocaleString()}</p>
+                        </div>
+                        <div class="bg-white rounded-lg p-4">
+                            <p class="text-sm text-gray-600">Money Donations</p>
+                            <p class="text-xl font-bold text-blue-600">${donor.moneyDonations}</p>
+                        </div>
+                        <div class="bg-white rounded-lg p-4">
+                            <p class="text-sm text-gray-600">In-Kind Donations</p>
+                            <p class="text-xl font-bold text-purple-600">${donor.inKindDonations}</p>
+                        </div>
+                        <div class="bg-white rounded-lg p-4">
+                            <p class="text-sm text-gray-600">Last Donation</p>
+                            <p class="text-lg font-bold text-gray-900">${formatDate(donor.lastDonationDate)}</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div class="flex items-center text-gray-600">
+                            <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                            <span>${donor.emailAddress || 'No email provided'}</span>
+                        </div>
+                        ${donor.contactNumber ? `
+                            <div class="flex items-center text-gray-600">
+                                <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                                </svg>
+                                <span>${donor.contactNumber}</span>
+                            </div>
+                        ` : ''}
+                        ${donor.address ? `
+                            <div class="flex items-center text-gray-600">
+                                <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                <span>${donor.address}</span>
+                            </div>
+                        ` : ''}
+                        ${donor.tin ? `
+                            <div class="flex items-center text-gray-600">
+                                <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                <span>TIN: ${donor.tin}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Donation History (${donor.donationCount} donations)</h3>
+                    <div class="space-y-4">
+                        ${sortedDonations.map(donation => {
+                            const isMoneyDonation = donation.donationType === 'money';
+                            return `
+                                <div class="bg-white border rounded-lg p-4 hover:shadow-md transition-shadow">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex items-start space-x-3">
+                                            <div class="flex-shrink-0">
+                                                ${isMoneyDonation ? `
+                                                    <div class="h-10 w-10 bg-green-100 rounded-full flex items-center justify-center">
+                                                        <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                                                        </svg>
+                                                    </div>
+                                                ` : `
+                                                    <div class="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                                        <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                                        </svg>
+                                                    </div>
+                                                `}
+                                            </div>
+                                            <div class="flex-1">
+                                                <div class="flex items-center space-x-2">
+                                                    <h4 class="font-medium text-gray-900">
+                                                        ${isMoneyDonation ? 'Money Donation' : 'In-Kind Donation'}
+                                                    </h4>
+                                                    <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">${donation.donationId}</span>
+                                                </div>
+                                                ${isMoneyDonation ? `
+                                                    <p class="text-lg font-bold text-green-600">₱${parseFloat(donation.amount || 0).toLocaleString()}</p>
+                                                    <p class="text-sm text-gray-600">${donation.typeOfDonation || 'N/A'}</p>
+                                                    ${donation.purpose ? `<p class="text-sm text-gray-500 mt-1">${donation.purpose}</p>` : ''}
+                                                ` : `
+                                                    <p class="text-sm font-medium text-gray-900">${donation.itemDescription || 'N/A'}</p>
+                                                    <p class="text-sm text-gray-600">Qty: ${donation.quantity || 'N/A'} | Condition: ${donation.conditionOfItems || 'N/A'}</p>
+                                                    ${donation.receiverName ? `<p class="text-sm text-gray-500 mt-1">Received by: ${donation.receiverName}</p>` : ''}
+                                                `}
+                                            </div>
+                                        </div>
+                                        <div class="text-right text-sm text-gray-500">
+                                            <p>${formatDate(donation.dateOfDonation)}</p>
+                                            <p class="text-xs">${formatDateTime(donation.dateAdded)}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+            document.getElementById('donorModal').classList.remove('hidden');
+        };
+
+        function closeModal() {
+            document.getElementById('donorModal').classList.add('hidden');
+        }
+
+        function updateStatistics() {
+            const totalDonors = filteredDonors.length;
+            const totalAmount = filteredDonors.reduce((sum, donor) => sum + donor.totalAmount, 0);
+            const activeDonors = filteredDonors.filter(donor => {
+                const daysSinceLastDonation = (new Date() - donor.lastDonationDate) / (1000 * 60 * 60 * 24);
+                return daysSinceLastDonation <= 90;
+            }).length;
+            const avgDonation = totalDonors > 0 ? totalAmount / totalDonors : 0;
+            document.getElementById('totalDonors').textContent = totalDonors;
+            document.getElementById('totalAmount').textContent = `₱${totalAmount.toLocaleString()}`;
+            document.getElementById('activeDonors').textContent = activeDonors;
+            document.getElementById('avgDonation').textContent = `₱${Math.round(avgDonation).toLocaleString()}`;
+        }
+
+        function exportToCSV() {
+            const headers = ['Donor Name', 'Email', 'Contact', 'Address', 'Total Donated', 'Donation Count', 'Money Donations', 'In-Kind Donations', 'Last Donation'];
+            const csvContent = [
+                headers.join(','),
+                ...filteredDonors.map(donor => [
+                    donor.name,
+                    donor.emailAddress || '',
+                    donor.contactNumber || '',
+                    donor.address || '',
+                    donor.totalAmount,
+                    donor.donationCount,
+                    donor.moneyDonations,
+                    donor.inKindDonations,
+                    formatDate(donor.lastDonationDate)
+                ].map(field => `"${field}"`).join(','))
+            ].join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `donor-records-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function formatDate(date) {
+            if (!date) return 'N/A';
+            const d = new Date(date);
+            return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        function formatDateTime(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function showSkeletonLoading() {
+            document.getElementById('donorsGrid').classList.add('hidden');
+            document.getElementById('noRecords').classList.add('hidden');
+            document.getElementById('skeletonGrid').classList.remove('hidden');
+            
+            // Create skeleton items (default to 8 items)
+            const skeletonCount = 8;
+            const skeletonGrid = document.getElementById('skeletonGrid');
+            skeletonGrid.innerHTML = Array(skeletonCount).fill(0).map(() => `
+                <div class="bg-white rounded-lg shadow animate-pulse">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="h-10 w-10 bg-gray-300 rounded-full"></div>
+                                <div>
+                                    <div class="h-5 bg-gray-300 rounded w-24 mb-1"></div>
+                                    <div class="h-3 bg-gray-300 rounded w-16"></div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="h-6 bg-gray-300 rounded w-16 mb-1"></div>
+                                <div class="h-3 bg-gray-300 rounded w-12"></div>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex items-center">
+                                <div class="h-4 w-4 bg-gray-300 rounded mr-2"></div>
+                                <div class="h-3 bg-gray-300 rounded flex-1"></div>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="h-4 w-4 bg-gray-300 rounded mr-2"></div>
+                                <div class="h-3 bg-gray-300 rounded w-20"></div>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="h-4 w-4 bg-gray-300 rounded mr-2"></div>
+                                <div class="h-3 bg-gray-300 rounded w-32"></div>
+                            </div>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-gray-200">
+                            <div class="flex items-center justify-between">
+                                <div class="flex space-x-4">
+                                    <div class="h-3 bg-gray-300 rounded w-12"></div>
+                                    <div class="h-3 bg-gray-300 rounded w-12"></div>
+                                </div>
+                                <div class="h-3 bg-gray-300 rounded w-16"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function hideSkeletonLoading() {
+            document.getElementById('skeletonGrid').classList.add('hidden');
+            document.getElementById('donorsGrid').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

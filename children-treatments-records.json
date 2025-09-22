@@ -1,0 +1,50 @@
+[
+  {
+    "recordId": "TRT001",
+    "childId": "CH001",
+    "childName": "Maria Santos",
+    "dateCreated": "2024-01-15 10:30:00",
+    "lastUpdated": "2024-01-15 10:30:00",
+    "createdBy": "Dr. Ana Rodriguez",
+    "conditionTreated": "Asthma",
+    "medicineName": "Salbutamol Inhaler",
+    "dosage": "2 puffs every 4-6 hours as needed",
+    "startDate": "2024-01-15",
+    "endDate": "",
+    "status": "Ongoing",
+    "notes": "Child responds well to medication. No side effects observed.",
+    "prescribedBy": "Dr. Maria Santos"
+  },
+  {
+    "recordId": "TRT002",
+    "childId": "CH002",
+    "childName": "Juan Dela Cruz",
+    "dateCreated": "2024-02-10 14:15:00",
+    "lastUpdated": "2024-02-10 14:15:00",
+    "createdBy": "Dr. Roberto Cruz",
+    "conditionTreated": "Upper Respiratory Infection",
+    "medicineName": "Amoxicillin",
+    "dosage": "250mg three times daily",
+    "startDate": "2024-02-10",
+    "endDate": "2024-02-17",
+    "status": "Completed",
+    "notes": "Full course completed. Symptoms resolved completely.",
+    "prescribedBy": "Dr. Roberto Cruz"
+  },
+  {
+    "recordId": "TRT003",
+    "childId": "CH001",
+    "childName": "Maria Santos",
+    "dateCreated": "2024-03-05 09:20:00",
+    "lastUpdated": "2024-03-05 09:20:00",
+    "createdBy": "Nurse Patricia Lopez",
+    "conditionTreated": "Vitamin D Deficiency",
+    "medicineName": "Vitamin D3 Supplements",
+    "dosage": "1000 IU daily",
+    "startDate": "2024-03-05",
+    "endDate": "2024-06-05",
+    "status": "Ongoing",
+    "notes": "Monthly monitoring required. Increase outdoor activities.",
+    "prescribedBy": "Dr. Elena Reyes"
+  }
+]

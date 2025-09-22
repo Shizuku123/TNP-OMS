@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Tahanan ng Pagmamahal OMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'red-primary': '#dc2626',
+                        'red-secondary': '#ef4444',
+                        'red-light': '#fef2f2'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center py-12 px-4">
+    <div class="max-w-md w-full space-y-8">
+        <div class="bg-white py-8 px-6 shadow-lg rounded-lg">
+            <h2 class="text-center text-3xl font-bold text-gray-900 mb-2">
+                Create Account
+            </h2>
+            <p class="text-center text-gray-600 mb-8">
+                Join Tahanan ng Pagmamahal OMS
+            </p>
+            
+            <!-- Success/Error Messages -->
+            <div id="successMessage" class="mb-4 hidden bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+            </div>
+            <div id="errorMessage" class="mb-4 hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            </div>
+
+            <form id="registerForm" method="POST" action="register.php" class="space-y-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+            <label for="firstName" class="block text-sm font-medium text-gray-700">
+                First Name *
+            </label>
+            <input id="firstName" name="firstName" type="text" required 
+                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+        </div>
+
+        <div>
+            <label for="lastName" class="block text-sm font-medium text-gray-700">
+                Last Name *
+            </label>
+            <input id="lastName" name="lastName" type="text" required 
+                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+        </div>
+    </div>
+
+    <div>
+        <label for="middleName" class="block text-sm font-medium text-gray-700">
+            Middle Name
+        </label>
+        <input id="middleName" name="middleName" type="text" 
+               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+    </div>
+
+    <div>
+        <label for="username" class="block text-sm font-medium text-gray-700">
+            Username *
+        </label>
+        <input id="username" name="username" type="text" required 
+               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+            <label for="password" class="block text-sm font-medium text-gray-700">
+                Password *
+            </label>
+            <div class="relative">
+                <input id="password" name="password" type="password" required 
+                       class="mt-1 block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                    <svg id="eyeIcon" class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div>
+            <label for="confirmPassword" class="block text-sm font-medium text-gray-700">
+                Confirm Password *
+            </label>
+            <div class="relative">
+                <input id="confirmPassword" name="confirmPassword" type="password" required 
+                       class="mt-1 block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                <button type="button" id="toggleConfirmPassword" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                    <svg id="eyeIconConfirm" class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <label for="email" class="block text-sm font-medium text-gray-700">
+            Email *
+        </label>
+        <input id="email" name="email" type="email" required 
+               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+    </div>
+
+    <div>
+        <label for="phoneNumber" class="block text-sm font-medium text-gray-700">
+            Phone Number *
+        </label>
+        <input id="phoneNumber" name="phoneNumber" type="tel" required 
+               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary"
+               placeholder="+63 9XX XXX XXXX">
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+            <label for="birthday" class="block text-sm font-medium text-gray-700">
+                Birthday *
+            </label>
+            <input id="birthday" name="birthday" type="date" required 
+                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+        </div>
+
+        <div>
+            <label for="gender" class="block text-sm font-medium text-gray-700">
+                Gender *
+            </label>
+            <select id="gender" name="gender" required 
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+    </div>
+
+    <div>
+        <label for="nationality" class="block text-sm font-medium text-gray-700">
+            Nationality *
+        </label>
+        <input id="nationality" name="nationality" type="text" required 
+               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary"
+               placeholder="e.g., Filipino">
+    </div>
+
+    <div>
+        <label for="address" class="block text-sm font-medium text-gray-700">
+            Address *
+        </label>
+        <textarea id="address" name="address" rows="3" required 
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary"
+                  placeholder="Complete address"></textarea>
+    </div>
+
+    <div>
+        <label for="role" class="block text-sm font-medium text-gray-700">
+            Role *
+        </label>
+        <select id="role" name="role" required 
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+            <option value="">Select Role</option>
+            <option value="staff">Staff</option>
+            <option value="volunteer">Volunteer</option>
+            <option value="admin">Administrator</option>
+        </select>
+    </div>
+
+    <div>
+        <label for="department" class="block text-sm font-medium text-gray-700">
+            Department
+        </label>
+        <input id="department" name="department" type="text" 
+               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+    </div>
+
+    <button type="submit" id="registerBtn"
+            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-primary hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-primary disabled:opacity-50">
+        <span id="registerText">Create Account</span>
+    </button>
+</form>
+
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-600">
+                    Already have an account? 
+                    <a href="login.html" class="font-medium text-red-primary hover:text-red-500">
+                        Sign in here
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    // Combine names
+    const firstName = formData.get('firstName').trim();
+    const lastName = formData.get('lastName').trim();
+    const middleName = formData.get('middleName').trim();
+    const fullName = middleName ? `${firstName} ${middleName} ${lastName}` : `${firstName} ${lastName}`;
+    
+    const userData = {
+        username: formData.get('username').trim(),
+        password: formData.get('password').trim(),
+        confirmPassword: formData.get('confirmPassword').trim(),
+        name: fullName,
+        firstName: firstName,
+        lastName: lastName,
+        middleName: middleName,
+        email: formData.get('email').trim(),
+        phoneNumber: formData.get('phoneNumber').trim(),
+        birthday: formData.get('birthday'),
+        gender: formData.get('gender'),
+        nationality: formData.get('nationality').trim(),
+        address: formData.get('address').trim(),
+        role: formData.get('role'),
+        department: formData.get('department').trim(),
+        dateCreated: new Date().toISOString().split('T')[0]
+    };
+
+    const registerBtn = document.getElementById('registerBtn');
+    const registerText = document.getElementById('registerText');
+    const errorMessage = document.getElementById('errorMessage');
+    const successMessage = document.getElementById('successMessage');
+
+    // Clear previous messages
+    errorMessage.classList.add('hidden');
+    successMessage.classList.add('hidden');
+
+    // Validate required fields
+    if (!userData.firstName || !userData.lastName || !userData.username || !userData.password || 
+        !userData.confirmPassword || !userData.email || !userData.phoneNumber || !userData.birthday || 
+        !userData.gender || !userData.nationality || !userData.address || !userData.role) {
+        errorMessage.textContent = 'Please fill in all required fields.';
+        errorMessage.classList.remove('hidden');
+        return;
+    }
+
+    // Validate password match
+    if (userData.password !== userData.confirmPassword) {
+        errorMessage.textContent = 'Passwords do not match.';
+        errorMessage.classList.remove('hidden');
+        return;
+    }
+
+    // Validate password strength
+    if (userData.password.length < 6) {
+        errorMessage.textContent = 'Password must be at least 6 characters long.';
+        errorMessage.classList.remove('hidden');
+        return;
+    }
+
+    // Validate phone number format (basic)
+    const phoneRegex = /^(\+63|0)?[0-9]{10}$/;
+    if (!phoneRegex.test(userData.phoneNumber.replace(/\s/g, ''))) {
+        errorMessage.textContent = 'Please enter a valid Philippine phone number.';
+        errorMessage.classList.remove('hidden');
+        return;
+    }
+
+    // Validate age (must be at least 18)
+    const birthDate = new Date(userData.birthday);
+    const today = new Date();
+    const age = today.getFullYear() - birthDate.getFullYear();
+    if (age < 18) {
+        errorMessage.textContent = 'You must be at least 18 years old to register.';
+        errorMessage.classList.remove('hidden');
+        return;
+    }
+
+    // Disable button
+    registerBtn.disabled = true;
+    registerText.textContent = 'Creating Account...';
+
+    // Get existing accounts
+    let accounts = JSON.parse(localStorage.getItem('accounts') || '{"accounts": []}');
+    
+    // Check for duplicate username
+    if (accounts.accounts.some(acc => acc.username === userData.username)) {
+        errorMessage.textContent = 'Username already exists. Please choose a different username.';
+        errorMessage.classList.remove('hidden');
+        registerBtn.disabled = false;
+        registerText.textContent = 'Create Account';
+        return;
+    }
+
+    // Check for duplicate email
+    if (accounts.accounts.some(acc => acc.email === userData.email)) {
+        errorMessage.textContent = 'Email already exists. Please use a different email.';
+        errorMessage.classList.remove('hidden');
+        registerBtn.disabled = false;
+        registerText.textContent = 'Create Account';
+        return;
+    }
+
+    // Remove confirmPassword before saving
+    delete userData.confirmPassword;
+
+    // Add new user
+    accounts.accounts.push(userData);
+    localStorage.setItem('accounts', JSON.stringify(accounts));
+
+    // Also send to PHP backend
+    fetch('register.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.text())
+    .then(data => {
+        successMessage.textContent = 'Account created successfully! Redirecting to login...';
+        successMessage.classList.remove('hidden');
+        
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 2000);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        successMessage.textContent = 'Account created successfully! Redirecting to login...';
+        successMessage.classList.remove('hidden');
+        
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 2000);
+    });
+});
+
+// Password visibility toggle
+document.getElementById('togglePassword').addEventListener('click', function() {
+    const passwordField = document.getElementById('password');
+    const eyeIcon = document.getElementById('eyeIcon');
+    
+    if (passwordField.type === 'password') {
+        passwordField.type = 'text';
+        eyeIcon.innerHTML = `
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path>
+        `;
+    } else {
+        passwordField.type = 'password';
+        eyeIcon.innerHTML = `
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+        `;
+    }
+});
+
+document.getElementById('toggleConfirmPassword').addEventListener('click', function() {
+    const confirmPasswordField = document.getElementById('confirmPassword');
+    const eyeIconConfirm = document.getElementById('eyeIconConfirm');
+    
+    if (confirmPasswordField.type === 'password') {
+        confirmPasswordField.type = 'text';
+        eyeIconConfirm.innerHTML = `
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path>
+        `;
+    } else {
+        confirmPasswordField.type = 'password';
+        eyeIconConfirm.innerHTML = `
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+        `;
+    }
+});
+
+// Set max date for birthday (18 years ago)
+const today = new Date();
+const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+document.getElementById('birthday').max = maxDate.toISOString().split('T')[0];
+    </script>
+</body>
+</html>

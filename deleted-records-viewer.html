@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deleted Records - Tahanan ng Pagmamahal OMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="firebase.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'red-primary': '#dc2626',
+                        'red-secondary': '#ef4444',
+                        'red-light': '#fef2f2'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center min-w-0 flex-1">
+                    <a href="child-records.html" class="flex items-center text-gray-600 hover:text-red-primary transition-colors">
+                        <svg class="h-5 w-5 sm:h-6 sm:w-6 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                        <span class="hidden sm:inline">Back to Records</span>
+                        <span class="sm:hidden">Back</span>
+                    </a>
+                </div>
+                <h1 class="text-lg sm:text-xl font-semibold text-gray-900 text-center flex-1 min-w-0 truncate px-4">Deleted Records</h1>
+                <div class="flex space-x-2 flex-shrink-0">
+                    <button id="cleanupExpiredBtn" class="px-3 py-2 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 transition-colors">
+                        Cleanup Expired
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                            <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Total Deleted</p>
+                        <p id="totalDeleted" class="text-2xl font-semibold text-gray-900">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                            <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Pending Deletion</p>
+                        <p id="pendingDeletion" class="text-2xl font-semibold text-gray-900">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Recoverable</p>
+                        <p id="recoverableCount" class="text-2xl font-semibold text-gray-900">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-white rounded-lg shadow mb-6 p-4">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
+                    <select id="statusFilter" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+                        <option value="all">All Records</option>
+                        <option value="pending">Pending Deletion</option>
+                        <option value="expired">Expired</option>
+                    </select>
+                    <input type="text" id="searchInput" placeholder="Search by name or ID..." class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+                </div>
+                <div class="flex space-x-2">
+                    <button id="refreshBtn" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                        Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Records List -->
+        <div class="bg-white rounded-lg shadow">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Deleted Children Records</h3>
+                <p class="text-sm text-gray-500 mt-1">Records are automatically deleted after 14 days</p>
+            </div>
+            <div id="recordsList" class="divide-y divide-gray-200">
+                <!-- Records will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Recovery Confirmation Modal -->
+    <div id="recoveryModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">Recover Record</h3>
+                    <button onclick="closeRecoveryModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="mb-4">
+                    <p class="text-sm text-gray-600 mb-3">
+                        Are you sure you want to recover this record? This will restore the child record and all associated data.
+                    </p>
+                    <div id="recordPreview" class="p-3 bg-gray-50 rounded-lg">
+                        <!-- Record preview will be loaded here -->
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button onclick="closeRecoveryModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors">
+                        Cancel
+                    </button>
+                    <button id="confirmRecoveryBtn" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+                        Recover Record
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Record Details Modal -->
+    <div id="detailsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-10 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">Record Details</h3>
+                    <button onclick="closeDetailsModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div id="fullRecordDetails" class="max-h-96 overflow-y-auto">
+                    <!-- Full record details will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Permanently Confirmation Modal -->
+    <div id="deleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50 flex items-center justify-center">
+        <div class="relative mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Delete Record Permanently</h3>
+                <button onclick="window.closeDeleteModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <p class="text-sm text-gray-600 mb-3">
+                Are you sure you want to permanently delete this record?<br>
+                <span class="font-semibold text-red-600">This action cannot be undone and the record cannot be recovered.</span>
+            </p>
+            <div id="deleteRecordPreview" class="p-3 bg-gray-50 rounded-lg mb-4"></div>
+            <div class="flex justify-end space-x-3">
+                <button onclick="window.closeDeleteModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">Cancel</button>
+                <button id="confirmDeleteModalBtn" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Delete Permanently</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { db, collection, getDocs, setDoc, doc, updateDoc, deleteDoc } from './firebase.js';
+
+        let deletedRecords = [];
+        let recordToRecover = null;
+        let currentUser = null;
+        let deletedRecordsDocs = []; // array of {id, data}
+        let deleteRecordId = null;
+
+        function getCurrentUser() {
+            const userData = localStorage.getItem('currentUser');
+            return userData ? JSON.parse(userData) : null;
+        }
+
+        function checkUserPermissions() {
+            currentUser = getCurrentUser();
+            if (!currentUser) {
+                window.location.href = 'login.html';
+                return false;
+            }
+            const authorizedRoles = ['admin', 'director', 'assistant director'];
+            const authorizedPositions = ['admin', 'director', 'assistant director'];
+            if (!authorizedRoles.includes(currentUser.role) && !authorizedPositions.includes(currentUser.position)) {
+                alert('You do not have permission to access this page.');
+                window.location.href = 'child-records.html';
+                return false;
+            }
+            return true;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!checkUserPermissions()) return;
+            loadDeletedRecords();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            document.getElementById('statusFilter').addEventListener('change', filterRecords);
+            document.getElementById('searchInput').addEventListener('input', filterRecords);
+            document.getElementById('refreshBtn').addEventListener('click', () => {
+                loadDeletedRecords();
+                showMessage('Records refreshed.', 'success');
+            });
+            document.getElementById('cleanupExpiredBtn').addEventListener('click', cleanupExpiredRecords);
+            document.getElementById('confirmRecoveryBtn').addEventListener('click', confirmRecovery);
+        }
+
+        async function loadDeletedRecords() {
+            try {
+                const childrenCol = collection(db, 'children');
+                const snapshot = await getDocs(childrenCol);
+                deletedRecords = [];
+                deletedRecordsDocs = [];
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if (data.currentStatus === "deleted") {
+                        // Attach document id for recovery/permanent delete
+                        deletedRecords.push(data);
+                        deletedRecordsDocs.push({ id: docSnap.id, data });
+                    }
+                });
+                updateStats();
+                displayRecords(deletedRecords);
+            } catch (error) {
+                console.error('Error loading deleted records from Firestore:', error);
+                deletedRecords = [];
+                updateStats();
+                displayRecords([]);
+                showMessage('Error loading deleted records.', 'error');
+            }
+        }
+
+        function updateStats() {
+            const now = new Date();
+            const pending = deletedRecords.filter(record => new Date(record.expiryDate) > now);
+            const expired = deletedRecords.filter(record => new Date(record.expiryDate) <= now);
+
+            document.getElementById('totalDeleted').textContent = deletedRecords.length;
+            document.getElementById('pendingDeletion').textContent = pending.length;
+            document.getElementById('recoverableCount').textContent = pending.length;
+        }
+
+        function displayRecords(records) {
+            const recordsList = document.getElementById('recordsList');
+            if (records.length === 0) {
+                recordsList.innerHTML = `
+                    <div class="p-8 text-center">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900">No deleted records</h3>
+                        <p class="mt-1 text-sm text-gray-500">No children records have been deleted yet.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            recordsList.innerHTML = records.map(record => {
+                const now = new Date();
+                const expiryDate = record.expiryDate ? new Date(record.expiryDate) : null;
+                const isExpired = expiryDate ? expiryDate <= now : false;
+                const daysLeft = expiryDate ? Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24)) : '-';
+                const fullName = `${record.firstName || ''} ${record.middleName || ''} ${record.lastName || ''}`.trim();
+                const docId = getDocIdByChildId(record.childId);
+
+                return `
+                    <div class="p-6 hover:bg-gray-50">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center space-x-3">
+                                    <div class="flex-shrink-0">
+                                        <img class="h-10 w-10 rounded-full object-cover" 
+                                             src="${record.photoString || '/placeholder.svg?height=40&width=40'}" 
+                                             alt="${fullName}">
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm font-medium text-gray-900 truncate">
+                                            ${fullName}
+                                        </p>
+                                        <p class="text-sm text-gray-500">ID: ${record.childId}</p>
+                                    </div>
+                                </div>
+                                <div class="mt-2 flex items-center space-x-4 text-sm text-gray-500">
+                                    <span>Deleted by: ${record.deletedByName || record.deletedBy || 'N/A'}</span>
+                                    <span>Date: ${formatDate(record.deletedDate)}</span>
+                                    <span class="${isExpired ? 'text-red-600' : 'text-orange-600'}">
+                                        ${isExpired ? 'Expired' : `${daysLeft} days left`}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="window.viewRecordDetails('${record.childId}')" 
+                                        class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                    View Details
+                                </button>
+                                ${!isExpired ? `
+                                    <button onclick="window.recoverRecord('${record.childId}')" 
+                                            class="text-green-600 hover:text-green-800 text-sm font-medium">
+                                        Recover
+                                    </button>
+                                ` : ''}
+                                <button onclick="window.permanentlyDelete('${record.childId}')" 
+                                        class="text-red-600 hover:text-red-800 text-sm font-medium">
+                                    Delete Permanently
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getDocIdByChildId(childId) {
+            const doc = deletedRecordsDocs.find(d => d.data.childId === childId);
+            return doc ? doc.id : null;
+        }
+
+        function filterRecords() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            let filtered = deletedRecords;
+            // Filter by status
+            if (statusFilter !== 'all') {
+                const now = new Date();
+                if (statusFilter === 'pending') {
+                    filtered = filtered.filter(record => new Date(record.expiryDate) > now);
+                } else if (statusFilter === 'expired') {
+                    filtered = filtered.filter(record => new Date(record.expiryDate) <= now);
+                }
+            }
+            // Filter by search term
+            if (searchTerm) {
+                filtered = filtered.filter(record => 
+                    (record.firstName || '').toLowerCase().includes(searchTerm) ||
+                    (record.lastName || '').toLowerCase().includes(searchTerm) ||
+                    (record.childId || '').toLowerCase().includes(searchTerm)
+                );
+            }
+            displayRecords(filtered);
+        }
+
+        window.recoverRecord = function(childId) {
+            recordToRecover = deletedRecords.find(record => record.childId === childId);
+            if (!recordToRecover) return;
+            const fullName = `${recordToRecover.firstName || ''} ${recordToRecover.middleName || ''} ${recordToRecover.lastName || ''}`.trim();
+            document.getElementById('recordPreview').innerHTML = `
+                <div class="space-y-2">
+                    <p><span class="font-medium">Name:</span> ${fullName}</p>
+                    <p><span class="font-medium">ID:</span> ${recordToRecover.childId}</p>
+                    <p><span class="font-medium">Date of Birth:</span> ${formatDate(recordToRecover.dateOfBirth)}</p>
+                    <p><span class="font-medium">Gender:</span> ${recordToRecover.gender || 'N/A'}</p>
+                    <p><span class="font-medium">Status:</span> ${recordToRecover.currentStatus || 'N/A'}</p>
+                </div>
+            `;
+            document.getElementById('recoveryModal').classList.remove('hidden');
+        };
+
+        function closeRecoveryModal() {
+            document.getElementById('recoveryModal').classList.add('hidden');
+            recordToRecover = null;
+        }
+
+        async function confirmRecovery() {
+            if (!recordToRecover) return;
+            try {
+                const docId = getDocIdByChildId(recordToRecover.childId);
+                if (!docId) {
+                    showMessage('Error: record doc ID not found.', 'error');
+                    return;
+                }
+                // Remove deletion metadata and set currentStatus to previous value (if you store it) or to "active"
+                // For now, set to "active"
+                const updatedRecord = { ...recordToRecover };
+                updatedRecord.currentStatus = "active";
+                // Remove deletion metadata
+                delete updatedRecord.deletedBy;
+                delete updatedRecord.deletedByName;
+                delete updatedRecord.deletedDate;
+                delete updatedRecord.expiryDate;
+                delete updatedRecord.isDeleted;
+                // Update Firestore document
+                const childrenCol = collection(db, 'children');
+                const childDocRef = doc(childrenCol, docId);
+                await setDoc(childDocRef, updatedRecord, { merge: true });
+                closeRecoveryModal();
+                showMessage('Record recovered successfully!', 'success');
+                loadDeletedRecords();
+            } catch (error) {
+                console.error('Error recovering record:', error);
+                showMessage('Error recovering record.', 'error');
+            }
+        }
+
+        window.viewRecordDetails = function(childId) {
+            const record = deletedRecords.find(r => r.childId === childId);
+            if (!record) return;
+            const fullName = `${record.firstName || ''} ${record.middleName || ''} ${record.lastName || ''}`.trim();
+            document.getElementById('fullRecordDetails').innerHTML = `
+                <div class="space-y-6">
+                    <div>
+                        <h4 class="text-lg font-medium text-gray-900 mb-3">Basic Information</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                            <div><span class="font-medium">Full Name:</span> ${fullName}</div>
+                            <div><span class="font-medium">Child ID:</span> ${record.childId}</div>
+                            <div><span class="font-medium">Gender:</span> ${record.gender || 'N/A'}</div>
+                            <div><span class="font-medium">Date of Birth:</span> ${formatDate(record.dateOfBirth)}</div>
+                            <div><span class="font-medium">Place of Birth:</span> ${record.placeOfBirth || 'N/A'}</div>
+                            <div><span class="font-medium">Nationality:</span> ${record.nationality || 'N/A'}</div>
+                            <div><span class="font-medium">Religion:</span> ${record.religion || 'N/A'}</div>
+                            <div><span class="font-medium">Entry Date:</span> ${formatDate(record.entryDate)}</div>
+                            <div><span class="font-medium">Current Status:</span> ${record.currentStatus || 'N/A'}</div>
+                            <div><span class="font-medium">Reason for Admission:</span> ${record.reasonForAdmission || 'N/A'}</div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-medium text-gray-900 mb-3">Family Information</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                            <div><span class="font-medium">Father's Name:</span> ${record.fatherName || 'N/A'}</div>
+                            <div><span class="font-medium">Mother's Name:</span> ${record.motherName || 'N/A'}</div>
+                            <div><span class="font-medium">Parental Status:</span> ${record.parentalStatus || 'N/A'}</div>
+                            <div><span class="font-medium">Siblings in Orphanage:</span> ${record.siblingsInOrphanage || 'N/A'}</div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-medium text-gray-900 mb-3">Medical Information</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                            <div><span class="font-medium">Blood Type:</span> ${record.bloodType || 'N/A'}</div>
+                            <div><span class="font-medium">Allergies:</span> ${record.allergies || 'N/A'}</div>
+                            <div><span class="font-medium">Medical Conditions:</span> ${record.medicalConditions || 'N/A'}</div>
+                            <div><span class="font-medium">Last Checkup:</span> ${formatDate(record.lastCheckupDate)}</div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-medium text-gray-900 mb-3">Deletion Information</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                            <div><span class="font-medium">Deleted By:</span> ${record.deletedByName || record.deletedBy || 'N/A'}</div>
+                            <div><span class="font-medium">Deletion Date:</span> ${formatDate(record.deletedDate)}</div>
+                            <div><span class="font-medium">Expiry Date:</span> ${formatDate(record.expiryDate)}</div>
+                            <div><span class="font-medium">Days Remaining:</span> ${record.expiryDate ? Math.max(0, Math.ceil((new Date(record.expiryDate) - new Date()) / (1000 * 60 * 60 * 24))) : 'N/A'}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('detailsModal').classList.remove('hidden');
+        };
+
+        function closeDetailsModal() {
+            document.getElementById('detailsModal').classList.add('hidden');
+        }
+
+            window.permanentlyDelete = function(childId) {
+                deleteRecordId = childId;                                                       
+                const record = deletedRecords.find(r => r.childId === childId);
+                if (!record) return;
+                const fullName = `${record.firstName || ''} ${record.middleName || ''} ${record.lastName || ''}`.trim();
+                document.getElementById('deleteRecordPreview').innerHTML = `
+                    <div class="space-y-2">
+                        <p><span class="font-medium">Name:</span> ${fullName}</p>
+                        <p><span class="font-medium">ID:</span> ${record.childId}</p>
+                        <p><span class="font-medium">Date of Birth:</span> ${formatDate(record.dateOfBirth)}</p>
+                        <p><span class="font-medium">Gender:</span> ${record.gender || 'N/A'}</p>
+                        <p><span class="font-medium">Status:</span> ${record.currentStatus || 'N/A'}</p>
+                    </div>
+                `;
+                document.getElementById('deleteModal').classList.remove('hidden');                                          
+};
+
+    // Close modal function
+    window.closeDeleteModal = function() {
+        document.getElementById('deleteModal').classList.add('hidden');
+        deleteRecordId = null;
+        document.getElementById('deleteRecordPreview').innerHTML = '';
+    };
+
+    // Confirm delete (modal button)
+    document.getElementById('confirmDeleteModalBtn').onclick = async function() {
+        if (!deleteRecordId) return;
+        try {
+            const docId = getDocIdByChildId(deleteRecordId);
+            if (!docId) {
+                showMessage('Error: record doc ID not found.', 'error');
+                return;
+            }
+            const childrenCol = collection(db, 'children');
+            const childDocRef = doc(childrenCol, docId);
+            await deleteDoc(childDocRef);
+            showMessage('Record permanently deleted.', 'success');
+            loadDeletedRecords();
+        } catch (error) {
+            console.error('Error permanently deleting record:', error);
+            showMessage('Error permanently deleting record.', 'error');
+        }
+        window.closeDeleteModal();
+};
+
+        async function cleanupExpiredRecords() {
+            const now = new Date();
+            const expiredRecords = deletedRecords.filter(record => new Date(record.expiryDate) <= now);
+            if (expiredRecords.length === 0) {
+                showMessage('No expired records to cleanup.', 'info');
+                return;
+            }
+            let deletedCount = 0;
+            for (const record of expiredRecords) {
+                try {
+                    const docId = getDocIdByChildId(record.childId);
+                    if (docId) {
+                        const childrenCol = collection(db, 'children');
+                        const childDocRef = doc(childrenCol, docId);
+                        await deleteDoc(childDocRef);
+                        deletedCount++;
+                    }
+                } catch (error) {
+                    console.error('Error deleting expired record:', error);
+                }
+            }
+            showMessage(`${deletedCount} expired record(s) permanently deleted.`, 'success');
+            loadDeletedRecords();
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            return new Date(dateString).toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        }
+
+        function showMessage(message, type) {
+            let messageContainer = document.getElementById('messageContainer');
+            if (!messageContainer) {
+                messageContainer = document.createElement('div');
+                messageContainer.id = 'messageContainer';
+                messageContainer.className = 'fixed top-4 right-4 z-50';
+                document.body.appendChild(messageContainer);
+            }
+            const bgColor = type === 'error' ? 'bg-red-100 border-red-400 text-red-700' : 
+                           type === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 
+                           'bg-blue-100 border-blue-400 text-blue-700';
+            messageContainer.innerHTML = `<div class="${bgColor} border px-4 py-3 rounded shadow-lg">${message}</div>`;
+            messageContainer.classList.remove('hidden');
+            setTimeout(() => {
+                messageContainer.classList.add('hidden');
+            }, 5000);
+        }
+
+        window.closeRecoveryModal = closeRecoveryModal;
+        window.closeDetailsModal = closeDetailsModal;
+    </script>
+</body>
+</html>

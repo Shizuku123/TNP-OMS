@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Attendance - Tahanan ng Pagmamahal OMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'red-primary': '#dc2626',
+                        'red-secondary': '#ef4444',
+                        'red-light': '#fef2f2'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="flex items-center text-gray-600 hover:text-red-primary">
+                        <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                    </a>
+                </div>
+                <h1 class="text-xl font-semibold text-gray-900">Staff Attendance</h1>
+                <div class="text-sm text-gray-600" id="currentDateHeader">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Success/Error Messages -->
+        <div id="messageContainer" class="mb-4 hidden"></div>
+
+        <!-- Operating Hours Info -->
+        <div class="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex items-center">
+                <svg class="h-5 w-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div>
+                    <h3 class="text-sm font-medium text-blue-900">Operating Hours</h3>
+                    <p class="text-sm text-blue-800" id="operatingHours">
+                        Work Hours: 7:00 AM - 5:00 PM | Grace Period: 15 minutes
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today's Status -->
+        <div class="mb-8 bg-white rounded-lg shadow">
+            <div class="p-6 border-b">
+                <h2 class="text-lg font-medium text-gray-900">Today's Attendance Status</h2>
+            </div>
+            <div class="p-6" id="todayStatus">
+                <!-- Status will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Attendance Actions -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Time In -->
+            <div class="bg-white rounded-lg shadow">
+                <div class="p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="p-3 bg-green-100 rounded-lg">
+                            <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-lg font-medium text-gray-900">Time In</h3>
+                            <p class="text-sm text-gray-600">Record your arrival</p>
+                        </div>
+                    </div>
+                    
+                    <div id="timeInSection">
+                        <div class="mb-4">
+                            <div class="text-sm text-gray-600 mb-2">Current Time</div>
+                            <div class="text-lg font-semibold text-gray-900" id="currentTime"></div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="text-sm text-gray-600 mb-2">Location Status</div>
+                            <div id="locationStatus" class="text-sm text-gray-500">Getting location...</div>
+                        </div>
+                        
+                        <button id="timeInBtn" onclick="timeIn()" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors disabled:opacity-50" disabled>
+                            Time In
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Time Out -->
+            <div class="bg-white rounded-lg shadow">
+                <div class="p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="p-3 bg-red-100 rounded-lg">
+                            <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-lg font-medium text-gray-900">Time Out</h3>
+                            <p class="text-sm text-gray-600">Record your departure</p>
+                        </div>
+                    </div>
+                    
+                    <div id="timeOutSection">
+                        <div class="mb-4">
+                            <div class="text-sm text-gray-600 mb-2">Current Time</div>
+                            <div class="text-lg font-semibold text-gray-900" id="currentTime2"></div>
+                        </div>
+                        
+                        <button id="timeOutBtn" onclick="timeOut()" class="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors disabled:opacity-50" disabled>
+                            Time Out
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Request Leave -->
+            <div class="bg-white rounded-lg shadow">
+                <div class="p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="p-3 bg-yellow-100 rounded-lg">
+                            <svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 0V6a2 2 0 012-2h4a2 2 0 012 2v1m-6 0h8m-8 0H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V9a2 2 0 00-2-2h-2"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-lg font-medium text-gray-900">Request Leave</h3>
+                            <p class="text-sm text-gray-600">Submit leave request</p>
+                        </div>
+                    </div>
+                    
+                    <button onclick="showLeaveModal()" class="w-full bg-yellow-600 text-white py-2 px-4 rounded-md hover:bg-yellow-700 transition-colors">
+                        Request Leave
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leave Request Modal -->
+    <div id="leaveModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Request Leave</h3>
+                <form id="leaveForm">
+                    <div class="mb-4">
+                        <label for="leaveDate" class="block text-sm font-medium text-gray-700 mb-2">Leave Date *</label>
+                        <input type="date" id="leaveDate" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="leaveType" class="block text-sm font-medium text-gray-700 mb-2">Leave Type *</label>
+                        <select id="leaveType" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <option value="">Select leave type</option>
+                            <option value="Sick Leave">Sick Leave</option>
+                            <option value="Personal Leave">Personal Leave</option>
+                            <option value="Emergency Leave">Emergency Leave</option>
+                            <option value="Vacation Leave">Vacation Leave</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label for="reason" class="block text-sm font-medium text-gray-700 mb-2">Reason *</label>
+                        <textarea id="reason" rows="3" required
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary"
+                                  placeholder="Please provide a reason for your leave request"></textarea>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="closeLeaveModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-red-primary text-white rounded-md hover:bg-red-700">
+                            Submit Request
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import {
+            db,
+            collection,
+            doc,
+            getDocs,
+            setDoc,
+            updateDoc,
+            query,
+            where
+        } from './firebase.js';
+
+        let currentUser = null;
+        let todayRecord = null;
+        let userLocation = null;
+
+        // Session Manager
+        const sessionManager = {
+            getCurrentUser: function() {
+                const user = localStorage.getItem('currentUser');
+                return user ? JSON.parse(user) : null;
+            },
+            requireLogin: function() {
+                if (!localStorage.getItem('currentUser')) {
+                    window.location.href = 'login.html';
+                    return false;
+                }
+                return true;
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!sessionManager.requireLogin()) return;
+
+            currentUser = sessionManager.getCurrentUser();
+
+            if (currentUser.role !== 'staff' && currentUser.role !== 'volunteer') {
+                showMessage('Access denied. Only staff and volunteers can access this page.', 'error');
+                setTimeout(() => window.location.href = 'index.html', 2000);
+                return;
+            }
+
+            initializePage();
+            loadTodayRecord();
+            getLocation();
+            updateCurrentTime();
+            setInterval(updateCurrentTime, 1000);
+        });
+
+        function initializePage() {
+            document.getElementById('currentDateHeader').textContent = new Date().toLocaleDateString('en-US', {
+                year: 'numeric', month: 'long', day: 'numeric'
+            });
+            document.getElementById('leaveDate').min = new Date().toISOString().split('T')[0];
+
+            const settings = JSON.parse(localStorage.getItem('system-settings') || '{}');
+            if (settings.operatingHoursStart && settings.operatingHoursEnd) {
+                const startTime = new Date(`2000-01-01T${settings.operatingHoursStart}`);
+                const endTime = new Date(`2000-01-01T${settings.operatingHoursEnd}`);
+                const threshold = settings.lateThresholdMinutes || '15';
+                document.getElementById('operatingHours').textContent =
+                    `Work Hours: ${startTime.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit'})} - ${endTime.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit'})} | Grace Period: ${threshold} minutes`;
+            }
+        }
+
+        async function loadTodayRecord() {
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                const attendanceCol = collection(db, 'attendance');
+                const q = query(attendanceCol,
+                    where('accountId', '==', currentUser.username),
+                    where('date', '==', today)
+                );
+                const snapshot = await getDocs(q);
+                todayRecord = null;
+                snapshot.forEach(docSnap => {
+                    todayRecord = docSnap.data();
+                });
+                updateTodayStatus();
+                updateButtons();
+            } catch (error) {
+                console.error('Error loading today record:', error);
+                showMessage('Error loading attendance data', 'error');
+            }
+        }
+
+        function updateTodayStatus() {
+            const statusDiv = document.getElementById('todayStatus');
+            if (todayRecord) {
+                const totalHours = todayRecord.timeIn && todayRecord.timeOut ?
+                    calculateHours(todayRecord.timeIn, todayRecord.timeOut) : 'In progress';
+                statusDiv.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="text-center">
+                            <div class="text-sm text-gray-600 mb-1">Time In</div>
+                            <div class="text-lg font-semibold ${todayRecord.timeIn ? 'text-green-600' : 'text-gray-400'}">
+                                ${todayRecord.timeIn ? formatTime(todayRecord.timeIn) : 'Not recorded'}
+                            </div>
+                            ${todayRecord.status ? `<div class="text-xs mt-1 px-2 py-1 rounded-full inline-block ${getStatusColor(todayRecord.status)}">${todayRecord.status}</div>` : ''}
+                        </div>
+                        <div class="text-center">
+                            <div class="text-sm text-gray-600 mb-1">Time Out</div>
+                            <div class="text-lg font-semibold ${todayRecord.timeOut ? 'text-red-600' : 'text-gray-400'}">
+                                ${todayRecord.timeOut ? formatTime(todayRecord.timeOut) : 'Not recorded'}
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-sm text-gray-600 mb-1">Total Hours</div>
+                            <div class="text-lg font-semibold text-blue-600">
+                                ${totalHours}
+                            </div>
+                        </div>
+                    </div>
+                    ${todayRecord.remarks ? `<div class="mt-4 p-3 bg-gray-50 rounded-md"><div class="text-sm text-gray-600">Remarks: ${todayRecord.remarks}</div></div>` : ''}
+                `;
+            } else {
+                statusDiv.innerHTML = `
+                    <div class="text-center text-gray-500">
+                        <svg class="h-12 w-12 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <p>No attendance recorded for today</p>
+                    </div>
+                `;
+            }
+        }
+
+        function updateButtons() {
+            const timeInBtn = document.getElementById('timeInBtn');
+            const timeOutBtn = document.getElementById('timeOutBtn');
+            const timeInSection = document.getElementById('timeInSection');
+            const timeOutSection = document.getElementById('timeOutSection');
+
+            if (todayRecord && todayRecord.timeIn) {
+                timeInSection.innerHTML = `
+                    <div class="text-center text-green-600">
+                        <svg class="h-8 w-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <p class="font-medium">Already timed in</p>
+                        <p class="text-sm">${formatTime(todayRecord.timeIn)}</p>
+                    </div>
+                `;
+                if (todayRecord.timeOut) {
+                    timeOutSection.innerHTML = `
+                        <div class="text-center text-red-600">
+                            <svg class="h-8 w-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <p class="font-medium">Already timed out</p>
+                            <p class="text-sm">${formatTime(todayRecord.timeOut)}</p>
+                        </div>
+                    `;
+                } else if (timeOutBtn) {
+                    timeOutBtn.disabled = false;
+                }
+            } else {
+                if (userLocation && timeInBtn) timeInBtn.disabled = false;
+                timeOutSection.innerHTML = `
+                    <div class="text-center text-gray-400">
+                        <svg class="h-8 w-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        </svg>
+                        <p class="font-medium">Time in first</p>
+                    </div>
+                `;
+            }
+        }
+
+        function updateCurrentTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', {
+                hour: 'numeric', minute: '2-digit', hour12: true
+            });
+            const timeElements = document.querySelectorAll('#currentTime, #currentTime2');
+            timeElements.forEach(element => {
+                if (element) element.textContent = timeString;
+            });
+        }
+
+        function getLocation() {
+            const locationStatus = document.getElementById('locationStatus');
+            if (navigator.geolocation) {
+                locationStatus.textContent = 'Getting location...';
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        userLocation = {
+                            lat: position.coords.latitude,
+                            lon: position.coords.longitude,
+                            accuracy: position.coords.accuracy
+                        };
+                        locationStatus.innerHTML = '<span class="text-green-600">✓ Location verified</span>';
+                        const timeInBtnEl = document.getElementById('timeInBtn');
+                        if (timeInBtnEl) timeInBtnEl.disabled = false;
+                    },
+                    function(error) {
+                        userLocation = { verified: false, error: error.message };
+                        locationStatus.innerHTML = `
+                            <span class="text-red-600">✗ Location access denied.</span>
+                            <div class="text-sm text-red-500 mt-2">Please enable location services to proceed with Time In.</div>
+                        `;
+                        const timeInBtnEl = document.getElementById('timeInBtn');
+                        if (timeInBtnEl) timeInBtnEl.disabled = true;
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 60000
+                    }
+                );
+            } else {
+                userLocation = { verified: false, error: 'Geolocation not supported' };
+                locationStatus.innerHTML = `
+                    <span class="text-red-600">✗ Geolocation not supported by your browser.</span>
+                    <div class="text-sm text-red-500 mt-2">Please use a compatible browser or device with location access.</div>
+                `;
+                const timeInBtnEl = document.getElementById('timeInBtn');
+                if (timeInBtnEl) timeInBtnEl.disabled = true;
+            }
+        }
+
+        window.timeIn = async function() {
+            if (todayRecord && todayRecord.timeIn) {
+                showMessage('You have already timed in today.', 'error');
+                return;
+            }
+            const now = new Date();
+            const currentTime = now.toTimeString().substring(0, 5);
+            const today = now.toISOString().split('T')[0];
+            const attendanceId = 'AT' + String(Date.now()).slice(-6);
+
+            const attendanceData = {
+                attendanceId,
+                accountName: [
+                    currentUser.firstName || '',
+                    currentUser.middleName || '',
+                    currentUser.lastName || ''
+                ].filter(Boolean).join(' '),
+                accountId: currentUser.username,
+                accountType: currentUser.role,
+                date: today,
+                timeIn: currentTime,
+                location: userLocation && userLocation.lat ? 'Location verified' : 'Location not available',
+                locationVerified: userLocation && userLocation.lat ? true : false,
+                coordinates: userLocation && userLocation.lat ? `${userLocation.lat.toFixed(7)},${userLocation.lon.toFixed(7)}` : '',
+                locationAccuracy: userLocation && userLocation.accuracy ? `${userLocation.accuracy.toFixed(0)}m` : '',
+                status: calculateStatus(currentTime),
+                dateAdded: now.toISOString().replace('T', ' ').substring(0, 19)
+            };
+
+            // Add remarks for late arrival
+            if (attendanceData.status === 'Late') {
+                const settings = JSON.parse(localStorage.getItem('system-settings') || '{}');
+                const startTime = settings.operatingHoursStart || '07:00';
+                const lateMinutes = calculateLateMinutes(currentTime, startTime);
+                attendanceData.remarks = `Late by ${lateMinutes} minutes`;
+            }
+
+            try {
+                await setDoc(doc(db, 'attendance', attendanceId), attendanceData);
+                showMessage('Successfully timed in!', 'success');
+                localStorage.setItem(`lastLogin_${currentUser.username}`, today);
+                loadTodayRecord();
+            } catch (error) {
+                console.error('Error saving attendance:', error);
+                showMessage('Error saving attendance. Please try again.', 'error');
+            }
+        };
+
+        window.timeOut = async function() {
+            if (!todayRecord || !todayRecord.timeIn) {
+                showMessage('You must time in first before timing out.', 'error');
+                return;
+            }
+            if (todayRecord.timeOut) {
+                showMessage('You have already timed out today.', 'error');
+                return;
+            }
+            const now = new Date();
+            const currentTime = now.toTimeString().substring(0, 5);
+
+            try {
+                await updateDoc(doc(db, 'attendance', todayRecord.attendanceId), {
+                    timeOut: currentTime
+                });
+                showMessage('Successfully timed out!', 'success');
+                loadTodayRecord();
+            } catch (error) {
+                console.error('Error updating attendance:', error);
+                showMessage('Error updating attendance. Please try again.', 'error');
+            }
+        };
+
+        function calculateStatus(timeIn) {
+            const settings = JSON.parse(localStorage.getItem('system-settings') || '{}');
+            const startTime = settings.operatingHoursStart || '07:00';
+            const threshold = parseInt(settings.lateThresholdMinutes || '15');
+            const timeInMinutes = timeToMinutes(timeIn);
+            const startMinutes = timeToMinutes(startTime);
+            const thresholdMinutes = startMinutes + threshold;
+            if (timeInMinutes <= startMinutes) return 'Present';
+            else if (timeInMinutes <= thresholdMinutes) return 'Present';
+            else return 'Late';
+        }
+
+        function calculateLateMinutes(timeIn, startTime) {
+            const timeInMinutes = timeToMinutes(timeIn);
+            const startMinutes = timeToMinutes(startTime);
+            return Math.max(0, timeInMinutes - startMinutes);
+        }
+
+        function timeToMinutes(timeString) {
+            const [hours, minutes] = timeString.split(':').map(Number);
+            return hours * 60 + minutes;
+        }
+
+        function calculateHours(timeIn, timeOut) {
+            const inMinutes = timeToMinutes(timeIn);
+            const outMinutes = timeToMinutes(timeOut);
+            const totalMinutes = outMinutes - inMinutes;
+            const hours = totalMinutes / 60;
+            return `${hours.toFixed(1)} hrs`;
+        }
+
+        function formatTime(timeString) {
+            const [hours, minutes] = timeString.split(':');
+            const date = new Date();
+            date.setHours(parseInt(hours), parseInt(minutes));
+            return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        }
+
+        function getStatusColor(status) {
+            switch(status) {
+                case 'Present': return 'bg-green-100 text-green-800';
+                case 'Late': return 'bg-red-100 text-red-800';
+                case 'On Leave': return 'bg-yellow-100 text-yellow-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        window.showLeaveModal = function() {
+            document.getElementById('leaveModal').classList.remove('hidden');
+        };
+
+        window.closeLeaveModal = function() {
+            document.getElementById('leaveModal').classList.add('hidden');
+            document.getElementById('leaveForm').reset();
+        };
+
+        document.getElementById('leaveForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const leaveDate = document.getElementById('leaveDate').value;
+            const leaveType = document.getElementById('leaveType').value;
+            const reason = document.getElementById('reason').value;
+            const attendanceId = 'AT' + String(Date.now()).slice(-6);
+
+            const leaveData = {
+                attendanceId,
+                accountName: [
+                    currentUser.firstName || '',
+                    currentUser.middleName || '',
+                    currentUser.lastName || ''
+                ].filter(Boolean).join(' '),
+                accountId: currentUser.username,
+                accountType: currentUser.role,
+                date: leaveDate,
+                status: 'Leave Requested',
+                leaveType: leaveType,
+                reason: reason,
+                requestDate: new Date().toISOString().replace('T', ' ').substring(0, 19),
+                dateAdded: new Date().toISOString().replace('T', ' ').substring(0, 19),
+                remarks: 'Pending approval'
+            };
+
+            try {
+                await setDoc(doc(db, 'attendance', attendanceId), leaveData);
+                showMessage('Leave request submitted successfully!', 'success');
+                closeLeaveModal();
+            } catch (error) {
+                console.error('Error submitting leave request:', error);
+                showMessage('Error submitting leave request. Please try again.', 'error');
+            }
+        });
+
+        function showMessage(message, type) {
+            const container = document.getElementById('messageContainer');
+            const bgColor = type === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700';
+            container.innerHTML = `
+                <div class="${bgColor} px-4 py-3 rounded border">
+                    ${message}
+                </div>
+            `;
+            container.classList.remove('hidden');
+            setTimeout(() => {
+                container.classList.add('hidden');
+            }, 5000);
+        }
+
+        document.getElementById('leaveModal').addEventListener('click', function(e) {
+            if (e.target === this) closeLeaveModal();
+        });
+        </script>
+</body>
+</html>
