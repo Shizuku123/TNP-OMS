@@ -14,6 +14,7 @@ import {
   query,
   orderBy,
   where,
+  limit,
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js"
 import {
   getStorage,
@@ -66,4 +67,6 @@ export {
   ref,
   uploadBytes,
   getDownloadURL,
+  limit,
+  getAuth,
 }
