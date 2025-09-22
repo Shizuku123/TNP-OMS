@@ -77,14 +77,60 @@
                         <option value="Part-time">Part-time</option>
                         <option value="Probationary">Probationary</option>
                     </select>
-                    <button onclick="exportToCSV()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-center">
-                        Export CSV
+                    <button onclick="exportToPDF()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-center">
+                        Export PDF
                     </button>
                     <a href="add-staff.html" class="px-4 py-2 bg-red-primary text-white rounded-lg hover:bg-red-700 transition-colors text-center inline-block">
                         Add Staff
                     </a>
                 </div>
             </div>
+            <!-- Advanced Filters Section -->
+            <!-- Advanced Filters Section -->
+            <div class="border-t pt-4">
+                <button id="toggleAdvancedFilters" class="flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4">
+                    <svg id="filterToggleIcon" class="h-4 w-4 mr-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                    Show Advanced Filters
+                </button>
+                <div id="advancedFilters" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Simplified Advanced Filters -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                        <input type="text" id="nameFilter" placeholder="Name..." class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="text" id="emailFilter" placeholder="Email..." class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
+                        <input type="text" id="contactFilter" placeholder="Contact Number..." class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Position</label>
+                        <input type="text" id="positionFilter" placeholder="Position..." class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label for="genderFilter" class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                        <input type="text" id="genderFilter" placeholder="Gender..." class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label for="employmentStatusFilter" class="block text-sm font-medium text-gray-700 mb-1">Employment Status</label>
+                        <input type="text" id="employmentStatusFilter" placeholder="Employment Status..." class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label for="departmentFilterAdv" class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                        <input type="text" id="departmentFilterAdv" placeholder="Department..." class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                    </div>
+                </div>
+                <!-- Clear Filters Button -->
+                <div class="mt-4 flex justify-end">
+                    <button id="clearFiltersBtn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">Clear Filters</button>
+                </div>
+            </div>
+        </div>
         </div>
 
         <!-- Staff Records Grid -->
@@ -369,23 +415,61 @@
         }
 
         function setupEventListeners() {
-            document.getElementById('searchInput').addEventListener('input', filterRecords);
-            document.getElementById('departmentFilter').addEventListener('change', filterRecords);
-            document.getElementById('statusFilter').addEventListener('change', filterRecords);
-
-            document.getElementById('staffModal').addEventListener('click', function(e) {
+            // Removed event listeners for specific filter elements (no longer in HTML)
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) searchInput.addEventListener('input', filterRecords);
+            const departmentFilter = document.getElementById('departmentFilter');
+            if (departmentFilter) departmentFilter.addEventListener('change', filterRecords);
+            const statusFilter = document.getElementById('statusFilter');
+            if (statusFilter) statusFilter.addEventListener('change', filterRecords);
+            const nameFilter = document.getElementById('nameFilter');
+            if (nameFilter) nameFilter.addEventListener('input', filterRecords);
+            const emailFilter = document.getElementById('emailFilter');
+            if (emailFilter) emailFilter.addEventListener('input', filterRecords);
+            const contactFilter = document.getElementById('contactFilter');
+            if (contactFilter) contactFilter.addEventListener('input', filterRecords);
+            const positionFilter = document.getElementById('positionFilter');
+            if (positionFilter) positionFilter.addEventListener('input', filterRecords);
+            const genderFilter = document.getElementById('genderFilter');
+            if (genderFilter) genderFilter.addEventListener('input', filterRecords);
+            const employmentStatusFilter = document.getElementById('employmentStatusFilter');
+            if (employmentStatusFilter) employmentStatusFilter.addEventListener('input', filterRecords);
+            const departmentFilterAdv = document.getElementById('departmentFilterAdv');
+            if (departmentFilterAdv) departmentFilterAdv.addEventListener('input', filterRecords);
+            const dateHiredFilterFrom = document.getElementById('dateHiredFilterFrom');
+            if (dateHiredFilterFrom) dateHiredFilterFrom.addEventListener('change', filterRecords);
+            const dateHiredFilterTo = document.getElementById('dateHiredFilterTo');
+            if (dateHiredFilterTo) dateHiredFilterTo.addEventListener('change', filterRecords);
+            const toggleAdvancedFilters = document.getElementById('toggleAdvancedFilters');
+            if (toggleAdvancedFilters) toggleAdvancedFilters.addEventListener('click', function() {
+                const advancedFilters = document.getElementById('advancedFilters');
+                const toggleIcon = document.getElementById('filterToggleIcon');
+                if (advancedFilters && toggleIcon) {
+                    if (advancedFilters.classList.contains('hidden')) {
+                        advancedFilters.classList.remove('hidden');
+                        toggleIcon.style.transform = 'rotate(180deg)';
+                        this.lastChild.textContent = 'Hide Advanced Filters';
+                    } else {
+                        advancedFilters.classList.add('hidden');
+                        toggleIcon.style.transform = 'rotate(0deg)';
+                        this.lastChild.textContent = 'Show Advanced Filters';
+                    }
+                }
+            });
+            const staffModal = document.getElementById('staffModal');
+            if (staffModal) staffModal.addEventListener('click', function(e) {
                 if (e.target === this) {
                     closeModal();
                 }
             });
-
-            document.getElementById('deleteModal').addEventListener('click', function(e) {
+            const deleteModal = document.getElementById('deleteModal');
+            if (deleteModal) deleteModal.addEventListener('click', function(e) {
                 if (e.target === this) {
                     closeDeleteModal();
                 }
             });
-
-            document.getElementById('editPasswordModal').addEventListener('click', function(e) {
+            const editPasswordModal = document.getElementById('editPasswordModal');
+            if (editPasswordModal) editPasswordModal.addEventListener('click', function(e) {
                 if (e.target === this) {
                     closeEditPasswordModal();
                 }
@@ -393,22 +477,37 @@
         }
 
         function filterRecords() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const departmentFilter = document.getElementById('departmentFilter').value;
-            const statusFilter = document.getElementById('statusFilter').value;
+            // Improved filter logic: use departmentAdv if set, otherwise department. Fix gender and employment status filters.
+            const searchTerm = (document.getElementById('searchInput')?.value || '').toLowerCase();
+            const departmentFilter = document.getElementById('departmentFilter')?.value || '';
+            const statusFilter = document.getElementById('statusFilter')?.value || '';
+            const nameFilter = (document.getElementById('nameFilter')?.value || '').toLowerCase();
+            const emailFilter = (document.getElementById('emailFilter')?.value || '').toLowerCase();
+            const contactFilter = (document.getElementById('contactFilter')?.value || '').toLowerCase();
+            const positionFilter = (document.getElementById('positionFilter')?.value || '').toLowerCase();
+            const genderFilter = document.getElementById('genderFilter')?.value || '';
+            const departmentFilterAdv = document.getElementById('departmentFilterAdv')?.value || '';
+            const employmentStatusFilter = document.getElementById('employmentStatusFilter')?.value || '';
 
             const filteredRecords = allRecords.filter(record => {
                 const fullName = `${record.firstName || ''} ${record.middleName || ''} ${record.lastName || ''}`.toLowerCase();
-                const matchesSearch = fullName.includes(searchTerm) || 
-                                    record.staffId.toLowerCase().includes(searchTerm) || 
-                                    (record.position || '').toLowerCase().includes(searchTerm) ||
-                                    (record.department || '').toLowerCase().includes(searchTerm);
-                const matchesDepartment = !departmentFilter || record.department === departmentFilter;
-                const matchesStatus = !statusFilter || record.employmentStatus === statusFilter;
-
-                return matchesSearch && matchesDepartment && matchesStatus;
+                const matchesSearch = !searchTerm || fullName.includes(searchTerm) || (record.staffId || '').toLowerCase().includes(searchTerm) || (record.position || '').toLowerCase().includes(searchTerm) || (record.department || '').toLowerCase().includes(searchTerm);
+                // Use advanced department filter if set, else main department filter
+                let matchesDepartment = true;
+                if (departmentFilterAdv) {
+                    matchesDepartment = (record.department || '').toLowerCase().includes(departmentFilterAdv.toLowerCase());
+                } else if (departmentFilter) {
+                    matchesDepartment = (record.department || '').toLowerCase().includes(departmentFilter.toLowerCase());
+                }
+                const matchesStatus = !statusFilter || (record.employmentStatus || '').toLowerCase().includes(statusFilter.toLowerCase());
+                const matchesName = !nameFilter || fullName.includes(nameFilter);
+                const matchesEmail = !emailFilter || (record.emailAddress || '').toLowerCase().includes(emailFilter);
+                const matchesContact = !contactFilter || (record.contactNumber || '').toLowerCase().includes(contactFilter);
+                const matchesPosition = !positionFilter || (record.position || '').toLowerCase().includes(positionFilter);
+                const matchesGender = !genderFilter || (record.gender || '').trim().toLowerCase() === genderFilter.trim().toLowerCase();
+                const matchesEmploymentStatus = !employmentStatusFilter || (record.employmentStatus || '').toLowerCase().includes(employmentStatusFilter.toLowerCase());
+                return matchesSearch && matchesDepartment && matchesStatus && matchesName && matchesEmail && matchesContact && matchesPosition && matchesGender && matchesEmploymentStatus;
             });
-
             displayRecords(filteredRecords);
         }
 
@@ -504,31 +603,86 @@
             document.getElementById('staffModal').classList.add('hidden');
         };
 
-        window.exportToCSV = function() {
-            const headers = ['Staff ID', 'First Name', 'Middle Name', 'Last Name', 'Position', 'Department', 'Contact Number', 'Email', 'Employment Status', 'Date Hired'];
-            const csvContent = [
-                headers.join(','),
-                ...allRecords.map(staff => [
-                    staff.staffId,
-                    staff.firstName || '',
-                    staff.middleName || '',
-                    staff.lastName || '',
-                    staff.position || '',
-                    staff.department || '',
-                    staff.contactNumber || '',
-                    staff.emailAddress || '',
-                    staff.employmentStatus || '',
-                    staff.dateHired || ''
-                ].map(field => `"${field}"`).join(','))
-            ].join('\n');
+        window.exportToPDF = function() {
+            // Load jsPDF and autoTable from CDN if not present
+            function loadScript(src, callback) {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = callback;
+                document.body.appendChild(script);
+            }
+            function ensureJsPDFAndAutoTable(callback) {
+                if (typeof window.jspdf === 'undefined') {
+                    loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', function() {
+                        loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.7.0/jspdf.plugin.autotable.min.js', callback);
+                    });
+                } else if (typeof window.jspdf?.jsPDF === 'undefined' || typeof window.jspdf?.jsPDF?.prototype?.autoTable === 'undefined') {
+                    loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.7.0/jspdf.plugin.autotable.min.js', callback);
+                } else {
+                    callback();
+                }
+            }
+            ensureJsPDFAndAutoTable(generatePDF);
 
-            const blob = new Blob([csvContent], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `staff-records-${new Date().toISOString().split('T')[0]}.csv`;
-            a.click();
-            window.URL.revokeObjectURL(url);
+            function generatePDF() {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                // Header design
+                doc.setFillColor(220, 38, 38); // Tailwind red-primary
+                doc.rect(0, 0, 210, 25, 'F');
+                doc.setTextColor(255,255,255);
+                doc.setFontSize(20);
+                doc.text('Tahanan ng Pagmamahal OMS', 105, 12, {align: 'center'});
+                doc.setFontSize(12);
+                doc.text('Staff Records Report', 105, 20, {align: 'center'});
+                doc.setTextColor(0,0,0);
+
+                // Table columns
+                const columns = [
+                    { header: 'Staff ID', dataKey: 'staffId' },
+                    { header: 'Name', dataKey: 'name' },
+                    { header: 'Position', dataKey: 'position' },
+                    { header: 'Department', dataKey: 'department' },
+                    { header: 'Contact', dataKey: 'contactNumber' },
+                    { header: 'Email', dataKey: 'emailAddress' },
+                    { header: 'Status', dataKey: 'employmentStatus' },
+                    { header: 'Date Hired', dataKey: 'dateHired' }
+                ];
+                // Table rows
+                const rows = allRecords.map(staff => ({
+                    staffId: staff.staffId,
+                    name: `${staff.firstName || ''} ${staff.middleName || ''} ${staff.lastName || ''}`.trim(),
+                    position: staff.position || '',
+                    department: staff.department || '',
+                    contactNumber: staff.contactNumber || '',
+                    emailAddress: staff.emailAddress || '',
+                    employmentStatus: staff.employmentStatus || '',
+                    dateHired: staff.dateHired || ''
+                }));
+
+                // Table with autoTable
+                doc.autoTable({
+                    startY: 30,
+                    head: [columns.map(col => col.header)],
+                    body: rows.map(row => columns.map(col => row[col.dataKey])),
+                    styles: { fontSize: 9, cellPadding: 2 },
+                    headStyles: { fillColor: [220,38,38], textColor: 255, fontStyle: 'bold' },
+                    alternateRowStyles: { fillColor: [245,245,245] },
+                    margin: { left: 10, right: 10 },
+                });
+
+                // Footer design
+                const pageCount = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= pageCount; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(10);
+                    doc.setTextColor(120,120,120);
+                    doc.text(`Generated by TNP-OMS | ${new Date().toLocaleString()}`, 10, 292);
+                    doc.text(`Page ${i} of ${pageCount}`, 200, 292, {align: 'right'});
+                }
+
+                doc.save(`staff-records-report-${new Date().toISOString().split('T')[0]}.pdf`);
+            }
         };
 
         function formatDate(dateString) {

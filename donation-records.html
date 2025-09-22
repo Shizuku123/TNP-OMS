@@ -54,7 +54,7 @@
                         <option value="in-kind">In-Kind Donations</option>
                     </select>
                     <button id="exportCSVBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-center">
-                        Export CSV
+                        Export PDF
                     </button>
                     <a href="record-donation.html" class="px-4 py-2 bg-red-primary text-white rounded-lg hover:bg-red-700 transition-colors text-center">
                         Add Donation
@@ -282,7 +282,7 @@
         function setupEventListeners() {
             document.getElementById('searchInput').addEventListener('input', filterRecords);
             document.getElementById('typeFilter').addEventListener('change', filterRecords);
-            document.getElementById('exportCSVBtn').addEventListener('click', exportToCSV);
+            document.getElementById('exportCSVBtn').addEventListener('click', exportToPDF);
 
             document.getElementById('recordModal').addEventListener('click', function(e) {
                 if (e.target === this) {
@@ -429,28 +429,86 @@
             document.getElementById('recordModal').classList.add('hidden');
         }
 
-        function exportToCSV() {
-            const headers = ['Donation ID', 'Type', 'Donor Name', 'Amount/Items', 'Date', 'Purpose/Condition'];
-            const csvContent = [
-                headers.join(','),
-                ...filteredRecords.map(donation => [
-                    donation.donationId,
-                    donation.donationType,
-                    donation.donorName || 'Anonymous',
-                    donation.donationType === 'money' ? '₱' + parseFloat(donation.amount || 0).toLocaleString() : donation.itemDescription,
-                    donation.dateOfDonation,
-                    donation.purpose || donation.conditionOfItems || ''
-                ].map(field => `"${field}"`).join(','))
-            ].join('\n');
-            const blob = new Blob([csvContent], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `donation-records-${new Date().toISOString().split('T')[0]}.csv`;
-            a.click();
-            window.URL.revokeObjectURL(url);
-        }
+        function exportToPDF() {
+            // Load jsPDF and autoTable from CDN if not present
+            function loadScript(src, callback) {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = callback;
+                document.body.appendChild(script);
+            }
+            function ensureJsPDFAndAutoTable(callback) {
+                if (typeof window.jspdf === 'undefined') {
+                    loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', function() {
+                        loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.7.0/jspdf.plugin.autotable.min.js', callback);
+                    });
+                } else if (typeof window.jspdf?.jsPDF === 'undefined' || typeof window.jspdf?.jsPDF?.prototype?.autoTable === 'undefined') {
+                    loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.7.0/jspdf.plugin.autotable.min.js', callback);
+                } else {
+                    callback();
+                }
+            }
+            ensureJsPDFAndAutoTable(generatePDF);
 
+            function generatePDF() {
+                const { jsPDF } = window.jspdf;
+                // Use landscape orientation and A4 size for more columns
+                const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+                // Header design
+                doc.setFillColor(220, 38, 38); // Tailwind red-primary
+                doc.rect(0, 0, doc.internal.pageSize.getWidth(), 20, 'F');
+                doc.setTextColor(255,255,255);
+                doc.setFontSize(20);
+                doc.text('Tahanan ng Pagmamahal OMS', doc.internal.pageSize.getWidth() / 2, 10, {align: 'center'});
+                doc.setFontSize(12);
+                doc.text('Donation Records Report', doc.internal.pageSize.getWidth() / 2, 17, {align: 'center'});
+                doc.setTextColor(0,0,0);
+
+                // Table columns
+                const columns = [
+                    { header: 'Donation ID', dataKey: 'donationId', width: 25 },
+                    { header: 'Type', dataKey: 'donationType', width: 25 },
+                    { header: 'Donor Name', dataKey: 'donorName', width: 35 },
+                    { header: 'Amount/Items', dataKey: 'amountOrItems', width: 30 },
+                    { header: 'Date', dataKey: 'dateOfDonation', width: 25 },
+                    { header: 'Purpose/Condition', dataKey: 'purposeOrCondition', width: 40 }
+                ];
+                // Table rows
+                const rows = filteredRecords.map(donation => ({
+                    donationId: donation.donationId || '',
+                    donationType: donation.donationType || '',
+                    donorName: donation.donorName || 'Anonymous',
+                    amountOrItems: donation.donationType === 'money' ? '₱' + parseFloat(donation.amount || 0).toLocaleString() : (donation.itemDescription || ''),
+                    dateOfDonation: donation.dateOfDonation || '',
+                    purposeOrCondition: donation.purpose || donation.conditionOfItems || ''
+                }));
+
+                // Table with autoTable
+                doc.autoTable({
+                    startY: 25,
+                    head: [columns.map(col => col.header)],
+                    body: rows.map(row => columns.map(col => row[col.dataKey])),
+                    styles: { fontSize: 9, cellPadding: 2 },
+                    headStyles: { fillColor: [220,38,38], textColor: 255, fontStyle: 'bold' },
+                    alternateRowStyles: { fillColor: [245,245,245] },
+                    margin: { left: 5, right: 5 },
+                    columnStyles: columns.reduce((acc, col, idx) => { acc[idx] = { cellWidth: col.width }; return acc; }, {}),
+                });
+
+                // Footer design
+                const pageCount = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= pageCount; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(10);
+                    doc.setTextColor(120,120,120);
+                    doc.text(`Generated by TNP-OMS | ${new Date().toLocaleString()}`, 5, doc.internal.pageSize.getHeight() - 5);
+                    doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.getWidth() - 5, doc.internal.pageSize.getHeight() - 5, {align: 'right'});
+                }
+
+                doc.save(`donation-records-report-${new Date().toISOString().split('T')[0]}.pdf`);
+            }
+        }
         function formatDate(dateString) {
             if (!dateString) return 'N/A';
             const date = new Date(dateString);

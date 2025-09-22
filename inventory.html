@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+
+\<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -199,8 +200,8 @@
                         <option value="expiring">Expiring Soon</option>
                         <option value="expired">Expired</option>
                     </select>
-                    <button onclick="exportToCSV()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-center">
-                        Export CSV
+                    <button onclick="exportToPDF()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-center">
+                        Export PDF
                     </button>
                     <button onclick="exportToPDF()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-center ml-2">
                         Export PDF
@@ -1503,32 +1504,95 @@
             document.getElementById('totalCategories').textContent = totalCategories;
         }
 
-        window.exportToCSV = function() {
-            const headers = ['Inventory ID', 'Category', 'Description', 'Quantity', 'Unit', 'Condition', 'Expiry Date', 'Status', 'Donor', 'Notes', 'Date Added'];
-            const csvContent = [
-                headers.join(','),
-                ...filteredItems.map(item => [
-                    item.inventoryId,
-                    item.itemCategory || '',
-                    item.itemDescription,
-                    item.quantity,
-                    item.unit || 'pcs',
-                    item.conditionOfItems,
-                    item.expiryDate || '',
-                    getItemStatus(item),
-                    item.donorName,
-                    item.notes || '',
-                    item.dateAdded
-                ].map(field => `"${field}"`).join(','))
-            ].join('\n');
+        window.exportToPDF = function() {
+            // Load jsPDF and autoTable from CDN if not present
+            function loadScript(src, callback) {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = callback;
+                document.body.appendChild(script);
+            }
+            function ensureJsPDFAndAutoTable(callback) {
+                if (typeof window.jspdf === 'undefined') {
+                    loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', function() {
+                        loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.7.0/jspdf.plugin.autotable.min.js', callback);
+                    });
+                } else if (typeof window.jspdf?.jsPDF === 'undefined' || typeof window.jspdf?.jsPDF?.prototype?.autoTable === 'undefined') {
+                    loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.7.0/jspdf.plugin.autotable.min.js', callback);
+                } else {
+                    callback();
+                }
+            }
+            ensureJsPDFAndAutoTable(generatePDF);
 
-            const blob = new Blob([csvContent], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `inventory-${new Date().toISOString().split('T')[0]}.csv`;
-            a.click();
-            window.URL.revokeObjectURL(url);
+            function generatePDF() {
+                const { jsPDF } = window.jspdf;
+                // Use landscape orientation and A4 size for more columns
+                const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+                // Header design
+                doc.setFillColor(220, 38, 38); // Tailwind red-primary
+                doc.rect(0, 0, doc.internal.pageSize.getWidth(), 20, 'F');
+                doc.setTextColor(255,255,255);
+                doc.setFontSize(20);
+                doc.text('Tahanan ng Pagmamahal OMS', doc.internal.pageSize.getWidth() / 2, 10, {align: 'center'});
+                doc.setFontSize(12);
+                doc.text('Inventory Report', doc.internal.pageSize.getWidth() / 2, 17, {align: 'center'});
+                doc.setTextColor(0,0,0);
+
+                // Table columns
+                const columns = [
+                    { header: 'Inventory ID', dataKey: 'inventoryId', width: 25 },
+                    { header: 'Category', dataKey: 'itemCategory', width: 25 },
+                    { header: 'Description', dataKey: 'itemDescription', width: 40 },
+                    { header: 'Quantity', dataKey: 'quantity', width: 20 },
+                    { header: 'Unit', dataKey: 'unit', width: 15 },
+                    { header: 'Condition', dataKey: 'conditionOfItems', width: 20 },
+                    { header: 'Expiry Date', dataKey: 'expiryDate', width: 25 },
+                    { header: 'Status', dataKey: 'status', width: 20 },
+                    { header: 'Donor', dataKey: 'donorName', width: 25 },
+                    { header: 'Notes', dataKey: 'notes', width: 30 },
+                    { header: 'Date Added', dataKey: 'dateAdded', width: 25 }
+                ];
+                // Table rows
+                const rows = filteredItems.map(item => ({
+                    inventoryId: item.inventoryId || '',
+                    itemCategory: item.itemCategory || '',
+                    itemDescription: item.itemDescription || '',
+                    quantity: item.quantity || '',
+                    unit: item.unit || 'pcs',
+                    conditionOfItems: item.conditionOfItems || '',
+                    expiryDate: item.expiryDate || '',
+                    status: getItemStatus(item),
+                    donorName: item.donorName || '',
+                    notes: item.notes || '',
+                    dateAdded: item.dateAdded || ''
+                }));
+
+                // Table with autoTable
+                doc.autoTable({
+                    startY: 25,
+                    head: [columns.map(col => col.header)],
+                    body: rows.map(row => columns.map(col => row[col.dataKey])),
+                    styles: { fontSize: 9, cellPadding: 2 },
+                    headStyles: { fillColor: [220,38,38], textColor: 255, fontStyle: 'bold' },
+                    alternateRowStyles: { fillColor: [245,245,245] },
+                    margin: { left: 5, right: 5 },
+                    columnStyles: columns.reduce((acc, col, idx) => { acc[idx] = { cellWidth: col.width }; return acc; }, {}),
+                });
+
+                // Footer design
+                const pageCount = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= pageCount; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(10);
+                    doc.setTextColor(120,120,120);
+                    doc.text(`Generated by TNP-OMS | ${new Date().toLocaleString()}`, 5, doc.internal.pageSize.getHeight() - 5);
+                    doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.getWidth() - 5, doc.internal.pageSize.getHeight() - 5, {align: 'right'});
+                }
+
+                doc.save(`inventory-report-${new Date().toISOString().split('T')[0]}.pdf`);
+            }
         };
 
         function showErrorMessage(message) {
