@@ -325,7 +325,7 @@
 
                 return `
                     <div class="staff-record bg-white rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer"
-                         onclick="window.showVolunteerDetail && window.showVolunteerDetail('${volunteer.volunteerId}')">
+                        onclick="window.location.href='view-volunteer.html?id=${volunteer.uid}'">
                         <div class="p-4 sm:p-6">
                             <div class="flex items-center space-x-4 mb-4">
                                 <img src="${photoSrc}" alt="${fullName}" class="h-12 w-12 sm:h-16 sm:w-16 rounded-full object-cover">
