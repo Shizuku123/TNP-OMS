@@ -292,21 +292,28 @@
             document.getElementById('volunteerForm').addEventListener('submit', handleSubmit);
         }
 
+        function getUserIdFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('id');
+        }
+
         async function loadVolunteerInfo() {
             const volunteerId = getVolunteerIdFromUrl();
-            if (!volunteerId) {
-                showMessage('No volunteer ID provided.', 'error');
+            const userId = getUserIdFromUrl();
+            if (!volunteerId || !userId) {
+                showMessage('No volunteer ID or user ID provided.', 'error');
                 return;
             }
 
             try {
-                // Find Firestore doc by volunteerId
-                const volunteerCol = collection(db, 'volunteers');
+
+                // CHANGED: Use users/volunteers subcollection
+                const volunteerCol = collection(db, 'users');
                 const snapshot = await getDocs(volunteerCol);
                 let volunteerData = null;
                 snapshot.forEach(docSnap => {
                     const data = docSnap.data();
-                    if (data.volunteerId === volunteerId) {
+                    if (data.volunteerId === volunteerId || data.uid === userId) {
                         volunteerData = data;
                         docId = docSnap.id;
                     }
@@ -317,7 +324,7 @@
                     return;
                 }
 
-                // Populate the form fields
+                // ...rest of your autofill code...
                 setFieldValue('firstName', volunteerData.firstName);
                 setFieldValue('middleName', volunteerData.middleName);
                 setFieldValue('lastName', volunteerData.lastName);
@@ -434,7 +441,7 @@
                 }
 
                 // Update Firestore document
-                await updateDoc(doc(collection(db, 'volunteers'), docId), data);
+                await updateDoc(doc(collection(db, 'users'), docId), data);
 
                 showMessage('Volunteer record updated successfully!', 'success');
                 setTimeout(() => {
