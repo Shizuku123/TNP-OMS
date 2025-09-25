@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Settings - Tahanan ng Pagmamahal OMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'red-primary': '#dc2626',
+                        'red-secondary': '#ef4444',
+                        'red-light': '#fef2f2'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <a href="volunteer-dashboard.html" class="flex items-center text-gray-600 hover:text-red-primary">
+                        <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                        Back to Dashboard
+                    </a>
+                </div>
+                <h1 class="text-xl font-semibold text-gray-900">Account Settings</h1>
+                <div></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Success/Error Messages -->
+        <div id="messageContainer" class="mb-4 hidden"></div>
+
+        <!-- Added loading state for better UX -->
+        <div id="loadingState" class="hidden text-center py-12">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-red-primary"></div>
+            <p class="mt-2 text-gray-600">Loading profile data...</p>
+        </div>
+
+        <!-- Restructured profile form with organized sections -->
+        <form id="dynamicProfileForm" class="space-y-6" style="display:none">
+            <!-- Role Selection -->
+            <div class="bg-white shadow rounded-lg p-4 sm:p-6">
+                <h2 class="text-lg font-medium text-gray-900 mb-4">Account Role</h2>
+                <div>
+                    <label for="roleSelect" class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                    <select id="roleSelect" name="role" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary bg-gray-100" disabled>
+                        <option value="">Select role</option>
+                        <option value="staff">Staff</option>
+                        <option value="volunteer">Volunteer</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                    <p class="mt-1 text-xs text-gray-500">Role cannot be changed from account settings</p>
+                </div>
+            </div>
+
+            <!-- Added profile photo section with preview like edit-child.html -->
+            <div class="bg-white shadow rounded-lg p-4 sm:p-6">
+                <h2 class="text-lg font-medium text-gray-900 mb-6">Profile Photo</h2>
+                <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
+                    <div class="shrink-0">
+                        <img id="photoPreview" class="h-24 w-24 sm:h-32 sm:w-32 object-cover rounded-full border-2 border-gray-200" src="user.png" alt="Profile photo preview">
+                    </div>
+                    <div class="flex-1 w-full">
+                        <label for="photoString" class="block text-sm font-medium text-gray-700 mb-2">Upload New Photo</label>
+                        <input type="file" id="photoString" name="photoString" accept="image/*"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        <p class="mt-2 text-sm text-gray-500">JPG, PNG or GIF up to 2MB</p>
+                        <p class="mt-1 text-xs text-gray-400">Current photo will be kept if no new photo is selected</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dynamic Sections Container -->
+            <div id="dynamicSections"></div>
+
+            <!-- Form Actions -->
+            <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4">
+                <a href="index.html" class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-center">
+                    Cancel
+                </a>
+                <button type="submit" class="px-6 py-2 bg-red-primary text-white rounded-md hover:bg-red-700 transition-colors">
+                    Update Profile
+                </button>
+            </div>
+        </form>
+
+        <!-- Change Password Section -->
+        <div class="bg-white rounded-lg shadow mt-6">
+            <div class="p-6 border-b">
+                <h2 class="text-lg font-medium text-gray-900">Change Password</h2>
+                <p class="text-sm text-gray-600">Update your account password for security.</p>
+            </div>
+            <div class="p-6">
+                <form id="passwordForm" autocomplete="off">
+                    <div class="space-y-6">
+                        <div>
+                            <label for="currentPassword" class="block text-sm font-medium text-gray-700 mb-2">Current Password *</label>
+                            <input type="password" id="currentPassword" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        </div>
+                        <div>
+                            <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-2">New Password *</label>
+                            <input type="password" id="newPassword" required minlength="6"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <p class="text-xs text-gray-500 mt-1">Password must be at least 6 characters long.</p>
+                        </div>
+                        <div>
+                            <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">Confirm New Password *</label>
+                            <input type="password" id="confirmPassword" required minlength="6"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end">
+                        <button type="submit" class="px-4 py-2 bg-red-primary text-white rounded-md hover:bg-red-700 transition-colors">
+                            Change Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { db, doc, setDoc, getDoc, collection } from './firebase.js';
+
+        const roleSections = {
+            staff: {
+                personalInfo: {
+                    title: "Personal Information",
+                    fields: [
+                        { name: "firstName", label: "First Name", type: "text", required: true },
+                        { name: "lastName", label: "Last Name", type: "text", required: true },
+                        { name: "dateOfBirth", label: "Date of Birth", type: "date", required: false },
+                        { name: "placeOfBirth", label: "Place of Birth", type: "text", required: false },
+                        { name: "civilStatus", label: "Civil Status", type: "select", options: ["Single", "Married", "Widowed", "Separated"], required: false },
+                        { name: "gender", label: "Gender", type: "select", options: ["Male", "Female", "Other"], required: true },
+                        { name: "nationality", label: "Nationality", type: "text", required: false },
+                        { name: "religion", label: "Religion", type: "text", required: false },
+                        { name: "contactNumber", label: "Contact Number", type: "tel", required: false },
+                        { name: "emailAddress", label: "Email Address", type: "email", required: true },
+                        { name: "currentAddress", label: "Current Address", type: "textarea", required: false },
+                        { name: "username", label: "Username", type: "text", required: true, readOnly: true }
+                    ]
+                },
+                employmentInfo: {
+                    title: "Employment Information",
+                    fields: [
+                        { name: "dateHired", label: "Date Hired", type: "date", required: false },
+                        { name: "department", label: "Department", type: "text", required: false },
+                        { name: "position", label: "Position", type: "text", required: false },
+                        { name: "supervisor", label: "Supervisor", type: "text", required: false },
+                        { name: "assignedSchedule", label: "Assigned Schedule", type: "text", required: false },
+                        { name: "employmentStatus", label: "Employment Status", type: "select", options: ["Active", "Inactive", "Probationary"], required: false },
+                        { name: "restrictions", label: "Restrictions", type: "text", required: false }
+                    ]
+                },
+                systemInfo: {
+                    title: "System Information",
+                    viewOnly: true,
+                    fields: [
+                        { name: "uid", label: "UID", type: "text", required: true, readOnly: true },
+                        { name: "role", label: "Role", type: "text", required: true, readOnly: true },
+                        { name: "createAccount", label: "Create Account Method", type: "text", required: false, readOnly: true },
+                        { name: "dateAdded", label: "Date Added", type: "date", required: false, readOnly: true },
+                        { name: "firstTimeLogin", label: "First Time Login", type: "checkbox", required: false, disabled: true },
+                        { name: "isActive", label: "Is Active", type: "checkbox", required: false, disabled: true },
+                        { name: "isVerified", label: "Is Verified", type: "checkbox", required: false, disabled: true },
+                        { name: "isBlocked", label: "Is Blocked", type: "checkbox", required: false, disabled: true }
+                    ]
+                }
+            },
+            volunteer: {
+                personalInfo: {
+                    title: "Personal Information",
+                    fields: [
+                        { name: "firstName", label: "First Name", type: "text", required: true },
+                        { name: "middleName", label: "Middle Name", type: "text", required: false },
+                        { name: "lastName", label: "Last Name", type: "text", required: true },
+                        { name: "dateOfBirth", label: "Date of Birth", type: "date", required: false },
+                        { name: "placeOfBirth", label: "Place of Birth", type: "text", required: false },
+                        { name: "civilStatus", label: "Civil Status", type: "select", options: ["Single", "Married", "Widowed", "Separated"], required: false },
+                        { name: "gender", label: "Gender", type: "select", options: ["Male", "Female", "Other"], required: true },
+                        { name: "nationality", label: "Nationality", type: "text", required: false },
+                        { name: "religion", label: "Religion", type: "text", required: false },
+                        { name: "contactNumber", label: "Contact Number", type: "tel", required: false },
+                        { name: "emailAddress", label: "Email Address", type: "email", required: true },
+                        { name: "currentAddress", label: "Current Address", type: "textarea", required: false },
+                        { name: "emergencyContactName", label: "Emergency Contact Name", type: "text", required: false },
+                        { name: "emergencyContactNumber", label: "Emergency Contact Number", type: "tel", required: false },
+                        { name: "emergencyContactRelationship", label: "Emergency Contact Relationship", type: "text", required: false },
+                        { name: "username", label: "Username", type: "text", required: true, readOnly: true }
+                    ]
+                },
+                volunteerInfo: {
+                    title: "Volunteer Information",
+                    fields: [
+                        { name: "volunteerId", label: "Volunteer ID", type: "text", required: false },
+                        { name: "volunteerStatus", label: "Volunteer Status", type: "select", options: ["Active", "Inactive", "Pending"], required: false },
+                        { name: "availability", label: "Availability", type: "text", required: false },
+                        { name: "preferredDepartment", label: "Preferred Department", type: "text", required: false },
+                        { name: "skillsAndExperience", label: "Skills and Experience", type: "textarea", required: false },
+                        { name: "motivationForVolunteering", label: "Motivation for Volunteering", type: "textarea", required: false }
+                    ]
+                },
+                systemInfo: {
+                    title: "System Information",
+                    viewOnly: true,
+                    fields: [
+                        { name: "uid", label: "UID", type: "text", required: true, readOnly: true },
+                        { name: "role", label: "Role", type: "text", required: true, readOnly: true },
+                        { name: "dateAdded", label: "Date Added", type: "date", required: false, readOnly: true },
+                        { name: "firstTimeLogin", label: "First Time Login", type: "checkbox", required: false, disabled: true },
+                        { name: "isActive", label: "Is Active", type: "checkbox", required: false, disabled: true },
+                        { name: "isVerified", label: "Is Verified", type: "checkbox", required: false, disabled: true },
+                        { name: "isBlocked", label: "Is Blocked", type: "checkbox", required: false, disabled: true }
+                    ]
+                }
+            },
+            admin: {
+                personalInfo: {
+                    title: "Personal Information",
+                    fields: [
+                        { name: "firstName", label: "First Name", type: "text", required: true },
+                        { name: "middleName", label: "Middle Name", type: "text", required: false },
+                        { name: "lastName", label: "Last Name", type: "text", required: true },
+                        { name: "dateOfBirth", label: "Date of Birth", type: "date", required: false },
+                        { name: "placeOfBirth", label: "Place of Birth", type: "text", required: false },
+                        { name: "civilStatus", label: "Civil Status", type: "select", options: ["Single", "Married", "Widowed", "Separated"], required: false },
+                        { name: "gender", label: "Gender", type: "select", options: ["Male", "Female", "Other"], required: true },
+                        { name: "nationality", label: "Nationality", type: "text", required: false },
+                        { name: "religion", label: "Religion", type: "text", required: false },
+                        { name: "contactNumber", label: "Contact Number", type: "tel", required: false },
+                        { name: "emailAddress", label: "Email Address", type: "email", required: true },
+                        { name: "currentAddress", label: "Current Address", type: "textarea", required: false },
+                        { name: "username", label: "Username", type: "text", required: true, readOnly: true }
+                    ]
+                },
+                employmentInfo: {
+                    title: "Employment Information",
+                    fields: [
+                        { name: "dateHired", label: "Date Hired", type: "date", required: false },
+                        { name: "department", label: "Department", type: "text", required: false },
+                        { name: "position", label: "Position", type: "text", required: false },
+                        { name: "supervisor", label: "Supervisor", type: "text", required: false },
+                        { name: "assignedSchedule", label: "Assigned Schedule", type: "text", required: false },
+                        { name: "employmentStatus", label: "Employment Status", type: "select", options: ["Active", "Inactive", "Probationary"], required: false }
+                    ]
+                },
+                systemInfo: {
+                    title: "System Information",
+                    viewOnly: true,
+                    fields: [
+                        { name: "uid", label: "UID", type: "text", required: true, readOnly: true },
+                        { name: "role", label: "Role", type: "text", required: true, readOnly: true },
+                        { name: "createAccount", label: "Create Account Method", type: "text", required: false, readOnly: true },
+                        { name: "dateAdded", label: "Date Added", type: "date", required: false, readOnly: true },
+                        { name: "isActive", label: "Is Active", type: "checkbox", required: false, disabled: true },
+                        { name: "isVerified", label: "Is Verified", type: "checkbox", required: false, disabled: true },
+                        { name: "isBlocked", label: "Is Blocked", type: "checkbox", required: false, disabled: true }
+                    ]
+                }
+            }
+        };
+
+        // Map role to Firestore collection
+        const roleCollection = {
+            staff: "staff",
+            volunteer: "volunteers",
+            admin: "users"
+        };
+
+        // Session Manager
+        const sessionManager = {
+            getCurrentUser: function() {
+                const user = localStorage.getItem('currentUser');
+                return user ? JSON.parse(user) : null;
+            },
+            requireLogin: function() {
+                if (!localStorage.getItem('currentUser')) {
+                    window.location.href = 'login.html';
+                    return false;
+                }
+                return true;
+            }
+        };
+
+        let currentUser = null;
+        let loadedUserData = {};
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            if (!sessionManager.requireLogin()) return;
+            
+            currentUser = sessionManager.getCurrentUser();
+            
+            // Show loading state
+            document.getElementById('loadingState').classList.remove('hidden');
+            
+            // Pre-select and disable role
+            const roleSelect = document.getElementById('roleSelect');
+            roleSelect.value = currentUser.role;
+            roleSelect.disabled = true;
+
+            // Generate sections for current role
+            await generateDynamicSections(currentUser.role);
+
+            // Load user data from Firestore
+            await populateFormWithFirestoreData(currentUser.role);
+
+            setupPhotoPreview();
+
+            // Hide loading and show form
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('dynamicProfileForm').style.display = 'block';
+
+            // Event listeners
+            document.getElementById('dynamicProfileForm').addEventListener('submit', handleProfileSubmit);
+            document.getElementById('passwordForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                showMessage("Password change must be implemented with Firebase Auth.", "error");
+            });
+        });
+
+        function setupPhotoPreview() {
+            document.getElementById('photoString').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById('photoPreview').src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        async function generateDynamicSections(role) {
+            const sections = roleSections[role] || {};
+            const dynamicSections = document.getElementById('dynamicSections');
+            dynamicSections.innerHTML = "";
+
+            Object.entries(sections).forEach(([sectionKey, section]) => {
+                // Create section card
+                const sectionCard = document.createElement('div');
+                sectionCard.className = 'bg-white shadow rounded-lg p-4 sm:p-6';
+                
+                // Section header
+                const header = document.createElement('h2');
+                header.className = 'text-lg font-medium text-gray-900 mb-6';
+                header.textContent = section.title;
+                if (section.viewOnly) {
+                    header.innerHTML += ' <span class="text-sm font-normal text-gray-500">(View Only)</span>';
+                }
+                sectionCard.appendChild(header);
+
+                // Fields grid
+                const fieldsGrid = document.createElement('div');
+                fieldsGrid.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6';
+
+                section.fields.forEach(field => {
+                    const fieldDiv = document.createElement('div');
+                    if (field.type === 'textarea') {
+                        fieldDiv.className = 'sm:col-span-2 lg:col-span-3';
+                    }
+
+                    const fieldHTML = generateFieldHTML(field);
+                    fieldDiv.innerHTML = fieldHTML;
+                    fieldsGrid.appendChild(fieldDiv);
+                });
+
+                sectionCard.appendChild(fieldsGrid);
+                dynamicSections.appendChild(sectionCard);
+            });
+        }
+
+        function generateFieldHTML(field) {
+            const id = field.name;
+            const label = `<label for="${id}" class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>`;
+            const baseClasses = "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary";
+            const disabledClasses = field.readOnly || field.disabled ? " bg-gray-100" : "";
+            const inputClasses = baseClasses + disabledClasses;
+
+            if (field.type === "textarea") {
+                return `${label}<textarea id="${id}" name="${id}" ${field.required ? 'required' : ''} ${field.readOnly ? 'readonly' : ''} class="${inputClasses}"></textarea>`;
+            } else if (field.type === "select") {
+                const options = field.options ? field.options.map(opt => `<option value="${opt}">${opt}</option>`).join("") : "";
+                return `${label}<select id="${id}" name="${id}" ${field.required ? 'required' : ''} ${field.readOnly ? 'disabled' : ''} class="${inputClasses}">
+                    <option value="">Select</option>
+                    ${options}
+                </select>`;
+            } else if (field.type === "checkbox") {
+                const checkboxClasses = field.disabled ? "h-4 w-4 text-red-primary border-gray-300 rounded focus:ring-red-primary bg-gray-100" : "h-4 w-4 text-red-primary border-gray-300 rounded focus:ring-red-primary";
+                return `<div class="flex items-center mt-4">
+                    <input type="checkbox" id="${id}" name="${id}" ${field.disabled ? 'disabled' : ''} class="${checkboxClasses}" />
+                    <label for="${id}" class="ml-2 block text-sm font-medium text-gray-700">${field.label}</label>
+                </div>`;
+            } else if (field.type === "date") {
+                return `${label}<input type="date" id="${id}" name="${id}" ${field.required ? 'required' : ''} ${field.readOnly ? 'readonly' : ''} class="${inputClasses}">`;
+            } else {
+                return `${label}<input type="${field.type}" id="${id}" name="${id}" ${field.required ? 'required' : ''} ${field.readOnly ? 'readonly' : ''} class="${inputClasses}">`;
+            }
+        }
+
+        async function populateFormWithFirestoreData(role) {
+            const collectionName = roleCollection[role];
+            if (!collectionName) return;
+
+            let userId = currentUser.uid || currentUser.id || currentUser.username;
+            if (!userId) return;
+
+            const userDocRef = doc(db, collectionName, userId);
+            const userSnap = await getDoc(userDocRef);
+            loadedUserData = {};
+            
+            if (userSnap.exists()) {
+                loadedUserData = userSnap.data();
+            } else {
+                loadedUserData = currentUser;
+            }
+
+            if (loadedUserData.photoString) {
+                document.getElementById('photoPreview').src = loadedUserData.photoString;
+            }
+
+            // Populate all fields across sections
+            const sections = roleSections[role] || {};
+            Object.values(sections).forEach(section => {
+                section.fields.forEach(field => {
+                    const el = document.getElementById(field.name);
+                    if (!el) return;
+                    
+                    if (field.type === "checkbox") {
+                        el.checked = !!loadedUserData[field.name];
+                    } else if (field.type === "date") {
+                        el.value = loadedUserData[field.name] ? loadedUserData[field.name].split("T")[0] : "";
+                    } else {
+                        el.value = loadedUserData[field.name] || "";
+                    }
+                });
+            });
+        }
+
+        async function handleProfileSubmit(e) {
+            e.preventDefault();
+            const role = document.getElementById('roleSelect').value;
+            const sections = roleSections[role] || {};
+            const formData = new FormData(e.target);
+
+            let data = {};
+            let photoUploadPromise = Promise.resolve();
+
+            let valid = true, missing = [];
+            
+            // Handle photo upload
+            const photoFile = formData.get('photoString');
+            if (photoFile && photoFile.size > 0) {
+                photoUploadPromise = new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = function(evt) {
+                        data.photoString = evt.target.result;
+                        resolve();
+                    };
+                    reader.onerror = function() { reject("Error loading image"); };
+                    reader.readAsDataURL(photoFile);
+                });
+            } else if (loadedUserData.photoString) {
+                data.photoString = loadedUserData.photoString;
+            }
+
+            // Collect data from all sections
+            Object.values(sections).forEach(section => {
+                section.fields.forEach(field => {
+                    if (field.name === 'photoString') return; // Already handled above
+                    
+                    if (field.type === "checkbox") {
+                        data[field.name] = document.getElementById(field.name).checked;
+                    } else {
+                        const value = (formData.get(field.name) || "").trim();
+                        if (field.required && !value && !field.readOnly && !field.disabled) {
+                            valid = false;
+                            missing.push(field.label);
+                        }
+                        data[field.name] = value;
+                    }
+                });
+            });
+
+            if (!valid) {
+                showMessage("Missing required fields: " + missing.join(", "), "error");
+                return;
+            }
+
+            await photoUploadPromise;
+
+            // Ensure required system fields
+            data.role = currentUser.role;
+            data.uid = currentUser.uid || currentUser.id || currentUser.username;
+            data.username = currentUser.username;
+
+            // Save to Firestore
+            try {
+                const collectionName = roleCollection[role];
+                if (!collectionName) throw new Error("Unknown role collection");
+                const docRef = doc(db, collectionName, data.uid);
+                await setDoc(docRef, data, { merge: true });
+
+                // Update local session
+                Object.assign(currentUser, data);
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+                showMessage("Profile updated successfully!", "success");
+            } catch (err) {
+                console.error('Error saving profile:', err);
+                showMessage("Error saving profile: " + err.message, "error");
+            }
+        }
+
+        function showMessage(message, type) {
+            const container = document.getElementById('messageContainer');
+            const bgColor = type === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700';
+            container.innerHTML = `
+                <div class="${bgColor} px-4 py-3 rounded border">
+                    ${message}
+                </div>
+            `;
+            container.classList.remove('hidden');
+            setTimeout(() => {
+                container.classList.add('hidden');
+            }, 4000);
+        }
+    </script>
+</body>
+</html>

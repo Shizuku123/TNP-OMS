@@ -66,6 +66,7 @@
             <div class="bg-white shadow rounded-lg p-4 sm:p-6">
                 <h2 class="text-lg font-medium text-gray-900 mb-6">Personal Information</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                    <!-- ... same as add-staff.html ... -->
                     <div>
                         <label for="firstName" class="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
                         <input type="text" id="firstName" name="firstName" required
@@ -210,6 +211,77 @@
                 </div>
             </div>
 
+            <!-- Restriction Codes -->
+            <div class="bg-white shadow rounded-lg p-4 sm:p-6">
+                <h2 class="text-lg font-medium text-gray-900 mb-6">Features Granted</h2>
+                <div class="mb-6">
+                    <h3 class="font-semibold text-gray-700 mb-2">Recording Sections</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="featureGranted[]" value="Add New Child" class="mr-2 rounded text-red-primary focus:ring-red-primary" id="fg-add-child">
+                            <span>Add New Child</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="featureGranted[]" value="Add New Staff" class="mr-2 rounded text-red-primary focus:ring-red-primary" id="fg-add-staff">
+                            <span>Add New Staff</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="featureGranted[]" value="Add New Volunteer" class="mr-2 rounded text-red-primary focus:ring-red-primary" id="fg-add-volunteer">
+                            <span>Add New Volunteer</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="featureGranted[]" value="Record Donation" class="mr-2 rounded text-red-primary focus:ring-red-primary" id="fg-record-donation">
+                            <span>Record Donation</span>
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-700 mb-2">Record Viewing</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="featureGranted[]" value="Child Records" class="mr-2 rounded text-red-primary focus:ring-red-primary" id="fg-child-records">
+                            <span>Child Records</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="featureGranted[]" value="Staff Records" class="mr-2 rounded text-red-primary focus:ring-red-primary" id="fg-staff-records">
+                            <span>Staff Records</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="featureGranted[]" value="Volunteer Records" class="mr-2 rounded text-red-primary focus:ring-red-primary" id="fg-volunteer-records">
+                            <span>Volunteer Records</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="featureGranted[]" value="Donation Records" class="mr-2 rounded text-red-primary focus:ring-red-primary" id="fg-donation-records">
+                            <span>Donation Records</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="featureGranted[]" value="Donors Records" class="mr-2 rounded text-red-primary focus:ring-red-primary" id="fg-donors-records">
+                            <span>Donors Records</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="featureGranted[]" value="Inventory Records" class="mr-2 rounded text-red-primary focus:ring-red-primary" id="fg-inventory-records">
+                            <span>Inventory Records</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="featureGranted[]" value="Expenses Records" class="mr-2 rounded text-red-primary focus:ring-red-primary" id="fg-expenses-records">
+                            <span>Expenses Records</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="featureGranted[]" value="Discharged Children Records" class="mr-2 rounded text-red-primary focus:ring-red-primary" id="fg-discharged-children-records">
+                            <span>Discharged Children Records</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="featureGranted[]" value="Archive Records" class="mr-2 rounded text-red-primary focus:ring-red-primary" id="fg-archive-records">
+                            <span>Archive Records</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="featureGranted[]" value="Staff Attendance" class="mr-2 rounded text-red-primary focus:ring-red-primary" id="fg-staff-attendance">
+                            <span>Staff Attendance</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
             <!-- Submit Button -->
             <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4">
                 <a href="staff-records.html" class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-center">
@@ -317,6 +389,34 @@
                     document.getElementById('photoPreview').src = 'user.png';
                 }
 
+                // Populate featureGranted checkboxes
+                if (staffData.featureGranted && Array.isArray(staffData.featureGranted)) {
+                    staffData.featureGranted.forEach(val => {
+                        // Try to match by id for all checkboxes
+                        let id = '';
+                        switch (val) {
+                            case "Add New Child": id = "fg-add-child"; break;
+                            case "Add New Staff": id = "fg-add-staff"; break;
+                            case "Add New Volunteer": id = "fg-add-volunteer"; break;
+                            case "Record Donation": id = "fg-record-donation"; break;
+                            case "Child Records": id = "fg-child-records"; break;
+                            case "Staff Records": id = "fg-staff-records"; break;
+                            case "Volunteer Records": id = "fg-volunteer-records"; break;
+                            case "Donation Records": id = "fg-donation-records"; break;
+                            case "Donors Records": id = "fg-donors-records"; break;
+                            case "Inventory Records": id = "fg-inventory-records"; break;
+                            case "Expenses Records": id = "fg-expenses-records"; break;
+                            case "Discharged Children Records": id = "fg-discharged-children-records"; break;
+                            case "Archive Records": id = "fg-archive-records"; break;
+                            case "Staff Attendance": id = "fg-staff-attendance"; break;
+                        }
+                        if (id) {
+                            const el = document.getElementById(id);
+                            if (el) el.checked = true;
+                        }
+                    });
+                }
+
             } catch (error) {
                 console.error('Failed to load staff info:', error);
                 showMessage('Failed to load staff info.', 'error');
@@ -341,7 +441,7 @@
 
             // Collect form data (plain text only, not files)
             for (let [key, value] of formData.entries()) {
-                if (key !== "photo") {
+                if (key !== "photo" && key !== "featureGranted[]") {
                     data[key] = value;
                 }
             }
@@ -350,6 +450,12 @@
             data.gender = document.getElementById('genderMale').checked ? 'Male'
                 : document.getElementById('genderFemale').checked ? 'Female'
                 : '';
+
+            // Collect featureGranted (restriction codes/features)
+            data.featureGranted = [];
+            document.querySelectorAll('input[name="featureGranted[]"]:checked').forEach(el => {
+                data.featureGranted.push(el.value);
+            });
 
             // Handle photo base64
             const photoFile = document.getElementById('photo').files[0];
@@ -375,7 +481,7 @@
                     }
                 }
 
-                // Update Firestore document in users collection
+                // Update Firestore document in users collection, including featureGranted
                 await updateDoc(doc(collection(db, 'users'), docId), data);
 
                 showMessage('Staff record updated successfully!', 'success');

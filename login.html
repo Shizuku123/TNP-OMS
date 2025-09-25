@@ -217,8 +217,13 @@
           };
           localStorage.setItem('currentUser', JSON.stringify(persistUser));
           loginText.textContent = 'Success! Redirecting...';
+          
           setTimeout(() => {
-            window.location.href = 'index.html';
+            if (persistUser.role === 'volunteer') {
+              window.location.href = 'volunteer-attendance.html';
+            } else {
+              window.location.href = 'index.html';
+            }
           }, 500);
         } catch (error) {
           errorMessage.textContent = 'Invalid username/email or password. Please try again.';
