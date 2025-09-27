@@ -6,6 +6,7 @@
     <title>Donation Records - Tahanan ng Pagmamahal OMS</title>
     <script type="module" src="firebase.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -40,6 +41,21 @@
 
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Month Filter Header (hidden by default) -->
+        <div id="monthFilterHeader" class="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4 hidden">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <svg class="h-5 w-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                    </svg>
+                    <span class="text-blue-800 font-medium">Filtered by: <span id="monthFilterText"></span></span>
+                </div>
+                <button onclick="clearMonthFilter()" class="text-blue-600 hover:text-blue-800 font-medium text-sm">
+                    Clear Filter
+                </button>
+            </div>
+        </div>
+        
         <!-- Search and Filter -->
         <div class="mb-6 bg-white rounded-lg shadow p-6">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
@@ -53,9 +69,20 @@
                         <option value="money">Money Donations</option>
                         <option value="in-kind">In-Kind Donations</option>
                     </select>
-                    <button id="exportCSVBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-center">
-                        Export CSV
-                    </button>
+                    <div class="flex space-x-2">
+                        <button id="printBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-center">
+                            <svg class="h-4 w-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                            </svg>
+                            Print
+                        </button>
+                        <button id="exportCSVBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-center">
+                            <svg class="h-4 w-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            Export CSV
+                        </button>
+                    </div>
                     <a href="record-donation.html" class="px-4 py-2 bg-red-primary text-white rounded-lg hover:bg-red-700 transition-colors text-center">
                         Add Donation
                     </a>
@@ -77,6 +104,71 @@
                         In-Kind Donations
                     </button>
                 </nav>
+            </div>
+        </div>
+
+        <!-- Donation Statistics & Graph -->
+        <div class="mb-6 bg-white rounded-lg shadow p-6">
+            <!-- Header with title and year selector -->
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-sm font-semibold text-gray-900">Donation Trends</h3>
+                <div class="flex items-center space-x-2">
+                    <label for="recordsYearSelector" class="text-sm text-gray-600 whitespace-nowrap">Year:</label>
+                    <select id="recordsYearSelector" class="text-sm border border-gray-300 rounded px-3 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary min-w-[80px]">
+                        <!-- Years will be populated by JavaScript -->
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Statistics Row -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-green-600" id="recordsTotalAmount">₱ 0.00</div>
+                    <div class="text-sm text-gray-500">Total Amount</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-blue-600" id="recordsMoneyDonations">0</div>
+                    <div class="text-sm text-gray-500">Money Donations</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-purple-600" id="recordsInKindDonations">0</div>
+                    <div class="text-sm text-gray-500">In-Kind Donations</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-orange-600" id="recordsTotalDonations">0</div>
+                    <div class="text-sm text-gray-500">Total Donations</div>
+                </div>
+            </div>
+            
+            <!-- Chart section -->
+            <div class="border-t pt-4">
+                <div class="mb-2">
+                    <p class="text-xs text-gray-500 text-center">💡 Tip: Click on the <span class="text-green-600 font-medium">green line</span> to filter money donations by month, or the <span class="text-blue-600 font-medium">blue line</span> for in-kind donations</p>
+                </div>
+                <div class="relative">
+                    <div class="overflow-x-auto overflow-y-hidden" style="scrollbar-width: thin;">
+                        <div class="h-64 min-w-[700px] pr-4">
+                            <canvas id="recordsDonationChart"></canvas>
+                        </div>
+                    </div>
+                    <!-- Custom scrollbar styling for webkit browsers -->
+                    <style>
+                        .overflow-x-auto::-webkit-scrollbar {
+                            height: 6px;
+                        }
+                        .overflow-x-auto::-webkit-scrollbar-track {
+                            background: #f1f5f9;
+                            border-radius: 3px;
+                        }
+                        .overflow-x-auto::-webkit-scrollbar-thumb {
+                            background: #cbd5e1;
+                            border-radius: 3px;
+                        }
+                        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+                            background: #94a3b8;
+                        }
+                    </style>
+                </div>
             </div>
         </div>
 
@@ -109,8 +201,8 @@
     </div>
 
     <!-- Record Detail Modal -->
-    <div id="recordModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+    <div id="recordModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" onclick="closeModalBackdrop(event)">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white" onclick="event.stopPropagation()">
             <div class="mt-3">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-medium text-gray-900">Donation Details</h3>
@@ -122,6 +214,147 @@
                 </div>
                 <div id="modalContent" class="space-y-6">
                     <!-- Content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Preview Modal -->
+    <div id="printModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative mx-auto p-5 border w-11/12 max-w-6xl shadow-lg rounded-md bg-white" style="margin-top: 20px; margin-bottom: 20px;">
+            <div class="mt-3">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-medium text-gray-900">Print Preview & Filters</h3>
+                    <button onclick="closePrintModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Filter Controls -->
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h4 class="text-lg font-semibold mb-4 text-gray-800">Print Filters</h4>
+                        
+                        <!-- Date Range -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Date Range</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-xs text-gray-500 mb-1">From Date</label>
+                                    <input type="date" id="printFromDate" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-500 mb-1">To Date</label>
+                                    <input type="date" id="printToDate" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Donation Type -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Donation Type</label>
+                            <select id="printDonationType" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                                <option value="">All Types</option>
+                                <option value="money">Cash Donations</option>
+                                <option value="in-kind">In-Kind Donations</option>
+                            </select>
+                        </div>
+
+                        <!-- Donation Status -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Donation Status</label>
+                            <select id="printDonationStatus" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                                <option value="">All Status</option>
+                                <option value="received">Received</option>
+                                <option value="pending">Pending</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                        </div>
+
+                        <!-- Amount Range -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Amount Range (for Cash Donations)</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-xs text-gray-500 mb-1">Min Amount (₱)</label>
+                                    <input type="number" id="printMinAmount" placeholder="0" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-500 mb-1">Max Amount (₱)</label>
+                                    <input type="number" id="printMaxAmount" placeholder="No limit" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Donor Name -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Specific Donor</label>
+                            <select id="printDonorName" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                                <option value="">All Donors</option>
+                                <!-- Options will be populated dynamically -->
+                            </select>
+                        </div>
+
+                        <!-- Sort Options -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
+                            <select id="printSortBy" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                                <option value="date-desc">Date (Newest First)</option>
+                                <option value="date-asc">Date (Oldest First)</option>
+                                <option value="donor-asc">Donor Name (A-Z)</option>
+                                <option value="donor-desc">Donor Name (Z-A)</option>
+                                <option value="amount-desc">Amount (Highest First)</option>
+                                <option value="amount-asc">Amount (Lowest First)</option>
+                            </select>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex space-x-3">
+                            <button id="applyFiltersBtn" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm">
+                                Apply Filters
+                            </button>
+                            <button id="resetFiltersBtn" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 text-sm">
+                                Reset
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Preview -->
+                    <div class="bg-white border rounded-lg">
+                        <div class="bg-gray-100 px-4 py-2 border-b">
+                            <h4 class="text-lg font-semibold text-gray-800">Print Preview</h4>
+                            <p class="text-sm text-gray-600" id="previewRecordCount">0 records will be printed</p>
+                        </div>
+                        <div id="printPreviewContent" class="p-4 max-h-96 overflow-y-auto" style="font-size: 12px;">
+                            <!-- Preview content will be generated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Final Action Buttons -->
+                <div class="flex justify-between items-center mt-6 pt-4 border-t">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Export Format</label>
+                        <select id="exportFormat" class="px-3 py-2 border border-gray-300 rounded-md text-sm">
+                            <option value="print">Print (Browser)</option>
+                            <option value="pdf">PDF Download</option>
+                            <option value="excel">Excel (.xlsx)</option>
+                            <option value="csv">CSV (.csv)</option>
+                        </select>
+                    </div>
+                    <div class="flex space-x-3">
+                        <button id="cancelPrintBtn" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50">
+                            Cancel
+                        </button>
+                        <button id="confirmPrintBtn" class="px-6 py-2 bg-red-primary text-white rounded-md hover:bg-red-700">
+                            <svg class="h-4 w-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                            </svg>
+                            Generate Report
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -155,12 +388,29 @@
             }
         };
 
+        // Get URL parameters
+        function getURLParameters() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return {
+                month: urlParams.get('month'),
+                year: urlParams.get('year'),
+                filter: urlParams.get('filter')
+            };
+        }
+
         document.addEventListener('DOMContentLoaded', async function() {
             // Check authentication
             if (!sessionManager.requireLogin()) {
                 return;
             }
             currentUser = sessionManager.getCurrentUser();
+            
+            // Check for URL parameters and show filter header if needed
+            const urlParams = getURLParameters();
+            if (urlParams.filter === 'month' && urlParams.month && urlParams.year) {
+                showMonthFilterHeader(urlParams.month, urlParams.year);
+            }
+            
             await loadRecordsFromFirebase();
             setupEventListeners();
         });
@@ -178,16 +428,60 @@
                     data.photoData = data.photoString || '';
                     allRecords.push(data);
                 });
-                filteredRecords = [...allRecords];
+                
+                // Apply month filter if URL parameters are present
+                const urlParams = getURLParameters();
+                if (urlParams.filter === 'month' && urlParams.month && urlParams.year) {
+                    filteredRecords = filterByMonth(allRecords, urlParams.month, urlParams.year);
+                } else {
+                    filteredRecords = [...allRecords];
+                }
                 
                 hideSkeletonLoading();
                 displayRecords();
+                // Initialize chart after records are loaded
+                initializeRecordsChart();
             } catch (error) {
                 console.error('Failed to load donation records from Firebase:', error);
                 filteredRecords = [];
                 hideSkeletonLoading();
                 displayRecords();
+                // Initialize empty chart even on error
+                initializeRecordsChart();
             }
+        }
+
+        // Function to show month filter header
+        function showMonthFilterHeader(month, year) {
+            const monthNames = {
+                '01': 'January', '02': 'February', '03': 'March', '04': 'April',
+                '05': 'May', '06': 'June', '07': 'July', '08': 'August',
+                '09': 'September', '10': 'October', '11': 'November', '12': 'December'
+            };
+            
+            const monthName = monthNames[month];
+            document.getElementById('monthFilterText').textContent = `${monthName} ${year}`;
+            document.getElementById('monthFilterHeader').classList.remove('hidden');
+        }
+
+        // Function to filter donations by month and year
+        function filterByMonth(records, month, year) {
+            return records.filter(record => {
+                if (record.dateOfDonation) {
+                    const donationDate = new Date(record.dateOfDonation);
+                    const donationMonth = String(donationDate.getMonth() + 1).padStart(2, '0');
+                    const donationYear = String(donationDate.getFullYear());
+                    
+                    return donationMonth === month && donationYear === year;
+                }
+                return false;
+            });
+        }
+
+        // Function to clear month filter
+        function clearMonthFilter() {
+            // Remove URL parameters and reload page
+            window.location.href = 'donation-records.html';
         }
 
         function showSkeletonLoading() {
@@ -283,10 +577,41 @@
             document.getElementById('searchInput').addEventListener('input', filterRecords);
             document.getElementById('typeFilter').addEventListener('change', filterRecords);
             document.getElementById('exportCSVBtn').addEventListener('click', exportToCSV);
+            document.getElementById('printBtn').addEventListener('click', printRecords);
+
+            // Add event listeners for print modal
+            document.getElementById('printFromDate').addEventListener('change', applyPrintFilters);
+            document.getElementById('printToDate').addEventListener('change', applyPrintFilters);
+            document.getElementById('printDonationType').addEventListener('change', applyPrintFilters);
+            document.getElementById('printDonationStatus').addEventListener('change', applyPrintFilters);
+            document.getElementById('printMinAmount').addEventListener('input', applyPrintFilters);
+            document.getElementById('printMaxAmount').addEventListener('input', applyPrintFilters);
+            document.getElementById('printDonorName').addEventListener('change', applyPrintFilters);
+            document.getElementById('printSortBy').addEventListener('change', applyPrintFilters);
+            
+            // Add event listeners for modal buttons
+            document.getElementById('cancelPrintBtn').addEventListener('click', closePrintModal);
+            document.getElementById('confirmPrintBtn').addEventListener('click', confirmPrint);
+            document.getElementById('applyFiltersBtn').addEventListener('click', applyPrintFilters);
+            document.getElementById('resetFiltersBtn').addEventListener('click', resetPrintFilters);
 
             document.getElementById('recordModal').addEventListener('click', function(e) {
                 if (e.target === this) {
                     closeModal();
+                }
+            });
+
+            // Handle ESC key to close modal
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    const recordModal = document.getElementById('recordModal');
+                    const printModal = document.getElementById('printModal');
+                    
+                    if (!recordModal.classList.contains('hidden')) {
+                        closeModal();
+                    } else if (!printModal.classList.contains('hidden')) {
+                        closePrintModal();
+                    }
                 }
             });
         }
@@ -313,6 +638,13 @@
             }
             filteredRecords = records;
             displayRecords();
+            // Update statistics - check if month filter is active
+            const monthFilterHeader = document.getElementById('monthFilterHeader');
+            if (monthFilterHeader && !monthFilterHeader.classList.contains('hidden')) {
+                updateMonthFilterStatistics();
+            } else {
+                updateRecordsStatistics();
+            }
         }
 
         window.filterDonations = function(type) {
@@ -324,6 +656,8 @@
             event.target.classList.add('active', 'border-red-primary', 'text-red-600');
             event.target.classList.remove('border-transparent', 'text-gray-500');
             filterRecords();
+            // Update chart when filter changes
+            createRecordsDonationChart();
         };
 
         window.showRecordDetail = function(donationId) {
@@ -331,11 +665,101 @@
             if (!record) return;
             const isMoneyDonation = record.donationType === 'money';
             const modalContent = document.getElementById('modalContent');
+            
+            // Generate payment details section based on payment type
+            let paymentDetailsSection = '';
+            if (isMoneyDonation && record.paymentDetails && record.typeOfDonation !== 'Cash') {
+                paymentDetailsSection = `
+                    <div class="mt-6 pt-4 border-t border-gray-200">
+                        <div class="flex items-center mb-3">
+                            <svg class="h-5 w-5 text-gray-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                            </svg>
+                            <h4 class="font-medium text-gray-900">Payment Details</h4>
+                        </div>
+                        <div class="space-y-2">
+                `;
+                
+                if (record.typeOfDonation === 'Bank Transfer') {
+                    paymentDetailsSection += `
+                        <div class="bg-blue-50 p-3 rounded-md space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-600">Bank Name:</span>
+                                <span class="text-sm font-medium text-blue-800">${record.paymentDetails.bankName || 'N/A'}</span>
+                            </div>
+                            ${record.paymentDetails.bankBranch ? `
+                                <div class="flex justify-between">
+                                    <span class="text-sm text-gray-600">Branch:</span>
+                                    <span class="text-sm font-medium">${record.paymentDetails.bankBranch}</span>
+                                </div>
+                            ` : ''}
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-600">Account Info:</span>
+                                <span class="text-sm font-medium">${record.paymentDetails.accountInfo || 'N/A'}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-600">Transaction Reference:</span>
+                                <span class="text-sm font-medium font-mono text-xs">${record.paymentDetails.transactionRef || 'N/A'}</span>
+                            </div>
+                        </div>
+                    `;
+                } else if (record.typeOfDonation === 'Check') {
+                    paymentDetailsSection += `
+                        <div class="bg-green-50 p-3 rounded-md space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-600">Check Number:</span>
+                                <span class="text-sm font-medium font-mono text-green-800">${record.paymentDetails.checkNumber || 'N/A'}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-600">Bank Name:</span>
+                                <span class="text-sm font-medium text-green-800">${record.paymentDetails.bankName || 'N/A'}</span>
+                            </div>
+                            ${record.paymentDetails.bankBranch ? `
+                                <div class="flex justify-between">
+                                    <span class="text-sm text-gray-600">Branch:</span>
+                                    <span class="text-sm font-medium">${record.paymentDetails.bankBranch}</span>
+                                </div>
+                            ` : ''}
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-600">Check Date:</span>
+                                <span class="text-sm font-medium">${formatDate(record.paymentDetails.checkDate) || 'N/A'}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-600">Payee Name:</span>
+                                <span class="text-sm font-medium">${record.paymentDetails.payeeName || 'N/A'}</span>
+                            </div>
+                        </div>
+                    `;
+                } else if (record.typeOfDonation === 'Online Payment') {
+                    paymentDetailsSection += `
+                        <div class="bg-purple-50 p-3 rounded-md space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-600">Payment Method:</span>
+                                <span class="text-sm font-medium text-purple-800">${record.paymentDetails.paymentMethod || 'N/A'}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-600">Transaction Reference:</span>
+                                <span class="text-sm font-medium font-mono text-xs">${record.paymentDetails.transactionRef || 'N/A'}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                paymentDetailsSection += `
+                        </div>
+                    </div>
+                `;
+            }
+            
             modalContent.innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="space-y-4">
                         <h4 class="font-medium text-gray-900">Donation Information</h4>
                         <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-600">Donation ID:</span>
+                                <span class="text-sm font-medium">${record.donationId || 'N/A'}</span>
+                            </div>
                             <div class="flex justify-between">
                                 <span class="text-sm text-gray-600">Date:</span>
                                 <span class="text-sm font-medium">${formatDate(record.dateOfDonation)}</span>
@@ -359,19 +783,30 @@
                                         <p class="text-sm font-medium mt-1">${record.purpose}</p>
                                     </div>
                                 ` : ''}
+                                ${paymentDetailsSection}
                             ` : `
                                 <div>
-                                    <span class="text-sm text-gray-600">Items:</span>
+                                    <span class="text-sm text-gray-600">Item Category:</span>
+                                    <p class="text-sm font-medium mt-1">${record.itemCategory || 'N/A'}</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm text-gray-600">Items Description:</span>
                                     <p class="text-sm font-medium mt-1">${record.itemDescription || 'N/A'}</p>
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-sm text-gray-600">Quantity:</span>
-                                    <span class="text-sm font-medium">${record.quantity || 'N/A'}</span>
+                                    <span class="text-sm font-medium">${record.quantity || 'N/A'} ${record.unit || 'pieces'}</span>
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-sm text-gray-600">Condition:</span>
                                     <span class="text-sm font-medium">${record.conditionOfItems || 'N/A'}</span>
                                 </div>
+                                ${record.expiryDate ? `
+                                    <div class="flex justify-between">
+                                        <span class="text-sm text-gray-600">Expiry Date:</span>
+                                        <span class="text-sm font-medium">${formatDate(record.expiryDate)}</span>
+                                    </div>
+                                ` : ''}
                                 ${record.receiverName ? `
                                     <div class="flex justify-between">
                                         <span class="text-sm text-gray-600">Received by:</span>
@@ -413,12 +848,29 @@
                                 </div>
                             ` : ''}
                         </div>
-                        ${!isMoneyDonation && record.photoData && !record.photoData.includes('placeholder') ? `
-                            <div class="mt-4">
-                                <h4 class="font-medium text-gray-900 mb-2">Photo</h4>
-                                <img src="${record.photoData}" alt="Donation photo" class="w-full h-48 object-cover rounded-md border">
+                        ${!isMoneyDonation && record.photoString && record.photoString.trim() !== '' ? `
+                            <div class="mt-4 pt-4 border-t border-gray-200">
+                                <div class="flex items-center mb-2">
+                                    <svg class="h-5 w-5 text-gray-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <h4 class="font-medium text-gray-900">Donation Photo</h4>
+                                </div>
+                                <img src="${record.photoString}" alt="Donation photo" class="w-full h-48 object-cover rounded-md border shadow-sm">
                             </div>
-                        ` : ''}
+                        ` : (!isMoneyDonation ? `
+                            <div class="mt-4 pt-4 border-t border-gray-200">
+                                <div class="flex items-center mb-2">
+                                    <svg class="h-5 w-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <h4 class="font-medium text-gray-400">No Photo Attached</h4>
+                                </div>
+                                <div class="w-full h-32 bg-gray-100 rounded-md border-2 border-dashed border-gray-300 flex items-center justify-center">
+                                    <span class="text-gray-400 text-sm">No photo provided</span>
+                                </div>
+                            </div>
+                        ` : '')}
                     </div>
                 </div>
             `;
@@ -427,6 +879,497 @@
 
         function closeModal() {
             document.getElementById('recordModal').classList.add('hidden');
+        }
+
+        function closeModalBackdrop(event) {
+            if (event.target === event.currentTarget) {
+                closeModal();
+            }
+        }
+
+        let printFilteredRecords = [];
+
+        function printRecords() {
+            // Open the print modal instead of directly printing
+            openPrintModal();
+        }
+
+        function openPrintModal() {
+            // Set default date range (last 30 days to today)
+            const today = new Date();
+            const thirtyDaysAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
+            
+            document.getElementById('printFromDate').value = thirtyDaysAgo.toISOString().split('T')[0];
+            document.getElementById('printToDate').value = today.toISOString().split('T')[0];
+            
+            // Populate donor dropdown
+            populateDonorDropdown();
+            
+            // Apply initial filters and show preview
+            applyPrintFilters();
+            
+            // Show modal
+            document.getElementById('printModal').classList.remove('hidden');
+        }
+
+        function closePrintModal() {
+            document.getElementById('printModal').classList.add('hidden');
+        }
+
+        function populateDonorDropdown() {
+            const donorSelect = document.getElementById('printDonorName');
+            const uniqueDonors = [...new Set(allRecords.map(record => record.donorName).filter(name => name))];
+            
+            // Clear existing options except "All Donors"
+            donorSelect.innerHTML = '<option value="">All Donors</option>';
+            
+            // Add donor options
+            uniqueDonors.sort().forEach(donor => {
+                const option = document.createElement('option');
+                option.value = donor;
+                option.textContent = donor;
+                donorSelect.appendChild(option);
+            });
+        }
+
+        function applyPrintFilters() {
+            // Get filter values
+            const fromDate = document.getElementById('printFromDate').value;
+            const toDate = document.getElementById('printToDate').value;
+            const donationType = document.getElementById('printDonationType').value;
+            const donationStatus = document.getElementById('printDonationStatus').value;
+            const minAmount = parseFloat(document.getElementById('printMinAmount').value) || 0;
+            const maxAmount = parseFloat(document.getElementById('printMaxAmount').value) || Infinity;
+            const donorName = document.getElementById('printDonorName').value;
+            const sortBy = document.getElementById('printSortBy').value;
+
+            // Apply filters
+            printFilteredRecords = allRecords.filter(record => {
+                // Date filter
+                if (fromDate && new Date(record.dateOfDonation) < new Date(fromDate)) return false;
+                if (toDate && new Date(record.dateOfDonation) > new Date(toDate)) return false;
+                
+                // Type filter
+                if (donationType && record.donationType !== donationType) return false;
+                
+                // Status filter (assuming status field exists, default to "received" if not)
+                const status = record.status || 'received';
+                if (donationStatus && status !== donationStatus) return false;
+                
+                // Amount filter (only for money donations)
+                if (record.donationType === 'money') {
+                    const amount = parseFloat(record.amount || 0);
+                    if (amount < minAmount || amount > maxAmount) return false;
+                }
+                
+                // Donor name filter
+                if (donorName && record.donorName !== donorName) return false;
+                
+                return true;
+            });
+
+            // Apply sorting
+            printFilteredRecords.sort((a, b) => {
+                switch (sortBy) {
+                    case 'date-desc':
+                        return new Date(b.dateOfDonation) - new Date(a.dateOfDonation);
+                    case 'date-asc':
+                        return new Date(a.dateOfDonation) - new Date(b.dateOfDonation);
+                    case 'donor-asc':
+                        return (a.donorName || 'Anonymous').localeCompare(b.donorName || 'Anonymous');
+                    case 'donor-desc':
+                        return (b.donorName || 'Anonymous').localeCompare(a.donorName || 'Anonymous');
+                    case 'amount-desc':
+                        return (parseFloat(b.amount || 0)) - (parseFloat(a.amount || 0));
+                    case 'amount-asc':
+                        return (parseFloat(a.amount || 0)) - (parseFloat(b.amount || 0));
+                    default:
+                        return new Date(b.dateOfDonation) - new Date(a.dateOfDonation);
+                }
+            });
+
+            // Update preview
+            updatePrintPreview();
+        }
+
+        function resetPrintFilters() {
+            // Reset all filter inputs to defaults
+            const today = new Date();
+            const thirtyDaysAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
+            
+            document.getElementById('printFromDate').value = thirtyDaysAgo.toISOString().split('T')[0];
+            document.getElementById('printToDate').value = today.toISOString().split('T')[0];
+            document.getElementById('printDonationType').value = '';
+            document.getElementById('printDonationStatus').value = '';
+            document.getElementById('printMinAmount').value = '';
+            document.getElementById('printMaxAmount').value = '';
+            document.getElementById('printDonorName').value = '';
+            document.getElementById('printSortBy').value = 'date-desc';
+            
+            // Reapply filters
+            applyPrintFilters();
+        }
+
+        function updatePrintPreview() {
+            const previewContent = document.getElementById('printPreviewContent');
+            const recordCount = document.getElementById('previewRecordCount');
+            
+            recordCount.textContent = `${printFilteredRecords.length} records will be printed`;
+            
+            if (printFilteredRecords.length === 0) {
+                previewContent.innerHTML = '<p class="text-gray-500 text-center py-8">No records match the selected filters.</p>';
+                return;
+            }
+
+            // Calculate summary statistics
+            const totalRecords = printFilteredRecords.length;
+            const moneyDonations = printFilteredRecords.filter(d => d.donationType === 'money');
+            const inKindDonations = printFilteredRecords.filter(d => d.donationType === 'in-kind');
+            const totalAmount = moneyDonations.reduce((sum, d) => sum + parseFloat(d.amount || 0), 0);
+
+            // Get full image URL
+            const logoUrl = `${window.location.origin}${window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'))}/tahanan-logo.png`;
+
+            // Generate preview HTML
+            let previewHTML = `
+                <div style="text-align: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #dc2626;">
+                    <div style="display: flex; justify-content: center; margin-bottom: 8px;">
+                       
+                    </div>
+                    <h2 style="margin: 0 0 8px 0; font-size: 25px; color: #dc2626; font-weight: bold;">TAHANAN NG PAGMAMAHAL</h2>
+                    <p style="margin: 2px 0; font-size: 10px;">45 Dr. Pilapil St., Brgy. Sagad, Pasig, Metro Manila, Philippines</p>
+                    <p style="margin: 2px 0; font-size: 10px;">Contact: (+63) 917 525 7188 Tel: +632 8631 7188</p>
+                    <p style="margin: 2px 0; font-size: 10px;">Email: tahananpch@gmail.com</p>
+                    <p style="color: #666; margin: 8px 0 2px 0; font-size: 13px; font-weight: bold;">Donation Records Report</p>
+                    <p style="margin: 0; color: #666; font-size: 10px;">Generated on ${new Date().toLocaleDateString()}</p>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; margin-bottom: 20px; background-color: #fef2f2; padding: 10px; border-radius: 5px; border: 1px solid #fca5a5;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 10px; color: #666;">Total Records</div>
+                        <div style="font-size: 14px; font-weight: bold; color: #dc2626;">${totalRecords}</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 10px; color: #666;">Money Donations</div>
+                        <div style="font-size: 14px; font-weight: bold; color: #dc2626;">${moneyDonations.length}</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 10px; color: #666;">In-Kind Donations</div>
+                        <div style="font-size: 14px; font-weight: bold; color: #dc2626;">${inKindDonations.length}</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 10px; color: #666;">Total Amount</div>
+                        <div style="font-size: 14px; font-weight: bold; color: #dc2626;">₱${totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+                    </div>
+                </div>
+
+                <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
+                    <thead>
+                        <tr style="background-color: #dc2626; color: white;">
+                            <th style="border: 1px solid #ddd; padding: 5px; text-align: left;">Date</th>
+                            <th style="border: 1px solid #ddd; padding: 5px; text-align: left;">Type</th>
+                            <th style="border: 1px solid #ddd; padding: 5px; text-align: left;">Donor</th>
+                            <th style="border: 1px solid #ddd; padding: 5px; text-align: left;">Amount/Items</th>
+                            <th style="border: 1px solid #ddd; padding: 5px; text-align: left;">Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+
+            printFilteredRecords.slice(0, 10).forEach((donation, index) => {
+                const rowStyle = index % 2 === 0 ? 'background-color: #f9f9f9;' : '';
+                previewHTML += `
+                    <tr style="${rowStyle}">
+                        <td style="border: 1px solid #ddd; padding: 5px;">${formatDate(donation.dateOfDonation)}</td>
+                        <td style="border: 1px solid #ddd; padding: 5px;">${donation.donationType === 'money' ? 'Money' : 'In-Kind'}</td>
+                        <td style="border: 1px solid #ddd; padding: 5px;">${donation.donorName || 'Anonymous'}</td>
+                        <td style="border: 1px solid #ddd; padding: 5px;">
+                            ${donation.donationType === 'money' 
+                                ? '₱' + parseFloat(donation.amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })
+                                : donation.itemDescription || 'N/A'}
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 5px;">${donation.purpose || donation.conditionOfItems || 'N/A'}</td>
+                    </tr>`;
+            });
+
+            if (printFilteredRecords.length > 10) {
+                previewHTML += `
+                    <tr>
+                        <td colspan="5" style="border: 1px solid #ddd; padding: 10px; text-align: center; color: #666; font-style: italic;">
+                            ... and ${printFilteredRecords.length - 10} more records
+                        </td>
+                    </tr>`;
+            }
+
+            previewHTML += `
+                    </tbody>
+                </table>`;
+
+            previewContent.innerHTML = previewHTML;
+        }
+
+        async function confirmPrint() {
+            const exportFormat = document.getElementById('exportFormat').value;
+            
+            // Use the filtered records for printing/exporting
+            const originalFilteredRecords = filteredRecords;
+            filteredRecords = printFilteredRecords;
+            
+            // Handle different export formats
+            switch (exportFormat) {
+                case 'print':
+                case 'pdf':
+                    await actualPrintRecords();
+                    break;
+                case 'excel':
+                    exportToExcel();
+                    break;
+                case 'csv':
+                    exportToCSV();
+                    break;
+                default:
+                    await actualPrintRecords();
+            }
+            
+            // Restore original filtered records
+            filteredRecords = originalFilteredRecords;
+            
+            // Close modal
+            closePrintModal();
+        }
+
+        function exportToExcel() {
+            // Create Excel content using HTML table format
+            const headers = ['Donation ID', 'Date', 'Type', 'Donor Name', 'Amount/Items', 'Payment Method', 'Purpose/Condition', 'Status'];
+            
+            let excelContent = `
+                <table border="1">
+                    <tr style="background-color: #dc2626; color: white; font-weight: bold;">
+                        ${headers.map(header => `<th>${header}</th>`).join('')}
+                    </tr>`;
+            
+            printFilteredRecords.forEach(donation => {
+                excelContent += `
+                    <tr>
+                        <td>${donation.donationId || 'N/A'}</td>
+                        <td>${formatDate(donation.dateOfDonation)}</td>
+                        <td>${donation.donationType === 'money' ? 'Money' : 'In-Kind'}</td>
+                        <td>${donation.donorName || 'Anonymous'}</td>
+                        <td>${donation.donationType === 'money' 
+                            ? parseFloat(donation.amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })
+                            : donation.itemDescription || 'N/A'}</td>
+                        <td>${donation.donationType === 'money' ? (donation.paymentMethod || 'N/A') : 'N/A'}</td>
+                        <td>${donation.purpose || donation.conditionOfItems || 'N/A'}</td>
+                        <td>${donation.status || 'Received'}</td>
+                    </tr>`;
+            });
+            
+            excelContent += '</table>';
+            
+            const blob = new Blob([excelContent], { 
+                type: 'application/vnd.ms-excel;charset=utf-8;' 
+            });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `donation-records-${new Date().toISOString().split('T')[0]}.xls`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        async function actualPrintRecords() {
+            // Get current filter information
+            const filterText = document.getElementById('monthFilterHeader').classList.contains('hidden') 
+                ? '' 
+                : document.getElementById('monthFilterText').textContent;
+            
+            // Convert logo to base64 for print
+            let logoBase64 = '';
+            try {
+                const logoUrl = `${window.location.origin}${window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'))}/tahanan-logo.png`;
+                const response = await fetch(logoUrl);
+                const blob = await response.blob();
+                logoBase64 = await new Promise(resolve => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.readAsDataURL(blob);
+                });
+            } catch (error) {
+                console.error('Could not load logo:', error);
+                logoBase64 = ''; // Fallback to no image
+            }
+            
+            // Create print content
+            let printContent = `
+                <html>
+                <head>
+                    <title>Donation Records Report</title>
+                    <style>
+                        body { 
+                            font-family: Arial, sans-serif; 
+                            margin: 20px;
+                            line-height: 1.4;
+                        }
+                        img {
+                            height: 50px;
+                            margin-bottom: 10px;
+                        }
+                        p {
+                            margin: 0;
+                            line-height: 1.4;
+                        }
+                        .filter-info {
+                            background-color: #f3f4f6;
+                            padding: 10px;
+                            border-radius: 5px;
+                            margin-bottom: 20px;
+                            font-weight: bold;
+                            color: #374151;
+                        }
+                        .summary {
+                            margin-bottom: 30px;
+                            display: flex;
+                            justify-content: space-between;
+                            background-color: #fef2f2;
+                            padding: 15px;
+                            border-radius: 8px;
+                            border: 1px solid #fca5a5;
+                        }
+                        .summary div {
+                            text-align: center;
+                        }
+                        .summary-title {
+                            font-size: 12px;
+                            color: #666;
+                            text-transform: uppercase;
+                            margin-bottom: 5px;
+                        }
+                        .summary-value {
+                            font-size: 18px;
+                            font-weight: bold;
+                            color: #dc2626;
+                        }
+                        table { 
+                            width: 100%; 
+                            border-collapse: collapse; 
+                            margin-top: 20px;
+                        }
+                        th, td { 
+                            border: 1px solid #ddd; 
+                            padding: 8px; 
+                            text-align: left; 
+                            font-size: 11px;
+                        }
+                        th { 
+                            background-color: #dc2626; 
+                            color: white;
+                            font-weight: bold;
+                        }
+                        tr:nth-child(even) { 
+                            background-color: #f9f9f9; 
+                        }
+                        .money { color: #059669; font-weight: bold; }
+                        .in-kind { color: #d97706; font-weight: bold; }
+                        .footer {
+                            margin-top: 30px;
+                            text-align: center;
+                            font-size: 10px;
+                            color: #666;
+                            border-top: 1px solid #ddd;
+                            padding-top: 15px;
+                        }
+                        @media print {
+                            body { margin: 0; }
+                            .no-print { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div style="text-align: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #dc2626;">
+                        ${logoBase64 ? `<div style="display: flex; justify-content: center; margin-bottom: 8px;">
+                            <img src="${logoBase64}" alt="Organization Logo" style="height: 45px;">
+                        </div>` : ''}
+                        <h2 style="margin: 0 0 8px 0; font-size: 25px; color: #dc2626; font-weight: bold;">TAHANAN NG PAGMAMAHAL</h2>
+                        <p style="margin: 2px 0; font-size: 10px;">45 Dr. Pilapil St., Brgy. Sagad, Pasig, Metro Manila, Philippines</p>
+                        <p style="margin: 2px 0; font-size: 10px;">Contact: (+63) 917 525 7188 Tel: +632 8631 7188</p>
+                        <p style="margin: 2px 0; font-size: 10px;">Email: tahananpch@gmail.com</p>
+                        <p style="color: #666; margin: 8px 0 2px 0; font-size: 13px; font-weight: bold;">Donation Records Report</p>
+                        <p style="margin: 0; color: #666; font-size: 10px;">Generated on ${new Date().toLocaleDateString()}</p>
+                    </div>`;
+
+            if (filterText) {
+                printContent += `<div class="filter-info">Filter Applied: ${filterText}</div>`;
+            }
+
+            // Calculate summary statistics
+            const totalRecords = printFilteredRecords.length;
+            const moneyDonations = printFilteredRecords.filter(d => d.donationType === 'money');
+            const inKindDonations = printFilteredRecords.filter(d => d.donationType === 'in-kind');
+            const totalAmount = moneyDonations.reduce((sum, d) => sum + parseFloat(d.amount || 0), 0);
+
+            printContent += `
+                <div class="summary">
+                    <div>
+                        <div class="summary-title">Total Records</div>
+                        <div class="summary-value">${totalRecords}</div>
+                    </div>
+                    <div>
+                        <div class="summary-title">Money Donations</div>
+                        <div class="summary-value">${moneyDonations.length}</div>
+                    </div>
+                    <div>
+                        <div class="summary-title">In-Kind Donations</div>
+                        <div class="summary-value">${inKindDonations.length}</div>
+                    </div>
+                    <div>
+                        <div class="summary-title">Total Amount</div>
+                        <div class="summary-value">₱${totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Donor Name</th>
+                            <th>Amount/Items</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+
+            printFilteredRecords.forEach(donation => {
+                const typeClass = donation.donationType === 'money' ? 'money' : 'in-kind';
+                printContent += `
+                    <tr>
+                        <td>${donation.donationId || 'N/A'}</td>
+                        <td>${formatDate(donation.dateOfDonation)}</td>
+                        <td class="${typeClass}">${donation.donationType === 'money' ? 'Money' : 'In-Kind'}</td>
+                        <td>${donation.donorName || 'Anonymous'}</td>
+                        <td class="${typeClass}">
+                            ${donation.donationType === 'money' 
+                                ? '₱' + parseFloat(donation.amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })
+                                : donation.itemDescription || 'N/A'}
+                        </td>
+                    </tr>`;
+            });
+
+            printContent += `
+                    </tbody>
+                </table>
+                <div class="footer">
+                    <p>This report contains ${totalRecords} donation record(s)</p>
+                    <p>Tahanan ng Pagmamahal - Organization Management System</p>
+                </div>
+            </body>
+            </html>`;
+
+            // Open print window
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(printContent);
+            printWindow.document.close();
+            printWindow.focus();
+            printWindow.print();
         }
 
         function exportToCSV() {
@@ -460,6 +1403,419 @@
                 day: 'numeric' 
             });
         }
+
+        // Global variables for chart functionality
+        let recordsChartInstance = null;
+        let recordsCurrentYear = new Date().getFullYear();
+
+        // Initialize chart and statistics when records are loaded
+        function initializeRecordsChart() {
+            // Only initialize if we have records or if allRecords is defined
+            if (typeof allRecords !== 'undefined') {
+                initializeRecordsYearSelector();
+                updateRecordsStatistics();
+                createRecordsDonationChart();
+            }
+        }
+
+        // Function to initialize year selector for records page
+        function initializeRecordsYearSelector() {
+            const yearSelector = document.getElementById('recordsYearSelector');
+            
+            // Get available years from donations data
+            const years = new Set();
+            allRecords.forEach(donation => {
+                if (donation.dateOfDonation) {
+                    const year = new Date(donation.dateOfDonation).getFullYear();
+                    years.add(year);
+                }
+            });
+            
+            // Add current year if not present
+            const currentYear = new Date().getFullYear();
+            years.add(currentYear);
+            
+            // Sort years in descending order
+            const sortedYears = Array.from(years).sort((a, b) => b - a);
+            
+            // Populate year selector
+            yearSelector.innerHTML = '';
+            sortedYears.forEach(year => {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                if (year === currentYear) {
+                    option.selected = true;
+                }
+                yearSelector.appendChild(option);
+            });
+            
+            // Add event listener for year change
+            yearSelector.addEventListener('change', function() {
+                recordsCurrentYear = parseInt(this.value);
+                updateRecordsStatistics();
+                createRecordsDonationChart();
+            });
+            
+            recordsCurrentYear = currentYear;
+        }
+
+        // Function to update statistics based on selected year and current filter
+        function updateRecordsStatistics() {
+            let yearData = allRecords.filter(donation => {
+                if (!donation.dateOfDonation) return false;
+                const donationYear = new Date(donation.dateOfDonation).getFullYear();
+                return donationYear === recordsCurrentYear;
+            });
+
+            // Apply current filter if not 'all'
+            if (currentFilter !== 'all') {
+                yearData = yearData.filter(d => d.donationType === currentFilter);
+            }
+
+            // Calculate statistics
+            const totalAmount = yearData
+                .filter(d => d.donationType === 'money')
+                .reduce((sum, donation) => sum + (parseFloat(donation.amount) || 0), 0);
+            
+            const moneyDonationsCount = yearData.filter(d => d.donationType === 'money').length;
+            const inKindDonationsCount = yearData.filter(d => d.donationType === 'in-kind').length;
+            const totalDonationsCount = yearData.length;
+
+            // Update DOM elements
+            document.getElementById('recordsTotalAmount').textContent = 
+                `₱ ${totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            document.getElementById('recordsMoneyDonations').textContent = moneyDonationsCount;
+            document.getElementById('recordsInKindDonations').textContent = inKindDonationsCount;
+            document.getElementById('recordsTotalDonations').textContent = totalDonationsCount;
+        }
+
+        // Function to create donation trend chart for records page
+        function createRecordsDonationChart() {
+            const ctx = document.getElementById('recordsDonationChart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (recordsChartInstance) {
+                recordsChartInstance.destroy();
+            }
+            
+            // Initialize all 12 months for the selected year
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                               'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            
+            const monthlyMoneyData = {};
+            const monthlyInKindData = {};
+            
+            monthNames.forEach((month, index) => {
+                const monthKey = `${month} ${recordsCurrentYear}`;
+                monthlyMoneyData[monthKey] = 0;
+                monthlyInKindData[monthKey] = 0;
+            });
+            
+            // Aggregate donations by month and type for the selected year
+            allRecords.forEach(donation => {
+                if (donation.dateOfDonation) {
+                    const donationDate = new Date(donation.dateOfDonation);
+                    if (donationDate.getFullYear() === recordsCurrentYear) {
+                        const month = donationDate.toLocaleDateString('en-US', { month: 'short' });
+                        const monthKey = `${month} ${recordsCurrentYear}`;
+                        
+                        if (monthlyMoneyData.hasOwnProperty(monthKey)) {
+                            if (donation.donationType === 'money') {
+                                monthlyMoneyData[monthKey] += parseFloat(donation.amount) || 0;
+                            } else if (donation.donationType === 'in-kind') {
+                                monthlyInKindData[monthKey] += 1;
+                            }
+                        }
+                    }
+                }
+            });
+            
+            const labels = Object.keys(monthlyMoneyData);
+            const moneyData = Object.values(monthlyMoneyData);
+            const inKindData = Object.values(monthlyInKindData);
+            
+            // Create datasets based on current filter
+            const chartDatasets = [];
+            
+            if (currentFilter === 'all' || currentFilter === 'money') {
+                chartDatasets.push({
+                    label: 'Money Donations (₱)',
+                    data: moneyData,
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderWidth: 3,
+                    fill: false,
+                    tension: 0.4,
+                    pointBackgroundColor: '#10b981',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 8,
+                    yAxisID: 'y',
+                    donationType: 'money'  // Add custom property to identify dataset
+                });
+            }
+            
+            if (currentFilter === 'all' || currentFilter === 'in-kind') {
+                chartDatasets.push({
+                    label: 'In-Kind Donations (Count)',
+                    data: inKindData,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 3,
+                    fill: false,
+                    tension: 0.4,
+                    pointBackgroundColor: '#3b82f6',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 8,
+                    yAxisID: currentFilter === 'all' ? 'y1' : 'y',
+                    donationType: 'in-kind'  // Add custom property to identify dataset
+                });
+            }
+            
+            recordsChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: chartDatasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: currentFilter === 'all',
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.datasetIndex === 0 && datasets[0].label.includes('Money')) {
+                                        return `Money: ₱ ${context.parsed.y.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+                                    } else if (context.datasetIndex === 1 || (currentFilter === 'in-kind')) {
+                                        return `In-Kind: ${context.parsed.y} ${context.parsed.y === 1 ? 'donation' : 'donations'}`;
+                                    } else {
+                                        return `Money: ₱ ${context.parsed.y.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 11
+                                },
+                                color: '#6b7280'
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            grid: {
+                                display: true,
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                font: {
+                                    size: 10
+                                },
+                                color: '#10b981',
+                                callback: function(value) {
+                                    if (currentFilter === 'in-kind') {
+                                        return value + (value === 1 ? ' donation' : ' donations');
+                                    } else {
+                                        if (value >= 1000) {
+                                            return '₱' + (value / 1000).toFixed(0) + 'k';
+                                        }
+                                        return '₱' + value;
+                                    }
+                                }
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: currentFilter === 'all',
+                            position: 'right',
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                            ticks: {
+                                font: {
+                                    size: 10
+                                },
+                                color: '#3b82f6',
+                                callback: function(value) {
+                                    return value + (value === 1 ? ' donation' : ' donations');
+                                }
+                            }
+                        }
+                    },
+                    elements: {
+                        point: {
+                            hoverRadius: 8
+                        }
+                    },
+                    onHover: function(event, elements) {
+                        event.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+                    },
+                    onClick: function(event, elements) {
+                        if (elements && elements.length > 0) {
+                            const clickedElement = elements[0];
+                            const clickedLabel = labels[clickedElement.index];
+                            const datasetIndex = clickedElement.datasetIndex;
+                            
+                            // Parse the month and year from the label (e.g., "Aug 2025")
+                            const [monthName, year] = clickedLabel.split(' ');
+                            
+                            // Convert month name to month number
+                            const monthMap = {
+                                'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04',
+                                'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08',
+                                'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'
+                            };
+                            
+                            const monthNumber = monthMap[monthName];
+                            if (monthNumber && year) {
+                                // Determine donation type based on which dataset was clicked
+                                let donationType = 'all';
+                                
+                                // Get the clicked dataset using the chart instance
+                                const chart = recordsChartInstance;
+                                if (chart && chart.data && chart.data.datasets[datasetIndex]) {
+                                    const clickedDataset = chart.data.datasets[datasetIndex];
+                                    // Use the custom donationType property we added
+                                    if (clickedDataset.donationType) {
+                                        donationType = clickedDataset.donationType;
+                                    }
+                                }
+                                
+                                // If we couldn't determine from dataset, fall back to current filter
+                                if (donationType === 'all' && currentFilter !== 'all') {
+                                    donationType = currentFilter;
+                                }
+                                
+                                console.log('Chart clicked:', {monthName, year, datasetIndex, donationType, currentFilter}); // Debug log
+                                
+                                // Filter records by the clicked month and donation type
+                                filterRecordsByMonth(monthNumber, year, donationType);
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Function to filter records by clicked month and donation type
+        function filterRecordsByMonth(monthNumber, year, donationType) {
+            // Filter all records by the selected month and year
+            filteredRecords = allRecords.filter(donation => {
+                if (!donation.dateOfDonation) return false;
+                const donationDate = new Date(donation.dateOfDonation);
+                const donationMonth = String(donationDate.getMonth() + 1).padStart(2, '0');
+                const donationYear = donationDate.getFullYear().toString();
+                
+                const monthMatch = donationMonth === monthNumber && donationYear === year;
+                
+                // Apply donation type filter if specified
+                if (donationType === 'all') {
+                    return monthMatch;
+                } else {
+                    return monthMatch && donation.donationType === donationType;
+                }
+            });
+
+            // Update the display
+            displayRecords();
+            
+            // Show month filter header
+            const monthNames = {
+                '01': 'January', '02': 'February', '03': 'March', '04': 'April',
+                '05': 'May', '06': 'June', '07': 'July', '08': 'August',
+                '09': 'September', '10': 'October', '11': 'November', '12': 'December'
+            };
+            
+            showMonthFilterHeader(monthNumber, year);
+            
+            // Set the appropriate filter tab as active
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('active', 'border-red-primary', 'text-red-600');
+                tab.classList.add('border-transparent', 'text-gray-500');
+            });
+            
+            // Determine which tab to activate based on donation type
+            let targetFilter;
+            if (donationType === 'money') {
+                targetFilter = 'money';
+            } else if (donationType === 'in-kind') {
+                targetFilter = 'in-kind';
+            } else {
+                targetFilter = 'all';
+            }
+            
+            const targetTab = document.querySelector(`button[onclick="filterDonations('${targetFilter}')"]`);
+            if (targetTab) {
+                targetTab.classList.add('active', 'border-red-primary', 'text-red-600');
+                targetTab.classList.remove('border-transparent', 'text-gray-500');
+            }
+            
+            // Set currentFilter to the donation type
+            currentFilter = donationType;
+            
+            // Update statistics for the filtered month
+            updateMonthFilterStatistics();
+        }
+
+        // Function to update statistics when month filter is active
+        function updateMonthFilterStatistics() {
+            const totalAmount = filteredRecords
+                .filter(d => d.donationType === 'money')
+                .reduce((sum, donation) => sum + (parseFloat(donation.amount) || 0), 0);
+            
+            const moneyDonationsCount = filteredRecords.filter(d => d.donationType === 'money').length;
+            const inKindDonationsCount = filteredRecords.filter(d => d.donationType === 'in-kind').length;
+            const totalDonationsCount = filteredRecords.length;
+
+            // Update DOM elements
+            document.getElementById('recordsTotalAmount').textContent = 
+                `₱ ${totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            document.getElementById('recordsMoneyDonations').textContent = moneyDonationsCount;
+            document.getElementById('recordsInKindDonations').textContent = inKindDonationsCount;
+            document.getElementById('recordsTotalDonations').textContent = totalDonationsCount;
+        }
+
+        // Make functions globally available
+        window.closeModal = closeModal;
+        window.closeModalBackdrop = closeModalBackdrop;
+        window.closePrintModal = closePrintModal;
+        window.applyPrintFilters = applyPrintFilters;
+        window.resetPrintFilters = resetPrintFilters;
+        window.confirmPrint = confirmPrint;
+        window.formatDate = formatDate;
+        window.initializeRecordsChart = initializeRecordsChart;
+        window.updateRecordsStatistics = updateRecordsStatistics;
+        window.createRecordsDonationChart = createRecordsDonationChart;
+        window.filterRecordsByMonth = filterRecordsByMonth;
     </script>
 </body>
 </html>
