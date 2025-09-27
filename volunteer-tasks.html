@@ -47,6 +47,13 @@
             background: #dc2626;
             border-radius: 6px 6px 0 0;
         }
+
+        .tab-active {
+            color: #dc2626 !important;
+            font-weight: 700 !important;
+            border-bottom: 3px solid #dc2626;
+            background: #fef2f2;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -154,10 +161,10 @@
             <!-- Tab Navigation with Animation -->
             <div class="bg-white border-b border-gray-200 relative">
                 <div id="tabNav" class="flex relative">
-                    <button id="currentTab" class="flex-1 py-3 px-4 text-center font-medium text-gray-600 relative tab-active" onclick="switchTab('current')">
+                    <button id="currentTab" class="flex-1 py-3 px-4 text-center font-medium text-gray-600 relative tab-active">
                         Current
                     </button>
-                    <button id="completedTab" class="flex-1 py-3 px-4 text-center font-medium text-gray-600 relative" onclick="switchTab('completed')">
+                    <button id="completedTab" class="flex-1 py-3 px-4 text-center font-medium text-gray-600 relative">
                         Completed
                     </button>
                     <!-- Animated underline -->
@@ -216,298 +223,384 @@
         </div>
     </nav>
 
-    <script>
-        let currentUser = null;
-        let currentTab = 'current';
-        let allTasks = [];
+    <script type="module">
+import { db, collection, getDocs, updateDoc, doc, addDoc } from './firebase.js';
+let currentUser = null;
+let currentTab = 'current';
+let allTasks = [];
 
-        // Session Manager
-        const sessionManager = {
-            getCurrentUser: function() {
-                const user = localStorage.getItem('currentUser');
-                return user ? JSON.parse(user) : null;
-            },
-            requireLogin: function() {
-                const user = this.getCurrentUser();
-                if (!user) {
-                    window.location.href = 'login.html';
-                    return false;
-                }
-                if (user.role !== 'volunteer') {
-                    window.location.href = 'index.html';
-                    return false;
-                }
-                return true;
-            },
-            logout: function() {
-                localStorage.removeItem('currentUser');
-                window.location.href = 'login.html';
-            }
-        };
+const sessionManager = {
+    getCurrentUser: function() {
+        const user = localStorage.getItem('currentUser');
+        return user ? JSON.parse(user) : null;
+    },
+    requireLogin: function() {
+        const user = this.getCurrentUser();
+        if (!user) {
+            window.location.href = 'login.html';
+            return false;
+        }
+        if (user.role !== 'volunteer') {
+            window.location.href = 'index.html';
+            return false;
+        }
+        return true;
+    },
+    logout: function() {
+        localStorage.removeItem('currentUser');
+        window.location.href = 'login.html';
+    }
+};
 
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', function() {
-            if (!sessionManager.requireLogin()) return;
-            currentUser = sessionManager.getCurrentUser();
-            initializePage();
-            loadTasksData();
-            setupEventListeners();
+document.addEventListener('DOMContentLoaded', function() {
+    if (!sessionManager.requireLogin()) return;
+    currentUser = sessionManager.getCurrentUser();
+    initializePage();
+    loadTasksData();
+    setupEventListeners();
+});
+
+function initializePage() {
+    let displayName = '';
+    if (currentUser.name) {
+        displayName = currentUser.name;
+    } else if (currentUser.firstName && currentUser.lastName) {
+        displayName = `${currentUser.firstName} ${currentUser.lastName}`;
+    } else if (currentUser.firstName) {
+        displayName = currentUser.firstName;
+    } else {
+        displayName = 'Volunteer';
+    }
+    let initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase() || 'V';
+    document.getElementById('userInitials').textContent = initials;
+    document.getElementById('userInitialsMobile').textContent = initials;
+    document.getElementById('profileName').textContent = displayName;
+    document.getElementById('profileRole').textContent = 'Volunteer';
+}
+
+function setupEventListeners() {
+    const profileBtn = document.getElementById('profile-btn');
+    const profileDropdown = document.getElementById('profile-dropdown');
+    if (profileBtn && profileDropdown) {
+        profileBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            profileDropdown.classList.toggle('hidden');
         });
+        document.addEventListener('click', function() {
+            profileDropdown.classList.add('hidden');
+        });
+        profileDropdown.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    }
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            sessionManager.logout();
+        });
+    }
+    const currentTabBtn = document.getElementById('currentTab');
+    const completedTabBtn = document.getElementById('completedTab');
+    if (currentTabBtn) currentTabBtn.addEventListener('click', () => switchTab('current'));
+    if (completedTabBtn) completedTabBtn.addEventListener('click', () => switchTab('completed'));
+}
 
-        function initializePage() {
-            // Set user info
-            let displayName = '';
-            if (currentUser.name) {
-                displayName = currentUser.name;
-            } else if (currentUser.firstName && currentUser.lastName) {
-                displayName = `${currentUser.firstName} ${currentUser.lastName}`;
-            } else if (currentUser.firstName) {
-                displayName = currentUser.firstName;
-            } else {
-                displayName = 'Volunteer';
-            }
-            
-            let initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase() || 'V';
-            
-            document.getElementById('userInitials').textContent = initials;
-            document.getElementById('userInitialsMobile').textContent = initials;
-            document.getElementById('profileName').textContent = displayName;
-            document.getElementById('profileRole').textContent = 'Volunteer';
+document.addEventListener('DOMContentLoaded', setupEventListeners);
+
+async function loadTasksData() {
+    try {
+        const taskCol = collection(db, 'tasks');
+        const taskSnapshot = await getDocs(taskCol);
+        allTasks = [];
+        taskSnapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            allTasks.push({
+                taskId: docSnap.id,
+                assignedTo: data.assignedTo || "",
+                author: data.author || "",
+                authorRole: data.authorRole || "",
+                createdAt: data.createdAt || "",
+                description: data.description || "",
+                dueDate: data.dueDate || "",
+                peopleNeeded: Number(data.peopleNeeded) || 1,
+                priority: data.priority || "",
+                status: data.status || "",
+                title: data.title || "",
+                acceptedBy: Array.isArray(data.acceptedBy) ? data.acceptedBy : [],
+                completedBy: Array.isArray(data.completedBy) ? data.completedBy : []
+            });
+        });
+        displayTasks();
+    } catch (error) {
+        console.error('Error loading tasks:', error);
+        document.getElementById('currentTasks').innerHTML = `<div class="text-center py-12"><i class="fas fa-tasks text-4xl text-gray-300 mb-4"></i><h3 class="text-lg font-medium text-gray-900 mb-2">Error loading tasks</h3><p class="text-gray-600">Please try reloading the page.</p></div>`;
+        document.getElementById('completedTasks').innerHTML = `<div class="text-center py-12"><i class="fas fa-tasks text-4xl text-gray-300 mb-4"></i><h3 class="text-lg font-medium text-gray-900 mb-2">Error loading completed tasks</h3><p class="text-gray-600">Please try reloading the page.</p></div>`;
+    }
+}
+
+function displayTasks() {
+    let userFullName = currentUser?.name || `${currentUser?.firstName || ""} ${currentUser?.lastName || ""}`.trim();
+    let filteredTasks = [];
+    const container = document.getElementById(currentTab === 'current' ? 'currentTasks' : 'completedTasks');
+    if (currentTab === 'current') {
+        filteredTasks = allTasks.filter(task =>
+            !task.completedBy?.includes(userFullName) &&
+            (!task.acceptedBy || !task.acceptedBy.includes(userFullName) || (task.acceptedBy.includes(userFullName) && !task.completedBy?.includes(userFullName)))
+        );
+    } else {
+        filteredTasks = allTasks.filter(task =>
+            task.acceptedBy?.includes(userFullName)
+        );
+    }
+    if (filteredTasks.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-12">
+                <i class="fas fa-tasks text-4xl text-gray-300 mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No tasks found</h3>
+                <p class="text-gray-600">There are currently no tasks in this category.</p>
+            </div>
+        `;
+        return;
+    }
+    container.innerHTML = filteredTasks.map(task => {
+        if (currentTab === 'current') {
+            return createTaskCard(task);
+        } else {
+            return createCompletedTaskCard(task);
         }
+    }).join('');
+}
 
+function updateTabUnderline() {
+    const underline = document.getElementById('tabUnderline');
+    if (!underline) return;
+    if (currentTab === 'current') {
+        underline.style.left = '0';
+        underline.style.width = '50%';
+    } else {
+        underline.style.left = '50%';
+        underline.style.width = '50%';
+    }
+}
 
-        function setupEventListeners() {
-                    // Desktop Profile Dropdown
-                    const profileBtn = document.getElementById('profile-btn');
-                    const profileDropdown = document.getElementById('profile-dropdown');
+function switchTab(tab) {
+    currentTab = tab;
+    document.getElementById('currentTab').classList.remove('tab-active');
+    document.getElementById('completedTab').classList.remove('tab-active');
+    if (tab === 'current') {
+        document.getElementById('currentTab').classList.add('tab-active');
+    } else {
+        document.getElementById('completedTab').classList.add('tab-active');
+    }
+    document.getElementById('currentTasks').classList.toggle('hidden', tab !== 'current');
+    document.getElementById('completedTasks').classList.toggle('hidden', tab !== 'completed');
+    updateTabUnderline();
+    displayTasks();
+}
 
-                    if (profileBtn && profileDropdown) {
-                        profileBtn.addEventListener('click', function(e) {
-                            e.stopPropagation();
-                            profileDropdown.classList.toggle('hidden');
-                        });
+function createTaskCard(task) {
+    let isFull = task.acceptedBy.length >= task.peopleNeeded;
+    let userFullName = currentUser?.name || `${currentUser?.firstName || ""} ${currentUser?.lastName || ""}`.trim();
+    let isAccepted = userFullName && task.acceptedBy.includes(userFullName);
 
-                        document.addEventListener('click', function() {
-                            profileDropdown.classList.add('hidden');
-                        });
+    let statusClass = {
+        'pending': 'status-pending',
+        'in-progress': 'status-progress',
+        'completed': 'status-completed',
+        'full': 'status-full'
+    }[isFull ? 'full' : task.status] || 'status-pending';
+    let statusText = isFull ? 'Full' : ({
+        'pending': 'Pending',
+        'in-progress': 'In Progress',
+        'completed': 'Completed'
+    }[task.status] || 'Pending');
 
-                        profileDropdown.addEventListener('click', function(e) {
-                            e.stopPropagation();
-                        });
-                    }
+    let priorityColor = {
+        'high': 'bg-red-100 text-red-800',
+        'medium': 'bg-yellow-100 text-yellow-800',
+        'low': 'bg-green-100 text-green-800'
+    }[task.priority] || 'bg-yellow-100 text-yellow-800';
 
-                    // Logout button
-                    const logoutBtn = document.getElementById('logoutBtn');
-                    if (logoutBtn) {
-                        logoutBtn.addEventListener('click', () => {
-                            sessionManager.logout();
-                        });
-                    }
-                }
+    let dueDate = 'No due date';
+    if (task.dueDate) {
+        try {
+            dueDate = new Date(task.dueDate).toLocaleDateString();
+        } catch (e) {}
+    }
+    let acceptBtnDisabled = isFull || isAccepted;
+    let acceptBtnText = isAccepted ? 'Accepted' : (isFull ? 'Full' : 'Accept Task');
+    let acceptBtnClass = acceptBtnDisabled
+        ? 'bg-gray-400 text-white px-4 py-2 rounded-md text-sm font-medium cursor-not-allowed'
+        : 'bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 transition-colors';
 
-                document.addEventListener('DOMContentLoaded', setupEventListeners);
-        // Session logic, initializePage, and navigation/event handlers remain unchanged...
-        async function loadTasksData() {
-            try {
-                const taskCol = collection(db, 'tasks');
-                const taskSnapshot = await getDocs(taskCol);
-                allTasks = [];
-                taskSnapshot.forEach(docSnap => {
-                    const data = docSnap.data();
-                    allTasks.push(data);
-                });
-                displayTasks();
-            } catch (error) {
-                console.error('Error loading tasks:', error);
-                // Use mock data for demonstration
-                allTasks = getMockTasks();
-                displayTasks();
-            }
-        }
-                function getMockTasks() {
-            return [
-                {
-                    taskId: 'TASK001',
-                    title: 'Organize Children\'s Activity Room',
-                    description: 'Help organize and clean the children\'s activity room. Sort toys, arrange books, and ensure all materials are properly stored.',
-                    dueDate: '2025-09-25',
-                    assignedBy: 'Admin',
-                    priority: 'high',
-                    status: 'in-progress',
-                    acceptedBy: ['volunteer@example.com'],
-                    completedBy: []
-                },
-                {
-                    taskId: 'TASK002',
-                    title: 'Assist with Lunch Distribution',
-                    description: 'Help serve lunch to children and ensure proper hygiene protocols are followed during meal time.',
-                    dueDate: '2025-09-24',
-                    assignedBy: 'Kitchen Coordinator',
-                    priority: 'medium',
-                    status: 'pending',
-                    acceptedBy: ['volunteer@example.com'],
-                    completedBy: []
-                },
-                {
-                    taskId: 'TASK003',
-                    title: 'Document Children\'s Activities',
-                    description: 'Take photos and document children\'s activities for the monthly newsletter. Ensure all privacy guidelines are followed.',
-                    dueDate: '2025-09-22',
-                    assignedBy: 'Communications Team',
-                    priority: 'low',
-                    status: 'completed',
-                    acceptedBy: ['volunteer@example.com'],
-                    completedBy: ['volunteer@example.com'],
-                    completedDate: '2025-09-22'
-                },
-                {
-                    taskId: 'TASK004',
-                    title: 'Prepare Activity Materials',
-                    description: 'Prepare art and craft materials for tomorrow\'s children\'s workshop. Cut papers, organize colors, and set up workstations.',
-                    dueDate: '2025-09-21',
-                    assignedBy: 'Activity Coordinator',
-                    priority: 'high',
-                    status: 'completed',
-                    acceptedBy: ['volunteer@example.com'],
-                    completedBy: ['volunteer@example.com'],
-                    completedDate: '2025-09-20'
-                }
-            ];
-        }
-        // --- BEGIN: REPLACED/UPDATED CODE FOR DESIGN/UX ---
-
-        // Animated tab underline
-        function updateTabUnderline() {
-            const underline = document.getElementById('tabUnderline');
-            if (!underline) return;
-            if (currentTab === 'current') {
-                underline.style.left = '0';
-                underline.style.width = '50%';
-            } else {
-                underline.style.left = '50%';
-                underline.style.width = '50%';
-            }
-        }
-
-        function getStatusBadge(status) {
-            const statusConfig = {
-                'in-progress': { color: 'bg-blue-100 text-blue-800', label: 'In Progress' },
-                'pending': { color: 'bg-yellow-100 text-yellow-800', label: 'Pending' },
-                'completed': { color: 'bg-gray-900 text-white', label: 'Completed' }
-            };
-            
-            const config = statusConfig[status] || statusConfig['pending'];
-            return `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${config.color}">${config.label}</span>`;
-        }
-
-        function getPriorityColor(priority) {
-            const colors = {
-                'high': 'bg-red-100 text-red-800',
-                'medium': 'bg-yellow-100 text-yellow-800',
-                'low': 'bg-green-100 text-green-800'
-            };
-            return colors[priority] || colors['medium'];
-        }
-
-        function switchTab(tab) {
-            currentTab = tab;
-            // Tab styling
-            document.getElementById('currentTab').classList.toggle('tab-active', tab === 'current');
-            document.getElementById('completedTab').classList.toggle('tab-active', tab === 'completed');
-            document.getElementById('currentTasks').classList.toggle('hidden', tab !== 'current');
-            document.getElementById('completedTasks').classList.toggle('hidden', tab !== 'completed');
-            updateTabUnderline();
-            displayTasks();
-        }
-
-        function displayTasks() {
-            const userEmail = currentUser?.email || 'volunteer@example.com';
-            let filteredTasks = [];
-            if (currentTab === 'current') {
-                filteredTasks = allTasks.filter(task =>
-                    task.acceptedBy?.includes(userEmail) &&
-                    !task.completedBy?.includes(userEmail)
-                );
-            } else {
-                filteredTasks = allTasks.filter(task =>
-                    task.completedBy?.includes(userEmail)
-                );
-            }
-            const container = document.getElementById(currentTab === 'current' ? 'currentTasks' : 'completedTasks');
-            if (filteredTasks.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-12">
-                        <i class="fas fa-tasks text-4xl text-gray-300 mb-4"></i>
-                        <h3 class="text-lg font-medium text-gray-900 mb-2">${currentTab === 'current' ? 'No current tasks' : 'No completed tasks'}</h3>
-                        <p class="text-gray-600">You don't have any tasks in this category yet.</p>
-                    </div>
-                `;
-                return;
-            }
-            container.innerHTML = filteredTasks.map(task => createTaskCard(task)).join('');
-        }
-
-        function createTaskCard(task) {
-            const statusClass = {
-                'pending': 'status-pending',
-                'in-progress': 'status-progress',
-                'completed': 'status-completed'
-            }[task.status] || 'status-pending';
-            const statusText = {
-                'pending': 'Pending',
-                'in-progress': 'In Progress',
-                'completed': 'Completed'
-            }[task.status] || 'Pending';
-            const priorityColor = {
-                'high': 'bg-red-100 text-red-800',
-                'medium': 'bg-yellow-100 text-yellow-800',
-                'low': 'bg-green-100 text-green-800'
-            }[task.priority] || 'bg-yellow-100 text-yellow-800';
-
-            let dueDate = 'No due date';
-            if (task.dueDate) {
-                try {
-                    dueDate = new Date(task.dueDate).toLocaleDateString();
-                } catch (e) {}
-            }
-            return `
-                <div class="task-card">
-                    <div class="flex justify-between items-start mb-3">
-                        <h3 class="font-bold text-black text-lg">${task.title}</h3>
-                        <span class="status-badge ${statusClass}">${statusText}</span>
-                    </div>
-                    <p class="text-gray-700 text-sm mb-3 leading-relaxed">${task.description || ''}</p>
-                    <div class="space-y-2 mb-4">
-                        <div class="flex items-center text-sm text-gray-600">
-                            <i class="fas fa-calendar-alt w-4 mr-2"></i>
-                            <span>Due: ${dueDate}</span>
-                        </div>
-                        <div class="flex items-center text-sm text-gray-600">
-                            <i class="fas fa-user w-4 mr-2"></i>
-                            <span>Assigned by: ${task.assignedBy || 'System'}</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center text-sm">
-                        <span class="mr-2">Priority:</span>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${priorityColor}">${task.priority}</span>
-                    </div>
-                    <div class="flex justify-end mt-3">
-                        ${
-                            task.status === 'completed'
-                            ? `<button onclick="submitTask('${task.taskId}')" class="bg-gray-800 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-900 transition-colors">Submit</button>`
-                            : `<button onclick="viewTaskDetails('${task.taskId}')" class="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 transition-colors">View Details</button>`
-                        }
-                    </div>
+    return `
+        <div class="task-card">
+            <div class="flex justify-between items-start mb-3">
+                <h3 class="font-bold text-black text-lg">${task.title}</h3>
+                <span class="status-badge ${statusClass}">${statusText}</span>
+            </div>
+            <p class="text-gray-700 text-sm mb-3 leading-relaxed">${task.description || ''}</p>
+            <div class="space-y-2 mb-4">
+                <div class="flex items-center text-sm text-gray-600">
+                    <i class="fas fa-calendar-alt w-4 mr-2"></i>
+                    <span>Due: ${dueDate}</span>
                 </div>
-            `;
-        }
-        // --- END: REPLACED/UPDATED CODE FOR DESIGN/UX ---
+                <div class="flex items-center text-sm text-gray-600">
+                    <i class="fas fa-user w-4 mr-2"></i>
+                    <span>Assigned by: ${task.author || 'System'}</span>
+                </div>
+                <div class="flex items-center text-sm text-gray-600">
+                    <i class="fas fa-users w-4 mr-2"></i>
+                    <span>${task.acceptedBy.length} / ${task.peopleNeeded} Volunteers Accepted</span>
+                </div>
+            </div>
+            <div class="flex items-center text-sm mb-2">
+                <span class="mr-2">Priority:</span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${priorityColor}">${task.priority}</span>
+            </div>
+            <div class="flex justify-end mt-3">
+                <button
+                    ${acceptBtnDisabled ? 'disabled' : ''}
+                    class="${acceptBtnClass}"
+                    onclick="window.acceptTask && window.acceptTask('${task.taskId}')"
+                >${acceptBtnText}</button>
+            </div>
+        </div>
+    `;
+}
 
-        // Keep the rest (session, init, etc.) as in your original file
-        // On DOMContentLoaded, just after your existing logic:
-        document.addEventListener('DOMContentLoaded', function() {
-            updateTabUnderline();
-        });
+function createCompletedTaskCard(task) {
+    let userFullName = currentUser?.name || `${currentUser?.firstName || ""} ${currentUser?.lastName || ""}`.trim();
+    let isCompleted = Array.isArray(task.completedBy) && task.completedBy.includes(userFullName);
+    let priorityColor = {
+        'high': 'bg-red-100 text-red-800',
+        'medium': 'bg-yellow-100 text-yellow-800',
+        'low': 'bg-green-100 text-green-800'
+    }[task.priority] || 'bg-yellow-100 text-yellow-800';
+    let dueDate = 'No due date';
+    if (task.dueDate) {
+        try {
+            dueDate = new Date(task.dueDate).toLocaleDateString();
+        } catch (e) {}
+    }
+    let statusClass = isCompleted ? 'status-completed' : 'status-progress';
+    let statusText = isCompleted ? 'Completed' : 'Accepted';
+
+    return `
+        <div class="task-card">
+            <div class="flex justify-between items-start mb-3">
+                <h3 class="font-bold text-black text-lg">${task.title}</h3>
+                <span class="status-badge ${statusClass}">${statusText}</span>
+            </div>
+            <p class="text-gray-700 text-sm mb-3 leading-relaxed">${task.description || ''}</p>
+            <div class="space-y-2 mb-4">
+                <div class="flex items-center text-sm text-gray-600">
+                    <i class="fas fa-calendar-alt w-4 mr-2"></i>
+                    <span>Due: ${dueDate}</span>
+                </div>
+                <div class="flex items-center text-sm text-gray-600">
+                    <i class="fas fa-user w-4 mr-2"></i>
+                    <span>Assigned by: ${task.author || 'System'}</span>
+                </div>
+            </div>
+            <div class="flex items-center text-sm mb-2">
+                <span class="mr-2">Priority:</span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${priorityColor}">${task.priority}</span>
+            </div>
+            <div class="flex justify-end mt-3" style="min-height:48px;">
+                ${
+                !isCompleted
+                ? `<button id="complete-btn-${task.taskId}" class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors" onclick="window.completeTask && window.completeTask('${task.taskId}')">Complete Task</button>
+                   <button id="submit-btn-${task.taskId}" class="bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700 transition-colors hidden" onclick="window.submitTask && window.submitTask('${task.taskId}')">Submit</button>`
+                : `<button class="bg-gray-400 text-white px-4 py-2 rounded-md text-sm font-medium cursor-not-allowed" disabled>Completed</button>`
+                }
+            </div>
+        </div>
+    `;
+}
+
+// Accept Task handler (global for button onclick)
+window.acceptTask = async function(taskId) {
+    const task = allTasks.find(t => t.taskId === taskId);
+    if (!task) return;
+    let userFullName = currentUser?.name || `${currentUser?.firstName || ""} ${currentUser?.lastName || ""}`.trim();
+    if (!userFullName) return;
+    if (task.acceptedBy.includes(userFullName) || task.acceptedBy.length >= task.peopleNeeded) return;
+    task.acceptedBy.push(userFullName);
+    try {
+        const taskDocRef = doc(db, 'tasks', taskId);
+        await updateDoc(taskDocRef, { acceptedBy: task.acceptedBy });
+    } catch (err) {
+        alert("Could not accept task. Try again!");
+        task.acceptedBy.pop();
+    }
+    displayTasks();
+};
+
+// Complete Task handler
+window.completeTask = async function(taskId) {
+    const task = allTasks.find(t => t.taskId === taskId);
+    if (!task) return;
+    let userFullName = currentUser?.name || `${currentUser?.firstName || ""} ${currentUser?.lastName || ""}`.trim();
+    if (!userFullName) return;
+    if (!task.completedBy.includes(userFullName)) {
+        task.completedBy.push(userFullName);
+        try {
+            const taskDocRef = doc(db, 'tasks', taskId);
+            await updateDoc(taskDocRef, { completedBy: task.completedBy });
+        } catch (err) {
+            alert("Could not mark as completed. Try again!");
+            task.completedBy.pop();
+            return;
+        }
+    }
+    // Fade out Complete button, show Submit
+    const btn = document.getElementById(`complete-btn-${taskId}`);
+    const submitBtn = document.getElementById(`submit-btn-${taskId}`);
+    if (btn) {
+        btn.textContent = "Completed";
+        btn.classList.add("fade-out");
+        btn.disabled = true;
+        setTimeout(() => {
+            if (btn) btn.style.display = "none";
+            if (submitBtn) submitBtn.classList.remove("hidden");
+        }, 1500);
+    }
+};
+
+// Submit Task handler (announcement)
+window.submitTask = async function(taskId) {
+    const task = allTasks.find(t => t.taskId === taskId);
+    if (!task) return;
+    let userFullName = currentUser?.name || `${currentUser?.firstName || ""} ${currentUser?.lastName || ""}`.trim();
+    const announcementsCol = collection(db, 'announcements');
+    const now = new Date();
+    const announcementData = {
+        author: "System",
+        authorRole: "System",
+        title: `Task Completed: ${task.title}`,
+        priority: task.priority || "medium",
+        createdAt: now.toISOString(),
+        content: `${userFullName} has completed the task "${task.title}". Thank you for your support and dedication! Keep up the amazing work.`
+    };
+    try {
+        await addDoc(announcementsCol, announcementData);
+        // UI: Hide submit, show completed button again disabled
+        const submitBtn = document.getElementById(`submit-btn-${taskId}`);
+        if (submitBtn) submitBtn.style.display = "none";
+        // Show disabled Completed button again
+        const container = submitBtn?.parentElement;
+        if (container) {
+            container.innerHTML += `<button class="bg-gray-400 text-white px-4 py-2 rounded-md text-sm font-medium cursor-not-allowed" disabled>Completed</button>`;
+        }
+    } catch (err) {
+        alert("Could not submit completion announcement. Try again!");
+    }
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    updateTabUnderline();
+});
     </script>
 </body>
 </html>

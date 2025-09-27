@@ -134,7 +134,9 @@
     </div>
 
     <script type="module">
-        import { db, doc, setDoc, getDoc, collection } from './firebase.js';
+        import { db, doc, setDoc, getDoc, collection, auth } from './firebase.js';
+    import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } 
+        from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
         const roleSections = {
             staff: {
@@ -327,10 +329,51 @@
 
             // Event listeners
             document.getElementById('dynamicProfileForm').addEventListener('submit', handleProfileSubmit);
-            document.getElementById('passwordForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                showMessage("Password change must be implemented with Firebase Auth.", "error");
-            });
+            document.getElementById('passwordForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const currentPassword = document.getElementById('currentPassword').value.trim();
+            const newPassword = document.getElementById('newPassword').value.trim();
+            const confirmPassword = document.getElementById('confirmPassword').value.trim();
+
+            if (newPassword !== confirmPassword) {
+                showMessage("New passwords do not match.", "error");
+                return;
+            }
+
+            try {
+                const user = auth.currentUser;
+                if (!user || !user.email) {
+                    showMessage("No authenticated user found.", "error");
+                    return;
+                }
+
+                // Re-authenticate user
+                const credential = EmailAuthProvider.credential(user.email, currentPassword);
+                await reauthenticateWithCredential(user, credential);
+
+                // Update password
+                await updatePassword(user, newPassword);
+
+                showMessage("Password updated successfully!", "success");
+
+                // Clear form
+                document.getElementById('passwordForm').reset();
+
+            } catch (error) {
+                console.error("Password update error:", error);
+                let msg = "Failed to update password.";
+                if (error.code === "auth/wrong-password") {
+                    msg = "Current password is incorrect.";
+                } else if (error.code === "auth/weak-password") {
+                    msg = "New password is too weak (min 6 chars).";
+                } else if (error.code === "auth/requires-recent-login") {
+                    msg = "Please log in again before changing your password.";
+                }
+                showMessage(msg, "error");
+            }
+        });
+
         });
 
         function setupPhotoPreview() {

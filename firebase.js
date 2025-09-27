@@ -68,5 +68,4 @@ export {
   uploadBytes,
   getDownloadURL,
   limit,
-  getAuth,
 }
