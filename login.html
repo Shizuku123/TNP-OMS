@@ -108,58 +108,69 @@
 
     // --- EXECUTE create-user.js LOGIC ON PAGE LOAD (if user does not exist) ---
     async function ensureAdminUser() {
-      const email = "guecoszanil4@gmail.com";
-      const password = "admin123";
-      const userDocRef = doc(db, "users", "admin-precreated");
-      const userDoc = await getDoc(userDocRef);
-      if (userDoc.exists()) return;
-      try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password).catch(async (err) => {
-          if (err.code === 'auth/user-not-found') {
-            const { createUserWithEmailAndPassword } = await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js');
-            return await createUserWithEmailAndPassword(auth, email, password);
-          }
-          throw err;
-        });
-        const user = userCredential.user;
-        const userData = {
-          uid: user.uid,
-          firstName: "Szanil",
-          middleName: "Iquitan",
-          lastName: "Gueco",
-          emailAddress: email,
-          contactNumber: "09171234567",
-          username: "szanilgueco",
-          photoString: "",
-          gender: "Male",
-          civilStatus: "Single",
-          nationality: "Filipino",
-          religion: "Catholic",
-          placeOfBirth: "Angeles City",
-          dateOfBirth: "1995-01-01",
-          currentAddress: "Angeles City, Pampanga",
-          assignedSchedule: "Day Shift",
-          department: "IT",
-          position: "Admin",
-          supervisor: "None",
-          employmentStatus: "Active",
-          createAccount: "System",
-          dateAdded: new Date().toISOString(),
-          dateHired: "2020-01-01",
-          role: "admin",
-          isActive: true,
-          isBlocked: false,
-          isVerified: false
-        };
-        await setDoc(doc(db, "users", user.uid), userData);
-        await setDoc(userDocRef, { created: true });
-      } catch (error) {
-        if (error.code !== 'auth/email-already-in-use') {
-          console.error('Error ensuring admin user:', error);
-        }
+  const email = "guecoszanil4@gmail.com";
+  const password = "admin123";
+
+  try {
+    // Try to sign in the admin first
+    let userCredential;
+    try {
+      userCredential = await signInWithEmailAndPassword(auth, email, password);
+    } catch (err) {
+      if (err.code === 'auth/user-not-found') {
+        const { createUserWithEmailAndPassword } = await import(
+          'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js'
+        );
+        userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      } else {
+        throw err;
       }
     }
-    ensureAdminUser();
+
+    const user = userCredential.user;
+
+    // Check if the user document already exists
+    const userDocRef = doc(db, "users", user.uid);
+    const userDocSnap = await getDoc(userDocRef);
+    if (!userDocSnap.exists()) {
+      // Create user doc with all fields
+      const userData = {
+        uid: user.uid,
+        firstName: "Szanil",
+        middleName: "Iquitan",
+        lastName: "Gueco",
+        emailAddress: email,
+        contactNumber: "09171234567",
+        username: "szanilgueco",
+        photoString: "",
+        gender: "Male",
+        civilStatus: "Single",
+        nationality: "Filipino",
+        religion: "Catholic",
+        placeOfBirth: "Angeles City",
+        dateOfBirth: "1995-01-01",
+        currentAddress: "Angeles City, Pampanga",
+        assignedSchedule: "Day Shift",
+        department: "IT",
+        position: "Admin",
+        supervisor: "None",
+        employmentStatus: "Active",
+        createAccount: "System",
+        dateAdded: new Date().toISOString(),
+        dateHired: "2020-01-01",
+        role: "admin",
+        isActive: true,
+        isBlocked: false,
+        isVerified: true
+      };
+      await setDoc(userDocRef, userData);
+    }
+  } catch (error) {
+    console.error('Error ensuring admin user:', error);
+  }
+}
+ensureAdminUser();
+
 
     // --- LOGIN FORM HANDLING ---
     document.addEventListener('DOMContentLoaded', function() {
