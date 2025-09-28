@@ -74,13 +74,13 @@
                         <span class="hidden sm:inline">Basic Information</span>
                         <span class="sm:hidden">Basic Info</span>
                     </button>
-                    <button id="checkupRecordsTab" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-sm flex-shrink-0">
-                        <span class="hidden sm:inline">Check-up Records</span>
-                        <span class="sm:hidden">Check-ups</span>
+                    <button id="hmpTab" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-sm flex-shrink-0">
+                        <span class="hidden sm:inline">Health & Medical Profile</span>
+                        <span class="sm:hidden">HMP</span>
                     </button>
-                    <button id="treatmentsTab" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-sm flex-shrink-0">
-                        <span class="hidden sm:inline">Treatments</span>
-                        <span class="sm:hidden">Treatments</span>
+                    <button id="anthropometricTab" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-sm flex-shrink-0">
+                        <span class="hidden sm:inline">Anthropometric Measurement</span>
+                        <span class="sm:hidden">Anthro</span>
                     </button>
                     <button id="educationalTab" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-sm flex-shrink-0">
                         <span class="hidden sm:inline">Educational Background</span>
@@ -92,29 +92,30 @@
             <!-- Tab Content -->
             <div class="p-4 sm:p-6">
                 <div id="basicInfoContent" class="tab-content"></div>
-                <div id="checkupRecordsContent" class="tab-content hidden">
+                <div id="hmpContent" class="tab-content hidden">
                     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 space-y-4 sm:space-y-0">
-                        <h3 class="text-lg font-medium text-gray-900">Check-up Records</h3>
-                        <button id="addCheckupRecordBtn" class="w-full sm:w-auto px-4 py-2 bg-red-primary text-white rounded-lg hover:bg-red-700 transition-colors text-center">
+                        <h3 class="text-lg font-medium text-gray-900">Health & Medical Profile</h3>
+                        <button id="addHmpRecordBtn" class="w-full sm:w-auto px-4 py-2 bg-red-primary text-white rounded-lg hover:bg-red-700 transition-colors text-center">
                             <svg class="inline h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                             </svg>
-                            Add Check-up Record
+                            Add HMP Record
                         </button>
                     </div>
-                    <div id="checkupRecordsList"></div>
+                    <div id="hmpRecordsList"></div>
                 </div>
-                <div id="treatmentsContent" class="tab-content hidden">
+                <div id="anthropometricContent" class="tab-content hidden">
                     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 space-y-4 sm:space-y-0">
-                        <h3 class="text-lg font-medium text-gray-900">Medical Treatments</h3>
-                        <button id="addTreatmentBtn" class="w-full sm:w-auto px-4 py-2 bg-red-primary text-white rounded-lg hover:bg-red-700 transition-colors text-center">
+                        <h3 class="text-lg font-medium text-gray-900">Anthropometric Measurements</h3>
+                        <button id="addAnthropometricBtn" 
+  class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-center">
                             <svg class="inline h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                             </svg>
-                            Add Treatment Record
+                            Add Measurement Record
                         </button>
                     </div>
-                    <div id="treatmentsList"></div>
+                    <div id="anthropometricRecordsList"></div>
                 </div>
                 <div id="educationalContent" class="tab-content hidden">
                     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 space-y-4 sm:space-y-0">
@@ -132,11 +133,194 @@
         </div>
     </div>
 
-    <!-- Modals (keep as in your original file) -->
-    <!-- ... omitted for brevity ... -->
+    <!-- HMP Modal -->
+    <div id="hmpModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <h3 class="text-lg font-bold text-gray-900 mb-4">Add Health & Medical Profile Record</h3>
+                <form id="hmpForm" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Date of Check-up *</label>
+                            <input type="date" name="dateOfCheckUp" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Created By *</label>
+                            <input type="text" name="createdBy" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Diagnosis</label>
+                        <textarea name="diagnosis" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary"></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Prescribed Medications (one per line)</label>
+                        <textarea name="prescribedMedications" rows="3" placeholder="Enter each medication on a new line" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary"></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Immunizations</label>
+                        <div id="immunizationsList" class="space-y-2">
+                            <div class="flex space-x-2">
+                                <input type="text" placeholder="Immunization name" class="flex-1 px-3 py-2 border border-gray-300 rounded-md immunization-name">
+                                <input type="date" class="px-3 py-2 border border-gray-300 rounded-md immunization-date">
+                                <button type="button" class="px-3 py-2 bg-red-primary text-white rounded-md hover:bg-red-700" onclick="addImmunization()">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Procedures Undergone (one per line)</label>
+                        <textarea name="proceduresUndergone" rows="2" placeholder="Enter each procedure on a new line" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary"></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Procedures to be Undertaken (one per line)</label>
+                        <textarea name="proceduresToBeUndertaken" rows="2" placeholder="Enter each procedure on a new line" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary"></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Laboratory Workups (one per line)</label>
+                        <textarea name="laboratoryWorkups" rows="2" placeholder="Enter each lab work on a new line" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary"></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Laboratory Results</label>
+                        <div id="labResultsList" class="space-y-2">
+                            <div class="flex space-x-2">
+                                <input type="text" placeholder="Test name" class="flex-1 px-3 py-2 border border-gray-300 rounded-md lab-test">
+                                <input type="text" placeholder="Result" class="flex-1 px-3 py-2 border border-gray-300 rounded-md lab-result">
+                                <button type="button" class="px-3 py-2 bg-red-primary text-white rounded-md hover:bg-red-700" onclick="addLabResult()">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Doctor Remarks (one per line)</label>
+                        <textarea name="doctorRemarks" rows="3" placeholder="Enter each remark on a new line" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary"></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Follow-up Check-up Date</label>
+                        <input type="date" name="followUpCheckUpDate" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                    
+                    <!-- Document Upload Option -->
+                    <div class="border-t pt-4">
+                        <h4 class="font-medium text-gray-900 mb-2">Alternative: Upload Scanned Document</h4>
+                        <p class="text-sm text-gray-600 mb-2">You can scan and upload the medical document instead of filling out the form above.</p>
+                        <input type="file" name="scannedDocument" accept="image/*,.pdf" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                    
+                    <div class="flex justify-end space-x-2 pt-4">
+                        <button type="button" onclick="closeHmpModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-red-primary text-white rounded-md hover:bg-red-700">Save Record</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Anthropometric Modal -->
+    <div id="anthropometricModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-3xl shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <h3 class="text-lg font-bold text-gray-900 mb-4">Add Anthropometric Measurement Record</h3>
+                <form id="anthropometricForm" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Date Recorded *</label>
+                            <input type="date" name="dateRecorded" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Recorded By *</label>
+                            <input type="text" name="recordedBy" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Weight (kg)</label>
+                            <input type="number" step="0.1" name="weight" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Height (cm)</label>
+                            <input type="number" step="0.1" name="height" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Head Circumference (cm)</label>
+                            <input type="number" step="0.1" name="headCircumference" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Chest Circumference (cm)</label>
+                            <input type="number" step="0.1" name="chestCircumference" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Abdominal Circumference (cm)</label>
+                            <input type="number" step="0.1" name="abdominalCircumference" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Number of Teeth</label>
+                            <input type="number" name="numberOfTeeth" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        </div>
+                    </div>
+                    
+                    <!-- Document Upload Option -->
+                    <div class="border-t pt-4">
+                        <h4 class="font-medium text-gray-900 mb-2">Alternative: Upload Scanned Document</h4>
+                        <p class="text-sm text-gray-600 mb-2">You can scan and upload the measurement document instead of filling out the form above.</p>
+                        <input type="file" name="scannedDocument" accept="image/*,.pdf" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                    
+                    <div class="flex justify-end space-x-2 pt-4">
+                        <button type="button" onclick="closeAnthropometricModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-red-primary text-white rounded-md hover:bg-red-700">Save Record</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Viewer Modal -->
+    <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-75 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative min-h-screen flex items-center justify-center p-4">
+            <div class="relative bg-white rounded-lg max-w-4xl max-h-screen overflow-auto">
+                <div class="flex items-center justify-between p-4 border-b">
+                    <h3 id="imageModalTitle" class="text-lg font-bold text-gray-900">Document Viewer</h3>
+                    <button onclick="closeImageModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="p-4">
+                    <img id="modalImage" src="" alt="Scanned Document" class="max-w-full h-auto mx-auto" style="max-height: 70vh;">
+                    <div id="pdfViewer" class="hidden">
+                        <embed id="pdfEmbed" src="" type="application/pdf" width="100%" height="600px">
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-2 p-4 border-t">
+                    <button onclick="downloadDocument()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                        Download
+                    </button>
+                    <button onclick="closeImageModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script type="module">
-        import { db, collection, getDocs } from './firebase.js';
+        import { db, collection, getDocs, doc, setDoc, addDoc } from './firebase.js';
 
         let currentChild = null;
         let currentChildId = null;
@@ -190,8 +374,8 @@
                 }
                 displayChildHeader();
                 displayBasicInfo();
-                await loadCheckupRecords();
-                await loadTreatmentRecords();
+                await loadHmpRecords();
+                await loadAnthropometricRecords();
                 await loadEducationalRecords();
             } catch (error) {
                 console.error('Error loading child data:', error);
@@ -254,6 +438,10 @@
                                 <span class="sm:col-span-2 text-sm text-gray-900 break-words">${currentChild.firstName || ''} ${currentChild.middleName || ''} ${currentChild.lastName || ''}</span>
                             </div>
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-gray-500">Child ID:</span>
+                                <span class="sm:col-span-2 text-sm text-gray-900">${currentChild.childId || 'N/A'}</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
                                 <span class="text-sm font-medium text-gray-500">Gender:</span>
                                 <span class="sm:col-span-2 text-sm text-gray-900">${currentChild.gender || 'Not specified'}</span>
                             </div>
@@ -273,6 +461,34 @@
                                 <span class="text-sm font-medium text-gray-500">Religion:</span>
                                 <span class="sm:col-span-2 text-sm text-gray-900">${currentChild.religion || 'Not specified'}</span>
                             </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-gray-500">Case Category:</span>
+                                <span class="sm:col-span-2 text-sm text-gray-900">${currentChild.caseCategory || 'N/A'}</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-gray-500">Guardian:</span>
+                                <span class="sm:col-span-2 text-sm text-gray-900">${currentChild.guardian || 'N/A'}</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-gray-500">Social Worker:</span>
+                                <span class="sm:col-span-2 text-sm text-gray-900">${currentChild.socialWorker || 'N/A'}</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-gray-500">Medical Records:</span>
+                                <span class="sm:col-span-2 text-sm"><a href="#" onclick="document.getElementById('hmpTab').click();return false;" class="text-blue-600 hover:underline">View Medical Records</a></span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-gray-500">Status:</span>
+                                <span class="sm:col-span-2 text-sm"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getStatusColor(currentChild.currentStatus)}">${currentChild.currentStatus || 'No Status'}</span></span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-gray-500">Notes:</span>
+                                <span class="sm:col-span-2 text-sm text-gray-900">${currentChild.notes || 'None'}</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-gray-500">Attachments:</span>
+                                <span class="sm:col-span-2 text-sm text-gray-900">${currentChild.attachments ? `<a href="${currentChild.attachments}" class="text-blue-600 hover:underline" target="_blank">View</a>` : 'None'}</span>
+                            </div>
                         </div>
                     </div>
                     <div>
@@ -289,14 +505,6 @@
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
                                 <span class="text-sm font-medium text-gray-500">Reason for Admission:</span>
                                 <span class="sm:col-span-2 text-sm text-gray-900 break-words">${currentChild.reasonForAdmission || 'Not specified'}</span>
-                            </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
-                                <span class="text-sm font-medium text-gray-500">Current Status:</span>
-                                <span class="sm:col-span-2">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getStatusColor(currentChild.currentStatus)}">
-                                        ${currentChild.currentStatus || 'No Status'}
-                                    </span>
-                                </span>
                             </div>
                         </div>
                     </div>
@@ -365,61 +573,268 @@
             `;
         }
 
-        async function loadCheckupRecords() {
+        async function loadHmpRecords() {
             try {
-                const checkupCol = collection(db, 'children-checkups-records');
-                const snapshot = await getDocs(checkupCol);
-                const childCheckupRecords = [];
+                const hmpCol = collection(db, 'healthMedicalProfile');
+                const snapshot = await getDocs(hmpCol);
+                const childHmpRecords = [];
                 snapshot.forEach(docSnap => {
                     const data = docSnap.data();
-                    if (data.childId === currentChildId) childCheckupRecords.push(data);
+                    if (data.patientId === currentChildId) childHmpRecords.push(data);
                 });
-                const checkupRecordsList = document.getElementById('checkupRecordsList');
-                checkupRecordsList.innerHTML = childCheckupRecords.length === 0
-                    ? `<div class="text-center py-12 text-gray-500">No check-up records found for this child.</div>`
-                    : childCheckupRecords.map(record => `
-                        <div class="bg-white border rounded-lg p-4 mb-4">
-                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 space-y-2 sm:space-y-0">
-                                <div class="min-w-0 flex-1">
-                                    <h5 class="font-medium text-gray-900 break-words">Check-up - ${formatDate(record.checkupDate)}</h5>
-                                    <p class="text-sm text-gray-500">Dr. ${record.doctorName} • ${record.facilityName}</p>
-                                    ${record.purposeOfVisit ? `<span class="inline-block mt-1 px-2 py-1 text-xs rounded-full ${getPurposeColor(record.purposeOfVisit)}">${record.purposeOfVisit}</span>` : ''}
+                const hmpRecordsList = document.getElementById('hmpRecordsList');
+                hmpRecordsList.innerHTML = childHmpRecords.length === 0
+                    ? `<div class="text-center py-12 text-gray-500">No health & medical profile records found for this child.</div>`
+                    : childHmpRecords.map(record => {
+                        let isImage = false;
+                        if (record.scannedDocument && record.scannedDocument.startsWith('data:image/')) {
+                            isImage = true;
+                        }
+                        return `
+                        <div class="bg-white rounded-lg shadow-sm hover:shadow-lg mb-6 transition-all duration-300${isImage ? ' cursor-pointer' : ''}" ${isImage ? `onclick=\"showHmpDetails('${record.profileId}')\"` : ''}>
+                            <div class="flex items-center justify-between px-6 py-3 rounded-t-lg" style="background: linear-gradient(90deg, #dc2626 60%, #fff 100%);">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 bg-white border-2 border-red-200 rounded-lg flex items-center justify-center shadow">
+                                        <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h5 class="text-lg font-bold text-white">Medical Check-up</h5>
+                                        <p class="text-sm text-white">${formatDate(record.dateOfCheckUp)} • ID: ${record.profileId}</p>
+                                    </div>
+                                </div>
+                                <button class="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors z-10" onclick="event.stopPropagation();window.editHmpRecord('${record.profileId}')">Edit</button>
+                            </div>
+                            <div class="px-6 py-4">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-xs font-medium text-gray-700">Created by:</span>
+                                    <span class="text-sm text-gray-900">${record.createdBy || 'Unknown'}</span>
+                                    ${record.scannedDocument ? '<span class="ml-2 flex items-center gap-1 text-blue-600 text-xs"><svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>Document</span>' : ''}
+                                </div>
+                                ${record.diagnosis ? `<div class="mb-2"><span class="text-xs font-medium text-red-700">Diagnosis:</span> <span class="text-sm text-red-900">${record.diagnosis}</span></div>` : ''}
+                                ${record.prescribedMedications && record.prescribedMedications.length > 0 ? `<div class="mb-2"><span class="text-xs font-medium text-green-700">Medications:</span> <span class="text-sm">${record.prescribedMedications.map(med => `<span class='px-2 py-1 bg-green-100 text-green-800 rounded-full mr-1'>${med}</span>`).join('')}</span></div>` : ''}
+                                ${record.followUpCheckUpDate ? `<div class="mb-2 text-orange-600 text-xs">Follow-up: ${formatDate(record.followUpCheckUpDate)}</div>` : ''}
+                                <div class="flex justify-end items-center mt-4">
+                                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
                                 </div>
                             </div>
                         </div>
-                    `).join('');
+                        `;
+                    }).join('');
             } catch (error) {
-                console.error('Error loading check-up records:', error);
-                document.getElementById('checkupRecordsList').innerHTML = `<div class="text-center py-12 text-red-500">Error loading check-up records.</div>`;
+                console.error('Error loading HMP records:', error);
+                document.getElementById('hmpRecordsList').innerHTML = `<div class="text-center py-12 text-red-500">Error loading health & medical profile records.</div>`;
             }
         }
 
-        async function loadTreatmentRecords() {
+        async function loadAnthropometricRecords() {
             try {
-                const treatmentCol = collection(db, 'children-treatment-records');
-                const snapshot = await getDocs(treatmentCol);
-                const childTreatmentRecords = [];
+                const anthropometricCol = collection(db, 'anthropometricMeasurement');
+                const snapshot = await getDocs(anthropometricCol);
+                const childAnthropometricRecords = [];
                 snapshot.forEach(docSnap => {
                     const data = docSnap.data();
-                    if (data.childId === currentChildId) childTreatmentRecords.push(data);
+                    if (data.patientId === currentChildId) childAnthropometricRecords.push(data);
                 });
-                const treatmentsList = document.getElementById('treatmentsList');
-                treatmentsList.innerHTML = childTreatmentRecords.length === 0
-                    ? `<div class="text-center py-12 text-gray-500">No treatment records found for this child.</div>`
-                    : childTreatmentRecords.map(record => `
-                        <div class="bg-white border rounded-lg p-4 mb-4">
-                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 space-y-2 sm:space-y-0">
-                                <div class="min-w-0 flex-1">
-                                    <h5 class="font-medium text-gray-900 break-words">${record.medicineName} - ${record.conditionTreated || 'Treatment'}</h5>
-                                    <p class="text-sm text-gray-500">Prescribed by ${record.prescribedBy || 'Unknown'}</p>
-                                    <span class="inline-block mt-1 px-2 py-1 text-xs rounded-full ${getStatusColor(record.status)}">${record.status}</span>
+                const anthropometricRecordsList = document.getElementById('anthropometricRecordsList');
+                anthropometricRecordsList.innerHTML = childAnthropometricRecords.length === 0
+                    ? `<div class="text-center py-12 text-gray-500">No anthropometric measurement records found for this child.</div>`
+                    : childAnthropometricRecords.map(record => {
+                        // Calculate BMI category and status
+                        let bmiStatus = { category: '', color: '', bgColor: '', textColor: '', icon: '' };
+                        if (record.bmi && record.bmi[0]) {
+                            const bmi = record.bmi[0].value;
+                            if (bmi < 18.5) {
+                                bmiStatus = { 
+                                    category: 'Underweight', 
+                                    color: 'blue', 
+                                    bgColor: 'bg-blue-50', 
+                                    textColor: 'text-blue-600',
+                                    icon: 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' 
+                                };
+                            } else if (bmi >= 18.5 && bmi < 25) {
+                                bmiStatus = { 
+                                    category: 'Normal weight', 
+                                    color: 'green', 
+                                    bgColor: 'bg-green-50', 
+                                    textColor: 'text-green-600',
+                                    icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' 
+                                };
+                            } else if (bmi >= 25 && bmi < 30) {
+                                bmiStatus = { 
+                                    category: 'Overweight', 
+                                    color: 'yellow', 
+                                    bgColor: 'bg-yellow-50', 
+                                    textColor: 'text-yellow-600',
+                                    icon: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.664-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z' 
+                                };
+                            } else {
+                                bmiStatus = { 
+                                    category: 'Obese', 
+                                    color: 'red', 
+                                    bgColor: 'bg-red-50', 
+                                    textColor: 'text-red-600',
+                                    icon: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.664-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z' 
+                                };
+                            }
+                        }
+                        // Only clickable if scannedDocument is an image
+                        let isImage = false;
+                        if (record.scannedDocument && record.scannedDocument.startsWith('data:image/')) {
+                            isImage = true;
+                        }
+                        return `
+                        <div class="bg-white rounded-lg shadow-sm hover:shadow-lg mb-6 transition-all duration-300${isImage ? ' cursor-pointer' : ''}" >
+                            <div class="flex items-center justify-between px-6 py-3 rounded-t-lg" style="background: linear-gradient(90deg, #2563eb 60%, #fff 100%);">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 bg-white border-2 border-blue-200 rounded-lg flex items-center justify-center shadow">
+                                        <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h5 class="text-lg font-bold text-white">Anthropometric Measurement</h5>
+                                        <p class="text-sm text-white">${formatDate(record.dateRecorded)} • ID: ${record.measurementId}</p>
+                                    </div>
+                                </div>
+                                <button class="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors z-10" onclick="event.stopPropagation();window.editAnthropometricRecord('${record.measurementId || ''}')">Edit</button>
+                            </div>
+                            <div class="px-6 py-4" ${isImage ? `onclick=\"showAnthropometricDetails('${record.measurementId}')\" style=\"cursor:pointer\"` : ''}>
+                                <div class="flex flex-wrap gap-4 mb-2">
+                                    ${record.weight && record.weight[0] ? `<span class='bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-xs'>Weight: ${record.weight[0].value} ${record.weight[0].unit}</span>` : ''}
+                                    ${record.height && record.height[0] ? `<span class='bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-xs'>Height: ${record.height[0].value} ${record.height[0].unit}</span>` : ''}
+                                    ${record.bmi && record.bmi[0] ? `<span class='bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs'>BMI: ${record.bmi[0].value} (${bmiStatus.category})</span>` : ''}
+                                    ${record.headCircumference && record.headCircumference[0] ? `<span class='bg-pink-100 text-pink-800 px-3 py-1 rounded-full text-xs'>Head: ${record.headCircumference[0].value} ${record.headCircumference[0].unit}</span>` : ''}
+                                    ${record.chestCircumference && record.chestCircumference[0] ? `<span class='bg-teal-100 text-teal-800 px-3 py-1 rounded-full text-xs'>Chest: ${record.chestCircumference[0].value} ${record.chestCircumference[0].unit}</span>` : ''}
+                                    ${record.abdominalCircumference && record.abdominalCircumference[0] ? `<span class='bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-xs'>Abdomen: ${record.abdominalCircumference[0].value} ${record.abdominalCircumference[0].unit}</span>` : ''}
+                                    ${record.numberOfTeeth && record.numberOfTeeth[0] ? `<span class='bg-cyan-100 text-cyan-800 px-3 py-1 rounded-full text-xs'>Teeth: ${record.numberOfTeeth[0].count}</span>` : ''}
+                                </div>
+                                <div class="flex items-center gap-2 text-gray-600 text-xs mb-2">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                    </svg>
+                                    <span>Recorded by: ${record.recordedBy || 'Unknown'}</span>
+                                    ${record.scannedDocument ? '<span class="ml-2 flex items-center gap-1 text-blue-600"><svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>Document</span>' : ''}
+                                </div>
+                                <div class="flex justify-end items-center mt-4">
+                                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
                                 </div>
                             </div>
                         </div>
-                    `).join('');
+                        `;
+                    }).join('');
+                // No card click events needed
+        // Edit Anthropometric Record handler
+        window.editAnthropometricRecord = async function(measurementId) {
+            try {
+                const anthropometricCol = collection(db, 'anthropometricMeasurement');
+                const snapshot = await getDocs(anthropometricCol);
+                let record = null;
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if (data.measurementId === measurementId) {
+                        record = data;
+                    }
+                });
+                if (!record) return;
+                document.getElementById('anthropometricModal').classList.remove('hidden');
+                const form = document.getElementById('anthropometricForm');
+                form.querySelector('input[name="dateRecorded"]').value = record.dateRecorded || '';
+                form.querySelector('input[name="dateRecorded"]').disabled = true;
+                form.querySelector('input[name="recordedBy"]').value = record.recordedBy || '';
+                form.querySelector('input[name="recordedBy"]').disabled = true;
+                form.querySelector('input[name="weight"]').value = record.weight && record.weight[0] ? record.weight[0].value : '';
+                form.querySelector('input[name="weight"]').disabled = false;
+                form.querySelector('input[name="height"]').value = record.height && record.height[0] ? record.height[0].value : '';
+                form.querySelector('input[name="height"]').disabled = false;
+                form.querySelector('input[name="headCircumference"]').value = record.headCircumference && record.headCircumference[0] ? record.headCircumference[0].value : '';
+                form.querySelector('input[name="headCircumference"]').disabled = false;
+                form.querySelector('input[name="chestCircumference"]').value = record.chestCircumference && record.chestCircumference[0] ? record.chestCircumference[0].value : '';
+                form.querySelector('input[name="chestCircumference"]').disabled = false;
+                form.querySelector('input[name="abdominalCircumference"]').value = record.abdominalCircumference && record.abdominalCircumference[0] ? record.abdominalCircumference[0].value : '';
+                form.querySelector('input[name="abdominalCircumference"]').disabled = false;
+                form.querySelector('input[name="numberOfTeeth"]').value = record.numberOfTeeth && record.numberOfTeeth[0] ? record.numberOfTeeth[0].count : '';
+                form.querySelector('input[name="numberOfTeeth"]').disabled = false;
+                window.currentEditingAnthropometricId = measurementId;
             } catch (error) {
-                console.error('Error loading treatment records:', error);
-                document.getElementById('treatmentsList').innerHTML = `<div class="text-center py-12 text-red-500">Error loading treatment records.</div>`;
+                console.error('Error loading anthropometric record for edit:', error);
+            }
+        }
+
+        // HMP Edit Functionality
+        window.editHmpRecord = async function(profileId) {
+            try {
+                const hmpCol = collection(db, 'healthMedicalProfile');
+                const snapshot = await getDocs(hmpCol);
+                let record = null;
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if (data.profileId === profileId) {
+                        record = data;
+                    }
+                });
+                if (!record) return;
+                document.getElementById('hmpModal').classList.remove('hidden');
+                const form = document.getElementById('hmpForm');
+                form.querySelector('input[name="dateOfCheckUp"]').value = record.dateOfCheckUp || '';
+                form.querySelector('input[name="dateOfCheckUp"]').disabled = true;
+                form.querySelector('input[name="createdBy"]').value = record.createdBy || '';
+                form.querySelector('input[name="createdBy"]').disabled = true;
+                form.querySelector('textarea[name="diagnosis"]').value = record.diagnosis || '';
+                form.querySelector('textarea[name="prescribedMedications"]').value = record.prescribedMedications ? record.prescribedMedications.join('\n') : '';
+                // Immunizations
+                const immunizationsList = document.getElementById('immunizationsList');
+                immunizationsList.innerHTML = '';
+                if (record.immunizations && record.immunizations.length > 0) {
+                    record.immunizations.forEach(imm => {
+                        const div = document.createElement('div');
+                        div.className = 'flex space-x-2';
+                        div.innerHTML = `
+                            <input type="text" placeholder="Immunization name" class="flex-1 px-3 py-2 border border-gray-300 rounded-md immunization-name" value="${imm.name || ''}">
+                            <input type="date" class="px-3 py-2 border border-gray-300 rounded-md immunization-date" value="${imm.dateGiven || ''}">
+                            <button type="button" class="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700" onclick="this.parentElement.remove()">-</button>
+                        `;
+                        immunizationsList.appendChild(div);
+                    });
+                } else {
+                    window.addImmunization();
+                }
+                form.querySelector('textarea[name="proceduresUndergone"]').value = record.proceduresUndergone ? record.proceduresUndergone.join('\n') : '';
+                form.querySelector('textarea[name="proceduresToBeUndertaken"]').value = record.proceduresToBeUndertaken ? record.proceduresToBeUndertaken.join('\n') : '';
+                form.querySelector('textarea[name="laboratoryWorkups"]').value = record.laboratoryWorkups ? record.laboratoryWorkups.join('\n') : '';
+                // Lab Results
+                const labResultsList = document.getElementById('labResultsList');
+                labResultsList.innerHTML = '';
+                if (record.laboratoryResults && record.laboratoryResults.length > 0) {
+                    record.laboratoryResults.forEach(lab => {
+                        const div = document.createElement('div');
+                        div.className = 'flex space-x-2';
+                        div.innerHTML = `
+                            <input type="text" placeholder="Test name" class="flex-1 px-3 py-2 border border-gray-300 rounded-md lab-test" value="${lab.test || ''}">
+                            <input type="text" placeholder="Result" class="flex-1 px-3 py-2 border border-gray-300 rounded-md lab-result" value="${lab.result || ''}">
+                            <button type="button" class="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700" onclick="this.parentElement.remove()">-</button>
+                        `;
+                        labResultsList.appendChild(div);
+                    });
+                } else {
+                    window.addLabResult();
+                }
+                form.querySelector('textarea[name="doctorRemarks"]').value = record.doctorRemarks ? record.doctorRemarks.join('\n') : '';
+                form.querySelector('input[name="followUpCheckUpDate"]').value = record.followUpCheckUpDate || '';
+                // Optionally store the profileId for saving
+                window.currentEditingHmpId = profileId;
+            } catch (error) {
+                console.error('Error loading HMP record for edit:', error);
+            }
+        }
+            } catch (error) {
+                console.error('Error loading anthropometric records:', error);
+                document.getElementById('anthropometricRecordsList').innerHTML = `<div class="text-center py-12 text-red-500">Error loading anthropometric measurement records.</div>`;
             }
         }
 
@@ -462,11 +877,11 @@
             document.getElementById('printBtn').addEventListener('click', function() {
                 window.print();
             });
-            document.getElementById('addCheckupRecordBtn').addEventListener('click', function() {
-                // Modal logic for checkup record
+            document.getElementById('addHmpRecordBtn').addEventListener('click', function() {
+                window.showHmpModal();
             });
-            document.getElementById('addTreatmentBtn').addEventListener('click', function() {
-                // Modal logic for treatment record
+            document.getElementById('addAnthropometricBtn').addEventListener('click', function() {
+                window.showAnthropometricModal();
             });
             document.getElementById('addEducationalRecordBtn').addEventListener('click', function() {
                 // Modal logic for educational record
@@ -551,6 +966,560 @@
                     return 'bg-gray-100 text-gray-800';
             }
         }
+
+        // Modal Functions (make global)
+        window.showHmpModal = function() {
+            document.getElementById('hmpModal').classList.remove('hidden');
+            // Set today's date as default
+            document.querySelector('#hmpForm input[name="dateOfCheckUp"]').value = new Date().toISOString().split('T')[0];
+            document.querySelector('#hmpForm input[name="createdBy"]').value = currentUser ? (currentUser.firstName + ' ' + currentUser.lastName) : '';
+        }
+
+        window.closeHmpModal = function() {
+            document.getElementById('hmpModal').classList.add('hidden');
+            document.getElementById('hmpForm').reset();
+        }
+
+        window.showAnthropometricModal = function() {
+            document.getElementById('anthropometricModal').classList.remove('hidden');
+            // Set today's date as default
+            document.querySelector('#anthropometricForm input[name="dateRecorded"]').value = new Date().toISOString().split('T')[0];
+            document.querySelector('#anthropometricForm input[name="recordedBy"]').value = currentUser ? (currentUser.firstName + ' ' + currentUser.lastName) : '';
+        }
+
+        window.closeAnthropometricModal = function() {
+            document.getElementById('anthropometricModal').classList.add('hidden');
+            document.getElementById('anthropometricForm').reset();
+        }
+
+        // Image Modal Functions
+        let currentDocumentData = '';
+        let currentDocumentTitle = '';
+
+        window.showImageModal = function(documentData, title) {
+            if (!documentData) return;
+            
+            currentDocumentData = documentData;
+            currentDocumentTitle = title;
+            
+            const modal = document.getElementById('imageModal');
+            const modalTitle = document.getElementById('imageModalTitle');
+            const modalImage = document.getElementById('modalImage');
+            const pdfViewer = document.getElementById('pdfViewer');
+            const pdfEmbed = document.getElementById('pdfEmbed');
+            
+            modalTitle.textContent = title;
+            
+            // Check if it's a PDF or image
+            if (documentData.includes('data:application/pdf')) {
+                modalImage.classList.add('hidden');
+                pdfViewer.classList.remove('hidden');
+                pdfEmbed.src = documentData;
+            } else {
+                pdfViewer.classList.add('hidden');
+                modalImage.classList.remove('hidden');
+                modalImage.src = documentData;
+            }
+            
+            modal.classList.remove('hidden');
+        }
+
+        window.closeImageModal = function() {
+            const modal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            const pdfEmbed = document.getElementById('pdfEmbed');
+            
+            modal.classList.add('hidden');
+            modalImage.src = '';
+            pdfEmbed.src = '';
+            currentDocumentData = '';
+            currentDocumentTitle = '';
+        }
+
+        window.downloadDocument = function() {
+            if (!currentDocumentData) return;
+            
+            // Create a temporary link to download the document
+            const link = document.createElement('a');
+            link.href = currentDocumentData;
+            
+            // Determine file extension based on data type
+            let extension = '.jpg';
+            if (currentDocumentData.includes('data:application/pdf')) {
+                extension = '.pdf';
+            } else if (currentDocumentData.includes('data:image/png')) {
+                extension = '.png';
+            } else if (currentDocumentData.includes('data:image/gif')) {
+                extension = '.gif';
+            }
+            
+            // Create filename from title
+            const filename = (currentDocumentTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'document') + extension;
+            link.download = filename;
+            
+            // Trigger download
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Detailed view functions
+        let currentRecordData = null;
+        
+        window.showHmpDetails = async function(profileId) {
+            try {
+                const hmpCol = collection(db, 'healthMedicalProfile');
+                const snapshot = await getDocs(hmpCol);
+                let record = null;
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if (data.profileId === profileId) {
+                        record = data;
+                    }
+                });
+                
+                if (!record) return;
+                currentRecordData = record;
+                
+                if (record.scannedDocument) {
+                    showImageModal(record.scannedDocument, `HMP Record - ${formatDate(record.dateOfCheckUp)}`);
+                } else {
+                    showHmpDetailModal(record);
+                }
+            } catch (error) {
+                console.error('Error loading HMP details:', error);
+            }
+        }
+
+        window.showAnthropometricDetails = async function(measurementId) {
+            try {
+                const anthropometricCol = collection(db, 'anthropometricMeasurement');
+                const snapshot = await getDocs(anthropometricCol);
+                let record = null;
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if (data.measurementId === measurementId) {
+                        record = data;
+                    }
+                });
+                
+                if (!record) return;
+                currentRecordData = record;
+                
+                if (record.scannedDocument) {
+                    showImageModal(record.scannedDocument, `Anthropometric Record - ${formatDate(record.dateRecorded)}`);
+                } else {
+                    showAnthropometricDetailModal(record);
+                }
+            } catch (error) {
+                console.error('Error loading anthropometric details:', error);
+            }
+        }
+
+        function showHmpDetailModal(record) {
+            const modal = document.getElementById('imageModal');
+            const modalTitle = document.getElementById('imageModalTitle');
+            const modalImage = document.getElementById('modalImage');
+            const pdfViewer = document.getElementById('pdfViewer');
+            
+            modalTitle.textContent = `Health & Medical Profile - ${formatDate(record.dateOfCheckUp)}`;
+            modalImage.classList.add('hidden');
+            pdfViewer.classList.add('hidden');
+            
+            // Create detailed view content
+            const detailContent = document.createElement('div');
+            detailContent.className = 'max-h-96 overflow-y-auto space-y-4';
+            detailContent.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h4 class="font-bold text-gray-900 mb-2">Basic Information</h4>
+                        <p><strong>Profile ID:</strong> ${record.profileId}</p>
+                        <p><strong>Date:</strong> ${formatDate(record.dateOfCheckUp)}</p>
+                        <p><strong>Created by:</strong> ${record.createdBy || 'Unknown'}</p>
+                    </div>
+                    
+                    ${record.diagnosis ? `
+                    <div class="bg-red-50 p-4 rounded-lg">
+                        <h4 class="font-bold text-red-900 mb-2">Diagnosis</h4>
+                        <p>${record.diagnosis}</p>
+                    </div>
+                    ` : ''}
+                </div>
+                
+                ${record.prescribedMedications && record.prescribedMedications.length > 0 ? `
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h4 class="font-bold text-green-900 mb-2">Prescribed Medications</h4>
+                    <ul class="list-disc list-inside space-y-1">
+                        ${record.prescribedMedications.map(med => `<li>${med}</li>`).join('')}
+                    </ul>
+                </div>
+                ` : ''}
+                
+                ${record.immunizations && record.immunizations.length > 0 ? `
+                <div class="bg-purple-50 p-4 rounded-lg">
+                    <h4 class="font-bold text-purple-900 mb-2">Immunizations</h4>
+                    <div class="space-y-2">
+                        ${record.immunizations.map(imm => `
+                            <div class="flex justify-between">
+                                <span>${imm.name}</span>
+                                <span class="text-sm text-gray-600">${imm.dateGiven ? formatDate(imm.dateGiven) : 'Date not specified'}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                ` : ''}
+                
+                ${record.laboratoryResults && record.laboratoryResults.length > 0 ? `
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h4 class="font-bold text-blue-900 mb-2">Laboratory Results</h4>
+                    <div class="space-y-2">
+                        ${record.laboratoryResults.map(result => `
+                            <div class="flex justify-between">
+                                <span>${result.test}</span>
+                                <span class="font-medium">${result.result}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                ` : ''}
+                
+                ${record.doctorRemarks && record.doctorRemarks.length > 0 ? `
+                <div class="bg-yellow-50 p-4 rounded-lg">
+                    <h4 class="font-bold text-yellow-900 mb-2">Doctor Remarks</h4>
+                    <ul class="list-disc list-inside space-y-1">
+                        ${record.doctorRemarks.map(remark => `<li>${remark}</li>`).join('')}
+                    </ul>
+                </div>
+                ` : ''}
+                
+                ${record.followUpCheckUpDate ? `
+                <div class="bg-orange-50 p-4 rounded-lg">
+                    <h4 class="font-bold text-orange-900 mb-2">Follow-up</h4>
+                    <p>Next check-up scheduled for: ${formatDate(record.followUpCheckUpDate)}</p>
+                </div>
+                ` : ''}
+            `;
+            
+            const modalContent = document.querySelector('#imageModal .p-4');
+            modalContent.innerHTML = '';
+            modalContent.appendChild(detailContent);
+            
+            modal.classList.remove('hidden');
+        }
+
+        function showAnthropometricDetailModal(record) {
+            const modal = document.getElementById('imageModal');
+            const modalTitle = document.getElementById('imageModalTitle');
+            const modalImage = document.getElementById('modalImage');
+            const pdfViewer = document.getElementById('pdfViewer');
+            
+            modalTitle.textContent = `Anthropometric Measurements - ${formatDate(record.dateRecorded)}`;
+            modalImage.classList.add('hidden');
+            pdfViewer.classList.add('hidden');
+            
+            // Calculate BMI status
+            let bmiInfo = '';
+            if (record.bmi && record.bmi[0]) {
+                const bmi = record.bmi[0].value;
+                let status = '';
+                let color = '';
+                if (bmi < 18.5) {
+                    status = 'Underweight';
+                    color = 'text-blue-600 bg-blue-50';
+                } else if (bmi >= 18.5 && bmi < 25) {
+                    status = 'Normal weight';
+                    color = 'text-green-600 bg-green-50';
+                } else if (bmi >= 25 && bmi < 30) {
+                    status = 'Overweight';
+                    color = 'text-yellow-600 bg-yellow-50';
+                } else {
+                    status = 'Obese';
+                    color = 'text-red-600 bg-red-50';
+                }
+                bmiInfo = `
+                    <div class="${color} p-4 rounded-lg text-center">
+                        <div class="text-3xl font-bold mb-2">${bmi}</div>
+                        <div class="text-lg font-semibold">${status}</div>
+                        <div class="text-sm mt-2">${record.bmi[0].formula}</div>
+                    </div>
+                `;
+            }
+            
+            // Create detailed view content
+            const detailContent = document.createElement('div');
+            detailContent.className = 'max-h-96 overflow-y-auto space-y-4';
+            detailContent.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h4 class="font-bold text-gray-900 mb-2">Basic Information</h4>
+                        <p><strong>Measurement ID:</strong> ${record.measurementId}</p>
+                        <p><strong>Date:</strong> ${formatDate(record.dateRecorded)}</p>
+                        <p><strong>Recorded by:</strong> ${record.recordedBy || 'Unknown'}</p>
+                    </div>
+                    
+                    ${bmiInfo}
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    ${record.weight && record.weight[0] ? `
+                    <div class="bg-purple-50 p-4 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-purple-900">${record.weight[0].value} ${record.weight[0].unit}</div>
+                        <div class="text-purple-700">Weight</div>
+                    </div>
+                    ` : ''}
+                    
+                    ${record.height && record.height[0] ? `
+                    <div class="bg-indigo-50 p-4 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-indigo-900">${record.height[0].value} ${record.height[0].unit}</div>
+                        <div class="text-indigo-700">Height</div>
+                    </div>
+                    ` : ''}
+                    
+                    ${record.headCircumference && record.headCircumference[0] ? `
+                    <div class="bg-pink-50 p-4 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-pink-900">${record.headCircumference[0].value} ${record.headCircumference[0].unit}</div>
+                        <div class="text-pink-700">Head Circumference</div>
+                    </div>
+                    ` : ''}
+                    
+                    ${record.chestCircumference && record.chestCircumference[0] ? `
+                    <div class="bg-teal-50 p-4 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-teal-900">${record.chestCircumference[0].value} ${record.chestCircumference[0].unit}</div>
+                        <div class="text-teal-700">Chest Circumference</div>
+                    </div>
+                    ` : ''}
+                    
+                    ${record.abdominalCircumference && record.abdominalCircumference[0] ? `
+                    <div class="bg-orange-50 p-4 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-orange-900">${record.abdominalCircumference[0].value} ${record.abdominalCircumference[0].unit}</div>
+                        <div class="text-orange-700">Abdominal Circumference</div>
+                    </div>
+                    ` : ''}
+                    
+                    ${record.numberOfTeeth && record.numberOfTeeth[0] ? `
+                    <div class="bg-cyan-50 p-4 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-cyan-900">${record.numberOfTeeth[0].count}</div>
+                        <div class="text-cyan-700">Number of Teeth</div>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            const modalContent = document.querySelector('#imageModal .p-4');
+            modalContent.innerHTML = '';
+            modalContent.appendChild(detailContent);
+            
+            modal.classList.remove('hidden');
+        }
+
+        // Dynamic form field functions
+        window.addImmunization = function() {
+            const container = document.getElementById('immunizationsList');
+            const div = document.createElement('div');
+            div.className = 'flex space-x-2';
+            div.innerHTML = `
+                <input type="text" placeholder="Immunization name" class="flex-1 px-3 py-2 border border-gray-300 rounded-md immunization-name">
+                <input type="date" class="px-3 py-2 border border-gray-300 rounded-md immunization-date">
+                <button type="button" class="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700" onclick="this.parentElement.remove()">-</button>
+            `;
+            container.appendChild(div);
+        }
+
+        window.addLabResult = function() {
+            const container = document.getElementById('labResultsList');
+            const div = document.createElement('div');
+            div.className = 'flex space-x-2';
+            div.innerHTML = `
+                <input type="text" placeholder="Test name" class="flex-1 px-3 py-2 border border-gray-300 rounded-md lab-test">
+                <input type="text" placeholder="Result" class="flex-1 px-3 py-2 border border-gray-300 rounded-md lab-result">
+                <button type="button" class="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700" onclick="this.parentElement.remove()">-</button>
+            `;
+            container.appendChild(div);
+        }
+
+        // Generate unique IDs
+        async function generateHmpId() {
+            const hmpCol = collection(db, 'healthMedicalProfile');
+            const snapshot = await getDocs(hmpCol);
+            let lastId = 0;
+            snapshot.forEach(docSnap => {
+                const data = docSnap.data();
+                if (data.profileId && /^HMP\d+$/.test(data.profileId)) {
+                    const num = parseInt(data.profileId.replace('HMP', ''), 10);
+                    if (num > lastId) lastId = num;
+                }
+            });
+            return `HMP${String(lastId + 1).padStart(3, '0')}`;
+        }
+
+        async function generateAnthropometricId() {
+            const anthropometricCol = collection(db, 'anthropometricMeasurement');
+            const snapshot = await getDocs(anthropometricCol);
+            let lastId = 0;
+            snapshot.forEach(docSnap => {
+                const data = docSnap.data();
+                if (data.measurementId && /^AMP\d+$/.test(data.measurementId)) {
+                    const num = parseInt(data.measurementId.replace('AMP', ''), 10);
+                    if (num > lastId) lastId = num;
+                }
+            });
+            return `AMP${String(lastId + 1).padStart(3, '0')}`;
+        }
+
+        // Initialize form handlers after DOM is ready
+        setTimeout(() => {
+            // HMP Form submission
+            const hmpForm = document.getElementById('hmpForm');
+            if (hmpForm) {
+                hmpForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    try {
+                        const formData = new FormData(e.target);
+                        const scannedFile = formData.get('scannedDocument');
+                        
+                        // Generate unique ID
+                        const profileId = await generateHmpId();
+                        const currentDate = new Date().toISOString().split('T')[0];
+                        
+                        // Collect immunizations
+                        const immunizations = [];
+                        document.querySelectorAll('#immunizationsList .immunization-name').forEach((nameInput, index) => {
+                            const name = nameInput.value.trim();
+                            const dateInput = document.querySelectorAll('#immunizationsList .immunization-date')[index];
+                            const dateGiven = dateInput ? dateInput.value : '';
+                            if (name) {
+                                immunizations.push({ name, dateGiven });
+                            }
+                        });
+                        
+                        // Collect lab results
+                        const laboratoryResults = [];
+                        document.querySelectorAll('#labResultsList .lab-test').forEach((testInput, index) => {
+                            const test = testInput.value.trim();
+                            const resultInput = document.querySelectorAll('#labResultsList .lab-result')[index];
+                            const result = resultInput ? resultInput.value.trim() : '';
+                            if (test) {
+                                laboratoryResults.push({ test, result });
+                            }
+                        });
+                        
+                        // Prepare document data
+                        let scannedDocumentData = '';
+                        if (scannedFile && scannedFile.size > 0) {
+                            scannedDocumentData = await new Promise((resolve, reject) => {
+                                const reader = new FileReader();
+                                reader.onload = () => resolve(reader.result);
+                                reader.onerror = reject;
+                                reader.readAsDataURL(scannedFile);
+                            });
+                        }
+                        
+                        const hmpData = {
+                            profileId: profileId,
+                            patientId: currentChildId,
+                            dateOfCheckUp: formData.get('dateOfCheckUp') || '',
+                            diagnosis: formData.get('diagnosis') || '',
+                            prescribedMedications: formData.get('prescribedMedications') ? formData.get('prescribedMedications').split('\n').filter(med => med.trim()) : [],
+                            immunizations: immunizations,
+                            proceduresUndergone: formData.get('proceduresUndergone') ? formData.get('proceduresUndergone').split('\n').filter(proc => proc.trim()) : [],
+                            proceduresToBeUndertaken: formData.get('proceduresToBeUndertaken') ? formData.get('proceduresToBeUndertaken').split('\n').filter(proc => proc.trim()) : [],
+                            laboratoryWorkups: formData.get('laboratoryWorkups') ? formData.get('laboratoryWorkups').split('\n').filter(lab => lab.trim()) : [],
+                            laboratoryResults: laboratoryResults,
+                            doctorRemarks: formData.get('doctorRemarks') ? formData.get('doctorRemarks').split('\n').filter(remark => remark.trim()) : [],
+                            followUpCheckUpDate: formData.get('followUpCheckUpDate') || '',
+                            createdBy: formData.get('createdBy') || '',
+                            dateAdded: currentDate,
+                            lastUpdated: currentDate,
+                            isActive: true,
+                            scannedDocument: scannedDocumentData
+                        };
+                        
+                        // Save to Firebase
+                        const docRef = doc(db, 'healthMedicalProfile', profileId);
+                        await setDoc(docRef, hmpData);
+                        
+                        alert('Health & Medical Profile record saved successfully!');
+                        closeHmpModal();
+                        await loadHmpRecords();
+                        
+                    } catch (error) {
+                        console.error('Error saving HMP record:', error);
+                        alert('Error saving record. Please try again.');
+                    }
+                });
+            }
+
+            // Anthropometric Form submission
+            const anthropometricForm = document.getElementById('anthropometricForm');
+            if (anthropometricForm) {
+                anthropometricForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    try {
+                        const formData = new FormData(e.target);
+                        const scannedFile = formData.get('scannedDocument');
+                        let measurementId = window.currentEditingAnthropometricId;
+                        let isEdit = !!measurementId;
+                        if (!isEdit) {
+                            measurementId = await generateAnthropometricId();
+                        }
+                        const currentDate = new Date().toISOString().split('T')[0];
+                        // Calculate BMI if weight and height are provided
+                        const weight = parseFloat(formData.get('weight'));
+                        const height = parseFloat(formData.get('height'));
+                        let bmiData = [];
+                        if (weight && height) {
+                            const bmiValue = weight / Math.pow(height / 100, 2);
+                            bmiData = [{
+                                value: parseFloat(bmiValue.toFixed(1)),
+                                formula: "BMI = weight(kg) / [height(m)]²"
+                            }];
+                        }
+                        // Prepare document data
+                        let scannedDocumentData = '';
+                        if (scannedFile && scannedFile.size > 0) {
+                            scannedDocumentData = await new Promise((resolve, reject) => {
+                                const reader = new FileReader();
+                                reader.onload = () => resolve(reader.result);
+                                reader.onerror = reject;
+                                reader.readAsDataURL(scannedFile);
+                            });
+                        }
+                        // Prepare data
+                        const anthropometricData = {
+                            measurementId: measurementId,
+                            patientId: currentChildId,
+                            dateRecorded: formData.get('dateRecorded') || '',
+                            weight: formData.get('weight') ? [{ value: parseFloat(formData.get('weight')), unit: 'kg' }] : [],
+                            height: formData.get('height') ? [{ value: parseFloat(formData.get('height')), unit: 'cm' }] : [],
+                            headCircumference: formData.get('headCircumference') ? [{ value: parseFloat(formData.get('headCircumference')), unit: 'cm' }] : [],
+                            chestCircumference: formData.get('chestCircumference') ? [{ value: parseFloat(formData.get('chestCircumference')), unit: 'cm' }] : [],
+                            abdominalCircumference: formData.get('abdominalCircumference') ? [{ value: parseFloat(formData.get('abdominalCircumference')), unit: 'cm' }] : [],
+                            numberOfTeeth: formData.get('numberOfTeeth') ? [{ count: parseInt(formData.get('numberOfTeeth')) }] : [],
+                            bmi: bmiData,
+                            recordedBy: formData.get('recordedBy') || '',
+                            dateAdded: isEdit ? (window.currentEditingAnthropometricDateAdded || currentDate) : currentDate,
+                            lastUpdated: currentDate,
+                            isActive: true,
+                            scannedDocument: scannedDocumentData
+                        };
+                        // Save to Firebase (update if editing, add if new)
+                        const docRef = doc(db, 'anthropometricMeasurement', measurementId);
+                        await setDoc(docRef, anthropometricData);
+                        alert(isEdit ? 'Anthropometric measurement record updated successfully!' : 'Anthropometric measurement record saved successfully!');
+                        closeAnthropometricModal();
+                        await loadAnthropometricRecords();
+                        // Clean up edit state
+                        window.currentEditingAnthropometricId = null;
+                        window.currentEditingAnthropometricDateAdded = null;
+                    } catch (error) {
+                        console.error('Error saving anthropometric record:', error);
+                        alert('Error saving record. Please try again.');
+                    }
+                });
+            }
+        }, 1000);
     </script>
 </body>
 </html>
