@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Child Records - Tahanan ng Pagmamahal OMS</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module" src="firebase.js"></script>
     <script>
         tailwind.config = {
@@ -54,16 +55,41 @@
                                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
                     </div>
                     
+                    <!-- In Care/Discharged Toggle -->
+                    <div class="flex items-center justify-center space-x-3 px-3 py-2 bg-gray-100 rounded-lg mt-3">
+                        <span class="text-sm font-medium text-gray-700">In Care</span>
+                        <button id="careToggle" class="relative inline-flex h-6 w-11 items-center rounded-full bg-red-primary transition-colors focus:outline-none focus:ring-2 focus:ring-red-primary focus:ring-offset-2">
+                            <span id="toggleSlider" class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-6"></span>
+                        </button>
+                        <span class="text-sm font-medium text-gray-700">Discharged</span>
+                    </div>
+                    
+                    <!-- Show All Records Button -->
+                    <div class="flex justify-center mt-3">
+                        <button id="showAllRecordsBtn" class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors">
+                            <svg class="inline h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                            </svg>
+                            Show All Records
+                        </button>
+                    </div>
+                    
                 </div>
                 <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
-                    
                     <select id="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
                         <option value="">All Status</option>
                         <option value="Adoptable">Adoptable</option>
                         <option value="Under legal custody">Under legal custody</option>
                         <option value="Temporary Shelter">Temporary Shelter</option>
                         <option value="Awaiting placement">Awaiting placement</option>
+                        <option value="Discharged">Discharged</option>
                     </select>
+                    <button id="advancedFilterBtn" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-center">
+                        <svg class="inline h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"></path>
+                        </svg>
+                        Advanced Filter
+                    </button>
                     <button id="exportBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-center">
                         Export CSV
                     </button>
@@ -74,8 +100,130 @@
                         <svg class="inline h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                         </svg>
-                        Deleted Records
+                        Archived Records
                     </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Child Trends Section -->
+        <div class="mb-6 bg-white rounded-lg shadow p-4 sm:p-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Child Entry Trends</h3>
+                    <p class="text-sm text-gray-600">Monthly breakdown of children by gender</p>
+                </div>
+                
+                <!-- Statistics Display -->
+                <div id="statisticsContainer" class="flex items-center space-x-6 mt-4 sm:mt-0">
+                    <!-- Default Statistics (for In Care and Discharged modes) -->
+                    <div id="defaultStats" class="flex items-center space-x-6">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <span class="text-sm text-gray-700">Male: <span id="maleCount" class="font-semibold">0</span></span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-pink-500 rounded-full"></div>
+                            <span class="text-sm text-gray-700">Female: <span id="femaleCount" class="font-semibold">0</span></span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-gray-500 rounded-full"></div>
+                            <span class="text-sm text-gray-700">Total: <span id="totalCount" class="font-semibold">0</span></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Breakdown Statistics (for Show All Records mode) -->
+                    <div id="breakdownStats" class="hidden flex-wrap items-center gap-4">
+                        <!-- In Care Section -->
+                        <div class="flex items-center space-x-4 bg-blue-50 px-3 py-2 rounded-lg">
+                            <div class="text-xs font-medium text-blue-700">In Care:</div>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                <span class="text-xs text-blue-700">M: <span id="inCareMaleCount" class="font-semibold">0</span></span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-2 h-2 bg-pink-500 rounded-full"></div>
+                                <span class="text-xs text-blue-700">F: <span id="inCareFemaleCount" class="font-semibold">0</span></span>
+                            </div>
+                            <span class="text-xs text-blue-700 font-semibold">(<span id="inCareTotal" class="font-bold">0</span>)</span>
+                        </div>
+                        
+                        <!-- Discharged Section -->
+                        <div class="flex items-center space-x-4 bg-gray-50 px-3 py-2 rounded-lg">
+                            <div class="text-xs font-medium text-gray-600">Discharged:</div>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-2 h-2 bg-blue-300 rounded-full"></div>
+                                <span class="text-xs text-gray-600">M: <span id="dischargedMaleCount" class="font-semibold">0</span></span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-2 h-2 bg-pink-300 rounded-full"></div>
+                                <span class="text-xs text-gray-600">F: <span id="dischargedFemaleCount" class="font-semibold">0</span></span>
+                            </div>
+                            <span class="text-xs text-gray-600 font-semibold">(<span id="dischargedTotal" class="font-bold">0</span>)</span>
+                        </div>
+                        
+                        <!-- Grand Total -->
+                        <div class="flex items-center space-x-2 bg-green-50 px-3 py-2 rounded-lg">
+                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                            <span class="text-sm text-green-700 font-medium">Total: <span id="grandTotal" class="font-bold">0</span></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 sm:mt-0">
+                    <select id="chartYearFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        <option value="">All Years</option>
+                        <!-- Years will be populated by JavaScript -->
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Charts Container -->
+            <div id="chartsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Male Children Chart -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <div class="flex items-center justify-center mb-4">
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                            <h4 class="text-md font-medium text-gray-700">Male Children</h4>
+                        </div>
+                    </div>
+                    <div class="relative h-64">
+                        <canvas id="maleChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Female Children Chart -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <div class="flex items-center justify-center mb-4">
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 bg-pink-500 rounded-full mr-2"></div>
+                            <h4 class="text-md font-medium text-gray-700">Female Children</h4>
+                        </div>
+                    </div>
+                    <div class="relative h-64">
+                        <canvas id="femaleChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Skeleton Loading for Charts -->
+            <div id="chartsSkeleton" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <div class="animate-pulse">
+                        <div class="flex items-center justify-center mb-4">
+                            <div class="h-4 bg-gray-300 rounded w-24"></div>
+                        </div>
+                        <div class="h-64 bg-gray-300 rounded"></div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <div class="animate-pulse">
+                        <div class="flex items-center justify-center mb-4">
+                            <div class="h-4 bg-gray-300 rounded w-24"></div>
+                        </div>
+                        <div class="h-64 bg-gray-300 rounded"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -108,6 +256,220 @@
         </div>
     </div>
 
+    <!-- Advanced Filter Modal -->
+    <div id="advancedFilterModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-60 hidden">
+        <div class="bg-white rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] mx-4 flex flex-col">
+            <div class="sticky top-0 bg-white flex items-center justify-between p-4 border-b rounded-t-lg z-10">
+                <h3 class="text-lg font-semibold text-gray-900">Advanced Filter</h3>
+                <button id="closeAdvancedFilterModal" class="text-gray-400 hover:text-gray-600">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-6 space-y-6">
+                <!-- Personal Information Section -->
+                <div class="border rounded-lg p-4">
+                    <h4 class="text-md font-medium text-gray-900 mb-4 flex items-center">
+                        <svg class="h-5 w-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                        Personal Information
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Name</label>
+                            <input type="text" id="filterName" placeholder="Enter child's name..." class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Gender</label>
+                            <select id="filterGender" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                                <option value="">All Genders</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Blood Type</label>
+                            <select id="filterBloodType" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                                <option value="">All Blood Types</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Age Range</label>
+                            <div class="flex space-x-2">
+                                <input type="number" id="filterAgeMin" placeholder="Min" min="0" max="18" class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                                <input type="number" id="filterAgeMax" placeholder="Max" min="0" max="18" class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Date of Birth From</label>
+                            <input type="date" id="filterDobFrom" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Date of Birth To</label>
+                            <input type="date" id="filterDobTo" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admission Information Section -->
+                <div class="border rounded-lg p-4">
+                    <h4 class="text-md font-medium text-gray-900 mb-4 flex items-center">
+                        <svg class="h-5 w-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 0V6a2 2 0 012-2h4a2 2 0 012 2v1m-6 0h8m-8 0H6a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2h-2"></path>
+                        </svg>
+                        Admission Information
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Date Admitted From</label>
+                            <input type="date" id="filterAdmissionFrom" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Date Admitted To</label>
+                            <input type="date" id="filterAdmissionTo" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Entry Age Range</label>
+                            <div class="flex space-x-2">
+                                <input type="number" id="filterEntryAgeMin" placeholder="Min" min="0" max="18" class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                                <input type="number" id="filterEntryAgeMax" placeholder="Max" min="0" max="18" class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Referring Agency</label>
+                            <select id="filterReferringAgency" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                                <option value="">All Agencies</option>
+                                <option value="DSWD">DSWD</option>
+                                <option value="Police">Police</option>
+                                <option value="Private">Private</option>
+                                <option value="Court">Court</option>
+                                <option value="Hospital">Hospital</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Current Status Section -->
+                <div class="border rounded-lg p-4">
+                    <h4 class="text-md font-medium text-gray-900 mb-4 flex items-center">
+                        <svg class="h-5 w-5 mr-2 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Current Status
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Current Status</label>
+                            <select id="filterCurrentStatus" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                                <option value="">All Statuses</option>
+                                <option value="In Care">In Care</option>
+                                <option value="Temporary Shelter">Temporary Shelter</option>
+                                <option value="Foster">Foster</option>
+                                <option value="Adopted">Adopted</option>
+                                <option value="Reunited">Reunited</option>
+                                <option value="Adoptable">Adoptable</option>
+                                <option value="Under legal custody">Under legal custody</option>
+                                <option value="Awaiting placement">Awaiting placement</option>
+                                <option value="Discharged">Discharged</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Educational Status</label>
+                            <select id="filterEducationalStatus" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                                <option value="">All Educational Status</option>
+                                <option value="In School">In School</option>
+                                <option value="Not in School">Not in School</option>
+                                <option value="Special Education">Special Education</option>
+                                <option value="Preschool">Preschool</option>
+                                <option value="Homeschooled">Homeschooled</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Health Status</label>
+                            <select id="filterHealthStatus" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                                <option value="">All Health Status</option>
+                                <option value="Healthy">Healthy</option>
+                                <option value="Medical Condition">Medical Condition</option>
+                                <option value="Special Needs">Special Needs</option>
+                                <option value="Under Treatment">Under Treatment</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location / Demographics Section -->
+                <div class="border rounded-lg p-4">
+                    <h4 class="text-md font-medium text-gray-900 mb-4 flex items-center">
+                        <svg class="h-5 w-5 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        Location / Demographics
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Hometown / Province</label>
+                            <input type="text" id="filterHometown" placeholder="Enter hometown or province..." class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nationality</label>
+                            <select id="filterNationality" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                                <option value="">All Nationalities</option>
+                                <option value="Filipino">Filipino</option>
+                                <option value="American">American</option>
+                                <option value="Chinese">Chinese</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="sticky bottom-0 bg-gray-50 border-t rounded-b-lg p-4 z-10">
+                <div class="flex justify-end space-x-3">
+                    <button id="clearAdvancedFiltersBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">Clear All</button>
+                    <button id="cancelAdvancedFilterBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                    <button id="applyAdvancedFiltersBtn" class="px-6 py-2 bg-red-primary text-white rounded-md hover:bg-red-700 transition-colors">Apply Filters</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Show All Records Confirmation Modal -->
+    <div id="showAllModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-60 hidden">
+        <div class="bg-white rounded-lg shadow-lg max-w-md w-full mx-4 p-6">
+            <div class="flex items-center mb-4">
+                <svg class="h-6 w-6 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <h3 class="text-lg font-medium text-gray-900">Show All Records</h3>
+            </div>
+            <p class="text-sm text-gray-600 mb-6">
+                Show all records will display all the children records - both In Care and Discharged children in a combined view.
+            </p>
+            <div class="flex justify-end space-x-3">
+                <button id="cancelShowAllBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                    Cancel
+                </button>
+                <button id="confirmShowAllBtn" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Delete Modal -->
     <div id="deleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-60 hidden">
         <div class="bg-white rounded-lg shadow-lg max-w-sm w-full p-6 relative">
@@ -134,10 +496,16 @@
     import { db, collection, getDocs, setDoc, doc, updateDoc } from './firebase.js';
 
     let allRecords = [];
+    let dischargedRecords = [];
+    let currentlyDisplayedRecords = []; // Track filtered/displayed records
+    let viewMode = 'incare'; // 'incare', 'discharged', or 'all'
     let currentUser = null;
     let deleteChildId = null;
     let deleteDocId = null;
     let deleteFullName = "";
+    let maleChart = null;
+    let femaleChart = null;
+    let activeAdvancedFilters = {};
 
     // Hardcoded admin password for demo (use secure backend in production!)
     const ADMIN_PASSWORD = "admin123"; // Change this in production
@@ -176,38 +544,598 @@
         return true;
     }
 
+    // Chart functions
+    function initializeCharts() {
+        console.log('Initializing charts...');
+        try {
+            const maleCtx = document.getElementById('maleChart').getContext('2d');
+            const femaleCtx = document.getElementById('femaleChart').getContext('2d');
+
+        maleChart = new Chart(maleCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [{
+                    label: 'Male Children',
+                    data: new Array(12).fill(0),
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false,
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 15,
+                            font: {
+                                size: 11
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ${context.parsed.y}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        femaleChart = new Chart(femaleCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [{
+                    label: 'Female Children',
+                    data: new Array(12).fill(0),
+                    backgroundColor: 'rgba(236, 72, 153, 0.1)',
+                    borderColor: 'rgba(236, 72, 153, 1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false,
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 15,
+                            font: {
+                                size: 11
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ${context.parsed.y}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        console.log('Charts initialized successfully');
+        } catch (error) {
+            console.error('Error initializing charts:', error);
+        }
+    }
+
+    function showChartsSkeleton() {
+        document.getElementById('chartsContainer').classList.add('hidden');
+        document.getElementById('chartsSkeleton').classList.remove('hidden');
+    }
+
+    function hideChartsSkeleton() {
+        document.getElementById('chartsSkeleton').classList.add('hidden');
+        document.getElementById('chartsContainer').classList.remove('hidden');
+    }
+
+    function populateYearDropdown() {
+        const yearSelect = document.getElementById('chartYearFilter');
+        const currentYear = new Date().getFullYear();
+        
+        // Clear existing options except "All Years"
+        yearSelect.innerHTML = '<option value="">All Years</option>';
+        
+        // Add years from 2000 to current year
+        for (let year = currentYear; year >= 2000; year--) {
+            const option = document.createElement('option');
+            option.value = year.toString();
+            option.textContent = year.toString();
+            yearSelect.appendChild(option);
+        }
+    }
+
+    function processChartData(records, selectedYear) {
+        // Separate data for in-care and discharged records
+        const maleInCareData = new Array(12).fill(0);
+        const femaleInCareData = new Array(12).fill(0);
+        const maleDischargedData = new Array(12).fill(0);
+        const femaleDischargedData = new Array(12).fill(0);
+
+        records.forEach(record => {
+            // Use entryDate or dateAdded for chart calculations
+            const entryDate = new Date(record.entryDate || record.dateAdded);
+            if (!isNaN(entryDate)) {
+                const recordYear = entryDate.getFullYear();
+                
+                // If a year is selected, only include records from that year
+                if (!selectedYear || recordYear.toString() === selectedYear) {
+                    const month = entryDate.getMonth(); // 0-11
+                    const isDisscharged = record._isDischarged;
+                    
+                    if (record.gender && record.gender.toLowerCase() === 'male') {
+                        if (isDisscharged) {
+                            maleDischargedData[month]++;
+                        } else {
+                            maleInCareData[month]++;
+                        }
+                    } else if (record.gender && record.gender.toLowerCase() === 'female') {
+                        if (isDisscharged) {
+                            femaleDischargedData[month]++;
+                        } else {
+                            femaleInCareData[month]++;
+                        }
+                    }
+                }
+            }
+        });
+
+        return { 
+            maleInCareData, 
+            femaleInCareData, 
+            maleDischargedData, 
+            femaleDischargedData 
+        };
+    }
+
+    function updateCharts(records, selectedYear) {
+        if (!maleChart || !femaleChart) {
+            initializeCharts();
+        }
+
+        const { maleInCareData, femaleInCareData, maleDischargedData, femaleDischargedData } = processChartData(records, selectedYear);
+
+        // Update charts based on view mode
+        if (viewMode === 'incare') {
+            // Show only in-care data with regular colors
+            maleChart.data.datasets = [{
+                label: 'Male Children (In Care)',
+                data: maleInCareData,
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                borderColor: 'rgba(59, 130, 246, 1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4
+            }];
+            
+            femaleChart.data.datasets = [{
+                label: 'Female Children (In Care)',
+                data: femaleInCareData,
+                backgroundColor: 'rgba(236, 72, 153, 0.1)',
+                borderColor: 'rgba(236, 72, 153, 1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4
+            }];
+        } else if (viewMode === 'discharged') {
+            // Show only discharged data with lighter colors
+            maleChart.data.datasets = [{
+                label: 'Male Children (Discharged)',
+                data: maleDischargedData,
+                backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                borderColor: 'rgba(59, 130, 246, 0.6)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4
+            }];
+            
+            femaleChart.data.datasets = [{
+                label: 'Female Children (Discharged)',
+                data: femaleDischargedData,
+                backgroundColor: 'rgba(236, 72, 153, 0.05)',
+                borderColor: 'rgba(236, 72, 153, 0.6)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4
+            }];
+        } else if (viewMode === 'all') {
+            // Show both datasets stacked/combined
+            maleChart.data.datasets = [
+                {
+                    label: 'Male Children (In Care)',
+                    data: maleInCareData,
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                },
+                {
+                    label: 'Male Children (Discharged)',
+                    data: maleDischargedData,
+                    backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                    borderColor: 'rgba(59, 130, 246, 0.6)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }
+            ];
+            
+            femaleChart.data.datasets = [
+                {
+                    label: 'Female Children (In Care)',
+                    data: femaleInCareData,
+                    backgroundColor: 'rgba(236, 72, 153, 0.1)',
+                    borderColor: 'rgba(236, 72, 153, 1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                },
+                {
+                    label: 'Female Children (Discharged)',
+                    data: femaleDischargedData,
+                    backgroundColor: 'rgba(236, 72, 153, 0.05)',
+                    borderColor: 'rgba(236, 72, 153, 0.6)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }
+            ];
+        }
+
+        // Update legend visibility based on view mode
+        maleChart.options.plugins.legend.display = viewMode === 'all';
+        femaleChart.options.plugins.legend.display = viewMode === 'all';
+
+        maleChart.update();
+        femaleChart.update();
+    }
+
+    function filterRecordsByYear(records, selectedYear) {
+        if (!selectedYear) return records;
+        
+        return records.filter(record => {
+            const entryDate = new Date(record.entryDate || record.dateAdded);
+            if (!isNaN(entryDate)) {
+                return entryDate.getFullYear().toString() === selectedYear;
+            }
+            return false;
+        });
+    }
+
     async function loadRecords() {
     try {
+        console.log('Starting to load records...');
         showSkeletonLoading(); // Show default skeletons
+        showChartsSkeleton(); // Show charts skeleton
 
+        console.log('Getting children collection...');
         const childrenCol = collection(db, 'children');
         const snapshot = await getDocs(childrenCol);
+        console.log('Got Firebase snapshot, processing records...');
         allRecords = [];
+        let allChildrenRecords = []; // Keep all records for discharge lookup
+        
         snapshot.forEach(docSnap => {
             const data = docSnap.data();
+            data._docId = docSnap.id;
+            data.photoData = data.photoString || `https://via.placeholder.com/150x150/e5e7eb/6b7280?text=${encodeURIComponent(data.firstName || 'Child')}`;
+            
+            // Store all records for discharge lookup
+            allChildrenRecords.push(data);
+            
+            // Only add non-deleted records to allRecords for display
             if (data.currentStatus !== "deleted") {
-                data._docId = docSnap.id;
-                data.photoData = data.photoString || `https://via.placeholder.com/150x150/e5e7eb/6b7280?text=${encodeURIComponent(data.firstName || 'Child')}`;
                 allRecords.push(data);
             }
         });
         allRecords.sort((a, b) => a.childId.localeCompare(b.childId));
+        console.log(`Loaded ${allRecords.length} active records, ${allChildrenRecords.length} total records`);
+
+        // Load discharged children from dischargeRequests collection
+        console.log('Getting discharge requests...');
+        const dischargeCol = collection(db, 'dischargeRequests');
+        const dischargeSnapshot = await getDocs(dischargeCol);
+        dischargedRecords = [];
+        dischargeSnapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            console.log('Discharge record found:', data.childId, 'Status:', data.status);
+            if (data.status === "Completed") {
+                // Parse childName to extract first, middle, last names
+                const childNameParts = (data.childName || '').split(' ');
+                const firstName = childNameParts[0] || '';
+                const middleName = childNameParts.length > 2 ? childNameParts.slice(1, -1).join(' ') : (childNameParts.length === 2 ? '' : childNameParts[1] || '');
+                const lastName = childNameParts.length > 1 ? childNameParts[childNameParts.length - 1] : '';
+                
+                // Try to find original child record to get correct entry date
+                let originalEntryDate = data.entryDate || '';
+                let originalDateAdded = data.submittedDate || '';
+                let originalGender = data.gender || 'Unknown';
+                let originalDateOfBirth = data.dateOfBirth || '';
+                
+                // Look for matching child record in allChildrenRecords (including deleted ones)
+                const matchingChild = allChildrenRecords.find(child => child.childId === data.childId);
+                if (matchingChild) {
+                    originalEntryDate = matchingChild.entryDate || matchingChild.dateAdded || originalEntryDate;
+                    originalDateAdded = matchingChild.dateAdded || originalDateAdded;
+                    originalGender = matchingChild.gender || originalGender;
+                    originalDateOfBirth = matchingChild.dateOfBirth || originalDateOfBirth;
+                    console.log(`Found original child record for ${data.childId}, using entryDate: ${originalEntryDate}, gender: ${originalGender}`);
+                } else {
+                    console.log(`No original child record found for ${data.childId}, using discharge record data`);
+                }
+                
+                // Convert discharge request to child record format
+                const childRecord = {
+                    childId: data.childId,
+                    firstName: firstName,
+                    middleName: middleName,
+                    lastName: lastName,
+                    gender: originalGender,
+                    dateOfBirth: originalDateOfBirth,
+                    currentStatus: "Discharged",
+                    entryDate: originalEntryDate,
+                    dateAdded: originalDateAdded,
+                    dischargeDate: data.finalDischargeDate || data.dischargeDate,
+                    dischargeReason: data.dischargeReason,
+                    _docId: docSnap.id,
+                    _isDischarged: true
+                };
+                childRecord.photoData = data.photoString || `https://via.placeholder.com/150x150/e5e7eb/6b7280?text=${encodeURIComponent(firstName || 'Child')}`;
+                console.log('Created discharged child record:', {
+                    childId: childRecord.childId, 
+                    name: `${childRecord.firstName} ${childRecord.lastName}`, 
+                    entryDate: originalEntryDate,
+                    gender: originalGender,
+                    isDischarged: true
+                });
+                dischargedRecords.push(childRecord);
+            }
+        });
+        dischargedRecords.sort((a, b) => a.childId.localeCompare(b.childId));
+        console.log(`Loaded ${dischargedRecords.length} discharged records`);
+        if (dischargedRecords.length > 0) {
+            console.log('Sample discharged record:', dischargedRecords[0]);
+        }
 
         // Update skeletons to match the number of records
-        showSkeletonLoading(allRecords.length);
+        showSkeletonLoading(getRecordsToDisplay().length);
 
         // Delay to let user see the accurate skeleton count
         setTimeout(() => {
+            console.log('Hiding skeleton and displaying records...');
             hideSkeletonLoading();
-            displayRecords(allRecords);
+            displayRecords(getRecordsToDisplay());
+            
+            // Initialize charts and populate year dropdown
+            console.log('Initializing charts...');
+            populateYearDropdown();
+            initializeCharts();
+            updateCharts(getRecordsToDisplay(), '');
+            hideChartsSkeleton();
+            console.log('Charts initialized successfully');
         }, 500); // 500ms delay
     } catch (error) {
         console.error('Error loading records from Firestore:', error);
+        console.error('Error details:', error.message);
         allRecords = [];
+        dischargedRecords = [];
         hideSkeletonLoading();
         displayRecords([]);
+        hideChartsSkeleton();
     }
 }
+
+    // Toggle and record management functions
+    function getRecordsToDisplay() {
+        switch (viewMode) {
+            case 'incare':
+                console.log(`Getting In Care records: ${allRecords.length}`);
+                return allRecords;
+            case 'discharged':
+                console.log(`Getting Discharged records: ${dischargedRecords.length}`);
+                return dischargedRecords;
+            case 'all':
+                const combined = [...allRecords, ...dischargedRecords];
+                console.log(`Getting All Records: ${allRecords.length} in-care + ${dischargedRecords.length} discharged = ${combined.length} total`);
+                return combined;
+            default:
+                return allRecords;
+        }
+    }
+
+    function toggleCareMode() {
+        // Toggle between 'incare' and 'discharged'
+        viewMode = viewMode === 'incare' ? 'discharged' : 'incare';
+        console.log(`Toggle switched to: ${viewMode}`);
+        console.log(`Available records - In Care: ${allRecords.length}, Discharged: ${dischargedRecords.length}`);
+        updateToggleUI();
+        
+        // Refresh display with new records
+        const recordsToShow = getRecordsToDisplay();
+        console.log(`Displaying ${recordsToShow.length} records after toggle`);
+        displayRecords(recordsToShow);
+        updateCharts(recordsToShow, document.getElementById('chartYearFilter').value);
+        
+        // Apply existing filters
+        filterRecords();
+    }
+
+    function updateToggleUI() {
+        const toggleButton = document.getElementById('careToggle');
+        const toggleSlider = document.getElementById('toggleSlider');
+        
+        if (viewMode === 'incare') {
+            // In Care mode - toggle on left (red)
+            toggleButton.classList.remove('bg-gray-400');
+            toggleButton.classList.add('bg-red-primary');
+            toggleSlider.classList.remove('translate-x-1');
+            toggleSlider.classList.add('translate-x-6');
+        } else if (viewMode === 'discharged') {
+            // Discharged mode - toggle on right (gray)
+            toggleButton.classList.remove('bg-red-primary');
+            toggleButton.classList.add('bg-gray-400');
+            toggleSlider.classList.remove('translate-x-6');
+            toggleSlider.classList.add('translate-x-1');
+        }
+        // Note: 'all' mode doesn't use the toggle, it's controlled by the separate button
+    }
+
+    function updateStatistics() {
+        // Always recalculate from current filters to ensure accuracy
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const statusFilter = document.getElementById('statusFilter').value;
+        const selectedYear = document.getElementById('chartYearFilter').value;
+        
+        // Start with records based on toggle state, then apply year filter
+        let baseRecords = getRecordsToDisplay();
+        if (selectedYear) {
+            baseRecords = filterRecordsByYear(baseRecords, selectedYear);
+        }
+        
+        // Apply advanced filters
+        baseRecords = applyAdvancedFiltersToRecords(baseRecords);
+        
+        const recordsToDisplay = baseRecords.filter(record => {
+            const fullName = `${record.firstName || ''} ${record.middleName || ''} ${record.lastName || ''}`.toLowerCase();
+            const matchesSearch = fullName.includes(searchTerm) || 
+                                (record.childId || '').toLowerCase().includes(searchTerm) || 
+                                (record.currentStatus || '').toLowerCase().includes(searchTerm);
+            const matchesStatus = !statusFilter || record.currentStatus === statusFilter;
+            return matchesSearch && matchesStatus;
+        });
+        
+        if (viewMode === 'all') {
+            // Show breakdown statistics for "Show All Records" mode
+            document.getElementById('defaultStats').classList.add('hidden');
+            document.getElementById('breakdownStats').classList.remove('hidden');
+            document.getElementById('breakdownStats').classList.add('flex');
+            
+            // Separate In Care and Discharged records
+            const inCareRecords = recordsToDisplay.filter(record => !record._isDischarged);
+            const dischargedRecords = recordsToDisplay.filter(record => record._isDischarged);
+            
+            // In Care counts
+            const inCareMaleCount = inCareRecords.filter(record => 
+                record.gender && record.gender.toLowerCase() === 'male'
+            ).length;
+            const inCareFemaleCount = inCareRecords.filter(record => 
+                record.gender && record.gender.toLowerCase() === 'female'
+            ).length;
+            const inCareTotal = inCareRecords.length;
+            
+            // Discharged counts
+            const dischargedMaleCount = dischargedRecords.filter(record => 
+                record.gender && record.gender.toLowerCase() === 'male'
+            ).length;
+            const dischargedFemaleCount = dischargedRecords.filter(record => 
+                record.gender && record.gender.toLowerCase() === 'female'
+            ).length;
+            const dischargedTotal = dischargedRecords.length;
+            
+            // Grand total
+            const grandTotal = recordsToDisplay.length;
+            
+            // Update breakdown statistics
+            document.getElementById('inCareMaleCount').textContent = inCareMaleCount;
+            document.getElementById('inCareFemaleCount').textContent = inCareFemaleCount;
+            document.getElementById('inCareTotal').textContent = inCareTotal;
+            document.getElementById('dischargedMaleCount').textContent = dischargedMaleCount;
+            document.getElementById('dischargedFemaleCount').textContent = dischargedFemaleCount;
+            document.getElementById('dischargedTotal').textContent = dischargedTotal;
+            document.getElementById('grandTotal').textContent = grandTotal;
+            
+        } else {
+            // Show simple statistics for "In Care" and "Discharged" modes
+            document.getElementById('breakdownStats').classList.add('hidden');
+            document.getElementById('breakdownStats').classList.remove('flex');
+            document.getElementById('defaultStats').classList.remove('hidden');
+            
+            const maleCount = recordsToDisplay.filter(record => 
+                record.gender && record.gender.toLowerCase() === 'male'
+            ).length;
+            
+            const femaleCount = recordsToDisplay.filter(record => 
+                record.gender && record.gender.toLowerCase() === 'female'
+            ).length;
+            
+            const totalCount = recordsToDisplay.length;
+            
+            document.getElementById('maleCount').textContent = maleCount;
+            document.getElementById('femaleCount').textContent = femaleCount;
+            document.getElementById('totalCount').textContent = totalCount;
+        }
+        
+        console.log('=== STATISTICS UPDATE ===');
+        console.log('View Mode:', viewMode);
+        console.log('Selected Year:', selectedYear);
+        console.log('Search Term:', searchTerm);
+        console.log('Status Filter:', statusFilter);
+        console.log('Records to Display:', recordsToDisplay.length);
+        console.log('========================');
+    }
+
+    function showAllRecordsConfirmation() {
+        document.getElementById('showAllModal').classList.remove('hidden');
+    }
+
+    function cancelShowAll() {
+        document.getElementById('showAllModal').classList.add('hidden');
+    }
+
+    function confirmShowAll() {
+        viewMode = 'all';
+        console.log(`Switched to show all records mode`);
+        console.log(`Available records - In Care: ${allRecords.length}, Discharged: ${dischargedRecords.length}`);
+        
+        // Close modal
+        document.getElementById('showAllModal').classList.add('hidden');
+        
+        // Refresh display with all records
+        const recordsToShow = getRecordsToDisplay();
+        console.log(`Displaying ${recordsToShow.length} total records`);
+        displayRecords(recordsToShow);
+        updateCharts(recordsToShow, document.getElementById('chartYearFilter').value);
+        
+        // Apply existing filters
+        filterRecords();
+        
+        // Reset toggle to in-care position but don't change mode
+        updateToggleUI();
+    }
 
     function showSkeletonLoading(count = 8) {
         document.getElementById('recordsGrid').classList.add('hidden');
@@ -245,14 +1173,25 @@
     }
 
     function displayRecords(records) {
-        const recordsGrid = document.getElementById('recordsGrid');
-        const noRecords = document.getElementById('noRecords');
-        if (records.length === 0) {
-            recordsGrid.innerHTML = '';
-            noRecords.classList.remove('hidden');
-            return;
-        }
-        noRecords.classList.add('hidden');
+        // Update currently displayed records for statistics
+        currentlyDisplayedRecords = records;
+        
+        console.log(`Displaying ${records.length} records`);
+        console.log('Record types breakdown:');
+        const inCareCount = records.filter(r => !r._isDischarged).length;
+        const dischargedCount = records.filter(r => r._isDischarged).length;
+        console.log(`- In Care: ${inCareCount}, Discharged: ${dischargedCount}`);
+        try {
+            const recordsGrid = document.getElementById('recordsGrid');
+            const noRecords = document.getElementById('noRecords');
+            if (records.length === 0) {
+                console.log('No records to display');
+                recordsGrid.innerHTML = '';
+                noRecords.classList.remove('hidden');
+                return;
+            }
+            console.log('Hiding no-records message and displaying records');
+            noRecords.classList.add('hidden');
         recordsGrid.innerHTML = records.map(child => {
             const fullName = `${child.firstName || ''} ${child.middleName || ''} ${child.lastName || ''}`.trim();
             const age = calculateAge(child.dateOfBirth);
@@ -322,6 +1261,13 @@
                 </div>
             `;
         }).join('');
+        console.log('Records HTML generated and set');
+        
+        // Update statistics based on currently displayed records
+        updateStatistics();
+        } catch (error) {
+            console.error('Error displaying records:', error);
+        }
     }
 
     window.viewChildDetails = function(childId) {
@@ -400,24 +1346,297 @@
     });
 
     document.addEventListener('DOMContentLoaded', async function() {
-        if (!checkUserPermissions()) return;
-        await loadRecords();
-        setupEventListeners();
+        console.log('DOM loaded, starting initialization...');
+        try {
+            if (!checkUserPermissions()) {
+                console.log('User permissions check failed, redirecting...');
+                return;
+            }
+            console.log('User permissions OK, loading records...');
+            await loadRecords();
+            console.log('Records loaded, setting up event listeners...');
+            setupEventListeners();
+            console.log('Setting up toggle UI...');
+            updateToggleUI();
+            console.log('Initialization complete!');
+        } catch (error) {
+            console.error('Error during initialization:', error);
+        }
     });
 
     function setupEventListeners() {
-        document.getElementById('searchInput').addEventListener('input', filterRecords);
-        document.getElementById('statusFilter').addEventListener('change', filterRecords);
-        document.getElementById('exportBtn').addEventListener('click', exportToCSV);
-        document.getElementById('deletedRecordsBtn').addEventListener('click', function() {
-            window.location.href = 'deleted-records-viewer.html';
+        console.log('Setting up event listeners...');
+        try {
+            document.getElementById('searchInput').addEventListener('input', filterRecords);
+            document.getElementById('statusFilter').addEventListener('change', filterRecords);
+            document.getElementById('chartYearFilter').addEventListener('change', handleYearFilterChange);
+            document.getElementById('exportBtn').addEventListener('click', exportToCSV);
+            document.getElementById('deletedRecordsBtn').addEventListener('click', function() {
+                window.location.href = 'deleted-records-viewer.html';
+            });
+
+            // Advanced Filter Event Listeners
+            document.getElementById('advancedFilterBtn').addEventListener('click', openAdvancedFilter);
+            document.getElementById('closeAdvancedFilterModal').addEventListener('click', closeAdvancedFilter);
+            document.getElementById('cancelAdvancedFilterBtn').addEventListener('click', closeAdvancedFilter);
+            document.getElementById('clearAdvancedFiltersBtn').addEventListener('click', function() {
+                clearAdvancedFilters();
+                filterRecords();
+            });
+            document.getElementById('applyAdvancedFiltersBtn').addEventListener('click', applyAdvancedFilters);
+
+            // Close modal when clicking outside
+            document.getElementById('advancedFilterModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeAdvancedFilter();
+                }
+            });
+
+            // Toggle button event listener
+            document.getElementById('careToggle').addEventListener('click', toggleCareMode);
+            
+            // Show All Records button and modal event listeners
+            document.getElementById('showAllRecordsBtn').addEventListener('click', showAllRecordsConfirmation);
+            document.getElementById('cancelShowAllBtn').addEventListener('click', cancelShowAll);
+            document.getElementById('confirmShowAllBtn').addEventListener('click', confirmShowAll);
+            
+            // Close modal when clicking outside
+            document.getElementById('showAllModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    cancelShowAll();
+                }
+            });
+
+            console.log('Event listeners set up successfully');
+        } catch (error) {
+            console.error('Error setting up event listeners:', error);
+        }
+    }
+
+    function handleYearFilterChange() {
+        const selectedYear = document.getElementById('chartYearFilter').value;
+        
+        // Update charts with selected year
+        updateCharts(getRecordsToDisplay(), selectedYear);
+        
+        // Filter and display records for selected year
+        let recordsToDisplay = getRecordsToDisplay();
+        if (selectedYear) {
+            recordsToDisplay = filterRecordsByYear(recordsToDisplay, selectedYear);
+        }
+        
+        // Apply advanced filters
+        recordsToDisplay = applyAdvancedFiltersToRecords(recordsToDisplay);
+        
+        // Apply search and status filters to year-filtered records
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const statusFilter = document.getElementById('statusFilter').value;
+        
+        const filteredRecords = recordsToDisplay.filter(record => {
+            const fullName = `${record.firstName || ''} ${record.middleName || ''} ${record.lastName || ''}`.toLowerCase();
+            const matchesSearch = fullName.includes(searchTerm) || 
+                                (record.childId || '').toLowerCase().includes(searchTerm) || 
+                                (record.currentStatus || '').toLowerCase().includes(searchTerm);
+            const matchesStatus = !statusFilter || record.currentStatus === statusFilter;
+            return matchesSearch && matchesStatus;
+        });
+        
+        displayRecords(filteredRecords);
+        // Ensure statistics are updated after year filter
+        updateStatistics();
+    }
+
+    // Advanced Filter Functions
+    function openAdvancedFilter() {
+        document.getElementById('advancedFilterModal').classList.remove('hidden');
+    }
+
+    function closeAdvancedFilter() {
+        document.getElementById('advancedFilterModal').classList.add('hidden');
+    }
+
+    function clearAdvancedFilters() {
+        // Clear all advanced filter inputs
+        const filterInputs = [
+            'filterName', 'filterGender', 'filterBloodType', 'filterAgeMin', 'filterAgeMax',
+            'filterDobFrom', 'filterDobTo', 'filterAdmissionFrom', 'filterAdmissionTo',
+            'filterEntryAgeMin', 'filterEntryAgeMax', 'filterReferringAgency', 'filterCurrentStatus',
+            'filterEducationalStatus', 'filterHealthStatus', 'filterHometown', 'filterNationality'
+        ];
+
+        filterInputs.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.value = '';
+            }
+        });
+
+        activeAdvancedFilters = {};
+        updateAdvancedFilterButtonStyle();
+    }
+
+    function calculateAgeForFiltering(birthDateString) {
+        if (!birthDateString) return null;
+        const today = new Date();
+        const birthDate = new Date(birthDateString);
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        return age;
+    }
+
+    function applyAdvancedFilters() {
+        // Collect all filter values
+        const filters = {
+            name: document.getElementById('filterName').value.trim().toLowerCase(),
+            gender: document.getElementById('filterGender').value,
+            bloodType: document.getElementById('filterBloodType').value,
+            ageMin: document.getElementById('filterAgeMin').value ? parseInt(document.getElementById('filterAgeMin').value) : null,
+            ageMax: document.getElementById('filterAgeMax').value ? parseInt(document.getElementById('filterAgeMax').value) : null,
+            dobFrom: document.getElementById('filterDobFrom').value,
+            dobTo: document.getElementById('filterDobTo').value,
+            admissionFrom: document.getElementById('filterAdmissionFrom').value,
+            admissionTo: document.getElementById('filterAdmissionTo').value,
+            entryAgeMin: document.getElementById('filterEntryAgeMin').value ? parseInt(document.getElementById('filterEntryAgeMin').value) : null,
+            entryAgeMax: document.getElementById('filterEntryAgeMax').value ? parseInt(document.getElementById('filterEntryAgeMax').value) : null,
+            referringAgency: document.getElementById('filterReferringAgency').value,
+            currentStatus: document.getElementById('filterCurrentStatus').value,
+            educationalStatus: document.getElementById('filterEducationalStatus').value,
+            healthStatus: document.getElementById('filterHealthStatus').value,
+            hometown: document.getElementById('filterHometown').value.trim().toLowerCase(),
+            nationality: document.getElementById('filterNationality').value
+        };
+
+        // Remove empty filters and store active ones
+        activeAdvancedFilters = {};
+        Object.keys(filters).forEach(key => {
+            if (filters[key] !== '' && filters[key] !== null) {
+                activeAdvancedFilters[key] = filters[key];
+            }
+        });
+
+        updateAdvancedFilterButtonStyle();
+        closeAdvancedFilter();
+        
+        // Apply all filters (existing + advanced)
+        filterRecords();
+    }
+
+    function checkIfAdvancedFiltersActive() {
+        return Object.keys(activeAdvancedFilters).length > 0;
+    }
+
+    function updateAdvancedFilterButtonStyle() {
+        const button = document.getElementById('advancedFilterBtn');
+        if (checkIfAdvancedFiltersActive()) {
+            button.classList.remove('bg-gray-600', 'hover:bg-gray-700');
+            button.classList.add('bg-red-primary', 'hover:bg-red-700');
+        } else {
+            button.classList.remove('bg-red-primary', 'hover:bg-red-700');
+            button.classList.add('bg-gray-600', 'hover:bg-gray-700');
+        }
+    }
+
+    function applyAdvancedFiltersToRecords(records) {
+        if (!checkIfAdvancedFiltersActive()) {
+            return records;
+        }
+
+        return records.filter(record => {
+            // Personal Information Filters
+            if (activeAdvancedFilters.name) {
+                const fullName = `${record.firstName || ''} ${record.middleName || ''} ${record.lastName || ''}`.toLowerCase();
+                if (!fullName.includes(activeAdvancedFilters.name)) return false;
+            }
+
+            if (activeAdvancedFilters.gender && record.gender !== activeAdvancedFilters.gender) {
+                return false;
+            }
+
+            if (activeAdvancedFilters.bloodType && record.bloodType !== activeAdvancedFilters.bloodType) {
+                return false;
+            }
+
+            // Age filtering
+            if (activeAdvancedFilters.ageMin !== null || activeAdvancedFilters.ageMax !== null) {
+                const age = calculateAgeForFiltering(record.dateOfBirth);
+                if (age !== null) {
+                    if (activeAdvancedFilters.ageMin !== null && age < activeAdvancedFilters.ageMin) return false;
+                    if (activeAdvancedFilters.ageMax !== null && age > activeAdvancedFilters.ageMax) return false;
+                }
+            }
+
+            // Date of Birth filtering
+            if (activeAdvancedFilters.dobFrom || activeAdvancedFilters.dobTo) {
+                const dob = new Date(record.dateOfBirth);
+                if (activeAdvancedFilters.dobFrom && dob < new Date(activeAdvancedFilters.dobFrom)) return false;
+                if (activeAdvancedFilters.dobTo && dob > new Date(activeAdvancedFilters.dobTo)) return false;
+            }
+
+            // Admission Information Filters
+            if (activeAdvancedFilters.admissionFrom || activeAdvancedFilters.admissionTo) {
+                const admissionDate = new Date(record.entryDate || record.dateAdded);
+                if (activeAdvancedFilters.admissionFrom && admissionDate < new Date(activeAdvancedFilters.admissionFrom)) return false;
+                if (activeAdvancedFilters.admissionTo && admissionDate > new Date(activeAdvancedFilters.admissionTo)) return false;
+            }
+
+            // Entry Age filtering
+            if (activeAdvancedFilters.entryAgeMin !== null || activeAdvancedFilters.entryAgeMax !== null) {
+                const entryAge = record.entryAge || calculateAgeForFiltering(record.dateOfBirth);
+                if (entryAge !== null) {
+                    if (activeAdvancedFilters.entryAgeMin !== null && entryAge < activeAdvancedFilters.entryAgeMin) return false;
+                    if (activeAdvancedFilters.entryAgeMax !== null && entryAge > activeAdvancedFilters.entryAgeMax) return false;
+                }
+            }
+
+            if (activeAdvancedFilters.referringAgency && record.referringAgency !== activeAdvancedFilters.referringAgency) {
+                return false;
+            }
+
+            // Current Status Filters
+            if (activeAdvancedFilters.currentStatus && record.currentStatus !== activeAdvancedFilters.currentStatus) {
+                return false;
+            }
+
+            if (activeAdvancedFilters.educationalStatus && record.educationalStatus !== activeAdvancedFilters.educationalStatus) {
+                return false;
+            }
+
+            if (activeAdvancedFilters.healthStatus && record.healthStatus !== activeAdvancedFilters.healthStatus) {
+                return false;
+            }
+
+            // Location / Demographics Filters
+            if (activeAdvancedFilters.hometown) {
+                const hometown = (record.hometown || '').toLowerCase();
+                if (!hometown.includes(activeAdvancedFilters.hometown)) return false;
+            }
+
+            if (activeAdvancedFilters.nationality && record.nationality !== activeAdvancedFilters.nationality) {
+                return false;
+            }
+
+            return true;
         });
     }
 
     function filterRecords() {
         const searchTerm = document.getElementById('searchInput').value.toLowerCase();
         const statusFilter = document.getElementById('statusFilter').value;
-        const filteredRecords = allRecords.filter(record => {
+        const selectedYear = document.getElementById('chartYearFilter').value;
+        
+        // Start with records based on toggle state, then apply year filter
+        let baseRecords = getRecordsToDisplay();
+        if (selectedYear) {
+            baseRecords = filterRecordsByYear(baseRecords, selectedYear);
+        }
+        
+        // Apply advanced filters
+        baseRecords = applyAdvancedFiltersToRecords(baseRecords);
+        
+        const filteredRecords = baseRecords.filter(record => {
             const fullName = `${record.firstName || ''} ${record.middleName || ''} ${record.lastName || ''}`.toLowerCase();
             const matchesSearch = fullName.includes(searchTerm) || 
                                 (record.childId || '').toLowerCase().includes(searchTerm) || 
@@ -426,6 +1645,8 @@
             return matchesSearch && matchesStatus;
         });
         displayRecords(filteredRecords);
+        // Ensure statistics are updated after filtering
+        updateStatistics();
     }
 
     function exportToCSV() {
@@ -485,6 +1706,8 @@
                 return 'bg-yellow-100 text-yellow-800';
             case 'Awaiting placement':
                 return 'bg-purple-100 text-purple-800';
+            case 'Discharged':
+                return 'bg-orange-100 text-orange-800';
             default:
                 return 'bg-gray-100 text-gray-800';
         }
