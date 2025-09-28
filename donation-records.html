@@ -64,11 +64,22 @@
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
                 </div>
                 <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
-                    <select id="typeFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
-                        <option value="">All Types</option>
-                        <option value="money">Money Donations</option>
-                        <option value="in-kind">In-Kind Donations</option>
-                    </select>
+                    <div class="flex space-x-2">
+                        <select id="typeFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <option value="">All Donations</option>
+                            <option value="Cash">Cash</option>
+                            <option value="Online Payment">Online Payment</option>
+                            <option value="Bank Transfer">Bank Transfer</option>
+                            <option value="Check">Check</option>
+                            <option value="in-kind">In-Kind Donations</option>
+                        </select>
+                        <button id="advancedFilterBtn" class="px-4 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors flex items-center">
+                            <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v4.586a1 1 0 01-.553.894l-4 2A1 1 0 018 20v-6.586a1 1 0 00-.293-.707L1.293 7.293A1 1 0 011 6.586V4z"></path>
+                            </svg>
+                            Advanced Filter
+                        </button>
+                    </div>
                     <div class="flex space-x-2">
                         <button id="printBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-center">
                             <svg class="h-4 w-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -109,16 +120,66 @@
 
         <!-- Donation Statistics & Graph -->
         <div class="mb-6 bg-white rounded-lg shadow p-6">
-            <!-- Header with title and year selector -->
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-sm font-semibold text-gray-900">Donation Trends</h3>
-                <div class="flex items-center space-x-2">
-                    <label for="recordsYearSelector" class="text-sm text-gray-600 whitespace-nowrap">Year:</label>
-                    <select id="recordsYearSelector" class="text-sm border border-gray-300 rounded px-3 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary min-w-[80px]">
-                        <!-- Years will be populated by JavaScript -->
-                    </select>
+            <!-- Skeleton Loading for Donation Trends -->
+            <div id="trendsSkeleton" class="animate-pulse">
+                <!-- Header Skeleton -->
+                <div class="flex items-center justify-between mb-6">
+                    <div class="h-4 bg-gray-300 rounded w-32"></div>
+                    <div class="flex items-center space-x-2">
+                        <div class="h-3 bg-gray-300 rounded w-8"></div>
+                        <div class="h-8 bg-gray-300 rounded w-20"></div>
+                    </div>
+                </div>
+                
+                <!-- Statistics Skeleton -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="text-center">
+                        <div class="h-8 bg-gray-300 rounded w-24 mx-auto mb-2"></div>
+                        <div class="h-3 bg-gray-300 rounded w-20 mx-auto"></div>
+                    </div>
+                    <div class="text-center">
+                        <div class="h-8 bg-gray-300 rounded w-16 mx-auto mb-2"></div>
+                        <div class="h-3 bg-gray-300 rounded w-24 mx-auto"></div>
+                    </div>
+                    <div class="text-center">
+                        <div class="h-8 bg-gray-300 rounded w-16 mx-auto mb-2"></div>
+                        <div class="h-3 bg-gray-300 rounded w-28 mx-auto"></div>
+                    </div>
+                    <div class="text-center">
+                        <div class="h-8 bg-gray-300 rounded w-16 mx-auto mb-2"></div>
+                        <div class="h-3 bg-gray-300 rounded w-24 mx-auto"></div>
+                    </div>
+                </div>
+                
+                <!-- Chart Skeleton -->
+                <div class="border-t pt-4">
+                    <div class="mb-2">
+                        <div class="h-3 bg-gray-300 rounded w-96 mx-auto"></div>
+                    </div>
+                    <div class="h-64 bg-gray-300 rounded-lg flex items-center justify-center">
+                        <div class="text-gray-500">
+                            <svg class="h-16 w-16 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M3 3v18h18v-2H5V3H3zm17 0v16H6v2h16V3h-2z"/>
+                                <path d="M7 12l3-3 4 4 5-5-1.5-1.5L13 11l-4-4-4 4L7 12z"/>
+                            </svg>
+                            <div class="text-sm">Loading chart...</div>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            <!-- Actual Content (initially hidden) -->
+            <div id="trendsContent" class="hidden">
+                <!-- Header with title and year selector -->
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-sm font-semibold text-gray-900">Donation Trends</h3>
+                    <div class="flex items-center space-x-2">
+                        <label for="recordsYearSelector" class="text-sm text-gray-600 whitespace-nowrap">Year:</label>
+                        <select id="recordsYearSelector" class="text-sm border border-gray-300 rounded px-3 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary min-w-[80px]">
+                            <!-- Years will be populated by JavaScript -->
+                        </select>
+                    </div>
+                </div>
             
             <!-- Statistics Row -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -151,6 +212,7 @@
                             <canvas id="recordsDonationChart"></canvas>
                         </div>
                     </div>
+                    
                     <!-- Custom scrollbar styling for webkit browsers -->
                     <style>
                         .overflow-x-auto::-webkit-scrollbar {
@@ -169,6 +231,7 @@
                         }
                     </style>
                 </div>
+            </div>
             </div>
         </div>
 
@@ -360,6 +423,204 @@
         </div>
     </div>
 
+    <!-- Advanced Filter Modal -->
+    <div id="advancedFilterModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" onclick="closeAdvancedFilterBackdrop(event)">
+        <div class="relative top-4 mx-auto p-4 border w-11/12 md:w-3/4 lg:w-2/3 xl:w-1/2 shadow-lg rounded-md bg-white max-h-[95vh] overflow-y-auto" onclick="event.stopPropagation()">
+            <div class="mt-2">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center">
+                        <svg class="h-5 w-5 text-gray-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <h3 class="text-lg font-semibold text-gray-900">🔎 Advanced Filter</h3>
+                    </div>
+                    <button onclick="closeAdvancedFilter()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <form id="advancedFilterForm" class="space-y-4">
+                    <!-- Date Filters -->
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <h4 class="text-sm font-medium text-gray-900 mb-3">📅 Date Filters</h4>
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">From Date</label>
+                                <input type="date" id="advFromDate" class="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">To Date</label>
+                                <input type="date" id="advToDate" class="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Month</label>
+                                <select id="advMonth" class="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                                    <option value="">All Months</option>
+                                    <option value="01">January</option>
+                                    <option value="02">February</option>
+                                    <option value="03">March</option>
+                                    <option value="04">April</option>
+                                    <option value="05">May</option>
+                                    <option value="06">June</option>
+                                    <option value="07">July</option>
+                                    <option value="08">August</option>
+                                    <option value="09">September</option>
+                                    <option value="10">October</option>
+                                    <option value="11">November</option>
+                                    <option value="12">December</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Year</label>
+                                <select id="advYear" class="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                                    <option value="">All Years</option>
+                                    <!-- Years will be populated by JavaScript -->
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Donor Filters -->
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <h4 class="text-sm font-medium text-gray-900 mb-3">👥 Donor Filters</h4>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Donor Name / Organization</label>
+                                <select id="advDonorName" class="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                                    <option value="">All Donors</option>
+                                    <!-- Donor names will be populated by JavaScript -->
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Location / Country</label>
+                                <input type="text" id="advLocation" placeholder="Enter location" class="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Donation Type -->
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <h4 class="text-sm font-medium text-gray-900 mb-3">💰 Donation Type</h4>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Payment Type</label>
+                                <select id="advDonationType" class="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                                    <option value="">All Types</option>
+                                    <option value="Cash">Cash</option>
+                                    <option value="Check">Check</option>
+                                    <option value="Bank Transfer">Bank Transfer</option>
+                                    <option value="Online Payment">Online Payment</option>
+                                    <option value="in-kind">In-Kind Donations</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bank / Payment Channel -->
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <h4 class="text-sm font-medium text-gray-900 mb-3">🏦 Bank / Payment Channel</h4>
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Bank Name</label>
+                                <select id="advBankName" class="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                                    <option value="">All Banks</option>
+                                    <option value="BDO">BDO</option>
+                                    <option value="BPI">BPI</option>
+                                    <option value="Metrobank">Metrobank</option>
+                                    <option value="Landbank">Landbank</option>
+                                    <option value="PNB">PNB</option>
+                                    <option value="UnionBank">UnionBank</option>
+                                    <option value="Security Bank">Security Bank</option>
+                                    <option value="RCBC">RCBC</option>
+                                    <option value="Chinabank">Chinabank</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Payment Gateway</label>
+                                <select id="advPaymentGateway" class="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                                    <option value="">All Gateways</option>
+                                    <option value="GCash">GCash</option>
+                                    <option value="PayPal">PayPal</option>
+                                    <option value="Stripe">Stripe</option>
+                                    <option value="PayMaya">PayMaya</option>
+                                    <option value="Credit Card">Credit Card</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Account / Wallet No.</label>
+                                <input type="text" id="advAccountNumber" placeholder="Account number" class="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Amount Filters -->
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <h4 class="text-sm font-medium text-gray-900 mb-3">💵 Amount Filters</h4>
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Min Amount (₱)</label>
+                                <input type="number" id="advMinAmount" placeholder="0.00" step="0.01" class="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Max Amount (₱)</label>
+                                <input type="number" id="advMaxAmount" placeholder="999999.99" step="0.01" class="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Currency</label>
+                                <select id="advCurrency" class="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                                    <option value="">All Currencies</option>
+                                    <option value="PHP">PHP</option>
+                                    <option value="USD">USD</option>
+                                    <option value="EUR">EUR</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transaction / Reference Filters -->
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <h4 class="text-sm font-medium text-gray-900 mb-3">📋 Transaction / Reference</h4>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Transaction Reference / Check No.</label>
+                                <input type="text" id="advTransactionRef" placeholder="Transaction reference" class="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Official Receipt Number</label>
+                                <input type="text" id="advReceiptNumber" placeholder="Receipt number" class="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-wrap justify-between items-center pt-4 border-t border-gray-200 gap-2">
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" onclick="clearAdvancedFilters()" class="px-3 py-1 text-sm bg-gray-100 text-gray-700 border border-gray-300 rounded hover:bg-gray-200 transition-colors">
+                                Clear All
+                            </button>
+                            <button type="button" onclick="resetAdvancedFilters()" class="px-3 py-1 text-sm bg-yellow-100 text-yellow-700 border border-yellow-300 rounded hover:bg-yellow-200 transition-colors">
+                                Reset
+                            </button>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" onclick="closeAdvancedFilter()" class="px-3 py-1 text-sm bg-gray-100 text-gray-700 border border-gray-300 rounded hover:bg-gray-200 transition-colors">
+                                Cancel
+                            </button>
+                            <button type="button" onclick="applyAdvancedFilters()" class="px-4 py-1 text-sm bg-red-primary text-white rounded hover:bg-red-700 transition-colors flex items-center">
+                                <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v4.586a1 1 0 01-.553.894l-4 2A1 1 0 018 20v-6.586a1 1 0 00-.293-.707L1.293 7.293A1 1 0 011 6.586V4z"></path>
+                                </svg>
+                                Apply Filters
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import {
             db,
@@ -371,6 +632,7 @@
         let filteredRecords = [];
         let currentFilter = 'all';
         let currentUser = null;
+        let isAdvancedFilterActive = false;
 
         // Session Manager
         const sessionManager = {
@@ -418,6 +680,7 @@
         async function loadRecordsFromFirebase() {
             try {
                 showSkeletonLoading();
+                showTrendsSkeleton();
                 
                 const donationCol = collection(db, 'donations');
                 const snapshot = await getDocs(donationCol);
@@ -434,10 +697,17 @@
                 if (urlParams.filter === 'month' && urlParams.month && urlParams.year) {
                     filteredRecords = filterByMonth(allRecords, urlParams.month, urlParams.year);
                 } else {
-                    filteredRecords = [...allRecords];
+                    // Filter by current year by default
+                    const currentYear = new Date().getFullYear();
+                    filteredRecords = allRecords.filter(donation => {
+                        if (!donation.dateOfDonation) return false;
+                        const donationYear = new Date(donation.dateOfDonation).getFullYear();
+                        return donationYear === currentYear;
+                    });
                 }
                 
                 hideSkeletonLoading();
+                hideTrendsSkeleton();
                 displayRecords();
                 // Initialize chart after records are loaded
                 initializeRecordsChart();
@@ -445,6 +715,7 @@
                 console.error('Failed to load donation records from Firebase:', error);
                 filteredRecords = [];
                 hideSkeletonLoading();
+                hideTrendsSkeleton();
                 displayRecords();
                 // Initialize empty chart even on error
                 initializeRecordsChart();
@@ -521,6 +792,16 @@
             document.getElementById('recordsGrid').classList.remove('hidden');
         }
 
+        function showTrendsSkeleton() {
+            document.getElementById('trendsSkeleton').classList.remove('hidden');
+            document.getElementById('trendsContent').classList.add('hidden');
+        }
+
+        function hideTrendsSkeleton() {
+            document.getElementById('trendsSkeleton').classList.add('hidden');
+            document.getElementById('trendsContent').classList.remove('hidden');
+        }
+
         function displayRecords() {
             const recordsGrid = document.getElementById('recordsGrid');
             const noRecords = document.getElementById('noRecords');
@@ -578,6 +859,10 @@
             document.getElementById('typeFilter').addEventListener('change', filterRecords);
             document.getElementById('exportCSVBtn').addEventListener('click', exportToCSV);
             document.getElementById('printBtn').addEventListener('click', printRecords);
+            document.getElementById('advancedFilterBtn').addEventListener('click', openAdvancedFilter);
+
+            // Initialize advanced filter button style
+            updateAdvancedFilterButtonStyle();
 
             // Add event listeners for print modal
             document.getElementById('printFromDate').addEventListener('change', applyPrintFilters);
@@ -619,10 +904,34 @@
         function filterRecords() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const typeFilter = document.getElementById('typeFilter').value;
-            let records = currentFilter === 'all' ? allRecords : allRecords.filter(r => r.donationType === currentFilter);
+            
+            // Start with all records, then filter by selected year if a specific year is selected
+            let records = [...allRecords];
+            
+            // Filter by year first (if a specific year is selected via the year selector)
+            if (typeof recordsCurrentYear !== 'undefined' && recordsCurrentYear) {
+                records = records.filter(donation => {
+                    if (!donation.dateOfDonation) return false;
+                    const donationYear = new Date(donation.dateOfDonation).getFullYear();
+                    return donationYear === recordsCurrentYear;
+                });
+            }
+            
+            // Then apply the current filter (all, money, in-kind)
+            if (currentFilter !== 'all') {
+                records = records.filter(r => r.donationType === currentFilter);
+            }
 
             if (typeFilter) {
-                records = records.filter(record => record.donationType === typeFilter);
+                // If the filter is for specific payment types (Cash, Online Payment, Bank Transfer, Check)
+                if (['Cash', 'Online Payment', 'Bank Transfer', 'Check'].includes(typeFilter)) {
+                    records = records.filter(record => 
+                        record.donationType === 'money' && record.typeOfDonation === typeFilter
+                    );
+                } else if (typeFilter === 'in-kind') {
+                    // Filter for in-kind donations
+                    records = records.filter(record => record.donationType === typeFilter);
+                }
             }
             if (searchTerm) {
                 records = records.filter(record => {
@@ -877,6 +1186,13 @@
             document.getElementById('recordModal').classList.remove('hidden');
         };
 
+        // Make advanced filter functions available globally
+        window.closeAdvancedFilter = closeAdvancedFilter;
+        window.closeAdvancedFilterBackdrop = closeAdvancedFilterBackdrop;
+        window.clearAdvancedFilters = clearAdvancedFilters;
+        window.resetAdvancedFilters = resetAdvancedFilters;
+        window.applyAdvancedFilters = applyAdvancedFilters;
+
         function closeModal() {
             document.getElementById('recordModal').classList.add('hidden');
         }
@@ -884,6 +1200,256 @@
         function closeModalBackdrop(event) {
             if (event.target === event.currentTarget) {
                 closeModal();
+            }
+        }
+
+        // Advanced Filter Modal Functions
+        function openAdvancedFilter() {
+            // Populate year dropdown with available years from records
+            populateAdvancedFilterYears();
+            // Populate donor names dropdown
+            populateAdvancedFilterDonors();
+            document.getElementById('advancedFilterModal').classList.remove('hidden');
+        }
+
+        function closeAdvancedFilter() {
+            document.getElementById('advancedFilterModal').classList.add('hidden');
+        }
+
+        function closeAdvancedFilterBackdrop(event) {
+            if (event.target === event.currentTarget) {
+                closeAdvancedFilter();
+            }
+        }
+
+        function populateAdvancedFilterYears() {
+            const yearSelect = document.getElementById('advYear');
+            if (!yearSelect) return;
+
+            // Get current year
+            const currentYear = new Date().getFullYear();
+            
+            // Create year range from 2000 to current year
+            const yearRange = [];
+            for (let year = 2000; year <= currentYear; year++) {
+                yearRange.push(year);
+            }
+
+            // Get unique years from records that might be beyond current year
+            const recordYears = [...new Set(allRecords.map(record => {
+                if (record.dateReceived) {
+                    return new Date(record.dateReceived).getFullYear();
+                }
+                return null;
+            }).filter(Boolean))];
+
+            // Combine year range with any future years from records
+            const allYears = [...new Set([...yearRange, ...recordYears])].sort((a, b) => b - a);
+
+            // Clear existing options except "All Years"
+            yearSelect.innerHTML = '<option value="">All Years</option>';
+
+            // Add year options
+            allYears.forEach(year => {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                yearSelect.appendChild(option);
+            });
+        }
+
+        function populateAdvancedFilterDonors() {
+            const donorSelect = document.getElementById('advDonorName');
+            if (!donorSelect) return;
+
+            // Get unique donor names from all records
+            const donors = [...new Set(allRecords.map(record => record.donorName).filter(Boolean))].sort();
+
+            // Clear existing options except "All Donors"
+            donorSelect.innerHTML = '<option value="">All Donors</option>';
+
+            // Add donor options
+            donors.forEach(donor => {
+                const option = document.createElement('option');
+                option.value = donor;
+                option.textContent = donor;
+                donorSelect.appendChild(option);
+            });
+        }
+
+        function checkIfAdvancedFiltersActive() {
+            // Check if any advanced filter field has a value
+            const fromDate = document.getElementById('advFromDate').value;
+            const toDate = document.getElementById('advToDate').value;
+            const month = document.getElementById('advMonth').value;
+            const year = document.getElementById('advYear').value;
+            const donorName = document.getElementById('advDonorName').value;
+            const location = document.getElementById('advLocation').value;
+            const donationType = document.getElementById('advDonationType').value;
+            const bankName = document.getElementById('advBankName').value;
+            const paymentGateway = document.getElementById('advPaymentGateway').value;
+            const accountNumber = document.getElementById('advAccountNumber').value;
+            const minAmount = document.getElementById('advMinAmount').value;
+            const maxAmount = document.getElementById('advMaxAmount').value;
+            const currency = document.getElementById('advCurrency').value;
+            const transactionRef = document.getElementById('advTransactionRef').value;
+            const receiptNumber = document.getElementById('advReceiptNumber').value;
+
+            return fromDate || toDate || month || year || donorName || location || donationType || 
+                   bankName || paymentGateway || accountNumber || minAmount || maxAmount || 
+                   currency || transactionRef || receiptNumber;
+        }
+
+        function updateAdvancedFilterButtonStyle() {
+            const advancedBtn = document.getElementById('advancedFilterBtn');
+            if (!advancedBtn) return;
+
+            if (isAdvancedFilterActive) {
+                // Active state - blue background
+                advancedBtn.className = 'px-4 py-2 bg-blue-600 text-white border border-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center';
+            } else {
+                // Default state - gray background
+                advancedBtn.className = 'px-4 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors flex items-center';
+            }
+        }
+
+        function clearAdvancedFilters() {
+            // Clear all form fields
+            document.getElementById('advancedFilterForm').reset();
+            // Reset button style
+            isAdvancedFilterActive = false;
+            updateAdvancedFilterButtonStyle();
+        }
+
+        function resetAdvancedFilters() {
+            clearAdvancedFilters();
+            // Also apply the reset to show all records
+            applyAdvancedFilters();
+        }
+
+        function applyAdvancedFilters() {
+            // Start with all records, then apply current tab filter if any, then advanced filters
+            let filtered = currentFilter === 'all' ? [...allRecords] : allRecords.filter(r => r.donationType === currentFilter);
+
+            // Date Filters
+            const fromDate = document.getElementById('advFromDate').value;
+            const toDate = document.getElementById('advToDate').value;
+            const month = document.getElementById('advMonth').value;
+            const year = document.getElementById('advYear').value;
+
+            if (fromDate) {
+                filtered = filtered.filter(record => record.dateReceived && new Date(record.dateReceived) >= new Date(fromDate));
+            }
+            if (toDate) {
+                filtered = filtered.filter(record => record.dateReceived && new Date(record.dateReceived) <= new Date(toDate));
+            }
+            if (month) {
+                filtered = filtered.filter(record => record.dateReceived && new Date(record.dateReceived).getMonth() + 1 === parseInt(month));
+            }
+            if (year) {
+                filtered = filtered.filter(record => record.dateReceived && new Date(record.dateReceived).getFullYear() === parseInt(year));
+            }
+
+            // Donor Filters
+            const donorName = document.getElementById('advDonorName').value;
+            const location = document.getElementById('advLocation').value.toLowerCase();
+
+            if (donorName) {
+                filtered = filtered.filter(record => 
+                    record.donorName && record.donorName === donorName
+                );
+            }
+            if (location) {
+                filtered = filtered.filter(record => 
+                    record.location && record.location.toLowerCase().includes(location)
+                );
+            }
+
+            // Donation Type Filter (dropdown)
+            const donationType = document.getElementById('advDonationType').value;
+            if (donationType) {
+                if (donationType === 'in-kind') {
+                    filtered = filtered.filter(record => record.donationType === 'in-kind');
+                } else {
+                    filtered = filtered.filter(record => 
+                        record.donationType === 'money' && record.typeOfDonation === donationType
+                    );
+                }
+            }
+
+            // Bank / Payment Channel Filters
+            const bankName = document.getElementById('advBankName').value;
+            const paymentGateway = document.getElementById('advPaymentGateway').value;
+            const accountNumber = document.getElementById('advAccountNumber').value.toLowerCase();
+
+            if (bankName) {
+                filtered = filtered.filter(record => 
+                    record.paymentDetails && record.paymentDetails.bankName === bankName
+                );
+            }
+            if (paymentGateway) {
+                filtered = filtered.filter(record => 
+                    record.paymentDetails && record.paymentDetails.paymentGateway === paymentGateway
+                );
+            }
+            if (accountNumber) {
+                filtered = filtered.filter(record => 
+                    record.paymentDetails && (
+                        (record.paymentDetails.accountInfo && record.paymentDetails.accountInfo.toLowerCase().includes(accountNumber)) ||
+                        (record.paymentDetails.walletNumber && record.paymentDetails.walletNumber.toLowerCase().includes(accountNumber))
+                    )
+                );
+            }
+
+            // Amount Filters
+            const minAmount = parseFloat(document.getElementById('advMinAmount').value);
+            const maxAmount = parseFloat(document.getElementById('advMaxAmount').value);
+            const currency = document.getElementById('advCurrency').value;
+
+            if (!isNaN(minAmount)) {
+                filtered = filtered.filter(record => record.amount >= minAmount);
+            }
+            if (!isNaN(maxAmount)) {
+                filtered = filtered.filter(record => record.amount <= maxAmount);
+            }
+            if (currency) {
+                filtered = filtered.filter(record => record.currency === currency);
+            }
+
+            // Transaction / Reference Filters
+            const transactionRef = document.getElementById('advTransactionRef').value.toLowerCase();
+            const receiptNumber = document.getElementById('advReceiptNumber').value.toLowerCase();
+
+            if (transactionRef) {
+                filtered = filtered.filter(record => 
+                    (record.paymentDetails && record.paymentDetails.transactionRef && record.paymentDetails.transactionRef.toLowerCase().includes(transactionRef)) ||
+                    (record.paymentDetails && record.paymentDetails.checkNumber && record.paymentDetails.checkNumber.toLowerCase().includes(transactionRef)) ||
+                    (record.paymentDetails && record.paymentDetails.depositSlipNumber && record.paymentDetails.depositSlipNumber.toLowerCase().includes(transactionRef))
+                );
+            }
+            if (receiptNumber) {
+                filtered = filtered.filter(record => 
+                    record.receiptNumber && record.receiptNumber.toLowerCase().includes(receiptNumber)
+                );
+            }
+
+            // Check if any filters are active and update button style
+            isAdvancedFilterActive = checkIfAdvancedFiltersActive();
+            updateAdvancedFilterButtonStyle();
+
+            // Update the display
+            filteredRecords = filtered;
+            displayRecords();
+            updateRecordsStatistics();
+
+            // Close the modal
+            closeAdvancedFilter();
+
+            // Show a notification of results
+            if (filtered.length === 0 && isAdvancedFilterActive) {
+                alert('No records found matching the advanced filter criteria.');
+            } else if (isAdvancedFilterActive) {
+                console.log(`Advanced filter applied: ${filtered.length} records found.`);
             }
         }
 
@@ -1422,25 +1988,29 @@
         function initializeRecordsYearSelector() {
             const yearSelector = document.getElementById('recordsYearSelector');
             
-            // Get available years from donations data
-            const years = new Set();
-            allRecords.forEach(donation => {
-                if (donation.dateOfDonation) {
-                    const year = new Date(donation.dateOfDonation).getFullYear();
-                    years.add(year);
-                }
-            });
-            
-            // Add current year if not present
+            // Get current year
             const currentYear = new Date().getFullYear();
-            years.add(currentYear);
             
-            // Sort years in descending order
-            const sortedYears = Array.from(years).sort((a, b) => b - a);
+            // Create year range from 2000 to current year
+            const yearRange = [];
+            for (let year = 2000; year <= currentYear; year++) {
+                yearRange.push(year);
+            }
+
+            // Get unique years from records that might be beyond current year
+            const recordYears = [...new Set(allRecords.map(record => {
+                if (record.dateOfDonation) {
+                    return new Date(record.dateOfDonation).getFullYear();
+                }
+                return null;
+            }).filter(Boolean))];
+
+            // Combine year range with any future years from records
+            const allYears = [...new Set([...yearRange, ...recordYears])].sort((a, b) => b - a);
             
             // Populate year selector
             yearSelector.innerHTML = '';
-            sortedYears.forEach(year => {
+            allYears.forEach(year => {
                 const option = document.createElement('option');
                 option.value = year;
                 option.textContent = year;
@@ -1453,8 +2023,22 @@
             // Add event listener for year change
             yearSelector.addEventListener('change', function() {
                 recordsCurrentYear = parseInt(this.value);
+                
+                // Filter records by selected year
+                filteredRecords = allRecords.filter(donation => {
+                    if (!donation.dateOfDonation) return false;
+                    const donationYear = new Date(donation.dateOfDonation).getFullYear();
+                    return donationYear === recordsCurrentYear;
+                });
+                
+                // Apply current filter (all, money, in-kind) to the year-filtered records
+                if (currentFilter !== 'all') {
+                    filteredRecords = filteredRecords.filter(record => record.donationType === currentFilter);
+                }
+                
                 updateRecordsStatistics();
                 createRecordsDonationChart();
+                displayRecords(); // Update the displayed records
             });
             
             recordsCurrentYear = currentYear;
@@ -1575,6 +2159,10 @@
                     donationType: 'in-kind'  // Add custom property to identify dataset
                 });
             }
+            
+
+            
+            // Always create the chart (even with empty data to show the structure)
             
             recordsChartInstance = new Chart(ctx, {
                 type: 'line',
