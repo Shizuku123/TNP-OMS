@@ -67,6 +67,32 @@
                 <h2 class="text-lg font-medium text-gray-900 mb-6">Basic Information</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     <div>
+                        <label for="caseCategory" class="block text-sm font-medium text-gray-700 mb-2">Case Category</label>
+                        <input type="text" id="caseCategory" name="caseCategory"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                    <div>
+                        <label for="guardian" class="block text-sm font-medium text-gray-700 mb-2">Guardian</label>
+                        <input type="text" id="guardian" name="guardian"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                    <div>
+                        <label for="socialWorker" class="block text-sm font-medium text-gray-700 mb-2">Social Worker</label>
+                        <input type="text" id="socialWorker" name="socialWorker"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                    <div class="sm:col-span-2 lg:col-span-3">
+                        <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                        <textarea id="notes" name="notes" rows="2"
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary"></textarea>
+                    </div>
+                    <div class="sm:col-span-2 lg:col-span-3">
+                        <label for="attachments" class="block text-sm font-medium text-gray-700 mb-2">Attachments</label>
+                        <input type="file" id="attachments" name="attachments" multiple
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        <p class="mt-2 text-sm text-gray-500">You may upload multiple files (PDF, images, etc.)</p>
+                    </div>
+                    <div>
                         <label for="firstName" class="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
                         <input type="text" id="firstName" name="firstName" required
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
@@ -306,6 +332,7 @@
                     data[el.name] = el.value;
                 }
             }
+
             // Siblings names textarea (may be hidden)
             if (document.getElementById('siblingsNamesList')) {
                 data['siblingsNamesList'] = document.getElementById('siblingsNamesList').value;
@@ -323,6 +350,23 @@
                 });
             }
             data.photoString = photoString;
+
+            // Attachments: save as array of base64 strings (or empty array)
+            const attachmentsInput = document.getElementById('attachments');
+            let attachmentsArr = [];
+            if (attachmentsInput && attachmentsInput.files.length > 0) {
+                for (let i = 0; i < attachmentsInput.files.length; i++) {
+                    const file = attachmentsInput.files[i];
+                    const base64 = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(file);
+                    });
+                    attachmentsArr.push(base64);
+                }
+            }
+            data.attachments = attachmentsArr;
 
             // Add metadata
             data.dateAdded = new Date().toISOString().split('T')[0];
