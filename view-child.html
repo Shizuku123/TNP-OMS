@@ -14,11 +14,30 @@
                         'red-primary': '#dc2626',
                         'red-secondary': '#ef4444',
                         'red-light': '#fef2f2'
+                    },
+                    animation: {
+                        shimmer: 'shimmer 2s linear infinite',
+                    },
+                    keyframes: {
+                        shimmer: {
+                            '0%': { 'background-position': '-200% 0' },
+                            '100%': { 'background-position': '200% 0' },
+                        },
+                    },
+                    backgroundSize: {
+                        '200': '200% 100%',
                     }
                 }
             }
         }
     </script>
+    <style>
+        .animate-shimmer {
+            background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+            background-size: 200% 100%;
+            animation: shimmer 2s linear infinite;
+        }
+    </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
     <!-- Header -->
@@ -83,8 +102,8 @@
                         <span class="sm:hidden">Anthro</span>
                     </button>
                     <button id="educationalTab" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-sm flex-shrink-0">
-                        <span class="hidden sm:inline">Educational Background</span>
-                        <span class="sm:hidden">Education</span>
+                        <span class="hidden sm:inline">Gallery</span>
+                        <span class="sm:hidden">Gallery</span>
                     </button>
                 </nav>
             </div>
@@ -108,7 +127,7 @@
                     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 space-y-4 sm:space-y-0">
                         <h3 class="text-lg font-medium text-gray-900">Anthropometric Measurements</h3>
                         <button id="addAnthropometricBtn" 
-  class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-center">
+                            class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-center">
                             <svg class="inline h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                             </svg>
@@ -119,15 +138,17 @@
                 </div>
                 <div id="educationalContent" class="tab-content hidden">
                     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 space-y-4 sm:space-y-0">
-                        <h3 class="text-lg font-medium text-gray-900">Educational Background</h3>
-                        <button id="addEducationalRecordBtn" class="w-full sm:w-auto px-4 py-2 bg-red-primary text-white rounded-lg hover:bg-red-700 transition-colors text-center">
+                        <h3 class="text-lg font-medium text-gray-900">Gallery</h3>
+                        <button onclick="showPhotoUploadModal()" class="w-full sm:w-auto px-4 py-2 bg-red-primary text-white rounded-lg hover:bg-red-700 transition-colors text-center">
                             <svg class="inline h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                             </svg>
-                            Add Educational Record
+                            Add Picture
                         </button>
                     </div>
-                    <div id="educationalRecordsList"></div>
+                    <div id="photoGallery" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        <!-- Photos will be loaded here -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -319,8 +340,70 @@
         </div>
     </div>
 
+    <!-- Photo Upload Modal -->
+    <div id="photoUploadModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50 flex items-center justify-center p-4">
+        <div class="relative w-full max-w-2xl bg-white rounded-lg shadow-xl">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-900">Add Photo to Gallery</h3>
+                    <button onclick="hidePhotoUploadModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <form id="photoUploadForm" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Left Column - Form Fields -->
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Photo Title *</label>
+                                <input type="text" name="title" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="Enter photo title">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Description (Optional)</label>
+                                <textarea name="description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="Enter photo description"></textarea>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Select Photo *</label>
+                                <input type="file" name="photoFile" accept="image/*" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" onchange="previewPhoto(this)" onclick="console.log('File input clicked')">
+                                <p class="text-xs text-gray-500 mt-1">Supported formats: JPG, PNG, GIF (Max size: 5MB)</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Column - Preview -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Preview</label>
+                            <div id="photoPreview" class="w-full h-64 border-2 border-dashed border-gray-300 rounded-lg overflow-hidden bg-gray-50 relative">
+                                <div id="previewPlaceholder" class="absolute inset-0 flex items-center justify-center">
+                                    <div class="text-center">
+                                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                        <p class="mt-2 text-sm text-gray-500">Select an image to preview</p>
+                                    </div>
+                                </div>
+                                <img id="previewImage" src="" alt="Preview" class="hidden absolute inset-0 w-full h-full object-cover rounded-lg">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3 pt-6 border-t">
+                        <button type="button" onclick="hidePhotoUploadModal()" class="px-6 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors">Cancel</button>
+                        <button type="button" onclick="uploadPhoto()" class="px-4 py-2 bg-red-primary text-white rounded-md hover:bg-red-700">
+                            Upload Photo
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
-        import { db, collection, getDocs, doc, setDoc, addDoc } from './firebase.js';
+        import { db, storage, collection, getDocs, doc, setDoc, addDoc, deleteDoc, ref, uploadBytes, getDownloadURL } from './firebase.js';
 
         let currentChild = null;
         let currentChildId = null;
@@ -373,10 +456,11 @@
                     return;
                 }
                 displayChildHeader();
-                displayBasicInfo();
+                await displayBasicInfo();
+                await loadPhotoGallery();
                 await loadHmpRecords();
                 await loadAnthropometricRecords();
-                await loadEducationalRecords();
+                // Note: loadEducationalRecords() removed since Gallery tab now contains photo gallery
             } catch (error) {
                 console.error('Error loading child data:', error);
                 alert('Error loading child data');
@@ -427,8 +511,17 @@
             `;
         }
 
-        function displayBasicInfo() {
-            document.getElementById('basicInfoContent').innerHTML = `
+        async function displayBasicInfo() {
+            // Show skeleton loading first
+            const basicInfoContent = document.getElementById('basicInfoContent');
+            basicInfoContent.innerHTML = createBasicInfoLoadingSkeleton();
+            
+            // Add minimum loading time for better UX
+            const minimumLoadTime = 600;
+            await new Promise(resolve => setTimeout(resolve, minimumLoadTime));
+            
+            // Then display actual content
+            basicInfoContent.innerHTML = `
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
                     <div>
                         <h4 class="text-lg font-medium text-gray-900 mb-4">Personal Information</h4>
@@ -567,14 +660,301 @@
                         </div>
                     </div>
                 </div>
-                <div class="mt-8 pt-6 border-t">
+                <div class="mt-6 pt-6 border-t">
                     <p class="text-xs text-gray-400">Record added on ${formatDate(currentChild.dateAdded)}</p>
                 </div>
             `;
         }
 
+        function createPhotoLoadingSkeleton() {
+            return Array.from({length: 10}, (_, i) => `
+                <div class="aspect-square bg-gray-200 rounded-lg overflow-hidden relative">
+                    <div class="w-full h-full animate-shimmer"></div>
+                    <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 p-2 rounded-b-lg">
+                        <div class="h-3 bg-gray-400 rounded animate-pulse mb-1"></div>
+                        <div class="h-2 bg-gray-400 rounded animate-pulse w-3/4"></div>
+                        <div class="h-2 bg-gray-400 rounded animate-pulse w-1/2 mt-1"></div>
+                    </div>
+                    <div class="absolute top-2 right-2 w-6 h-6 bg-gray-300 rounded-full animate-pulse"></div>
+                </div>
+            `).join('');
+        }
+
+        function createHmpLoadingSkeleton() {
+            return Array.from({length: 3}, (_, i) => `
+                <div class="bg-white border rounded-lg overflow-hidden mb-4">
+                    <div class="p-4 border-b">
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex-1">
+                                <div class="h-4 bg-gray-300 rounded animate-pulse w-3/4 mb-2"></div>
+                                <div class="h-3 bg-gray-200 rounded animate-pulse w-1/2"></div>
+                            </div>
+                            <div class="h-6 w-16 bg-gray-200 rounded-full animate-pulse"></div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="h-3 bg-gray-200 rounded animate-pulse w-full"></div>
+                            <div class="h-3 bg-gray-200 rounded animate-pulse w-5/6"></div>
+                            <div class="h-3 bg-gray-200 rounded animate-pulse w-4/6"></div>
+                        </div>
+                    </div>
+                    <div class="px-6 py-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <div class="h-3 bg-gray-200 rounded animate-pulse w-20"></div>
+                            <div class="h-3 bg-gray-300 rounded animate-pulse w-24"></div>
+                        </div>
+                        <div class="flex justify-end items-center mt-4">
+                            <div class="h-5 w-5 bg-gray-200 rounded animate-pulse"></div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function createAnthropometricLoadingSkeleton() {
+            return Array.from({length: 3}, (_, i) => `
+                <div class="bg-white border rounded-lg p-4 mb-4">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 space-y-2 sm:space-y-0">
+                        <div class="min-w-0 flex-1">
+                            <div class="h-4 bg-gray-300 rounded animate-pulse w-2/3 mb-2"></div>
+                            <div class="h-3 bg-gray-200 rounded animate-pulse w-1/2 mb-2"></div>
+                            <div class="flex flex-wrap gap-2">
+                                <div class="h-6 w-16 bg-gray-200 rounded-full animate-pulse"></div>
+                                <div class="h-6 w-20 bg-gray-200 rounded-full animate-pulse"></div>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                            <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                            <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                        <div class="space-y-1">
+                            <div class="h-3 bg-gray-200 rounded animate-pulse w-12"></div>
+                            <div class="h-4 bg-gray-300 rounded animate-pulse w-16"></div>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="h-3 bg-gray-200 rounded animate-pulse w-14"></div>
+                            <div class="h-4 bg-gray-300 rounded animate-pulse w-18"></div>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="h-3 bg-gray-200 rounded animate-pulse w-10"></div>
+                            <div class="h-4 bg-gray-300 rounded animate-pulse w-12"></div>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="h-3 bg-gray-200 rounded animate-pulse w-8"></div>
+                            <div class="h-4 bg-gray-300 rounded animate-pulse w-14"></div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function createBasicInfoLoadingSkeleton() {
+            return `
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
+                    <div>
+                        <div class="h-5 bg-gray-300 rounded animate-pulse w-40 mb-4"></div>
+                        <div class="space-y-3">
+                            ${Array.from({length: 7}, () => `
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                                    <div class="h-4 bg-gray-200 rounded animate-pulse w-20"></div>
+                                    <div class="sm:col-span-2 h-4 bg-gray-300 rounded animate-pulse w-3/4"></div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    ${currentChild?.guardian ? `
+                    <div>
+                        <div class="h-5 bg-gray-300 rounded animate-pulse w-32 mb-4"></div>
+                        <div class="space-y-3">
+                            ${Array.from({length: 6}, () => `
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                                    <div class="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
+                                    <div class="sm:col-span-2 h-4 bg-gray-300 rounded animate-pulse w-2/3"></div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
+                    <div>
+                        <div class="h-5 bg-gray-300 rounded animate-pulse w-48 mb-4"></div>
+                        <div class="space-y-3">
+                            ${Array.from({length: 4}, () => `
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                                    <div class="h-4 bg-gray-200 rounded animate-pulse w-20"></div>
+                                    <div class="sm:col-span-2 h-4 bg-gray-300 rounded animate-pulse w-1/2"></div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function loadPhotoGallery() {
+            console.log('🖼️ Loading photo gallery for child:', currentChildId);
+            
+            // Show loading skeleton
+            const photoGallery = document.getElementById('photoGallery');
+            photoGallery.innerHTML = createPhotoLoadingSkeleton();
+            
+            // Add a minimum loading time to show skeleton (for UX)
+            const minimumLoadTime = 800; // 800ms
+            const startTime = Date.now();
+            
+            try {
+                const picturesCol = collection(db, 'pictures');
+                const snapshot = await getDocs(picturesCol);
+                const childPhotos = [];
+                
+                console.log('📸 Total pictures in database:', snapshot.size);
+                console.log('📸 Looking for photos with childId:', currentChildId);
+                
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    console.log('📸 Picture data:', {
+                        id: docSnap.id,
+                        childId: data.childId,
+                        title: data.title,
+                        storageMethod: data.storageMethod,
+                        hasImageUrl: !!data.imageUrl,
+                        imageUrlPrefix: data.imageUrl ? data.imageUrl.substring(0, 50) + '...' : 'No URL'
+                    });
+                    
+                    if (data.childId === currentChildId) {
+                        childPhotos.push({
+                            id: docSnap.id,
+                            ...data
+                        });
+                        console.log('✅ Photo matched for child:', data.title);
+                    } else {
+                        console.log('❌ Photo does not match child ID. Expected:', currentChildId, 'Got:', data.childId);
+                    }
+                });
+                
+                console.log('📸 Photos for this child:', childPhotos.length);
+                
+                // Sort by upload date (newest first)
+                childPhotos.sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate));
+                
+                // Ensure minimum loading time for better UX
+                const elapsedTime = Date.now() - startTime;
+                const remainingTime = Math.max(0, minimumLoadTime - elapsedTime);
+                
+                if (remainingTime > 0) {
+                    console.log(`⏳ Waiting ${remainingTime}ms to show skeleton loading...`);
+                    await new Promise(resolve => setTimeout(resolve, remainingTime));
+                }
+                
+                const photoGallery = document.getElementById('photoGallery');
+                if (childPhotos.length === 0) {
+                    photoGallery.innerHTML = `
+                        <div class="col-span-full text-center py-12">
+                            <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <h3 class="mt-4 text-lg font-medium text-gray-900">No photos found</h3>
+                            <p class="mt-2 text-gray-500">Get started by uploading a photo for this child.</p>
+                            <button onclick="showPhotoUploadModal()" class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                                <svg class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                </svg>
+                                Add Photo
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    console.log('📸 Rendering', childPhotos.length, 'photos');
+                    photoGallery.innerHTML = childPhotos.map((photo, index) => {
+                        console.log(`📸 Rendering photo ${index + 1}:`, {
+                            title: photo.title,
+                            storageMethod: photo.storageMethod,
+                            imageUrlLength: photo.imageUrl ? photo.imageUrl.length : 0,
+                            imageUrlPreview: photo.imageUrl ? photo.imageUrl.substring(0, 100) + '...' : 'No URL'
+                        });
+                        
+                        // Validate image URL
+                        if (!photo.imageUrl) {
+                            console.error('❌ No image URL for photo:', photo.title);
+                            return '';
+                        }
+                        
+                        // Escape quotes and special characters for HTML attributes
+                        const safeTitle = (photo.title || 'Untitled').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+                        const safeDescription = (photo.description || '').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+                        // Don't escape the image URL if it's base64 data
+                        const safeImageUrl = photo.imageUrl;
+                        
+                        return `
+                        <div class="relative group cursor-pointer photo-item" data-photo-id="${photo.id}">
+                            <div class="aspect-square bg-gray-200 rounded-lg overflow-hidden">
+                                <img src="${safeImageUrl}" 
+                                     alt="${safeTitle}" 
+                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200 photo-image"
+                                     loading="lazy"
+                                     onload="console.log('✅ Photo loaded:', '${safeTitle}'); console.log('✅ Image src length:', this.src.length)"
+                                     onerror="console.error('❌ Photo failed to load:', '${safeTitle}'); console.error('❌ Failed image src preview:', this.src.substring(0, 100)); this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGZpbGw9IiNkMWQ1ZGIiIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTEyIDlhMyAzIDAgMTEtNiAwIDMgMyAwIDAgMTYgMHoiLz48cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xLjUgNmEyLjI1IDIuMjUgMCAwIDEgMi4yNS0yLjI1aDE2LjVBMi4yNSAyLjI1IDAgMCAxIDIyLjUgNnYxMmEyLjI1IDIuMjUgMCAwIDEtMi4yNSAyLjI1SDMuNzVBMi4yNSAyLjI1IDAgMCAxIDEuNSAxOFY2ek0zIDE2LjA2VjE4YzAgLjQxNC4zMzYuNzUuNzUuNzVoMTYuNUEuNzUuNzUgMCAwIDAgMjEgMTh2LTEuOTRsLTIuNjktMi42ODlhMS41IDEuNSAwIDAgMC0yLjEyIDBsLTUuODggNS44OGEuNzUuNzUgMCAwIDEtMS4wNiAwTDguMjIgMTguMjJhMS41IDEuNSAwIDAgMC0yLjEyIDBMMy4wMDMgMjEuMzFWMTYuMDZ6IiBjbGlwLXJ1bGU9ImV2ZW5vZGQiLz48L3N2Zz4='" />
+                            </div>
+                            <div class="absolute inset-x-0 bottom-0 bg-black bg-opacity-75 text-white p-2 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                <p class="text-xs font-medium truncate" title="${safeTitle}">${safeTitle}</p>
+                                <p class="text-xs text-gray-300 truncate">${formatDate(photo.uploadDate)}</p>
+                                <p class="text-xs text-gray-400">${photo.storageMethod === 'base64' ? 'Stored locally' : 'Firebase Storage'}</p>
+                            </div>
+                            <button onclick="deletePhoto('${photo.id}', event)" 
+                                    class="absolute top-2 right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-700">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                </svg>
+                            </button>
+                        </div>`;
+                    }).join('');
+                    
+                    console.log('📸 Photo gallery rendered successfully');
+                    console.log('📸 Gallery HTML length:', photoGallery.innerHTML.length);
+                    console.log('📸 Gallery children count:', photoGallery.children.length);
+                    console.log('📸 Gallery element visible:', photoGallery.style.display !== 'none');
+                    console.log('📸 Generated HTML preview:', photoGallery.innerHTML.substring(0, 500));
+                    
+                    // Force a layout refresh
+                    photoGallery.style.display = 'grid';
+                    
+                    // Add click handlers for photo viewing
+                    setTimeout(() => {
+                        document.querySelectorAll('.photo-item').forEach(photoItem => {
+                            photoItem.addEventListener('click', function(e) {
+                                // Don't trigger if clicking the delete button
+                                if (e.target.closest('button')) return;
+                                
+                                const photoId = this.getAttribute('data-photo-id');
+                                const photo = childPhotos.find(p => p.id === photoId);
+                                if (photo) {
+                                    viewPhotoModal(photo.imageUrl, photo.title, photo.description);
+                                }
+                            });
+                        });
+                    }, 100);
+                }
+            } catch (error) {
+                console.error('Error loading photo gallery:', error);
+                document.getElementById('photoGallery').innerHTML = `
+                    <div class="col-span-full text-center py-8 text-red-500">
+                        <p>Error loading photos. Please refresh the page.</p>
+                    </div>
+                `;
+            }
+        }
+
         async function loadHmpRecords() {
             try {
+                // Show skeleton loading
+                const hmpRecordsList = document.getElementById('hmpRecordsList');
+                hmpRecordsList.innerHTML = createHmpLoadingSkeleton();
+                
+                // Add minimum loading time for better UX
+                const minimumLoadTime = 600;
+                const startTime = Date.now();
+                
                 const hmpCol = collection(db, 'healthMedicalProfile');
                 const snapshot = await getDocs(hmpCol);
                 const childHmpRecords = [];
@@ -582,7 +962,14 @@
                     const data = docSnap.data();
                     if (data.patientId === currentChildId) childHmpRecords.push(data);
                 });
-                const hmpRecordsList = document.getElementById('hmpRecordsList');
+                
+                // Ensure minimum loading time
+                const elapsedTime = Date.now() - startTime;
+                const remainingTime = Math.max(0, minimumLoadTime - elapsedTime);
+                if (remainingTime > 0) {
+                    await new Promise(resolve => setTimeout(resolve, remainingTime));
+                }
+                
                 hmpRecordsList.innerHTML = childHmpRecords.length === 0
                     ? `<div class="text-center py-12 text-gray-500">No health & medical profile records found for this child.</div>`
                     : childHmpRecords.map(record => {
@@ -632,6 +1019,14 @@
 
         async function loadAnthropometricRecords() {
             try {
+                // Show skeleton loading
+                const anthropometricRecordsList = document.getElementById('anthropometricRecordsList');
+                anthropometricRecordsList.innerHTML = createAnthropometricLoadingSkeleton();
+                
+                // Add minimum loading time for better UX
+                const minimumLoadTime = 600;
+                const startTime = Date.now();
+                
                 const anthropometricCol = collection(db, 'anthropometricMeasurement');
                 const snapshot = await getDocs(anthropometricCol);
                 const childAnthropometricRecords = [];
@@ -639,7 +1034,14 @@
                     const data = docSnap.data();
                     if (data.patientId === currentChildId) childAnthropometricRecords.push(data);
                 });
-                const anthropometricRecordsList = document.getElementById('anthropometricRecordsList');
+                
+                // Ensure minimum loading time
+                const elapsedTime = Date.now() - startTime;
+                const remainingTime = Math.max(0, minimumLoadTime - elapsedTime);
+                if (remainingTime > 0) {
+                    await new Promise(resolve => setTimeout(resolve, remainingTime));
+                }
+                
                 anthropometricRecordsList.innerHTML = childAnthropometricRecords.length === 0
                     ? `<div class="text-center py-12 text-gray-500">No anthropometric measurement records found for this child.</div>`
                     : childAnthropometricRecords.map(record => {
@@ -840,6 +1242,13 @@
 
         async function loadEducationalRecords() {
             try {
+                const educationalRecordsList = document.getElementById('educationalRecordsList');
+                // Check if the element exists (it won't in the new Gallery tab structure)
+                if (!educationalRecordsList) {
+                    console.log('Educational records list element not found - Gallery tab is now used for photos');
+                    return;
+                }
+                
                 const educationalCol = collection(db, 'children-educational-background');
                 const snapshot = await getDocs(educationalCol);
                 const childEducationalRecords = [];
@@ -847,9 +1256,8 @@
                     const data = docSnap.data();
                     if (data.childId === currentChildId) childEducationalRecords.push(data);
                 });
-                const educationalRecordsList = document.getElementById('educationalRecordsList');
                 educationalRecordsList.innerHTML = childEducationalRecords.length === 0
-                    ? `<div class="text-center py-12 text-gray-500">No educational records found for this child.</div>`
+                    ? `<div class="text-center py-12 text-gray-500">No picture found</div>`
                     : childEducationalRecords.map(record => `
                         <div class="bg-white border rounded-lg p-4 mb-4">
                             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 space-y-2 sm:space-y-0">
@@ -883,9 +1291,7 @@
             document.getElementById('addAnthropometricBtn').addEventListener('click', function() {
                 window.showAnthropometricModal();
             });
-            document.getElementById('addEducationalRecordBtn').addEventListener('click', function() {
-                // Modal logic for educational record
-            });
+            // Gallery photo upload button is handled by onclick in the HTML
         }
 
         function setupTabs() {
@@ -906,6 +1312,167 @@
                     document.getElementById(tabId).classList.remove('hidden');
                 });
             });
+        }
+
+        // Store escape key handler reference
+        let escapeKeyHandler = null;
+
+        function showPhotoUploadModal() {
+            const modal = document.getElementById('photoUploadModal');
+            modal.classList.remove('hidden');
+            
+            // Add click outside to close
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    hidePhotoUploadModal();
+                }
+            });
+            
+            // Create named escape key handler
+            escapeKeyHandler = function(e) {
+                if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                    hidePhotoUploadModal();
+                }
+            };
+            
+            // Add escape key to close
+            document.addEventListener('keydown', escapeKeyHandler);
+        }
+
+        window.hidePhotoUploadModal = function() {
+            const modal = document.getElementById('photoUploadModal');
+            const form = document.getElementById('photoUploadForm');
+            const previewImage = document.getElementById('previewImage');
+            const previewPlaceholder = document.getElementById('previewPlaceholder');
+            
+            // Hide modal
+            modal.classList.add('hidden');
+            
+            // Reset form
+            form.reset();
+            
+            // Reset preview to placeholder state
+            previewImage.classList.add('hidden');
+            previewImage.src = '';
+            previewImage.style.opacity = '';
+            previewImage.style.transition = '';
+            previewPlaceholder.classList.remove('hidden');
+            
+            // Reset placeholder content
+            previewPlaceholder.innerHTML = `
+                <div class="text-center">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <p class="mt-2 text-sm text-gray-500">Select an image to preview</p>
+                </div>
+            `;
+            
+            // Remove event listeners properly
+            if (escapeKeyHandler) {
+                document.removeEventListener('keydown', escapeKeyHandler);
+                escapeKeyHandler = null;
+            }
+        }
+
+        window.previewPhoto = function(input) {
+            console.log('=== Preview Photo Function Called ===');
+            console.log('Input:', input);
+            console.log('Files:', input.files);
+            
+            // Find elements
+            const previewImage = document.getElementById('previewImage');
+            const previewPlaceholder = document.getElementById('previewPlaceholder');
+            
+            console.log('Elements found:', {
+                previewImage: !!previewImage,
+                previewPlaceholder: !!previewPlaceholder
+            });
+            
+            if (!previewImage || !previewPlaceholder) {
+                console.error('Could not find preview elements!');
+                alert('Preview elements not found. Please refresh the page.');
+                return;
+            }
+            
+            // Reset preview state first
+            previewImage.classList.add('hidden');
+            previewImage.src = '';
+            previewPlaceholder.classList.remove('hidden');
+            
+            if (input.files && input.files.length > 0) {
+                const file = input.files[0];
+                console.log('File selected:', file.name, file.type, file.size);
+                
+                // Check file size (5MB limit)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File size must be less than 5MB');
+                    input.value = '';
+                    return;
+                }
+                
+                // Check file type
+                if (!file.type.startsWith('image/')) {
+                    alert('Please select an image file');
+                    input.value = '';
+                    return;
+                }
+                
+                // Show loading state
+                previewPlaceholder.innerHTML = `
+                    <div class="text-center">
+                        <svg class="animate-spin mx-auto h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <p class="mt-2 text-sm text-gray-500">Loading preview...</p>
+                    </div>
+                `;
+                
+                console.log('Creating FileReader...');
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    console.log('✅ FileReader loaded successfully!');
+                    console.log('Data URL length:', e.target.result.length);
+                    
+                    try {
+                        // Set the image source
+                        previewImage.src = e.target.result;
+                        
+                        // Show the image immediately
+                        previewPlaceholder.classList.add('hidden');
+                        previewImage.classList.remove('hidden');
+                        previewImage.style.opacity = '1';
+                        
+                        console.log('✅ Image should now be visible!');
+                        console.log('Preview image classes:', previewImage.className);
+                        console.log('Placeholder classes:', previewPlaceholder.className);
+                        
+                    } catch (err) {
+                        console.error('Error setting image source:', err);
+                    }
+                };
+                
+                reader.onerror = function(e) {
+                    console.error('❌ FileReader error:', e);
+                    alert('Error reading the file');
+                };
+                
+                console.log('Starting to read file as data URL...');
+                reader.readAsDataURL(file);
+            } else {
+                console.log('No file selected');
+                // Reset placeholder content
+                previewPlaceholder.innerHTML = `
+                    <div class="text-center">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <p class="mt-2 text-sm text-gray-500">Select an image to preview</p>
+                </div>
+                `;
+            }
         }
 
         function calculateAge(birthDate) {
@@ -1365,6 +1932,282 @@
             });
             return `AMP${String(lastId + 1).padStart(3, '0')}`;
         }
+
+        // Photo Upload Functions
+        window.uploadPhoto = async function() {
+            const form = document.getElementById('photoUploadForm');
+            const formData = new FormData(form);
+            const fileInput = form.querySelector('input[type="file"]');
+            const titleInput = form.querySelector('input[name="title"]');
+            const descriptionInput = form.querySelector('textarea[name="description"]');
+            
+            // Validate required fields
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert('Please select a photo to upload.');
+                return;
+            }
+            
+            if (!titleInput.value.trim()) {
+                alert('Please enter a photo title.');
+                titleInput.focus();
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            const title = titleInput.value.trim();
+            const description = descriptionInput.value.trim();
+            
+            // Enhanced file validation
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            
+            if (!validTypes.includes(file.type.toLowerCase())) {
+                alert('Please select a valid image file (JPEG, PNG, GIF, or WebP).');
+                return;
+            }
+            
+            if (file.size > maxSize) {
+                alert('File size must be less than 5MB. Please select a smaller image.');
+                return;
+            }
+            
+            // Check if filename is too long
+            if (file.name.length > 100) {
+                alert('Filename is too long. Please rename the file to be shorter than 100 characters.');
+                return;
+            }
+            
+            try {
+                // Show upload progress
+                const uploadBtn = document.querySelector('#photoUploadModal button[onclick="uploadPhoto()"]');
+                const originalText = uploadBtn.textContent;
+                uploadBtn.disabled = true;
+                uploadBtn.innerHTML = `
+                    <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Uploading...
+                `;
+                
+                // Generate unique and safe filename - use UUID-like approach
+                const timestamp = Date.now();
+                const randomId = Math.random().toString(36).substring(2, 15);
+                const fileExtension = file.name.split('.').pop().toLowerCase();
+                
+                // Create completely safe filename using only alphanumeric characters
+                const filename = `${currentChildId}_${timestamp}_${randomId}.${fileExtension}`;
+                
+                console.log('Original filename:', file.name);
+                console.log('Safe filename:', filename);
+                console.log('Storage path:', `children-photos/${filename}`);
+                
+                // TEMPORARY: Use base64 storage due to Firebase Storage CORS issues
+                // Once Firebase Storage rules are configured, this can be switched back
+                const useFirebaseStorage = false; // Set to true when Firebase Storage is working
+                
+                let imageUrl;
+                let storageMethod = 'base64'; // Default to base64 for now
+                
+                if (useFirebaseStorage) {
+                    try {
+                        // Upload to Firebase Storage
+                        console.log('Attempting Firebase Storage upload...');
+                        const storageRef = ref(storage, `children-photos/${filename}`);
+                        
+                        // Add metadata to help with debugging
+                        const metadata = {
+                            contentType: file.type,
+                            customMetadata: {
+                                'originalName': file.name,
+                                'uploadedBy': currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : 'Unknown',
+                                'childId': currentChildId
+                            }
+                        };
+                        
+                        // Set a timeout for the upload to prevent hanging
+                        const uploadPromise = uploadBytes(storageRef, file, metadata);
+                        const timeoutPromise = new Promise((_, reject) => 
+                            setTimeout(() => reject(new Error('Upload timeout')), 10000)
+                        );
+                        
+                        const uploadResult = await Promise.race([uploadPromise, timeoutPromise]);
+                        console.log('Firebase Storage upload successful:', uploadResult);
+                        
+                        // Get download URL
+                        console.log('Getting download URL...');
+                        imageUrl = await getDownloadURL(uploadResult.ref);
+                        console.log('Download URL obtained:', imageUrl);
+                        storageMethod = 'firebase';
+                        
+                    } catch (storageError) {
+                        console.warn('Firebase Storage upload failed, using base64 fallback:', storageError);
+                        storageMethod = 'base64';
+                        
+                        // Convert file to base64
+                        console.log('Converting file to base64...');
+                        const reader = new FileReader();
+                        imageUrl = await new Promise((resolve, reject) => {
+                            reader.onload = () => {
+                                console.log('Base64 conversion successful');
+                                resolve(reader.result);
+                            };
+                            reader.onerror = (error) => {
+                                console.error('Base64 conversion failed:', error);
+                                reject(error);
+                            };
+                            reader.readAsDataURL(file);
+                        });
+                        
+                        console.log('Base64 conversion successful, length:', imageUrl.length);
+                    }
+                } else {
+                    // Use base64 storage directly
+                    console.log('Using base64 storage (Firebase Storage disabled due to CORS)');
+                    console.log('Converting file to base64...');
+                    const reader = new FileReader();
+                    imageUrl = await new Promise((resolve, reject) => {
+                        reader.onload = () => {
+                            console.log('Base64 conversion successful');
+                            resolve(reader.result);
+                        };
+                        reader.onerror = (error) => {
+                            console.error('Base64 conversion failed:', error);
+                            reject(error);
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                    
+                    console.log('Base64 conversion successful, length:', imageUrl.length);
+                }
+                
+                // Generate picture ID
+                const pictureId = await generatePictureId();
+                
+                // Save picture data to Firestore
+                const pictureData = {
+                    pictureId: pictureId,
+                    childId: currentChildId,
+                    title: title,
+                    description: description,
+                    imageUrl: imageUrl,
+                    filename: filename,
+                    originalFilename: file.name,
+                    fileSize: file.size,
+                    fileType: file.type,
+                    storageMethod: storageMethod, // 'firebase' or 'base64'
+                    uploadDate: new Date().toISOString(),
+                    uploadedBy: currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : 'Unknown'
+                };
+                
+                console.log('💾 Saving photo to Firestore:', {
+                    pictureId: pictureData.pictureId,
+                    childId: pictureData.childId,
+                    title: pictureData.title,
+                    storageMethod: pictureData.storageMethod,
+                    imageUrlLength: pictureData.imageUrl.length
+                });
+                
+                const docRef = await addDoc(collection(db, 'pictures'), pictureData);
+                console.log('✅ Photo saved to Firestore with ID:', docRef.id);
+                
+                // Reset form and close modal
+                form.reset();
+                hidePhotoUploadModal();
+                
+                // Reload photo gallery
+                console.log('🔄 Refreshing photo gallery...');
+                await loadPhotoGallery();
+                
+                console.log('✅ Photo uploaded and gallery refreshed successfully!');
+                
+            } catch (error) {
+                console.error('Error uploading photo:', error);
+                
+                let errorMessage = 'Error uploading photo. Please try again.';
+                
+                // Provide more specific error messages
+                if (error.code === 'storage/unauthorized') {
+                    errorMessage = 'You do not have permission to upload files. Please contact administrator.';
+                } else if (error.code === 'storage/canceled') {
+                    errorMessage = 'Upload was cancelled.';
+                } else if (error.code === 'storage/quota-exceeded') {
+                    errorMessage = 'Storage quota exceeded. Please contact administrator.';
+                } else if (error.code === 'storage/invalid-format') {
+                    errorMessage = 'Invalid file format. Please select a valid image file.';
+                } else if (error.code === 'storage/retry-limit-exceeded') {
+                    errorMessage = 'Upload failed after multiple attempts. Please check your internet connection.';
+                } else if (error.message) {
+                    errorMessage = `Upload failed: ${error.message}`;
+                }
+                
+                alert(errorMessage);
+            } finally {
+                // Reset upload button
+                const uploadBtn = document.querySelector('#photoUploadModal button[onclick="uploadPhoto()"]');
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = originalText;
+            }
+        };
+        
+        async function generatePictureId() {
+            const picturesCol = collection(db, 'pictures');
+            const snapshot = await getDocs(picturesCol);
+            let lastId = 0;
+            snapshot.forEach(docSnap => {
+                const data = docSnap.data();
+                if (data.pictureId && data.pictureId.startsWith('PIC')) {
+                    const idNumber = parseInt(data.pictureId.replace('PIC', ''));
+                    if (idNumber > lastId) {
+                        lastId = idNumber;
+                    }
+                }
+            });
+            return `PIC${String(lastId + 1).padStart(3, '0')}`;
+        }
+        
+        // Photo Viewer Functions
+        window.viewPhotoModal = function(imageUrl, title, description) {
+            const modal = document.getElementById('imageModal');
+            const modalTitle = document.getElementById('imageModalTitle');
+            const modalImage = document.getElementById('modalImage');
+            const pdfViewer = document.getElementById('pdfViewer');
+            
+            modalTitle.textContent = title;
+            modalImage.src = imageUrl;
+            modalImage.classList.remove('hidden');
+            pdfViewer.classList.add('hidden');
+            
+            // Set current document data for download
+            currentDocumentData = imageUrl;
+            currentDocumentTitle = title;
+            
+            modal.classList.remove('hidden');
+        };
+        
+        // Photo Delete Function
+        window.deletePhoto = async function(photoId, event) {
+            // Prevent opening the photo viewer
+            event.stopPropagation();
+            
+            if (!confirm('Are you sure you want to delete this photo? This action cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                // Delete from Firestore
+                await deleteDoc(doc(db, 'pictures', photoId));
+                
+                // Reload photo gallery
+                await loadPhotoGallery();
+                
+                alert('Photo deleted successfully!');
+                
+            } catch (error) {
+                console.error('Error deleting photo:', error);
+                alert('Error deleting photo. Please try again.');
+            }
+        };
 
         // Initialize form handlers after DOM is ready
         setTimeout(() => {
