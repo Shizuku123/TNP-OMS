@@ -20,6 +20,41 @@
             }
         }
     </script>
+    <style>
+        /* Chart interactivity styles */
+        .chart-container {
+            cursor: pointer;
+        }
+        
+        .chart-container:hover {
+            opacity: 0.9;
+        }
+        
+        /* Month filter indicator animation */
+        #monthFilterIndicator {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Tooltip for charts */
+        .chart-tooltip {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+    </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
     <!-- Header -->
@@ -92,6 +127,12 @@
                     </button>
                     <button id="exportBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-center">
                         Export CSV
+                    </button>
+                    <button id="printBtn" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-center">
+                        <svg class="inline h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                        </svg>
+                        Print
                     </button>
                     <a href="add-child.html" class="px-4 py-2 bg-red-primary text-white rounded-lg hover:bg-red-700 transition-colors text-center inline-block">
                         Add Child
@@ -188,7 +229,7 @@
                             <h4 class="text-md font-medium text-gray-700">Male Children</h4>
                         </div>
                     </div>
-                    <div class="relative h-64">
+                    <div class="relative h-64 chart-container">
                         <canvas id="maleChart"></canvas>
                     </div>
                 </div>
@@ -201,7 +242,7 @@
                             <h4 class="text-md font-medium text-gray-700">Female Children</h4>
                         </div>
                     </div>
-                    <div class="relative h-64">
+                    <div class="relative h-64 chart-container">
                         <canvas id="femaleChart"></canvas>
                     </div>
                 </div>
@@ -492,6 +533,198 @@
         </div>
     </div>
 
+    <!-- Print Preview Modal -->
+    <div id="printModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative mx-auto border w-11/12 max-w-7xl shadow-lg rounded-md bg-white flex flex-col" style="margin-top: 10px; margin-bottom: 10px; height: 90vh;">
+            <!-- Modal Header -->
+            <div class="p-6 border-b border-gray-200 flex-shrink-0">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-medium text-gray-900">Print Child Records</h3>
+                    <button id="closePrintModal" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+                </div>
+            </div>
+            
+            <!-- Modal Content -->
+            <div class="flex-1 p-6 overflow-y-auto">
+                <!-- Two Column Layout -->
+                <div class="flex flex-col lg:flex-row gap-6 min-h-full">
+                    
+                    <!-- Left Column: Print Filters -->
+                    <div class="w-full lg:w-96 flex-shrink-0">
+                        <div class="bg-gray-50 p-4 rounded-lg h-full">
+                            <h4 class="text-md font-medium text-gray-700 mb-3">Filter Options</h4>
+                            
+                            <!-- First Row -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <!-- Record Type Filter -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Record Type</label>
+                                    <select id="printRecordType" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                                        <option value="all">All Records</option>
+                                        <option value="incare">In Care</option>
+                                        <option value="discharged">Discharged</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Gender Filter -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                                    <div class="space-y-2">
+                                        <label class="flex items-center">
+                                            <input type="checkbox" id="printMaleOnly" class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                            <span class="ml-2 text-sm text-gray-700">Male Only</span>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" id="printFemaleOnly" class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                            <span class="ml-2 text-sm text-gray-700">Female Only</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Second Row -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <!-- Age Range -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Age Range</label>
+                                    <div class="flex space-x-2">
+                                        <input type="number" id="printMinAge" placeholder="Min" min="0" max="100" class="w-full px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm">
+                                        <input type="number" id="printMaxAge" placeholder="Max" min="0" max="100" class="w-full px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm">
+                                    </div>
+                                </div>
+                                
+                                <!-- Blood Type -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Blood Type</label>
+                                    <select id="printBloodType" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                                        <option value="">All Blood Types</option>
+                                        <option value="A+">A+</option>
+                                        <option value="A-">A-</option>
+                                        <option value="B+">B+</option>
+                                        <option value="B-">B-</option>
+                                        <option value="AB+">AB+</option>
+                                        <option value="AB-">AB-</option>
+                                        <option value="O+">O+</option>
+                                        <option value="O-">O-</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- Third Row -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <!-- Status -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                    <select id="printStatus" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                                        <option value="">All Statuses</option>
+                                        <option value="Adoptable">Adoptable</option>
+                                        <option value="Under legal custody">Under legal custody</option>
+                                        <option value="Temporary Shelter">Temporary Shelter</option>
+                                        <option value="Awaiting placement">Awaiting placement</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Nationality -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nationality</label>
+                                    <select id="printNationality" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                                        <option value="">All Nationalities</option>
+                                        <option value="Filipino">Filipino</option>
+                                        <option value="American">American</option>
+                                        <option value="Chinese">Chinese</option>
+                                        <option value="Japanese">Japanese</option>
+                                        <option value="Korean">Korean</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- Fourth Row -->
+                            <div class="grid grid-cols-1 gap-4 mb-4">
+                                <!-- Religion -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Religion</label>
+                                    <select id="printReligion" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                                        <option value="">All Religions</option>
+                                        <option value="Catholic">Catholic</option>
+                                        <option value="Protestant">Protestant</option>
+                                        <option value="Islam">Islam</option>
+                                        <option value="Buddhism">Buddhism</option>
+                                        <option value="Other">Other</option>
+                                        <option value="None">None</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- Date Range for Discharged Records -->
+                            <div id="dischargeeDateFilter" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Discharge Date From</label>
+                                    <input type="date" id="printDischargeFromDate" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Discharge Date To</label>
+                                    <input type="date" id="printDischargeToDate" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Column: Print Preview -->
+                    <div class="flex-1 lg:flex-2 flex flex-col min-w-0">
+                        <div class="bg-white border border-gray-300 rounded-lg flex flex-col h-full min-h-96">
+                            <div class="bg-gray-50 px-4 py-3 border-b border-gray-300 rounded-t-lg flex-shrink-0">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="text-md font-medium text-gray-700">Print Preview</h4>
+                                    <span id="previewRecordCount" class="text-sm text-gray-600">0 records will be printed</span>
+                                </div>
+                            </div>
+                            
+                            <div id="printPreviewContent" class="p-4 flex-1 overflow-y-auto bg-white min-h-96">
+                                <!-- Preview content will be generated here -->
+                                <div class="text-center text-gray-500 py-8">
+                                    Apply filters to see preview
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="border-t border-gray-200 bg-gray-50 px-6 py-4 rounded-b-md flex-shrink-0">
+                <div class="flex items-center justify-between">
+                    <!-- Export Format Selection -->
+                    <div class="flex items-center space-x-4">
+                        <span class="text-sm font-medium text-gray-700">Export Format:</span>
+                        <select id="exportFormatSelect" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                            <option value="print">Print/PDF</option>
+                            <option value="excel">Excel (.xlsx)</option>
+                            <option value="csv">CSV (.csv)</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex space-x-3">
+                        <button id="resetPrintFilters" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
+                            Reset Filters
+                        </button>
+                        <button id="printSoloRecord" class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors">
+                            Solo Print
+                        </button>
+                        <button id="cancelPrintBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                            Cancel
+                        </button>
+                        <button id="confirmPrintBtn" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
+                            Export Records
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
     import { db, collection, getDocs, setDoc, doc, updateDoc } from './firebase.js';
 
@@ -506,6 +739,8 @@
     let maleChart = null;
     let femaleChart = null;
     let activeAdvancedFilters = {};
+    let activeMonthFilter = null; // Track active month filter (0-11 for Jan-Dec, null for no filter)
+    let activeMonthName = null; // Track active month name for display
 
     // Hardcoded admin password for demo (use secure backend in production!)
     const ADMIN_PASSWORD = "admin123"; // Change this in production
@@ -595,6 +830,14 @@
                             }
                         }
                     }
+                },
+                onClick: (event, elements) => {
+                    if (elements.length > 0) {
+                        const chartElement = elements[0];
+                        const monthIndex = chartElement.index;
+                        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                        filterByMonth(monthIndex, monthNames[monthIndex]);
+                    }
                 }
             }
         });
@@ -643,6 +886,14 @@
                             }
                         }
                     }
+                },
+                onClick: (event, elements) => {
+                    if (elements.length > 0) {
+                        const chartElement = elements[0];
+                        const monthIndex = chartElement.index;
+                        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                        filterByMonth(monthIndex, monthNames[monthIndex]);
+                    }
                 }
             }
         });
@@ -661,6 +912,111 @@
         document.getElementById('chartsSkeleton').classList.add('hidden');
         document.getElementById('chartsContainer').classList.remove('hidden');
     }
+
+    // Month filtering functions
+    function filterByMonth(monthIndex, monthName) {
+        console.log(`Filtering by month: ${monthName} (${monthIndex})`);
+        
+        // Toggle month filter - if same month clicked, clear filter
+        if (activeMonthFilter === monthIndex) {
+            clearMonthFilter();
+            return;
+        }
+        
+        // Set new month filter
+        activeMonthFilter = monthIndex;
+        activeMonthName = monthName;
+        
+        // Update visual indicators
+        updateMonthFilterDisplay();
+        
+        // Apply the filter
+        applyMonthFilter();
+    }
+
+    function clearMonthFilter() {
+        console.log('Clearing month filter');
+        activeMonthFilter = null;
+        activeMonthName = null;
+        
+        // Update visual indicators
+        updateMonthFilterDisplay();
+        
+        // Re-apply existing filters without month restriction
+        filterRecords();
+    }
+
+    function updateMonthFilterDisplay() {
+        // Update the chart year filter section to show active month filter
+        const yearFilterContainer = document.getElementById('chartYearFilter').parentElement;
+        let monthIndicator = document.getElementById('monthFilterIndicator');
+        
+        if (activeMonthFilter !== null) {
+            if (!monthIndicator) {
+                monthIndicator = document.createElement('div');
+                monthIndicator.id = 'monthFilterIndicator';
+                monthIndicator.className = 'mt-2 px-3 py-1 bg-blue-100 text-blue-800 text-xs rounded-full flex items-center justify-between';
+                yearFilterContainer.appendChild(monthIndicator);
+            }
+            monthIndicator.innerHTML = `
+                <span>📅 Filtered by: ${activeMonthName}</span>
+                <button onclick="clearMonthFilter()" class="ml-2 text-blue-600 hover:text-blue-800 font-bold">×</button>
+            `;
+        } else {
+            if (monthIndicator) {
+                monthIndicator.remove();
+            }
+        }
+    }
+
+    function applyMonthFilter() {
+        if (activeMonthFilter === null) {
+            filterRecords();
+            return;
+        }
+        
+        const selectedYear = document.getElementById('chartYearFilter').value;
+        
+        // Get base records depending on view mode
+        let baseRecords = getRecordsToDisplay();
+        
+        // Apply year filter if selected
+        if (selectedYear) {
+            baseRecords = filterRecordsByYear(baseRecords, selectedYear);
+        }
+        
+        // Apply month filter - filter by entry month
+        const monthFilteredRecords = baseRecords.filter(record => {
+            const entryDate = new Date(record.entryDate || record.dateAdded);
+            if (!isNaN(entryDate)) {
+                return entryDate.getMonth() === activeMonthFilter;
+            }
+            return false;
+        });
+        
+        console.log(`Month filter applied: ${monthFilteredRecords.length} records for ${activeMonthName}`);
+        
+        // Apply advanced filters
+        const advancedFilteredRecords = applyAdvancedFiltersToRecords(monthFilteredRecords);
+        
+        // Apply search and status filters
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const statusFilter = document.getElementById('statusFilter').value;
+        
+        const finalRecords = advancedFilteredRecords.filter(record => {
+            const fullName = `${record.firstName || ''} ${record.middleName || ''} ${record.lastName || ''}`.toLowerCase();
+            const matchesSearch = fullName.includes(searchTerm) || 
+                                (record.childId || '').toLowerCase().includes(searchTerm) || 
+                                (record.currentStatus || '').toLowerCase().includes(searchTerm);
+            const matchesStatus = !statusFilter || record.currentStatus === statusFilter;
+            return matchesSearch && matchesStatus;
+        });
+        
+        displayRecords(finalRecords);
+    }
+
+    // Make clearMonthFilter globally available
+    window.clearMonthFilter = clearMonthFilter;
 
     function populateYearDropdown() {
         const yearSelect = document.getElementById('chartYearFilter');
@@ -982,6 +1338,12 @@
         viewMode = viewMode === 'incare' ? 'discharged' : 'incare';
         console.log(`Toggle switched to: ${viewMode}`);
         console.log(`Available records - In Care: ${allRecords.length}, Discharged: ${dischargedRecords.length}`);
+        
+        // Clear month filter when switching view modes
+        activeMonthFilter = null;
+        activeMonthName = null;
+        updateMonthFilterDisplay();
+        
         updateToggleUI();
         
         // Refresh display with new records
@@ -1024,6 +1386,17 @@
         let baseRecords = getRecordsToDisplay();
         if (selectedYear) {
             baseRecords = filterRecordsByYear(baseRecords, selectedYear);
+        }
+        
+        // Apply month filter if active
+        if (activeMonthFilter !== null) {
+            baseRecords = baseRecords.filter(record => {
+                const entryDate = new Date(record.entryDate || record.dateAdded);
+                if (!isNaN(entryDate)) {
+                    return entryDate.getMonth() === activeMonthFilter;
+                }
+                return false;
+            });
         }
         
         // Apply advanced filters
@@ -1120,6 +1493,11 @@
         viewMode = 'all';
         console.log(`Switched to show all records mode`);
         console.log(`Available records - In Care: ${allRecords.length}, Discharged: ${dischargedRecords.length}`);
+        
+        // Clear month filter when switching view modes
+        activeMonthFilter = null;
+        activeMonthName = null;
+        updateMonthFilterDisplay();
         
         // Close modal
         document.getElementById('showAllModal').classList.add('hidden');
@@ -1371,6 +1749,7 @@
             document.getElementById('statusFilter').addEventListener('change', filterRecords);
             document.getElementById('chartYearFilter').addEventListener('change', handleYearFilterChange);
             document.getElementById('exportBtn').addEventListener('click', exportToCSV);
+            document.getElementById('printBtn').addEventListener('click', openPrintModal);
             document.getElementById('deletedRecordsBtn').addEventListener('click', function() {
                 window.location.href = 'deleted-records-viewer.html';
             });
@@ -1400,6 +1779,26 @@
             document.getElementById('cancelShowAllBtn').addEventListener('click', cancelShowAll);
             document.getElementById('confirmShowAllBtn').addEventListener('click', confirmShowAll);
             
+            // Print Modal Event Listeners
+            document.getElementById('closePrintModal').addEventListener('click', closePrintModal);
+            document.getElementById('cancelPrintBtn').addEventListener('click', closePrintModal);
+            document.getElementById('confirmPrintBtn').addEventListener('click', confirmPrint);
+            document.getElementById('resetPrintFilters').addEventListener('click', resetPrintFilters);
+            document.getElementById('printSoloRecord').addEventListener('click', printSoloRecord);
+            
+            // Auto-apply filters when any filter input changes
+            document.getElementById('printRecordType').addEventListener('change', function() { toggleDischargeFilter(); applyPrintFilters(); });
+            document.getElementById('printMaleOnly').addEventListener('change', function() { handleGenderFilter(); applyPrintFilters(); });
+            document.getElementById('printFemaleOnly').addEventListener('change', function() { handleGenderFilter(); applyPrintFilters(); });
+            document.getElementById('printMinAge').addEventListener('input', applyPrintFilters);
+            document.getElementById('printMaxAge').addEventListener('input', applyPrintFilters);
+            document.getElementById('printBloodType').addEventListener('change', applyPrintFilters);
+            document.getElementById('printStatus').addEventListener('change', applyPrintFilters);
+            document.getElementById('printNationality').addEventListener('change', applyPrintFilters);
+            document.getElementById('printReligion').addEventListener('change', applyPrintFilters);
+            document.getElementById('printDischargeFromDate').addEventListener('change', applyPrintFilters);
+            document.getElementById('printDischargeToDate').addEventListener('change', applyPrintFilters);
+            
             // Close modal when clicking outside
             document.getElementById('showAllModal').addEventListener('click', function(e) {
                 if (e.target === this) {
@@ -1423,6 +1822,17 @@
         let recordsToDisplay = getRecordsToDisplay();
         if (selectedYear) {
             recordsToDisplay = filterRecordsByYear(recordsToDisplay, selectedYear);
+        }
+        
+        // Apply month filter if active
+        if (activeMonthFilter !== null) {
+            recordsToDisplay = recordsToDisplay.filter(record => {
+                const entryDate = new Date(record.entryDate || record.dateAdded);
+                if (!isNaN(entryDate)) {
+                    return entryDate.getMonth() === activeMonthFilter;
+                }
+                return false;
+            });
         }
         
         // Apply advanced filters
@@ -1633,6 +2043,17 @@
             baseRecords = filterRecordsByYear(baseRecords, selectedYear);
         }
         
+        // Apply month filter if active
+        if (activeMonthFilter !== null) {
+            baseRecords = baseRecords.filter(record => {
+                const entryDate = new Date(record.entryDate || record.dateAdded);
+                if (!isNaN(entryDate)) {
+                    return entryDate.getMonth() === activeMonthFilter;
+                }
+                return false;
+            });
+        }
+        
         // Apply advanced filters
         baseRecords = applyAdvancedFiltersToRecords(baseRecords);
         
@@ -1649,11 +2070,12 @@
         updateStatistics();
     }
 
-    function exportToCSV() {
+    function exportToCSV(records = null) {
+        const recordsToExport = records || allRecords;
         const headers = ['Child ID', 'First Name', 'Middle Name', 'Last Name', 'Gender', 'Date of Birth', 'Entry Date', 'Current Status', 'Date Added'];
         const csvContent = [
             headers.join(','),
-            ...allRecords.map(child => [
+            ...recordsToExport.map(child => [
                 child.childId,
                 child.firstName || '',
                 child.middleName || '',
@@ -1672,6 +2094,575 @@
         a.download = `child-records-${new Date().toISOString().split('T')[0]}.csv`;
         a.click();
         window.URL.revokeObjectURL(url);
+    }
+
+    function exportToExcel(records = null) {
+        const recordsToExport = records || allRecords;
+        const headers = ['Child ID', 'First Name', 'Middle Name', 'Last Name', 'Gender', 'Date of Birth', 'Entry Date', 'Current Status', 'Date Added'];
+        
+        // Create Excel-compatible CSV format
+        const csvContent = [
+            headers.join('\t'), // Use tabs for Excel
+            ...recordsToExport.map(child => [
+                child.childId,
+                child.firstName || '',
+                child.middleName || '',
+                child.lastName || '',
+                child.gender || '',
+                child.dateOfBirth || '',
+                child.entryDate || '',
+                child.currentStatus || '',
+                child.dateAdded || ''
+            ].join('\t'))
+        ].join('\n');
+        
+        const blob = new Blob([csvContent], { type: 'application/vnd.ms-excel' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `child-records-${new Date().toISOString().split('T')[0]}.xls`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    }
+
+    // Print Functions
+    let printFilteredRecords = [];
+
+    function openPrintModal() {
+        // Show modal
+        document.getElementById('printModal').classList.remove('hidden');
+        
+        // Apply initial filters and show preview
+        applyPrintFilters();
+    }
+
+    function closePrintModal() {
+        document.getElementById('printModal').classList.add('hidden');
+    }
+
+    function toggleDischargeFilter() {
+        const recordType = document.getElementById('printRecordType').value;
+        const dischargeFilter = document.getElementById('dischargeeDateFilter');
+        
+        if (recordType === 'discharged') {
+            dischargeFilter.classList.remove('hidden');
+        } else {
+            dischargeFilter.classList.add('hidden');
+        }
+    }
+
+    function handleGenderFilter() {
+        const maleOnly = document.getElementById('printMaleOnly').checked;
+        const femaleOnly = document.getElementById('printFemaleOnly').checked;
+        
+        // If both are checked, uncheck the other one
+        if (maleOnly && femaleOnly) {
+            if (event.target.id === 'printMaleOnly') {
+                document.getElementById('printFemaleOnly').checked = false;
+            } else {
+                document.getElementById('printMaleOnly').checked = false;
+            }
+        }
+    }
+
+    function applyPrintFilters() {
+        // Get filter values
+        const recordType = document.getElementById('printRecordType').value;
+        const maleOnly = document.getElementById('printMaleOnly').checked;
+        const femaleOnly = document.getElementById('printFemaleOnly').checked;
+        const minAge = parseInt(document.getElementById('printMinAge').value) || 0;
+        const maxAge = parseInt(document.getElementById('printMaxAge').value) || 150;
+        const bloodType = document.getElementById('printBloodType').value;
+        const status = document.getElementById('printStatus').value;
+        const nationality = document.getElementById('printNationality').value;
+        const religion = document.getElementById('printReligion').value;
+        const dischargeFromDate = document.getElementById('printDischargeFromDate').value;
+        const dischargeToDate = document.getElementById('printDischargeToDate').value;
+
+        // Start with the base records
+        let records = [];
+        if (recordType === 'all') {
+            records = [...allRecords, ...dischargedRecords];
+        } else if (recordType === 'incare') {
+            records = [...allRecords];
+        } else if (recordType === 'discharged') {
+            records = [...dischargedRecords];
+        }
+
+        // Apply filters
+        printFilteredRecords = records.filter(record => {
+            // Gender filter
+            if (maleOnly && (!record.gender || record.gender.toLowerCase() !== 'male')) {
+                return false;
+            }
+            if (femaleOnly && (!record.gender || record.gender.toLowerCase() !== 'female')) {
+                return false;
+            }
+
+            // Age filter
+            const age = calculateAge(record.dateOfBirth);
+            const ageNum = parseInt(age);
+            if (!isNaN(ageNum) && (ageNum < minAge || ageNum > maxAge)) {
+                return false;
+            }
+
+            // Blood type filter
+            if (bloodType && record.bloodType !== bloodType) {
+                return false;
+            }
+
+            // Status filter
+            if (status && record.currentStatus !== status) {
+                return false;
+            }
+
+            // Nationality filter
+            if (nationality && record.nationality !== nationality) {
+                return false;
+            }
+
+            // Religion filter
+            if (religion && record.religion !== religion) {
+                return false;
+            }
+
+            // Discharge date filter (for discharged records)
+            if (recordType === 'discharged' && record._isDischarged) {
+                if (dischargeFromDate || dischargeToDate) {
+                    const dischargeDate = new Date(record.dischargeDate || record.dateAdded);
+                    if (dischargeFromDate && dischargeDate < new Date(dischargeFromDate)) {
+                        return false;
+                    }
+                    if (dischargeToDate && dischargeDate > new Date(dischargeToDate)) {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        });
+
+        // Update preview
+        updatePrintPreview();
+    }
+
+    function resetPrintFilters() {
+        // Reset all filter inputs
+        document.getElementById('printRecordType').value = 'all';
+        document.getElementById('printMaleOnly').checked = false;
+        document.getElementById('printFemaleOnly').checked = false;
+        document.getElementById('printMinAge').value = '';
+        document.getElementById('printMaxAge').value = '';
+        document.getElementById('printBloodType').value = '';
+        document.getElementById('printStatus').value = '';
+        document.getElementById('printNationality').value = '';
+        document.getElementById('printReligion').value = '';
+        document.getElementById('printDischargeFromDate').value = '';
+        document.getElementById('printDischargeToDate').value = '';
+        
+        // Hide discharge filter
+        document.getElementById('dischargeeDateFilter').classList.add('hidden');
+        
+        // Reapply filters
+        applyPrintFilters();
+    }
+
+    function updatePrintPreview() {
+        const previewContent = document.getElementById('printPreviewContent');
+        const recordCount = document.getElementById('previewRecordCount');
+        
+        recordCount.textContent = `${printFilteredRecords.length} records will be printed`;
+        
+        if (printFilteredRecords.length === 0) {
+            previewContent.innerHTML = '<div class="text-center text-gray-500 py-8">No records match the selected filters</div>';
+            return;
+        }
+
+        // Calculate statistics
+        const totalRecords = printFilteredRecords.length;
+        const inCareRecords = printFilteredRecords.filter(r => !r._isDischarged).length;
+        const dischargedRecords = printFilteredRecords.filter(r => r._isDischarged).length;
+        const maleRecords = printFilteredRecords.filter(r => r.gender && r.gender.toLowerCase() === 'male').length;
+        const femaleRecords = printFilteredRecords.filter(r => r.gender && r.gender.toLowerCase() === 'female').length;
+
+        // Get logo URL
+        const logoUrl = `${window.location.origin}${window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'))}/tahanan-logo.png`;
+
+        // Generate preview HTML with statistics cards and table format
+        let previewHTML = `
+            <div class="print-header text-center mb-4">
+                <img src="${logoUrl}" alt="Tahanan ng Pagmamahal Logo" class="mx-auto mb-2" style="height: 80px;">
+                <p style="margin: 2px 0; font-size: 10px;">45 Dr. Pilapil St., Brgy. Sagad, Pasig, Metro Manila, Philippines</p>
+                        <p style="margin: 2px 0; font-size: 10px;">Contact: (+63) 917 525 7188 Tel: +632 8631 7188</p>
+                        <p style="margin: 2px 0; font-size: 10px;">Email: tahananpch@gmail.com</p>
+                        <p style="color: #666; margin: 8px 0 2px 0; font-size: 13px; font-weight: bold;">Donation Records Report</p>
+                        <p style="margin: 0; color: #666; font-size: 10px;">Generated on ${new Date().toLocaleDateString()}</p>
+                <h2 class="text-sm font-semibold text-gray-700">Child Records Report</h2>
+                <p class="text-xs text-gray-600">Generated on: ${new Date().toLocaleDateString()}</p>
+            </div>
+            
+            <!-- Statistics Cards -->
+            <div class="grid grid-cols-5 gap-2 mb-4">
+                <div class="bg-gray-50 border border-gray-200 rounded p-2 text-center">
+                    <div class="text-xs text-gray-600">Total Records</div>
+                    <div class="text-lg font-bold text-red-600">${totalRecords}</div>
+                    <div class="text-xs text-gray-700">Children</div>
+                </div>
+                <div class="bg-gray-50 border border-gray-200 rounded p-2 text-center">
+                    <div class="text-xs text-gray-600">In Care</div>
+                    <div class="text-lg font-bold text-red-600">${inCareRecords}</div>
+                    <div class="text-xs text-gray-700">Active Cases</div>
+                </div>
+                <div class="bg-gray-50 border border-gray-200 rounded p-2 text-center">
+                    <div class="text-xs text-gray-600">Discharged</div>
+                    <div class="text-lg font-bold text-red-600">${dischargedRecords}</div>
+                    <div class="text-xs text-gray-700">Completed</div>
+                </div>
+                <div class="bg-gray-50 border border-gray-200 rounded p-2 text-center">
+                    <div class="text-xs text-gray-600">Male</div>
+                    <div class="text-lg font-bold text-red-600">${maleRecords}</div>
+                    <div class="text-xs text-gray-700">Boys</div>
+                </div>
+                <div class="bg-gray-50 border border-gray-200 rounded p-2 text-center">
+                    <div class="text-xs text-gray-600">Female</div>
+                    <div class="text-lg font-bold text-red-600">${femaleRecords}</div>
+                    <div class="text-xs text-gray-700">Girls</div>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-xs border-collapse border border-gray-300">
+                    <thead>
+                        <tr class="bg-red-600 text-white">
+                            <th class="border border-red-600 px-2 py-1 text-left font-semibold">ID</th>
+                            <th class="border border-red-600 px-2 py-1 text-left font-semibold">Full Name</th>
+                            <th class="border border-red-600 px-2 py-1 text-center font-semibold">Gender</th>
+                            <th class="border border-red-600 px-2 py-1 text-center font-semibold">Age</th>
+                            <th class="border border-red-600 px-2 py-1 text-center font-semibold">Blood Type</th>
+                            <th class="border border-red-600 px-2 py-1 text-left font-semibold">Status</th>
+                            <th class="border border-red-600 px-2 py-1 text-center font-semibold">Care Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        printFilteredRecords.slice(0, 8).forEach((child, index) => {
+            const fullName = `${child.firstName || ''} ${child.middleName || ''} ${child.lastName || ''}`.trim();
+            const age = calculateAge(child.dateOfBirth);
+            const rowClass = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+            
+            previewHTML += `
+                        <tr class="${rowClass}">
+                            <td class="border border-gray-300 px-2 py-1 text-center">${child.childId || 'N/A'}</td>
+                            <td class="border border-gray-300 px-2 py-1">${fullName}</td>
+                            <td class="border border-gray-300 px-2 py-1 text-center">${child.gender || 'N/A'}</td>
+                            <td class="border border-gray-300 px-2 py-1 text-center">${age}</td>
+                            <td class="border border-gray-300 px-2 py-1 text-center">${child.bloodType || 'N/A'}</td>
+                            <td class="border border-gray-300 px-2 py-1">${child.currentStatus || 'N/A'}</td>
+                            <td class="border border-gray-300 px-2 py-1 text-center">
+                                <span class="${child._isDischarged ? 'text-gray-600 font-semibold' : 'text-blue-600 font-semibold'}">
+                                    ${child._isDischarged ? 'Discharged' : 'In Care'}
+                                </span>
+                            </td>
+                        </tr>
+            `;
+        });
+
+        previewHTML += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        if (printFilteredRecords.length > 8) {
+            previewHTML += `
+                <div class="text-center text-gray-500 py-3 text-xs border-t mt-2">
+                    ... and ${printFilteredRecords.length - 8} more records will be included in the full print
+                </div>
+            `;
+        }
+
+        previewContent.innerHTML = previewHTML;
+    }
+
+    function printSoloRecord() {
+        // Show a simple prompt to enter child ID
+        const childId = prompt('Enter Child ID for solo record:');
+        if (!childId) return;
+        
+        // Find the record
+        const record = [...allRecords, ...dischargedRecords].find(r => r.childId === childId);
+        if (!record) {
+            alert('Child record not found with ID: ' + childId);
+            return;
+        }
+        
+        // Set filtered records to just this one record
+        printFilteredRecords = [record];
+        updatePrintPreview();
+        
+        // Auto-print immediately
+        setTimeout(() => {
+            confirmPrint();
+        }, 500);
+    }
+
+    function confirmPrint() {
+        if (printFilteredRecords.length === 0) {
+            alert('No records to print');
+            return;
+        }
+
+        // Get selected export format
+        const exportFormat = document.getElementById('exportFormatSelect').value;
+        
+        if (exportFormat === 'print') {
+            // Create print window
+            const printWindow = window.open('', '_blank');
+            const printContent = generatePrintContent(printFilteredRecords);
+            
+            printWindow.document.write(printContent);
+            printWindow.document.close();
+            
+            // Auto-print when loaded
+            printWindow.onload = function() {
+                printWindow.print();
+            };
+        } else if (exportFormat === 'excel') {
+            exportToExcel(printFilteredRecords);
+        } else if (exportFormat === 'csv') {
+            exportToCSV(printFilteredRecords);
+        }
+        
+        closePrintModal();
+    }
+
+    function generatePrintContent(records) {
+        const currentDate = new Date().toLocaleDateString();
+        const logoUrl = `${window.location.origin}${window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'))}/tahanan-logo.png`;
+        
+        // Get current print filter to show relevant statistics
+        const recordType = document.getElementById('printRecordType').value;
+        
+        // Calculate statistics
+        const totalRecords = records.length;
+        const inCareRecords = records.filter(r => !r._isDischarged).length;
+        const dischargedRecords = records.filter(r => r._isDischarged).length;
+        const maleRecords = records.filter(r => r.gender && r.gender.toLowerCase() === 'male').length;
+        const femaleRecords = records.filter(r => r.gender && r.gender.toLowerCase() === 'female').length;
+        
+        let content = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>Child Records Report - ${currentDate}</title>
+                <style>
+                    body { 
+                        font-family: Arial, sans-serif; 
+                        font-size: 11px; 
+                        margin: 20px;
+                        line-height: 1.3;
+                    }
+                    .header { 
+                        text-align: center; 
+                        margin-bottom: 25px; 
+                        border-bottom: 2px solid #d1514a; 
+                        padding-bottom: 15px; 
+                    }
+                    .logo { 
+                        height: 60px; 
+                        margin-bottom: 10px; 
+                    }
+                    .organization { 
+                        font-size: 18px; 
+                        font-weight: bold; 
+                        margin-bottom: 5px; 
+                    }
+                    .report-title { 
+                        font-size: 14px; 
+                        margin-bottom: 5px; 
+                        color: #666;
+                    }
+                    .date { 
+                        font-size: 11px; 
+                        color: #666; 
+                    }
+                    .stats-container {
+                        display: flex;
+                        justify-content: space-between;
+                        margin-bottom: 20px;
+                        gap: 15px;
+                    }
+                    .stat-card {
+                        flex: 1;
+                        background-color: #f8f9fa;
+                        border: 1px solid #dee2e6;
+                        border-radius: 4px;
+                        padding: 15px;
+                        text-align: center;
+                    }
+                    .stat-card h3 {
+                        font-size: 12px;
+                        color: #666;
+                        margin: 0 0 5px 0;
+                        font-weight: normal;
+                    }
+                    .stat-card .number {
+                        font-size: 24px;
+                        font-weight: bold;
+                        color: #d1514a;
+                        margin: 5px 0;
+                    }
+                    .stat-card .label {
+                        font-size: 10px;
+                        color: #333;
+                        font-weight: bold;
+                    }
+                    .records-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-top: 20px;
+                        font-size: 10px;
+                    }
+                    .records-table th {
+                        background-color: #d1514a;
+                        border: 1px solid #d1514a;
+                        padding: 8px 5px;
+                        text-align: left;
+                        font-weight: bold;
+                        color: white;
+                        font-size: 9px;
+                    }
+                    .records-table td {
+                        border: 1px solid #ddd;
+                        padding: 6px 5px;
+                        vertical-align: top;
+                        font-size: 9px;
+                    }
+                    .records-table tbody tr:nth-child(even) {
+                        background-color: #f9f9f9;
+                    }
+                    .status-incare {
+                        color: #1e40af;
+                        font-weight: bold;
+                    }
+                    .status-discharged {
+                        color: #6b7280;
+                        font-weight: bold;
+                    }
+                    .text-center {
+                        text-align: center;
+                    }
+                    .text-nowrap {
+                        white-space: nowrap;
+                    }
+                    @media print { 
+                        body { margin: 10px; font-size: 10px; } 
+                        .stats-container { margin-bottom: 15px; }
+                        .stat-card { padding: 10px; }
+                        .stat-card .number { font-size: 20px; }
+                        .records-table { font-size: 8px; }
+                        .records-table th { font-size: 8px; padding: 4px 3px; }
+                        .records-table td { font-size: 8px; padding: 4px 3px; }
+                        .header { margin-bottom: 15px; }
+                        .logo { height: 80px; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <img src="${logoUrl}" alt="Logo" class="logo">
+                    <p style="margin: 2px 0; font-size: 10px;">45 Dr. Pilapil St., Brgy. Sagad, Pasig, Metro Manila, Philippines</p>
+                    <p style="margin: 2px 0; font-size: 10px;">Contact: (+63) 917 525 7188 Tel: +632 8631 7188</p>
+                    <p style="margin: 2px 0; font-size: 10px;">Email: tahananpch@gmail.com</p>
+                    <div class="report-title">Child Records Report</div>
+                    <div class="date">Generated on: ${currentDate}</div>
+                </div>
+                
+                <!-- Statistics Cards -->
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <h3>Total Records</h3>
+                        <div class="number">${totalRecords}</div>
+                        <div class="label">Children</div>
+                    </div>
+                    ${recordType === 'all' || recordType === 'incare' ? `
+                    <div class="stat-card">
+                        <h3>In Care</h3>
+                        <div class="number">${inCareRecords}</div>
+                        <div class="label">Active Cases</div>
+                    </div>` : ''}
+                    ${recordType === 'all' || recordType === 'discharged' ? `
+                    <div class="stat-card">
+                        <h3>Discharged</h3>
+                        <div class="number">${dischargedRecords}</div>
+                        <div class="label">Completed Cases</div>
+                    </div>` : ''}
+                    <div class="stat-card">
+                        <h3>Male</h3>
+                        <div class="number">${maleRecords}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Female</h3>
+                        <div class="number">${femaleRecords}</div>
+                    </div>
+                </div>
+                
+                <table class="records-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 8%;">Child ID</th>
+                            <th style="width: 15%;">Full Name</th>
+                            <th style="width: 6%;">Gender</th>
+                            <th style="width: 5%;">Age</th>
+                            <th style="width: 8%;">Date of Birth</th>
+                            <th style="width: 6%;">Blood Type</th>
+                            <th style="width: 10%;">Nationality</th>
+                            <th style="width: 8%;">Religion</th>
+                            <th style="width: 10%;">Entry Date</th>
+                            <th style="width: 12%;">Current Status</th>
+                            <th style="width: 7%;">Care Status</th>
+                            <th style="width: 5%;">Discharge Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        records.forEach(record => {
+            const fullName = `${record.firstName || ''} ${record.middleName || ''} ${record.lastName || ''}`.trim();
+            const age = calculateAge(record.dateOfBirth);
+            
+            content += `
+                        <tr>
+                            <td class="text-center">${record.childId || 'N/A'}</td>
+                            <td>${fullName}</td>
+                            <td class="text-center">${record.gender || 'N/A'}</td>
+                            <td class="text-center">${age}</td>
+                            <td class="text-center text-nowrap">${formatDateShort(record.dateOfBirth) || 'N/A'}</td>
+                            <td class="text-center">${record.bloodType || 'N/A'}</td>
+                            <td>${record.nationality || 'N/A'}</td>
+                            <td>${record.religion || 'N/A'}</td>
+                            <td class="text-center text-nowrap">${formatDateShort(record.entryDate || record.dateAdded) || 'N/A'}</td>
+                            <td>${record.currentStatus || 'N/A'}</td>
+                            <td class="text-center">
+                                <span class="${record._isDischarged ? 'status-discharged' : 'status-incare'}">
+                                    ${record._isDischarged ? 'Discharged' : 'In Care'}
+                                </span>
+                            </td>
+                            <td class="text-center text-nowrap">${record._isDischarged ? formatDateShort(record.dischargeDate) || 'N/A' : '-'}</td>
+                        </tr>
+            `;
+        });
+
+        content += `
+                    </tbody>
+                </table>
+            </body>
+            </html>
+        `;
+
+        return content;
     }
 
     function calculateAge(birthDate) {
@@ -1693,6 +2684,16 @@
             year: 'numeric', 
             month: 'long', 
             day: 'numeric' 
+        });
+    }
+
+    function formatDateShort(dateString) {
+        if (!dateString) return 'N/A';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: '2-digit', 
+            day: '2-digit' 
         });
     }
 

@@ -1602,7 +1602,7 @@
                     <div style="display: flex; justify-content: center; margin-bottom: 8px;">
                        
                     </div>
-                    <h2 style="margin: 0 0 8px 0; font-size: 25px; color: #dc2626; font-weight: bold;">TAHANAN NG PAGMAMAHAL</h2>
+                    <img src="${logoUrl}" alt="Tahanan ng Pagmamahal Logo" class="mx-auto mb-2" style="height: 80px;">
                     <p style="margin: 2px 0; font-size: 10px;">45 Dr. Pilapil St., Brgy. Sagad, Pasig, Metro Manila, Philippines</p>
                     <p style="margin: 2px 0; font-size: 10px;">Contact: (+63) 917 525 7188 Tel: +632 8631 7188</p>
                     <p style="margin: 2px 0; font-size: 10px;">Email: tahananpch@gmail.com</p>
@@ -1747,21 +1747,40 @@
             const filterText = document.getElementById('monthFilterHeader').classList.contains('hidden') 
                 ? '' 
                 : document.getElementById('monthFilterText').textContent;
+
+            // Get logo URL with multiple fallback approaches
+            const logoUrl = `${window.location.origin}${window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'))}/tahanan-logo.png`;
+            console.log('Logo URL constructed:', logoUrl);
             
-            // Convert logo to base64 for print
-            let logoBase64 = '';
+            // Convert logo to base64 using proper image loading
+            let logoSrc = '';
             try {
-                const logoUrl = `${window.location.origin}${window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'))}/tahanan-logo.png`;
-                const response = await fetch(logoUrl);
-                const blob = await response.blob();
-                logoBase64 = await new Promise(resolve => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.readAsDataURL(blob);
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                
+                const base64Promise = new Promise((resolve, reject) => {
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        ctx.drawImage(img, 0, 0);
+                        resolve(canvas.toDataURL('image/png'));
+                    };
+                    img.onerror = function() {
+                        console.error('Failed to load logo image');
+                        reject(new Error('Image load failed'));
+                    };
                 });
+                
+                img.src = logoUrl;
+                logoSrc = await base64Promise;
+                console.log('Successfully converted logo to base64');
             } catch (error) {
-                console.error('Could not load logo:', error);
-                logoBase64 = ''; // Fallback to no image
+                console.error('Error converting logo:', error);
+                // Use direct URL as fallback
+                logoSrc = logoUrl;
+                console.log('Using direct URL as fallback');
             }
             
             // Create print content
@@ -1846,15 +1865,17 @@
                         @media print {
                             body { margin: 0; }
                             .no-print { display: none; }
+                            .logo { height: 80px; }
                         }
                     </style>
                 </head>
                 <body>
                     <div style="text-align: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #dc2626;">
-                        ${logoBase64 ? `<div style="display: flex; justify-content: center; margin-bottom: 8px;">
-                            <img src="${logoBase64}" alt="Organization Logo" style="height: 45px;">
-                        </div>` : ''}
-                        <h2 style="margin: 0 0 8px 0; font-size: 25px; color: #dc2626; font-weight: bold;">TAHANAN NG PAGMAMAHAL</h2>
+                        <div style="display: flex; justify-content: center; margin-bottom: 8px;">
+                            <img src="${logoSrc}" 
+                                 alt="Organization Logo" 
+                                 class="logo">
+                        </div>
                         <p style="margin: 2px 0; font-size: 10px;">45 Dr. Pilapil St., Brgy. Sagad, Pasig, Metro Manila, Philippines</p>
                         <p style="margin: 2px 0; font-size: 10px;">Contact: (+63) 917 525 7188 Tel: +632 8631 7188</p>
                         <p style="margin: 2px 0; font-size: 10px;">Email: tahananpch@gmail.com</p>
@@ -1930,12 +1951,25 @@
             </body>
             </html>`;
 
-            // Open print window
+            // Open print window and wait for images to load
             const printWindow = window.open('', '_blank');
             printWindow.document.write(printContent);
             printWindow.document.close();
-            printWindow.focus();
-            printWindow.print();
+            
+            // Wait for the document and images to load
+            printWindow.onload = function() {
+                // Additional delay to ensure images are loaded
+                setTimeout(() => {
+                    printWindow.focus();
+                    printWindow.print();
+                }, 500);
+            };
+            
+            // Fallback if onload doesn't trigger
+            setTimeout(() => {
+                printWindow.focus();
+                printWindow.print();
+            }, 1000);
         }
 
         function exportToCSV() {
