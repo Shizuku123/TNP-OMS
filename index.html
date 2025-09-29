@@ -1184,14 +1184,20 @@
             document.getElementById('profileRole').textContent = currentUser.role ? currentUser.role : '';
 
             // Show/hide elements based on user role
-            
+            if (currentUser.role === 'admin') {
+                document.getElementById('adminCreateButton').classList.remove('hidden');
+                document.getElementById('attendanceSummary').classList.remove('hidden');
+                document.getElementById('adminSettings').classList.remove('hidden');
+            }
 
             if (currentUser.position === 'director' || currentUser.position === 'assistant director') {
                 document.getElementById('deletedRecordsLink').classList.remove('hidden');
             }
 
-            
-
+            // Show attendance button for staff and volunteers
+            if (currentUser.role === 'staff' || currentUser.role === 'volunteer') {
+                document.getElementById('attendanceButton').classList.remove('hidden');
+            }
             
         }
 
@@ -2447,6 +2453,31 @@ async function loadDonorsData() {
             document.getElementById('logoutBtn').addEventListener('click', function(e) {
                 e.preventDefault();
                 sessionManager.logout();
+            });
+
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function(e) {
+                const createBtn = document.getElementById('create-btn');
+                const createDropdown = document.getElementById('create-dropdown');
+                const notificationsBtn = document.getElementById('notifications-btn');
+                const notificationsDropdown = document.getElementById('notifications-dropdown');
+                const profileBtn = document.getElementById('profile-btn');
+                const profileDropdown = document.getElementById('profile-dropdown');
+
+                // Close create dropdown
+                if (createBtn && createDropdown && !createBtn.contains(e.target) && !createDropdown.contains(e.target)) {
+                    createDropdown.classList.add('hidden');
+                }
+
+                // Close notifications dropdown
+                if (!notificationsBtn.contains(e.target) && !notificationsDropdown.contains(e.target)) {
+                    notificationsDropdown.classList.add('hidden');
+                }
+
+                // Close profile dropdown
+                if (!profileBtn.contains(e.target) && !profileDropdown.contains(e.target)) {
+                    profileDropdown.classList.add('hidden');
+                }
             });
 
             // Pagination buttons
