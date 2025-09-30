@@ -49,16 +49,6 @@
 
 
     /* custom fonts for small text */
-    // tailwind.config.js
-        module.exports = {
-        theme: {
-            extend: {
-            fontSize: {
-                'xxs': '0.625rem',
-            }
-            }
-        }
-        }
     </script>
 </head>
 <body class="bg-gray-50">
@@ -889,6 +879,139 @@
         </div>
     </div>
 
+    <!-- Create Announcement Modal (Admin Only) - Centered -->
+    <div id="announcementModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+        <div class="relative bg-white border w-full max-w-md shadow-lg rounded-md">
+            <div class="p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Create Announcement</h3>
+                <form id="announcementForm" onsubmit="event.preventDefault(); createAnnouncement();">
+                    <div class="mb-4">
+                        <label for="announcementTitle" class="block text-sm font-medium text-gray-700 mb-2">Title *</label>
+                        <input type="text" id="announcementTitle" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="announcementContent" class="block text-sm font-medium text-gray-700 mb-2">Content *</label>
+                        <textarea id="announcementContent" rows="4" required
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label for="announcementPriority" class="block text-sm font-medium text-gray-700 mb-2">Priority</label>
+                        <select id="announcementPriority"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <option value="normal">Normal</option>
+                            <option value="important">Important</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="closeAnnouncementModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                            Create Announcement
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Task Modal (Admin Only) - Centered -->
+    <div id="taskModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+        <div class="relative bg-white border w-full max-w-md shadow-lg rounded-md">
+            <div class="p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Create Task</h3>
+                <form id="taskForm" onsubmit="event.preventDefault(); createTask();">
+                    <div class="mb-4">
+                        <label for="taskTitle" class="block text-sm font-medium text-gray-700 mb-2">Task Title *</label>
+                        <input type="text" id="taskTitle" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="taskDescription" class="block text-sm font-medium text-gray-700 mb-2">Description *</label>
+                        <textarea id="taskDescription" rows="3" required
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="taskAssignedTo" class="block text-sm font-medium text-gray-700 mb-2">Assign To</label>
+                        <select id="taskAssignedTo"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <option value="all">All</option>
+                            <option value="staff">Staff</option>
+                            <option value="volunteer">Volunteers</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="taskDueDate" class="block text-sm font-medium text-gray-700 mb-2">Due Date</label>
+                        <input type="date" id="taskDueDate"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="taskPriority" class="block text-sm font-medium text-gray-700 mb-2">Priority</label>
+                        <select id="taskPriority"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label for="taskPeopleNeeded" class="block text-sm font-medium text-gray-700 mb-2">People Needed</label>
+                        <input type="number" id="taskPeopleNeeded" min="1" value="1"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="closeTaskModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                            Create Task
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmationModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+        <div class="relative bg-white border w-full max-w-md shadow-lg rounded-md">
+            <div class="p-6">
+                <div class="flex items-center mb-4">
+                    <div class="flex-shrink-0">
+                        <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 15.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 id="confirmationTitle" class="text-lg font-medium text-gray-900">Confirm Action</h3>
+                    </div>
+                </div>
+                <div class="mb-6">
+                    <p id="confirmationMessage" class="text-sm text-gray-500">Are you sure you want to proceed?</p>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeConfirmationModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                        Cancel
+                    </button>
+                    <button type="button" id="confirmButton" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                        Confirm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentUser = null;
         let allAnnouncements = [];
@@ -1150,17 +1273,21 @@
 
 async function loadStaffData() {
     try {
-        const staffCol = collection(db, 'staff');
-        const snapshot = await getDocs(staffCol);
+        const usersCol = collection(db, 'users');
+        const snapshot = await getDocs(usersCol);
         const staff = [];
         snapshot.forEach(doc => {
             const data = doc.data();
-            if (data.currentStatus !== "deleted") {
+            // Filter for staff role and exclude deleted/inactive users
+            if (data.role && data.role.toLowerCase() === 'staff' && 
+                data.isActive !== false && 
+                data.currentStatus !== "deleted") {
                 staff.push(data);
             }
         });
         
-        // Update total count
+        // Hide loader and show count
+        document.getElementById('staffLoader').style.display = 'none';
         document.getElementById('staffCount').textContent = staff.length;
         
         // Count male & female staff
@@ -1175,13 +1302,14 @@ async function loadStaffData() {
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
         
         const weeklyAdditions = staff.filter(member => {
-            const addedDate = new Date(member.dateAdded);
+            const addedDate = new Date(member.dateAdded || member.dateHired);
             return addedDate >= oneWeekAgo;
         }).length;
         
         document.getElementById('staffWeekly').textContent = `+${weeklyAdditions} Staff added this week`;
     } catch (error) {
         console.error('Error loading staff data:', error);
+        document.getElementById('staffLoader').style.display = 'none';
         document.getElementById('staffCount').textContent = '0';
         document.getElementById('maleStaffCount').textContent = '0';
         document.getElementById('femaleStaffCount').textContent = '0';
@@ -1191,17 +1319,18 @@ async function loadStaffData() {
 
 async function loadVolunteerData() {
     try {
-        const volunteersCol = collection(db, 'volunteers');
-        const snapshot = await getDocs(volunteersCol);
+        const usersCol = collection(db, 'users');
+        const snapshot = await getDocs(usersCol);
         const volunteers = [];
         snapshot.forEach(doc => {
             const data = doc.data();
-            if (data.currentStatus !== "deleted") {
+            if (data.role === 'volunteer' && data.currentStatus !== "deleted") {
                 volunteers.push(data);
             }
         });
         
-        const activeVolunteers = volunteers.filter(v => v.volunteerStatus === 'Active');
+        // For users collection, we already filtered by role='volunteer' above
+        const activeVolunteers = volunteers;
         
         // Update total count
         document.getElementById('volunteersCount').textContent = activeVolunteers.length;
@@ -1630,6 +1759,10 @@ async function loadDonorsData() {
                 allAnnouncements = [];
                 announcementSnapshot.forEach(docSnap => {
                     const data = docSnap.data();
+                    // Ensure announcementId is set to the document ID if not present
+                    if (!data.announcementId) {
+                        data.announcementId = docSnap.id;
+                    }
                     allAnnouncements.push(data);
                 });
                 displayAnnouncements();
@@ -1646,6 +1779,10 @@ async function loadDonorsData() {
                 allTasks = [];
                 taskSnapshot.forEach(docSnap => {
                     const data = docSnap.data();
+                    // Ensure taskId is set to the document ID if not present
+                    if (!data.taskId) {
+                        data.taskId = docSnap.id;
+                    }
                     allTasks.push(data);
                 });
                 displayTasks();
@@ -2196,18 +2333,22 @@ async function loadDonorsData() {
             const announcement = allAnnouncements.find(a => a.announcementId === announcementId);
             if (!announcement) return;
 
-            if (confirm(`Are you sure you want to delete the announcement "${announcement.title}"?`)) {
-                window.deleteDoc(window.doc(window.db, 'announcements', announcementId))
-                .then(() => {
-                    showMessage('Announcement deleted successfully!', 'success');
-                    closeDetailModal();
-                    loadAnnouncementsAndTasks(); // Reload data
-                })
-                .catch((error) => {
-                    console.error('Error deleting announcement:', error);
-                    showMessage('Failed to delete announcement.', 'error');
-                });
-            }
+            showConfirmationModal(
+                'Delete Announcement',
+                `Are you sure you want to delete the announcement "${announcement.title}"? This action cannot be undone.`,
+                function() {
+                    window.deleteDoc(window.doc(window.db, 'announcements', announcementId))
+                    .then(() => {
+                        showMessage('Announcement deleted successfully!', 'success');
+                        closeDetailModal();
+                        loadAnnouncementsAndTasks(); // Reload data
+                    })
+                    .catch((error) => {
+                        console.error('Error deleting announcement:', error);
+                        showMessage('Failed to delete announcement.', 'error');
+                    });
+                }
+            );
         }
 
         function deleteTask(taskId, event) {
@@ -2220,18 +2361,22 @@ async function loadDonorsData() {
             const task = allTasks.find(t => t.taskId === taskId);
             if (!task) return;
 
-            if (confirm(`Are you sure you want to delete the task "${task.title}"?`)) {
-                window.deleteDoc(window.doc(window.db, 'tasks', taskId))
-                .then(() => {
-                    showMessage('Task deleted successfully!', 'success');
-                    closeDetailModal();
-                    loadAnnouncementsAndTasks(); // Reload data
-                })
-                .catch((error) => {
-                    console.error('Error deleting task:', error);
-                    showMessage('Failed to delete task.', 'error');
-                });
-            }
+            showConfirmationModal(
+                'Delete Task',
+                `Are you sure you want to delete the task "${task.title}"? This action cannot be undone.`,
+                function() {
+                    window.deleteDoc(window.doc(window.db, 'tasks', taskId))
+                    .then(() => {
+                        showMessage('Task deleted successfully!', 'success');
+                        closeDetailModal();
+                        loadAnnouncementsAndTasks(); // Reload data
+                    })
+                    .catch((error) => {
+                        console.error('Error deleting task:', error);
+                        showMessage('Failed to delete task.', 'error');
+                    });
+                }
+            );
         }
 
         function generateCalendar() {
@@ -2501,6 +2646,38 @@ async function loadDonorsData() {
             document.getElementById('editTaskForm').reset();
         }
 
+        // Confirmation Modal Functions
+        function showConfirmationModal(title, message, onConfirm, isDestructive = true) {
+            document.getElementById('confirmationTitle').textContent = title;
+            document.getElementById('confirmationMessage').textContent = message;
+            document.getElementById('confirmationModal').classList.remove('hidden');
+            
+            // Remove any existing event listeners and add the new one
+            const confirmButton = document.getElementById('confirmButton');
+            const newConfirmButton = confirmButton.cloneNode(true);
+            confirmButton.parentNode.replaceChild(newConfirmButton, confirmButton);
+            
+            // Update button styling based on action type
+            if (isDestructive) {
+                newConfirmButton.className = 'px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700';
+                newConfirmButton.textContent = 'Confirm';
+            } else {
+                newConfirmButton.className = 'px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700';
+                newConfirmButton.textContent = 'Proceed';
+            }
+            
+            newConfirmButton.addEventListener('click', function() {
+                closeConfirmationModal();
+                if (onConfirm && typeof onConfirm === 'function') {
+                    onConfirm();
+                }
+            });
+        }
+
+        function closeConfirmationModal() {
+            document.getElementById('confirmationModal').classList.add('hidden');
+        }
+
         function createAnnouncement() {
             if (currentUser.role !== 'admin') return;
             
@@ -2525,7 +2702,12 @@ async function loadDonorsData() {
                 return;
             }
 
+            // Save to Firestore
+            const announcementsCol = window.collection(window.db, 'announcements');
+            const newAnnouncementRef = window.doc(announcementsCol);
+            
             const announcementData = {
+                announcementId: newAnnouncementRef.id,
                 title,
                 content,
                 priority,
@@ -2534,20 +2716,24 @@ async function loadDonorsData() {
                 createdAt
             };
 
-            // Save to Firestore
-            const announcementsCol = window.collection(window.db, 'announcements');
-            const newAnnouncementRef = window.doc(announcementsCol);
-            
-            window.setDoc(newAnnouncementRef, announcementData)
-                .then(() => {
-                    showMessage('Announcement created successfully!', 'success');
-                    closeAnnouncementModal();
-                    loadAnnouncementsAndTasks(); // Reload data
-                })
-                .catch((error) => {
-                    console.error('Error saving announcement:', error);
-                    showMessage('Failed to save announcement. Please try again.', 'error');
-                });
+            // Show confirmation before creating
+            showConfirmationModal(
+                'Create Announcement',
+                `Are you sure you want to create the announcement "${title}"?`,
+                function() {
+                    window.setDoc(newAnnouncementRef, announcementData)
+                        .then(() => {
+                            showMessage('Announcement created successfully!', 'success');
+                            closeAnnouncementModal();
+                            loadAnnouncementsAndTasks(); // Reload data
+                        })
+                        .catch((error) => {
+                            console.error('Error saving announcement:', error);
+                            showMessage('Failed to save announcement. Please try again.', 'error');
+                        });
+                },
+                false // Not destructive - use blue button
+            );
         }
 
         function createTask() {
@@ -2581,7 +2767,12 @@ async function loadDonorsData() {
                 return;
             }
 
+            // Save to Firestore
+            const tasksCol = window.collection(window.db, 'tasks');
+            const newTaskRef = window.doc(tasksCol);
+            
             const taskData = {
+                taskId: newTaskRef.id,
                 title,
                 description,
                 assignedTo,
@@ -2594,20 +2785,24 @@ async function loadDonorsData() {
                 status: 'pending' // Default status for new tasks
             };
 
-            // Save to Firestore
-            const tasksCol = window.collection(window.db, 'tasks');
-            const newTaskRef = window.doc(tasksCol);
-            
-            window.setDoc(newTaskRef, taskData)
-                .then(() => {
-                    showMessage('Task created successfully!', 'success');
-                    closeTaskModal();
-                    loadAnnouncementsAndTasks();
-                })
-                .catch((error) => {
-                    console.error('Error saving task:', error);
-                    showMessage('Failed to save task. Please try again.', 'error');
-                });
+            // Show confirmation before creating
+            showConfirmationModal(
+                'Create Task',
+                `Are you sure you want to create the task "${title}"?`,
+                function() {
+                    window.setDoc(newTaskRef, taskData)
+                        .then(() => {
+                            showMessage('Task created successfully!', 'success');
+                            closeTaskModal();
+                            loadAnnouncementsAndTasks();
+                        })
+                        .catch((error) => {
+                            console.error('Error saving task:', error);
+                            showMessage('Failed to save task. Please try again.', 'error');
+                        });
+                },
+                false // Not destructive - use blue button
+            );
         }
 
         function updateAnnouncement() {
@@ -2633,30 +2828,32 @@ async function loadDonorsData() {
             }
 
             const announcementData = {
-                announcementId,
                 title,
                 content,
-                priority
+                priority,
+                updatedAt: new Date().toISOString()
             };
 
-            fetch('api/update-announcement.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(announcementData)
-            })
-            .then(res => res.json())
-            .then(result => {
-                if (result.success) {
-                    showMessage('Announcement updated successfully!', 'success');
-                    closeEditAnnouncementModal();
-                    loadAnnouncementsAndTasks(); // Reload data
-                } else {
-                    showMessage(result.message || 'Failed to update announcement.', 'error');
-                }
-            })
-            .catch(() => {
-                showMessage('Network error. Please try again.', 'error');
-            });
+            // Show confirmation before updating
+            showConfirmationModal(
+                'Update Announcement',
+                `Are you sure you want to update the announcement "${title}"?`,
+                function() {
+                    // Update in Firestore
+                    const announcementRef = window.doc(window.db, 'announcements', announcementId);
+                    window.updateDoc(announcementRef, announcementData)
+                        .then(() => {
+                            showMessage('Announcement updated successfully!', 'success');
+                            closeEditAnnouncementModal();
+                            loadAnnouncementsAndTasks(); // Reload data
+                        })
+                        .catch((error) => {
+                            console.error('Error updating announcement:', error);
+                            showMessage('Failed to update announcement. Please try again.', 'error');
+                        });
+                },
+                false // Not destructive - use blue button
+            );
         }
 
         function updateTask() {
@@ -2684,32 +2881,34 @@ async function loadDonorsData() {
             }
 
             const taskData = {
-                taskId,
                 title,
                 description,
                 assignedTo,
                 dueDate,
-                priority
+                priority,
+                updatedAt: new Date().toISOString()
             };
 
-            fetch('api/update-task.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(taskData)
-            })
-            .then(res => res.json())
-            .then(result => {
-                if (result.success) {
-                    showMessage('Task updated successfully!', 'success');
-                    closeEditTaskModal();
-                    loadAnnouncementsAndTasks(); // Reload data
-                } else {
-                    showMessage(result.message || 'Failed to update task.', 'error');
-                }
-            })
-            .catch(() => {
-                showMessage('Network error. Please try again.', 'error');
-            });
+            // Show confirmation before updating
+            showConfirmationModal(
+                'Update Task',
+                `Are you sure you want to update the task "${title}"?`,
+                function() {
+                    // Update in Firestore
+                    const taskRef = window.doc(window.db, 'tasks', taskId);
+                    window.updateDoc(taskRef, taskData)
+                        .then(() => {
+                            showMessage('Task updated successfully!', 'success');
+                            closeEditTaskModal();
+                            loadAnnouncementsAndTasks(); // Reload data
+                        })
+                        .catch((error) => {
+                            console.error('Error updating task:', error);
+                            showMessage('Failed to update task. Please try again.', 'error');
+                        });
+                },
+                false // Not destructive - use blue button
+            );
         }
 
         function formatTimeAgo(dateString) {
@@ -2802,6 +3001,13 @@ async function loadDonorsData() {
         if (editTaskModal) {
             editTaskModal.addEventListener('click', function(e) {
                 if (e.target === this) closeEditTaskModal();
+            });
+        }
+
+        const confirmationModal = document.getElementById('confirmationModal');
+        if (confirmationModal) {
+            confirmationModal.addEventListener('click', function(e) {
+                if (e.target === this) closeConfirmationModal();
             });
         }
 
