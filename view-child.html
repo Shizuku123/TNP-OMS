@@ -1317,7 +1317,7 @@
         // Store escape key handler reference
         let escapeKeyHandler = null;
 
-        function showPhotoUploadModal() {
+        window.showPhotoUploadModal = function() {
             const modal = document.getElementById('photoUploadModal');
             modal.classList.remove('hidden');
             
