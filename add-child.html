@@ -19,20 +19,6 @@
             }
         }
     </script>
-    <style>
-        .loading-spinner {
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        
-        .modal-backdrop {
-            backdrop-filter: blur(2px);
-        }
-    </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
     <!-- Header -->
@@ -291,49 +277,9 @@
         </form>
     </div>
 
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 modal-backdrop z-50 flex items-center justify-center">
-        <div class="bg-white rounded-lg p-8 max-w-sm mx-4 text-center">
-            <div class="flex flex-col items-center space-y-4">
-                <div class="loading-spinner w-12 h-12 border-4 border-red-primary border-t-transparent rounded-full"></div>
-                <h3 class="text-lg font-semibold text-gray-900">Adding Child Record</h3>
-                <p class="text-gray-600">Please wait while we save the record...</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Success Modal -->
-    <div id="successModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 modal-backdrop z-50 flex items-center justify-center">
-        <div class="bg-white rounded-lg p-8 max-w-md mx-4 text-center">
-            <div class="flex flex-col items-center space-y-6">
-                <!-- Success Icon -->
-                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-                    <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                </div>
-                
-                <!-- Success Message -->
-                <div class="text-center">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Record Added Successfully!</h3>
-                    <p class="text-gray-600">The child record has been saved to the database.</p>
-                </div>
-                
-                <!-- Action Buttons -->
-                <div class="flex flex-col sm:flex-row gap-3 w-full">
-                    <button id="addAnotherBtn" class="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors">
-                        Add Another Child
-                    </button>
-                    <button id="viewRecordsBtn" class="flex-1 px-4 py-2 bg-red-primary text-white rounded-md hover:bg-red-700 transition-colors">
-                        View All Records
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script type="module">
         import { db, collection, setDoc, doc } from './firebase.js';
+        import { logActivity } from './activity-logger.js';
 
         // Siblings names field toggle
         document.getElementById('siblingsInOrphanage').addEventListener('change', function() {
@@ -379,81 +325,80 @@
         document.getElementById('childForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            // Show loading overlay
-            showLoading();
-            
-            // Disable form to prevent multiple submissions
-            const submitBtn = document.querySelector('button[type="submit"]');
-            const originalBtnText = submitBtn.textContent;
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Adding Record...';
-
-            try {
-                const form = e.target;
-                const data = {};
-                // Gather all fields
-                for (const el of form.elements) {
-                    if (el.name && el.type !== 'file' && (el.type !== 'radio' || el.checked)) {
-                        data[el.name] = el.value;
-                    }
+            const form = e.target;
+            const data = {};
+            // Gather all fields
+            for (const el of form.elements) {
+                if (el.name && el.type !== 'file' && (el.type !== 'radio' || el.checked)) {
+                    data[el.name] = el.value;
                 }
+            }
 
-                // Siblings names textarea (may be hidden)
-                if (document.getElementById('siblingsNamesList')) {
-                    data['siblingsNamesList'] = document.getElementById('siblingsNamesList').value;
-                }
+            // Siblings names textarea (may be hidden)
+            if (document.getElementById('siblingsNamesList')) {
+                data['siblingsNamesList'] = document.getElementById('siblingsNamesList').value;
+            }
 
-                // Photo file to base64 string
-                const photoFile = document.getElementById('photo').files[0];
-                let photoString = '';
-                if (photoFile) {
-                    photoString = await new Promise((resolve, reject) => {
+            // Photo file to base64 string
+            const photoFile = document.getElementById('photo').files[0];
+            let photoString = '';
+            if (photoFile) {
+                photoString = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(photoFile);
+                });
+            }
+            data.photoString = photoString;
+
+            // Attachments: save as array of base64 strings (or empty array)
+            const attachmentsInput = document.getElementById('attachments');
+            let attachmentsArr = [];
+            if (attachmentsInput && attachmentsInput.files.length > 0) {
+                for (let i = 0; i < attachmentsInput.files.length; i++) {
+                    const file = attachmentsInput.files[i];
+                    const base64 = await new Promise((resolve, reject) => {
                         const reader = new FileReader();
                         reader.onload = () => resolve(reader.result);
                         reader.onerror = reject;
-                        reader.readAsDataURL(photoFile);
+                        reader.readAsDataURL(file);
                     });
+                    attachmentsArr.push(base64);
                 }
-                data.photoString = photoString;
+            }
+            data.attachments = attachmentsArr;
 
-                // Attachments: save as array of base64 strings (or empty array)
-                const attachmentsInput = document.getElementById('attachments');
-                let attachmentsArr = [];
-                if (attachmentsInput && attachmentsInput.files.length > 0) {
-                    for (let i = 0; i < attachmentsInput.files.length; i++) {
-                        const file = attachmentsInput.files[i];
-                        const base64 = await new Promise((resolve, reject) => {
-                            const reader = new FileReader();
-                            reader.onload = () => resolve(reader.result);
-                            reader.onerror = reject;
-                            reader.readAsDataURL(file);
-                        });
-                        attachmentsArr.push(base64);
-                    }
-                }
-                data.attachments = attachmentsArr;
+            // Add metadata
+            data.dateAdded = new Date().toISOString().split('T')[0];
+            data.childId = await generateChildId();
 
-                // Add metadata
-                data.dateAdded = new Date().toISOString().split('T')[0];
-                data.childId = await generateChildId();
-
-                // Save to Firestore
+            // Save to Firestore
+            try {
                 const childrenCol = collection(db, 'children');
                 const newChildRef = doc(childrenCol);
                 await setDoc(newChildRef, data);
 
-                // Hide loading and show success modal
-                hideLoading();
-                showSuccessModal();
+                const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                if (currentUser.username) {
+                    await logActivity(
+                        'Added Child Record',
+                        `Added child record: ${data.firstName} ${data.lastName} (${data.childId})`,
+                        currentUser
+                    );
+                }
 
+                showMessage('Child record added successfully!', 'success');
+                form.reset();
+                document.getElementById('photoPreview').src = 'user.png';
+                document.getElementById('siblingsNames').classList.add('hidden');
+                document.getElementById('nationality').value = 'Filipino';
+
+                setTimeout(() => {
+                    window.location.href = 'child-records.html';
+                }, 2000);
             } catch (err) {
                 console.error(err);
-                hideLoading();
-                
-                // Re-enable form
-                submitBtn.disabled = false;
-                submitBtn.textContent = originalBtnText;
-                
                 showMessage('Error saving child record. Please try again.', 'error');
             }
         });
@@ -488,73 +433,6 @@
                 messageContainer.classList.add('hidden');
             }, 5000);
         }
-
-        // Loading functions
-        function showLoading() {
-            document.getElementById('loadingOverlay').classList.remove('hidden');
-            document.body.style.overflow = 'hidden'; // Prevent scrolling
-        }
-
-        function hideLoading() {
-            document.getElementById('loadingOverlay').classList.add('hidden');
-            document.body.style.overflow = 'auto'; // Re-enable scrolling
-        }
-
-        // Success modal functions
-        function showSuccessModal() {
-            document.getElementById('successModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden'; // Prevent scrolling
-        }
-
-        function hideSuccessModal() {
-            document.getElementById('successModal').classList.add('hidden');
-            document.body.style.overflow = 'auto'; // Re-enable scrolling
-        }
-
-        function resetForm() {
-            const form = document.getElementById('childForm');
-            form.reset();
-            document.getElementById('photoPreview').src = 'user.png';
-            document.getElementById('siblingsNames').classList.add('hidden');
-            document.getElementById('nationality').value = 'Filipino';
-            
-            // Re-enable submit button
-            const submitBtn = document.querySelector('button[type="submit"]');
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Add Child Record';
-        }
-
-        // Success modal event listeners
-        document.getElementById('addAnotherBtn').addEventListener('click', function() {
-            hideSuccessModal();
-            resetForm();
-        });
-
-        document.getElementById('viewRecordsBtn').addEventListener('click', function() {
-            window.location.href = 'child-records.html';
-        });
-
-        // Close modal when clicking outside
-        document.getElementById('successModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                hideSuccessModal();
-                resetForm();
-            }
-        });
-
-        // Close modal with Escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                const successModal = document.getElementById('successModal');
-                const loadingOverlay = document.getElementById('loadingOverlay');
-                
-                if (!successModal.classList.contains('hidden')) {
-                    hideSuccessModal();
-                    resetForm();
-                }
-                // Don't allow closing loading overlay with Escape
-            }
-        });
     </script>
 </body>
 </html>

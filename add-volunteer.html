@@ -41,36 +41,7 @@
     </header>
 
     <!-- Main Content -->
-    <div class="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8 relative">
-        <!-- Loading Overlay -->
-        <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur flex items-center justify-center z-50 hidden">
-            <div class="bg-white p-8 rounded-lg shadow-xl text-center">
-                <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-red-primary mx-auto mb-4"></div>
-                <p class="text-gray-700 font-medium">Creating volunteer record...</p>
-            </div>
-        </div>
-
-        <!-- Success Modal -->
-        <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur flex items-center justify-center z-50 hidden">
-            <div class="bg-white p-8 rounded-lg shadow-xl text-center max-w-md mx-4">
-                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
-                    <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                </div>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">Volunteer Record Created!</h3>
-                <p class="text-gray-600 mb-6">The volunteer record has been successfully added to the system.</p>
-                <div class="flex flex-col sm:flex-row gap-3">
-                    <button id="addAnotherVolunteer" class="flex-1 px-4 py-2 bg-red-primary text-white rounded-md hover:bg-red-700 transition-colors">
-                        Add Another Volunteer
-                    </button>
-                    <button id="viewVolunteerRecords" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors">
-                        View Volunteer Records
-                    </button>
-                </div>
-            </div>
-        </div>
-
+    <div class="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <!-- Success/Error Messages -->
         <div id="messageContainer" class="mb-4 hidden"></div>
 
@@ -296,12 +267,8 @@
                 <a href="volunteer-records.html" class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-center">
                     Cancel
                 </a>
-                <button type="submit" id="submitBtn" class="px-6 py-2 bg-red-primary text-white rounded-md hover:bg-red-700 transition-colors flex items-center justify-center">
-                    <span id="submitBtnText">Add Volunteer Record</span>
-                    <svg id="submitBtnSpinner" class="hidden animate-spin ml-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
+                <button type="submit" class="px-6 py-2 bg-red-primary text-white rounded-md hover:bg-red-700 transition-colors">
+                    Add Volunteer Record
                 </button>
             </div>
         </form>
@@ -317,6 +284,7 @@ import {
     auth
 } from './firebase.js';
 import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { logActivity } from './activity-logger.js';
 
 let createAccountEnabled = false;
 
@@ -360,33 +328,7 @@ function setupEventListeners() {
 
     // Form submission
     document.getElementById('volunteerForm').addEventListener('submit', handleSubmit);
-
-    // Success modal event handlers
-    document.getElementById('addAnotherVolunteer').addEventListener('click', function() {
-        document.getElementById('successModal').classList.add('hidden');
-        // Form is already reset in saveVolunteerRecord function
-    });
-
-    document.getElementById('viewVolunteerRecords').addEventListener('click', function() {
-        window.location.href = 'volunteer-records.html';
-    });
-
-    // Close modal on escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            document.getElementById('successModal').classList.add('hidden');
-        }
-    });
-
-    // Close modal when clicking outside
-    document.getElementById('successModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            this.classList.add('hidden');
-        }
-    });
 }
-
-
 
 function updateAccountToggle() {
     const toggle = document.getElementById('createAccountToggle');
@@ -412,123 +354,46 @@ function updateAccountToggle() {
 
 async function handleSubmit(e) {
     e.preventDefault();
-    
-    // Show loading overlay
-    document.getElementById('loadingOverlay').classList.remove('hidden');
 
-    try {
-        const formData = new FormData(e.target);
-        const data = {};
+    const formData = new FormData(e.target);
+    const data = {};
 
-        // Collect form data
-        for (let [key, value] of formData.entries()) {
-            if (key === 'availability[]') {
-                if (!data.availability) data.availability = [];
-                data.availability.push(value);
-            } else if (key !== 'photo') {
-                data[key] = value;
-            }
+    // Collect form data
+    for (let [key, value] of formData.entries()) {
+        if (key === 'availability[]') {
+            if (!data.availability) data.availability = [];
+            data.availability.push(value);
+        } else if (key !== 'photo') {
+            data[key] = value;
         }
-
-        // Convert availability array to comma-separated string
-        if (data.availability) {
-            data.availability = data.availability.join(', ');
-        } else {
-            data.availability = '';
-        }
-
-        // Add system fields
-        data.volunteerId = await generateVolunteerId();
-        data.dateAdded = new Date().toISOString().split('T')[0];
-        data.createAccount = createAccountEnabled ? '1' : '0';
-
-        // Handle photo base64
-        const photoFile = document.getElementById('photo').files[0];
-        if (photoFile) {
-            data.photoString = await new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = reject;
-                reader.readAsDataURL(photoFile);
-            });
-        } else {
-            data.photoString = "";
-        }
-
-        await saveVolunteerRecord(data);
-    } catch (error) {
-        console.error('Error in form submission:', error);
-        document.getElementById('loadingOverlay').classList.add('hidden');
-        showMessage('An unexpected error occurred. Please try again.', 'error');
     }
-}
 
-// Loading state management
-function setLoadingState(isLoading) {
-    const overlay = document.getElementById('loadingOverlay');
-    const submitBtn = document.getElementById('submitBtn');
-    const submitText = document.getElementById('submitBtnText');
-    const submitSpinner = document.getElementById('submitBtnSpinner');
-
-    if (isLoading) {
-        overlay.classList.remove('hidden');
-        submitBtn.disabled = true;
-        submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
-        if (submitText) submitText.textContent = 'Adding...';
-        if (submitSpinner) submitSpinner.classList.remove('hidden');
+    // Convert availability array to comma-separated string
+    if (data.availability) {
+        data.availability = data.availability.join(', ');
     } else {
-        overlay.classList.add('hidden');
-        submitBtn.disabled = false;
-        submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-        if (submitText) submitText.textContent = 'Add Volunteer Record';
-        if (submitSpinner) submitSpinner.classList.add('hidden');
-    }
-}
-
-// Enhanced message function with types
-function showMessage(message, type = 'info') {
-    const messageContainer = document.getElementById('messageContainer');
-    if (!messageContainer) return;
-
-    // Clear existing messages
-    messageContainer.innerHTML = '';
-
-    // Create message element
-    const messageEl = document.createElement('div');
-    messageEl.className = 'p-4 rounded-lg mb-4 transition-all duration-300 transform translate-y-0 opacity-100';
-
-    // Style based on type
-    switch (type) {
-        case 'success':
-            messageEl.className += ' bg-green-100 border border-green-400 text-green-700';
-            break;
-        case 'error':
-            messageEl.className += ' bg-red-100 border border-red-400 text-red-700';
-            break;
-        case 'warning':
-            messageEl.className += ' bg-yellow-100 border border-yellow-400 text-yellow-700';
-            break;
-        default:
-            messageEl.className += ' bg-blue-100 border border-blue-400 text-blue-700';
+        data.availability = '';
     }
 
-    messageEl.textContent = message;
-    messageContainer.appendChild(messageEl);
+    // Add system fields
+    data.volunteerId = await generateVolunteerId();
+    data.dateAdded = new Date().toISOString().split('T')[0];
+    data.createAccount = createAccountEnabled ? '1' : '0';
 
-    // Auto-hide after 5 seconds for success/info messages
-    if (type === 'success' || type === 'info') {
-        setTimeout(() => {
-            if (messageEl.parentNode) {
-                messageEl.style.transform = 'translateY(-20px)';
-                messageEl.style.opacity = '0';
-                setTimeout(() => {
-                    if (messageEl.parentNode) {
-                        messageEl.remove();
-                    }
-                }, 300);
-            }
-        }, 5000);
+    // Handle photo base64
+    const photoFile = document.getElementById('photo').files[0];
+    if (photoFile) {
+        data.photoString = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(photoFile);
+        });
+    } else {
+        data.photoString = "";
     }
+
+    await saveVolunteerRecord(data);
 }
 
 async function saveVolunteerRecord(data) {
@@ -539,8 +404,7 @@ async function saveVolunteerRecord(data) {
             requiredFields.push('username');
         }
         for (const field of requiredFields) {
-            if (!data[field] || data[field].trim() === '') {
-                document.getElementById('loadingOverlay').classList.add('hidden');
+            if (!data[field]) {
                 showMessage(`Please fill in the ${field.replace(/([A-Z])/g, ' $1').toLowerCase()} field.`, 'error');
                 return;
             }
@@ -559,10 +423,8 @@ async function saveVolunteerRecord(data) {
                 userId = userCredential.user.uid;
             } catch (error) {
                 if (error.code === 'auth/email-already-in-use') {
-                    document.getElementById('loadingOverlay').classList.add('hidden');
                     showMessage('Email address is already in use.', 'error');
                 } else {
-                    document.getElementById('loadingOverlay').classList.add('hidden');
                     showMessage('Error creating user account: ' + error.message, 'error');
                 }
                 return;
@@ -609,22 +471,42 @@ async function saveVolunteerRecord(data) {
         const userRef = doc(collection(db, 'users'), userId);
         await setDoc(userRef, volunteerDoc);
 
-        // Hide loading and show success modal
-        document.getElementById('loadingOverlay').classList.add('hidden');
-        document.getElementById('successModal').classList.remove('hidden');
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        if (currentUser.username) {
+            await logActivity(
+                'Added Volunteer Record',
+                `Added volunteer record: ${data.firstName} ${data.lastName} (${data.volunteerId}) - Department: ${data.preferredDepartment}`,
+                currentUser
+            );
+        }
 
-        // Reset form for next use
+        showMessage(`Volunteer record${createAccountEnabled ? " and account" : ""} created successfully!`, 'success');
         document.getElementById('volunteerForm').reset();
         document.getElementById('photoPreview').src = 'user.png';
         document.getElementById('nationality').value = 'Filipino';
         createAccountEnabled = false;
         if (document.getElementById('createAccountToggle')) updateAccountToggle();
 
+        setTimeout(() => {
+            window.location.href = 'volunteer-records.html';
+        }, 2000);
+
     } catch (error) {
         console.error('Error saving volunteer record:', error);
-        document.getElementById('loadingOverlay').classList.add('hidden');
         showMessage('Error saving volunteer record. Please try again.', 'error');
     }
+}
+
+function showMessage(message, type) {
+    const messageContainer = document.getElementById('messageContainer');
+    const bgColor = type === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700';
+
+    messageContainer.innerHTML = `<div class="${bgColor} border px-4 py-3 rounded">${message}</div>`;
+    messageContainer.classList.remove('hidden');
+
+    setTimeout(() => {
+        messageContainer.classList.add('hidden');
+    }, 5000);
 }
 </script>
 </body>

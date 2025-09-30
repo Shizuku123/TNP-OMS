@@ -52,7 +52,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <button onclick="selectDonationType('money')" class="p-6 border-2 border-gray-200 rounded-lg hover:border-red-primary hover:bg-red-light transition-colors text-center">
                             <svg class="h-12 w-12 mx-auto mb-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
                             </svg>
                             <h3 class="text-lg font-medium text-gray-900">Money Donation</h3>
                             <p class="text-sm text-gray-600 mt-2">Cash or monetary contributions</p>
@@ -358,6 +358,7 @@
 
     <script type="module">
         import { db, collection, setDoc, doc, getDocs } from './firebase.js';
+        import { logActivity } from './activity-logger.js';
 
         let currentDonationType = null;
 
@@ -495,106 +496,110 @@
         }
 
         async function handleMoneyDonationSubmit(e) {
-            e.preventDefault();
-            const form = e.target;
-            const formData = new FormData(form);
-            const isAnonymous = formData.get('anonymous') === 'on';
-            const paymentType = formData.get('typeOfDonation');
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const isAnonymous = formData.get('anonymous') === 'on';
+    const paymentType = formData.get('typeOfDonation');
 
-            const donationData = {
-                donationType: 'money',
-                dateOfDonation: formData.get('dateOfDonation'),
-                donorName: isAnonymous ? 'Anonymous' : formData.get('donorName'),
-                contactNumber: formData.get('contactNumber') || '',
-                emailAddress: isAnonymous ? '' : formData.get('emailAddress'),
-                address: formData.get('address') || '',
-                typeOfDonation: paymentType,
-                amount: parseFloat(formData.get('amount')),
-                purpose: formData.get('purpose') || '',
-                tin: formData.get('tin') || '',
-                isAnonymous: isAnonymous,
-                dateAdded: new Date().toISOString().split('T')[0],
-                donationId: await generateDonationId()
-            };
+    const donationData = {
+        donationType: 'money',
+        dateOfDonation: formData.get('dateOfDonation'),
+        donorName: isAnonymous ? 'Anonymous' : formData.get('donorName'),
+        contactNumber: formData.get('contactNumber') || '',
+        emailAddress: isAnonymous ? '' : formData.get('emailAddress'),
+        address: formData.get('address') || '',
+        typeOfDonation: paymentType,
+        amount: parseFloat(formData.get('amount')),
+        purpose: formData.get('purpose') || '',
+        tin: formData.get('tin') || '',
+        isAnonymous: isAnonymous,
+        dateAdded: new Date().toISOString().split('T')[0],
+        donationId: await generateDonationId()
+    };
 
-            // Add payment-specific fields
-            if (paymentType === 'Bank Transfer') {
-                donationData.paymentDetails = {
-                    bankName: formData.get('bankName'),
-                    bankBranch: formData.get('bankBranch') || '',
-                    accountInfo: formData.get('accountInfo'),
-                    transactionRef: formData.get('transactionRef')
-                };
-            } else if (paymentType === 'Check') {
-                donationData.paymentDetails = {
-                    checkNumber: formData.get('checkNumber'),
-                    bankName: formData.get('checkBankName'),
-                    bankBranch: formData.get('checkBranch') || '',
-                    checkDate: formData.get('checkDate'),
-                    payeeName: formData.get('payeeName')
-                };
-            } else if (paymentType === 'Online Payment') {
-                donationData.paymentDetails = {
-                    paymentMethod: formData.get('onlinePaymentMethod'),
-                    transactionRef: formData.get('onlineTransactionRef')
-                };
-            }
+    // Add payment-specific fields
+    if (paymentType === 'Bank Transfer') {
+        donationData.paymentDetails = {
+            bankName: formData.get('bankName'),
+            bankBranch: formData.get('bankBranch') || '',
+            accountInfo: formData.get('accountInfo'),
+            transactionRef: formData.get('transactionRef')
+        };
+    } else if (paymentType === 'Check') {
+        donationData.paymentDetails = {
+            checkNumber: formData.get('checkNumber'),
+            bankName: formData.get('checkBankName'),
+            bankBranch: formData.get('checkBranch') || '',
+            checkDate: formData.get('checkDate'),
+            payeeName: formData.get('payeeName')
+        };
+    } else if (paymentType === 'Online Payment') {
+        donationData.paymentDetails = {
+            paymentMethod: formData.get('onlinePaymentMethod'),
+            transactionRef: formData.get('onlineTransactionRef')
+        };
+    }
 
-            await saveDonationToFirestore(donationData);
-        }
+    // Save to Firestore (this will also log the activity inside saveDonationToFirestore)
+    await saveDonationToFirestore(donationData);
+}
 
-        async function handleInKindDonationSubmit(e) {
-            e.preventDefault();
-            const form = e.target;
-            const formData = new FormData(form);
-            const isAnonymous = formData.get('anonymous') === 'on';
 
-            const donationData = {
-                donationType: 'in-kind',
-                dateOfDonation: formData.get('dateOfDonation'),
-                itemCategory: formData.get('itemCategory'),
-                itemDescription: formData.get('itemDescription'),
-                quantity: parseInt(formData.get('quantity'), 10),
-                unit: formData.get('unit'),
-                expiryDate: formData.get('expiryDate') || '',
-                conditionOfItems: formData.get('conditionOfItems'),
-                receiverName: formData.get('receiverName') || '',
-                donorName: isAnonymous ? 'Anonymous' : formData.get('donorName'),
-                contactNumber: formData.get('contactNumber') || '',
-                emailAddress: isAnonymous ? '' : formData.get('emailAddress'),
-                address: formData.get('address') || '',
-                isAnonymous: isAnonymous,
-                dateAdded: new Date().toISOString().split('T')[0],
-                donationId: await generateDonationId()
-            };
 
-            // Handle photo upload (base64 string)
-            const photoFile = form.querySelector('input[name="photo"]').files[0];
-            if (photoFile) {
-                donationData.photoString = await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(photoFile);
-                });
-            } else {
-                donationData.photoString = '';
-            }
+      async function handleInKindDonationSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const isAnonymous = formData.get('anonymous') === 'on';
 
-            await saveDonationToFirestore(donationData);
-        }
+    const donationData = {
+        donationType: 'in-kind',
+        dateOfDonation: formData.get('dateOfDonation'),
+        itemCategory: formData.get('itemCategory'),
+        itemDescription: formData.get('itemDescription'),
+        quantity: parseInt(formData.get('quantity'), 10),
+        unit: formData.get('unit'),
+        expiryDate: formData.get('expiryDate') || '',
+        conditionOfItems: formData.get('conditionOfItems'),
+        receiverName: formData.get('receiverName') || '',
+        donorName: isAnonymous ? 'Anonymous' : formData.get('donorName'),
+        contactNumber: formData.get('contactNumber') || '',
+        emailAddress: isAnonymous ? '' : formData.get('emailAddress'),
+        address: formData.get('address') || '',
+        isAnonymous: isAnonymous,
+        dateAdded: new Date().toISOString().split('T')[0],
+        donationId: await generateDonationId()
+    };
+
+    // Handle photo upload (base64 string)
+    const photoFile = form.querySelector('input[name="photo"]').files[0];
+    if (photoFile) {
+        donationData.photoString = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(photoFile);
+        });
+    } else {
+        donationData.photoString = '';
+    }
+
+    // Save to Firestore (this will also log the activity inside saveDonationToFirestore)
+    await saveDonationToFirestore(donationData);
+}
+
+
 
         // Save donation record to Firestore
         async function saveDonationToFirestore(data) {
             try {
-                // Validate required fields
+                // Validate required fields (unchanged)
                 if (data.donationType === 'money') {
                     if (!data.dateOfDonation || !data.typeOfDonation || isNaN(data.amount)) {
                         showMessage('Please fill in all required fields.', 'error');
                         return;
                     }
-                    
-                    // Validate payment-specific fields
                     if (data.typeOfDonation === 'Bank Transfer' && data.paymentDetails) {
                         if (!data.paymentDetails.bankName || !data.paymentDetails.accountInfo || !data.paymentDetails.transactionRef) {
                             showMessage('Please fill in all required bank transfer details.', 'error');
@@ -622,8 +627,20 @@
                 const newDonationRef = doc(donationCol); // auto-id
                 await setDoc(newDonationRef, data);
 
+                // Fix: Always log activity, even for anonymous/guest users
+                let currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                if (!currentUser.username) {
+                    currentUser = { username: 'Anonymous', role: 'donor', staffId: '' };
+                }
+                let activityDetails = '';
+                if (data.donationType === 'money') {
+                    activityDetails = `Recorded money donation (${data.donationId}): ₱${data.amount.toFixed(2)} from ${data.donorName} - ${data.typeOfDonation}`;
+                } else if (data.donationType === 'in-kind') {
+                    activityDetails = `Recorded in-kind donation (${data.donationId}): ${data.quantity} ${data.unit} of ${data.itemCategory} from ${data.donorName}`;
+                }
+                await logActivity('Recorded Donation', activityDetails, currentUser);
+
                 showMessage('Donation saved successfully!', 'success');
-                // Reset form and UI after a delay
                 setTimeout(() => {
                     goBack();
                     document.getElementById('moneyDonationForm').reset();
@@ -640,12 +657,12 @@
                     document.getElementById('expiryDateField').classList.add('hidden');
                 }, 2000);
             } catch (err) {
-                console.error(err);
+                console.error('[v0] Error in saveDonationToFirestore:', err);
                 showMessage('Error saving donation. Please try again.', 'error');
             }
         }
 
-        // Generate unique donationId by checking Firestore
+        // Generate unique donationId by checking Firestore (unchanged)
         async function generateDonationId() {
             try {
                 const donationCol = collection(db, 'donations');

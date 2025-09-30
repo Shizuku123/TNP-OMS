@@ -1089,7 +1089,15 @@
                 return true;
             },
 
-            logout: function() {
+            logout: async function() {
+                const currentUser = this.getCurrentUser();
+                if (currentUser) {
+                    try {
+                        await logActivity('User Logout', `${currentUser.username} logged out of the system`, currentUser);
+                    } catch (error) {
+                        console.error('Error logging logout activity:', error);
+                    }
+                }
                 localStorage.removeItem('currentUser');
                 window.location.href = 'login.html';
             }
@@ -3113,6 +3121,7 @@ async function loadDonorsData() {
     
     <script type="module">
         import { db, collection, getDocs, setDoc, doc, updateDoc, deleteDoc } from './firebase.js';
+        import { logActivity } from './activity-logger.js';
 
         // Make Firebase functions globally accessible
         window.db = db;
@@ -3122,6 +3131,7 @@ async function loadDonorsData() {
         window.getDocs = getDocs;
         window.updateDoc = updateDoc;
         window.deleteDoc = deleteDoc;
+        window.logActivity = logActivity;
 
         window.showAnnouncementDetail = showAnnouncementDetail;
         window.showTaskDetail = showTaskDetail;

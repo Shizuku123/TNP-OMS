@@ -105,6 +105,7 @@
     import { auth, db } from './firebase.js';
     import { signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
     import { doc, getDoc, getDocs, collection, query, where, setDoc } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js';
+    import { logActivity } from './activity-logger.js';
 
     // --- EXECUTE create-user.js LOGIC ON PAGE LOAD (if user does not exist) ---
     async function ensureAdminUser() {
@@ -220,13 +221,15 @@ ensureAdminUser();
           let userFirestoreData = userDocSnap.exists() ? userDocSnap.data() : userData;
 
           // Step 4: Save role and featuresGranted to localStorage for use in index.html
-          // If featuresGranted not set, fallback to [] for staff, or all for admin
           const persistUser = {
             ...userFirestoreData,
             role: userFirestoreData.role || "staff",
             featuresGranted: userFirestoreData.featureGranted || userFirestoreData.featuresGranted || [],
           };
           localStorage.setItem('currentUser', JSON.stringify(persistUser));
+          
+          await logActivity('User Login', `${persistUser.username} logged into the system`, persistUser);
+          
           loginText.textContent = 'Success! Redirecting...';
           
           setTimeout(() => {

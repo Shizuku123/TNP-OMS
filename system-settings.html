@@ -150,7 +150,9 @@
         </form>
     </div>
 
-    <script>
+    <script type="module">
+        import { logActivity } from './activity-logger.js';
+        
         let currentUser = null;
 
         // Session Manager
@@ -267,7 +269,7 @@
             }
         }
 
-        function saveSettings() {
+        async function saveSettings() {
             try {
                 const formData = new FormData(document.getElementById('settingsForm'));
                 const settings = {};
@@ -283,8 +285,7 @@
                 // Save to localStorage
                 localStorage.setItem('system-settings', JSON.stringify(settings));
                 
-                // Log activity
-                logActivity('Updated System Settings', 'Modified operating hours and system configuration');
+                await logActivity('Updated System Settings', 'Modified operating hours and system configuration', currentUser);
                 
                 showMessage('System settings updated successfully!', 'success');
                 
@@ -301,28 +302,6 @@
             } catch (error) {
                 console.error('Error saving settings:', error);
                 showMessage('Error saving settings. Please try again.', 'error');
-            }
-        }
-
-        function logActivity(action, details) {
-            try {
-                const activities = JSON.parse(localStorage.getItem('system-activity') || '[]');
-                const activityId = 'ACT' + String(activities.length + 1).padStart(4, '0');
-                
-                const activity = {
-                    activityId: activityId,
-                    userId: currentUser.username,
-                    username: currentUser.username,
-                    action: action,
-                    details: details,
-                    timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
-                    ipAddress: '127.0.0.1'
-                };
-                
-                activities.push(activity);
-                localStorage.setItem('system-activity', JSON.stringify(activities));
-            } catch (error) {
-                console.error('Error logging activity:', error);
             }
         }
 
