@@ -667,6 +667,19 @@
                                     <input type="date" id="printDischargeToDate" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
                                 </div>
                             </div>
+                            
+                            <!-- Received By Section -->
+                            <div class="grid grid-cols-1 gap-4 mb-4">
+                                <div>
+                                    <label class="flex items-center mb-2">
+                                        <input type="checkbox" id="printReceivedByCheck" class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                        <span class="ml-2 text-sm font-medium text-gray-700">Add "Received By" field</span>
+                                    </label>
+                                    <div id="receivedByField" class="hidden">
+                                        <input type="text" id="printReceivedBy" placeholder="Enter receiver's name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
@@ -1798,6 +1811,8 @@
             document.getElementById('printReligion').addEventListener('change', applyPrintFilters);
             document.getElementById('printDischargeFromDate').addEventListener('change', applyPrintFilters);
             document.getElementById('printDischargeToDate').addEventListener('change', applyPrintFilters);
+            document.getElementById('printReceivedByCheck').addEventListener('change', function() { toggleReceivedByField(); applyPrintFilters(); });
+            document.getElementById('printReceivedBy').addEventListener('input', applyPrintFilters);
             
             // Close modal when clicking outside
             document.getElementById('showAllModal').addEventListener('click', function(e) {
@@ -2165,6 +2180,18 @@
         }
     }
 
+    function toggleReceivedByField() {
+        const receivedByCheck = document.getElementById('printReceivedByCheck').checked;
+        const receivedByField = document.getElementById('receivedByField');
+        
+        if (receivedByCheck) {
+            receivedByField.classList.remove('hidden');
+        } else {
+            receivedByField.classList.add('hidden');
+            document.getElementById('printReceivedBy').value = ''; // Clear the field when hidden
+        }
+    }
+
     function applyPrintFilters() {
         // Get filter values
         const recordType = document.getElementById('printRecordType').value;
@@ -2188,6 +2215,8 @@
         } else if (recordType === 'discharged') {
             records = [...dischargedRecords];
         }
+
+        console.log(`Print filter debug: recordType=${recordType}, allRecords=${allRecords.length}, dischargedRecords=${dischargedRecords.length}, totalRecords=${records.length}`);
 
         // Apply filters
         printFilteredRecords = records.filter(record => {
@@ -2242,6 +2271,8 @@
             return true;
         });
 
+        console.log(`Print filter result: ${printFilteredRecords.length} records after filtering`);
+
         // Update preview
         updatePrintPreview();
     }
@@ -2259,9 +2290,12 @@
         document.getElementById('printReligion').value = '';
         document.getElementById('printDischargeFromDate').value = '';
         document.getElementById('printDischargeToDate').value = '';
+        document.getElementById('printReceivedByCheck').checked = false;
+        document.getElementById('printReceivedBy').value = '';
         
-        // Hide discharge filter
+        // Hide discharge filter and received by field
         document.getElementById('dischargeeDateFilter').classList.add('hidden');
+        document.getElementById('receivedByField').classList.add('hidden');
         
         // Reapply filters
         applyPrintFilters();
@@ -2274,7 +2308,12 @@
         recordCount.textContent = `${printFilteredRecords.length} records will be printed`;
         
         if (printFilteredRecords.length === 0) {
-            previewContent.innerHTML = '<div class="text-center text-gray-500 py-8">No records match the selected filters</div>';
+            // Check if records are still loading
+            if (allRecords.length === 0 && dischargedRecords.length === 0) {
+                previewContent.innerHTML = '<div class="text-center text-gray-500 py-8">Loading records...</div>';
+            } else {
+                previewContent.innerHTML = '<div class="text-center text-gray-500 py-8">No records match the selected filters</div>';
+            }
             return;
         }
 
@@ -2284,50 +2323,26 @@
         const dischargedRecords = printFilteredRecords.filter(r => r._isDischarged).length;
         const maleRecords = printFilteredRecords.filter(r => r.gender && r.gender.toLowerCase() === 'male').length;
         const femaleRecords = printFilteredRecords.filter(r => r.gender && r.gender.toLowerCase() === 'female').length;
+        const recordType = document.getElementById('printRecordType').value;
+
+        // Get current user and received by info
+        const currentUser = getCurrentUser();
+        const preparedBy = currentUser ? `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim() : 'Unknown User';
+        const receivedByEnabled = document.getElementById('printReceivedByCheck').checked;
+        const receivedBy = document.getElementById('printReceivedBy').value.trim();
 
         // Get logo URL
         const logoUrl = `${window.location.origin}${window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'))}/tahanan-logo.png`;
 
-        // Generate preview HTML with statistics cards and table format
+        // Generate preview HTML with header and table format
         let previewHTML = `
             <div class="print-header text-center mb-4">
                 <img src="${logoUrl}" alt="Tahanan ng Pagmamahal Logo" class="mx-auto mb-2" style="height: 80px;">
                 <p style="margin: 2px 0; font-size: 10px;">45 Dr. Pilapil St., Brgy. Sagad, Pasig, Metro Manila, Philippines</p>
-                        <p style="margin: 2px 0; font-size: 10px;">Contact: (+63) 917 525 7188 Tel: +632 8631 7188</p>
-                        <p style="margin: 2px 0; font-size: 10px;">Email: tahananpch@gmail.com</p>
-                        <p style="color: #666; margin: 8px 0 2px 0; font-size: 13px; font-weight: bold;">Donation Records Report</p>
-                        <p style="margin: 0; color: #666; font-size: 10px;">Generated on ${new Date().toLocaleDateString()}</p>
-                <h2 class="text-sm font-semibold text-gray-700">Child Records Report</h2>
+                <p style="margin: 2px 0; font-size: 10px;">Contact: (+63) 917 525 7188 Tel: +632 8631 7188</p>
+                <p style="margin: 2px 0; font-size: 10px;">Email: tahananpch@gmail.com</p>
+                <h2 class="text-sm font-semibold text-gray-700 mt-2">Child Records Report</h2>
                 <p class="text-xs text-gray-600">Generated on: ${new Date().toLocaleDateString()}</p>
-            </div>
-            
-            <!-- Statistics Cards -->
-            <div class="grid grid-cols-5 gap-2 mb-4">
-                <div class="bg-gray-50 border border-gray-200 rounded p-2 text-center">
-                    <div class="text-xs text-gray-600">Total Records</div>
-                    <div class="text-lg font-bold text-red-600">${totalRecords}</div>
-                    <div class="text-xs text-gray-700">Children</div>
-                </div>
-                <div class="bg-gray-50 border border-gray-200 rounded p-2 text-center">
-                    <div class="text-xs text-gray-600">In Care</div>
-                    <div class="text-lg font-bold text-red-600">${inCareRecords}</div>
-                    <div class="text-xs text-gray-700">Active Cases</div>
-                </div>
-                <div class="bg-gray-50 border border-gray-200 rounded p-2 text-center">
-                    <div class="text-xs text-gray-600">Discharged</div>
-                    <div class="text-lg font-bold text-red-600">${dischargedRecords}</div>
-                    <div class="text-xs text-gray-700">Completed</div>
-                </div>
-                <div class="bg-gray-50 border border-gray-200 rounded p-2 text-center">
-                    <div class="text-xs text-gray-600">Male</div>
-                    <div class="text-lg font-bold text-red-600">${maleRecords}</div>
-                    <div class="text-xs text-gray-700">Boys</div>
-                </div>
-                <div class="bg-gray-50 border border-gray-200 rounded p-2 text-center">
-                    <div class="text-xs text-gray-600">Female</div>
-                    <div class="text-lg font-bold text-red-600">${femaleRecords}</div>
-                    <div class="text-xs text-gray-700">Girls</div>
-                </div>
             </div>
             
             <div class="overflow-x-auto">
@@ -2381,6 +2396,40 @@
                 </div>
             `;
         }
+
+        // Add Summary Section
+        previewHTML += `
+            <div class="mt-6 pt-4 border-t-2 border-red-600">
+                <div class="text-center mb-3">
+                    <h3 class="text-sm font-bold text-red-600">SUMMARY</h3>
+                    <div class="flex justify-center gap-6 text-xs mt-2">
+                        <span class="text-gray-600">Total: <strong class="text-red-600">${totalRecords}</strong></span>
+                        ${recordType === 'all' || recordType === 'incare' ? `<span class="text-gray-600">In Care: <strong class="text-red-600">${inCareRecords}</strong></span>` : ''}
+                        ${recordType === 'all' || recordType === 'discharged' ? `<span class="text-gray-600">Discharged: <strong class="text-red-600">${dischargedRecords}</strong></span>` : ''}
+                        <span class="text-gray-600">Male: <strong class="text-red-600">${maleRecords}</strong></span>
+                        <span class="text-gray-600">Female: <strong class="text-red-600">${femaleRecords}</strong></span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Prepared By Section -->
+            <div class="mt-6 pt-3 border-t border-gray-300 text-xs">
+                <div class="flex justify-between">
+                    ${receivedByEnabled && receivedBy ? `
+                    <div class="text-left">
+                        <div class="text-gray-600">Received By:</div>
+                        <div class="font-semibold mt-1">${receivedBy}</div>
+                        <div class="text-gray-600 text-xs mt-1">Date: _______________</div>
+                    </div>
+                    ` : '<div></div>'}
+                    <div class="text-right">
+                        <div class="text-gray-600">Prepared By:</div>
+                        <div class="font-semibold mt-1">${preparedBy}</div>
+                        <div class="text-gray-600 text-xs mt-1">Generated on: ${new Date().toLocaleDateString()}</div>
+                    </div>
+                </div>
+            </div>
+        `;
 
         previewContent.innerHTML = previewHTML;
     }
@@ -2451,6 +2500,12 @@
         const maleRecords = records.filter(r => r.gender && r.gender.toLowerCase() === 'male').length;
         const femaleRecords = records.filter(r => r.gender && r.gender.toLowerCase() === 'female').length;
         
+        // Get current user name and received by info
+        const currentUser = getCurrentUser();
+        const preparedBy = currentUser ? `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim() : 'Unknown User';
+        const receivedByEnabled = document.getElementById('printReceivedByCheck').checked;
+        const receivedBy = document.getElementById('printReceivedBy').value.trim();
+        
         let content = `
             <!DOCTYPE html>
             <html>
@@ -2487,37 +2542,6 @@
                     .date { 
                         font-size: 11px; 
                         color: #666; 
-                    }
-                    .stats-container {
-                        display: flex;
-                        justify-content: space-between;
-                        margin-bottom: 20px;
-                        gap: 15px;
-                    }
-                    .stat-card {
-                        flex: 1;
-                        background-color: #f8f9fa;
-                        border: 1px solid #dee2e6;
-                        border-radius: 4px;
-                        padding: 15px;
-                        text-align: center;
-                    }
-                    .stat-card h3 {
-                        font-size: 12px;
-                        color: #666;
-                        margin: 0 0 5px 0;
-                        font-weight: normal;
-                    }
-                    .stat-card .number {
-                        font-size: 24px;
-                        font-weight: bold;
-                        color: #d1514a;
-                        margin: 5px 0;
-                    }
-                    .stat-card .label {
-                        font-size: 10px;
-                        color: #333;
-                        font-weight: bold;
                     }
                     .records-table {
                         width: 100%;
@@ -2557,16 +2581,85 @@
                     .text-nowrap {
                         white-space: nowrap;
                     }
+                    .summary-section {
+                        margin-top: 30px;
+                        border-top: 2px solid #d1514a;
+                        padding-top: 20px;
+                    }
+                    .summary-stats {
+                        text-align: center;
+                        margin-bottom: 20px;
+                    }
+                    .summary-stats h3 {
+                        font-size: 12px;
+                        color: #d1514a;
+                        margin-bottom: 10px;
+                        font-weight: bold;
+                    }
+                    .stats-row {
+                        display: flex;
+                        justify-content: center;
+                        gap: 30px;
+                        font-size: 11px;
+                    }
+                    .stat-item {
+                        display: flex;
+                        align-items: center;
+                        gap: 5px;
+                    }
+                    .stat-label {
+                        color: #666;
+                    }
+                    .stat-value {
+                        font-weight: bold;
+                        color: #d1514a;
+                    }
+                    .signature-section {
+                        margin-top: 30px;
+                        border-top: 1px solid #ddd;
+                        padding-top: 15px;
+                        font-size: 11px;
+                    }
+                    .signature-row {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: flex-start;
+                    }
+                    .signature-box {
+                        flex: 1;
+                        max-width: 200px;
+                    }
+                    .signature-box.left {
+                        text-align: left;
+                    }
+                    .signature-box.right {
+                        text-align: right;
+                    }
+                    .signature-label {
+                        color: #666;
+                        margin-bottom: 5px;
+                    }
+                    .signature-name {
+                        font-weight: bold;
+                        margin-bottom: 3px;
+                    }
+                    .signature-date {
+                        color: #666;
+                        font-size: 10px;
+                    }
+                    .signature-line {
+                        border-bottom: 1px solid #666;
+                        margin-bottom: 3px;
+                        height: 20px;
+                    }
                     @media print { 
                         body { margin: 10px; font-size: 10px; } 
-                        .stats-container { margin-bottom: 15px; }
-                        .stat-card { padding: 10px; }
-                        .stat-card .number { font-size: 20px; }
                         .records-table { font-size: 8px; }
                         .records-table th { font-size: 8px; padding: 4px 3px; }
                         .records-table td { font-size: 8px; padding: 4px 3px; }
                         .header { margin-bottom: 15px; }
                         .logo { height: 80px; }
+                        .summary-section { margin-top: 20px; padding-top: 15px; }
                     }
                 </style>
             </head>
@@ -2578,35 +2671,6 @@
                     <p style="margin: 2px 0; font-size: 10px;">Email: tahananpch@gmail.com</p>
                     <div class="report-title">Child Records Report</div>
                     <div class="date">Generated on: ${currentDate}</div>
-                </div>
-                
-                <!-- Statistics Cards -->
-                <div class="stats-container">
-                    <div class="stat-card">
-                        <h3>Total Records</h3>
-                        <div class="number">${totalRecords}</div>
-                        <div class="label">Children</div>
-                    </div>
-                    ${recordType === 'all' || recordType === 'incare' ? `
-                    <div class="stat-card">
-                        <h3>In Care</h3>
-                        <div class="number">${inCareRecords}</div>
-                        <div class="label">Active Cases</div>
-                    </div>` : ''}
-                    ${recordType === 'all' || recordType === 'discharged' ? `
-                    <div class="stat-card">
-                        <h3>Discharged</h3>
-                        <div class="number">${dischargedRecords}</div>
-                        <div class="label">Completed Cases</div>
-                    </div>` : ''}
-                    <div class="stat-card">
-                        <h3>Male</h3>
-                        <div class="number">${maleRecords}</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Female</h3>
-                        <div class="number">${femaleRecords}</div>
-                    </div>
                 </div>
                 
                 <table class="records-table">
@@ -2658,6 +2722,56 @@
         content += `
                     </tbody>
                 </table>
+                
+                <!-- Summary Section -->
+                <div class="summary-section">
+                    <div class="summary-stats">
+                        <h3>SUMMARY</h3>
+                        <div class="stats-row">
+                            <div class="stat-item">
+                                <span class="stat-label">Total:</span>
+                                <span class="stat-value">${totalRecords}</span>
+                            </div>
+                            ${recordType === 'all' || recordType === 'incare' ? `
+                            <div class="stat-item">
+                                <span class="stat-label">In Care:</span>
+                                <span class="stat-value">${inCareRecords}</span>
+                            </div>` : ''}
+                            ${recordType === 'all' || recordType === 'discharged' ? `
+                            <div class="stat-item">
+                                <span class="stat-label">Discharged:</span>
+                                <span class="stat-value">${dischargedRecords}</span>
+                            </div>` : ''}
+                            <div class="stat-item">
+                                <span class="stat-label">Male:</span>
+                                <span class="stat-value">${maleRecords}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Female:</span>
+                                <span class="stat-value">${femaleRecords}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Signature Section -->
+                <div class="signature-section">
+                    <div class="signature-row">
+                        ${receivedByEnabled && receivedBy ? `
+                        <div class="signature-box left">
+                            <div class="signature-label">Received By:</div>
+                            <div class="signature-name">${receivedBy}</div>
+                            <div class="signature-line"></div>
+                            <div class="signature-date">Date: _______________</div>
+                        </div>
+                        ` : '<div></div>'}
+                        <div class="signature-box right">
+                            <div class="signature-label">Prepared By:</div>
+                            <div class="signature-name">${preparedBy}</div>
+                            <div class="signature-date">Generated on: ${currentDate}</div>
+                        </div>
+                    </div>
+                </div>
             </body>
             </html>
         `;
