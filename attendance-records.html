@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Staff Attendance Records - Tahanan ng Pagmamahal OMS</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="firebase.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -33,7 +34,7 @@
                 </div>
                 <h1 class="text-xl font-semibold text-gray-900">Staff Attendance Records</h1>
                 <div class="flex items-center space-x-4">
-                    <button onclick="exportToCSV()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors hidden">
+                    <button onclick="exportToCSV()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
                         Export CSV
                     </button>
                 </div>
@@ -46,40 +47,130 @@
         <!-- Success/Error Messages -->
         <div id="messageContainer" class="mb-4 hidden"></div>
 
-       
-        <!-- Search -->
-        <!-- Search -->
-    <div class="mb-6 bg-white rounded-lg shadow p-6">
-        <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
-
-            <!-- Search Input -->
-            <div class="flex-1 w-full hidden">
-                <input type="text" id="searchInput" placeholder="Search attendance records..."
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-500">Today Present</p>
+                        <p class="text-2xl font-semibold text-gray-900" id="todayPresent">0</p>
+                    </div>
+                </div>
             </div>
 
-            <!-- Date Filter (Dropdown + Date Picker) -->
-             <span id="record-count"
-                class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium hidden">
-                0 records
-            </span>
-            <div class="flex items-center space-x-2 w-full sm:w-auto">
-                
-                <select id="dateFilterOption"
-                    class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
-                    <option value="today">Today</option>
-                    <option value="all">All</option>
-                    <option value="custom">Pick a date</option>
-                </select>
-
-                <input type="date" id="dateFilterInput" disabled
-                    class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                            <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-500">Late Today</p>
+                        <p class="text-2xl font-semibold text-gray-900" id="todayLate">0</p>
+                    </div>
+                </div>
             </div>
 
-            <!-- Record Count -->
-            
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-500">On Leave</p>
+                        <p class="text-2xl font-semibold text-gray-900" id="todayLeave">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 00-2 2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-500">Total Records</p>
+                        <p class="text-2xl font-semibold text-gray-900" id="totalRecords">0</p>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
+
+        <!-- Enhanced Filters and Search -->
+        <div class="bg-white shadow rounded-lg mb-6">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Filters & Search</h3>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Date Range Filter -->
+                    <div>
+                        <label for="startDate" class="block text-sm font-medium text-gray-700 mb-1">From Date</label>
+                        <input type="date" id="startDate" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label for="endDate" class="block text-sm font-medium text-gray-700 mb-1">To Date</label>
+                        <input type="date" id="endDate" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                    </div>
+                    
+                    <!-- Search -->
+                    <div>
+                        <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                        <input type="text" id="searchInput" placeholder="Search staff name..." 
+                               class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                    </div>
+                    
+                    <!-- Status Filter -->
+                    <div>
+                        <label for="statusFilter" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                        <select id="statusFilter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                            <option value="">All Status</option>
+                            <option value="Present">Present</option>
+                            <option value="Late">Late</option>
+                            <option value="Absent">Absent</option>
+                            <option value="Leave">Leave</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Quick Date Filters -->
+                <div class="mt-4 flex flex-wrap gap-2">
+                    <button onclick="setDateRange('today')" class="px-3 py-1 text-sm bg-red-100 text-red-700 rounded-full hover:bg-red-200">Today</button>
+                    <button onclick="setDateRange('yesterday')" class="px-3 py-1 text-sm bg-red-100 text-red-700 rounded-full hover:bg-red-200">Yesterday</button>
+                    <button onclick="setDateRange('thisWeek')" class="px-3 py-1 text-sm bg-red-100 text-red-700 rounded-full hover:bg-red-200">This Week</button>
+                    <button onclick="setDateRange('thisMonth')" class="px-3 py-1 text-sm bg-red-100 text-red-700 rounded-full hover:bg-red-200">This Month</button>
+                    <button onclick="clearDateRange()" class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200">Clear Filters</button>
+                </div>
+                
+                <!-- Records Count -->
+                <div class="mt-4 flex justify-between items-center">
+                    <span id="record-count" class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">0 records</span>
+                    <div class="flex gap-2">
+                        <button onclick="refreshData()" class="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200">Refresh</button>
+                        <button onclick="exportFiltered()" class="px-3 py-1 text-sm bg-green-100 text-green-700 rounded-full hover:bg-green-200">Export Filtered</button>
+                        <button onclick="showDTRModal()" class="px-3 py-1 text-sm bg-purple-100 text-purple-700 rounded-full hover:bg-purple-200">Print DTR</button>
+                    </div>
+                </div>
+            </div>
+        </div>
          <!-- Filter Tabs -->
         <!-- <div class="mb-6 bg-white rounded-lg shadow">
             <div class="border-b border-gray-200">
@@ -122,12 +213,14 @@
             <thead class="bg-gray-50">
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Account Name
+                        Account Details
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Date
+                        Date & Time
                     </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status & Location
+                    </th>
                 </tr>
             </thead>
             <tbody id="attendance-table-body" class="bg-white divide-y divide-gray-200">
@@ -139,6 +232,42 @@
     <!-- Mobile Cards -->
     <div id="records-cards" class="sm:hidden px-4 py-4 space-y-4">
         <!-- Filled via JS -->
+    </div>
+
+    <!-- Pagination Controls -->
+    <div id="pagination-controls" class="mt-6 flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 sm:px-6 rounded-lg shadow">
+        <div class="flex justify-between flex-1 sm:hidden">
+            <button id="prevPageMobile" class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                Previous
+            </button>
+            <button id="nextPageMobile" class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                Next
+            </button>
+        </div>
+        <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+            <div>
+                <p class="text-sm text-gray-700">
+                    Showing <span id="startRecord" class="font-medium">1</span> to <span id="endRecord" class="font-medium">10</span> of <span id="totalRecordsCount" class="font-medium">0</span> results
+                </p>
+            </div>
+            <div>
+                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" id="paginationNav">
+                    <button id="prevPage" class="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-l-md hover:bg-gray-50">
+                        <span class="sr-only">Previous</span>
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                    <!-- Page numbers will be inserted here -->
+                    <button id="nextPage" class="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-r-md hover:bg-gray-50">
+                        <span class="sr-only">Next</span>
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </nav>
+            </div>
+        </div>
     </div>
 
 </div>
@@ -180,28 +309,57 @@
         </div>
     </div>
 
+    <!-- DTR Print Modal -->
+    <div id="dtr-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg w-11/12 max-w-lg p-6 relative">
+            <button onclick="closeDTRModal()" class="absolute top-3 right-3 text-gray-500 hover:text-black text-xl">
+                &times;
+            </button>
+            <h2 class="text-xl font-semibold text-gray-800 mb-6">Print DTR (Daily Time Record)</h2>
+            
+            <div class="space-y-4">
+                <!-- Staff Selection -->
+                <div>
+                    <label for="dtr-staff-select" class="block text-sm font-medium text-gray-700 mb-2">Select Staff</label>
+                    <select id="dtr-staff-select" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500">
+                        <option value="">Choose a staff member...</option>
+                    </select>
+                </div>
+                
+                <!-- Date Range -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="dtr-start-date" class="block text-sm font-medium text-gray-700 mb-2">From Date</label>
+                        <input type="date" id="dtr-start-date" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <div>
+                        <label for="dtr-end-date" class="block text-sm font-medium text-gray-700 mb-2">To Date</label>
+                        <input type="date" id="dtr-end-date" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                </div>
+                
+                <!-- Quick Date Options -->
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="setDTRDateRange('thisWeek')" class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200">This Week</button>
+                    <button onclick="setDTRDateRange('lastWeek')" class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200">Last Week</button>
+                    <button onclick="setDTRDateRange('thisMonth')" class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200">This Month</button>
+                    <button onclick="setDTRDateRange('lastMonth')" class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200">Last Month</button>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button onclick="closeDTRModal()" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">Cancel</button>
+                    <button onclick="previewDTR()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Preview DTR</button>
+                    <button onclick="printDTR()" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Print DTR</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Filter Div -->
     <script>
+        // Old date filter listeners removed - functionality replaced by enhanced filters
 
-
-
-            document.getElementById('dateFilterOption').addEventListener('change', function () {
-                const dateInput = document.getElementById('dateFilterInput');
-
-                if (this.value === 'custom') {
-                    dateInput.disabled = false;
-                    dateInput.value = '';
-                } else {
-                    dateInput.disabled = true;
-                    dateInput.value = '';
-                }
-
-                applyFilters(); // <-- this is essential
-            });
-
-
-
-            document.getElementById('dateFilterInput').addEventListener('input', applyFilters);
 
 
         function filterToToday() {
@@ -214,11 +372,14 @@
         }
 
 
-        document.getElementById('dateFilterInput').addEventListener('input', applyFilters);
-
+        // Old applyFilters function - replaced by applyEnhancedFilters
         function applyFilters() {
-            const option = document.getElementById('dateFilterOption').value;
-            const customDate = document.getElementById('dateFilterInput').value;
+            // Fallback to enhanced filters for compatibility
+            if (typeof applyEnhancedFilters === 'function') {
+                applyEnhancedFilters();
+                return;
+            }
+            
             const today = new Date().toISOString().split('T')[0];
 
             // Always start from allRecords
@@ -286,37 +447,76 @@
         });
 
         function setupEventListeners() {
-            document.getElementById('searchInput').addEventListener('input', function() {
-                const searchTerm = this.value.toLowerCase();
-                filteredRecords = allRecords.filter(record => {
-                    return record.accountName.toLowerCase().includes(searchTerm) ||
-                           record.date.includes(searchTerm) ||
-                           record.status.toLowerCase().includes(searchTerm) ||
-                           (record.remarks && record.remarks.toLowerCase().includes(searchTerm));
-                });
-                displayRecords();
-            });
+            // Event listeners are now handled in the enhanced features section
+            // This function is kept for compatibility but functionality moved to DOMContentLoaded at bottom
         }
 
-        // To be replaced with retrieving from firebase
         async function loadAttendanceRecords() {
             try {
+                showSkeletonLoading();
+                
                 const firebaseModule = await import('./firebase.js');
                 const db = firebaseModule.db;
                 const { collection, getDocs } = firebaseModule;
+
                 const attendanceCol = collection(db, 'attendance');
                 const snapshot = await getDocs(attendanceCol);
+                
                 allRecords = [];
+                
                 snapshot.forEach(docSnap => {
-                    allRecords.push(docSnap.data());
+                    const data = docSnap.data();
+                    
+                    // Ensure all required fields are present with fallback values
+                    const record = {
+                        attendanceId: data.attendanceId || docSnap.id,
+                        accountId: data.accountId || '',
+                        accountName: data.accountName || 'Unknown',
+                        accountType: data.accountType || '',
+                        coordinates: data.coordinates || '',
+                        date: data.date || '',
+                        dateAdded: data.dateAdded || '',
+                        location: data.location || '',
+                        locationAccuracy: data.locationAccuracy || '',
+                        locationVerified: data.locationVerified || false,
+                        remarks: data.remarks || '',
+                        status: data.status || 'Unknown',
+                        timeIn: data.timeIn || '',
+                        timeOut: data.timeOut || '',
+                        // Add document ID for reference
+                        _docId: docSnap.id
+                    };
+                    allRecords.push(record);
                 });
-                // Sort by date descending
-                allRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
-                applyFilters();
+                
+                // Sort by date descending, then by timeIn
+                allRecords.sort((a, b) => {
+                    const dateComparison = new Date(b.date) - new Date(a.date);
+                    if (dateComparison === 0) {
+                        // If same date, sort by timeIn
+                        if (a.timeIn && b.timeIn) {
+                            return a.timeIn.localeCompare(b.timeIn);
+                        }
+                    }
+                    return dateComparison;
+                });
+                
+                console.log(`Loaded ${allRecords.length} attendance records`);
+                hideSkeletonLoading();
+                
+                // Initialize filteredRecords and display all records initially
+                filteredRecords = [...allRecords];
+                currentPage = 1; // Reset to first page
+                displayRecords(); // Use pagination system
+                
             } catch (error) {
+                console.error('Error loading attendance records from Firestore:', error);
+                console.error('Error details:', error.message);
                 showMessage('Error loading attendance records from database.', 'error');
                 allRecords = [];
-                applyFilters();
+                filteredRecords = [];
+                hideSkeletonLoading();
+                displayRecords([]);
             }
         }
 
@@ -325,6 +525,74 @@
                 displayRecords();
             }
         });
+
+        function showSkeletonLoading() {
+            const tableBody = document.getElementById('attendance-table-body');
+            const recordsCards = document.getElementById('records-cards');
+            const recordsTable = document.getElementById('records-table');
+            const noRecords = document.getElementById('no-records');
+            
+            // Hide other elements
+            noRecords.classList.add('hidden');
+            
+            // Show skeleton for desktop table
+            if (window.innerWidth >= 640) {
+                recordsTable.classList.remove('hidden');
+                recordsCards.classList.add('hidden');
+                
+                tableBody.innerHTML = Array(8).fill(0).map(() => `
+                    <tr class="animate-pulse">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="h-4 bg-gray-200 rounded w-32 mb-2"></div>
+                            <div class="h-3 bg-gray-200 rounded w-24"></div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="h-4 bg-gray-200 rounded w-24"></div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="h-6 bg-gray-200 rounded-full w-16"></div>
+                        </td>
+                    </tr>
+                `).join('');
+            } else {
+                recordsTable.classList.add('hidden');
+                recordsCards.classList.remove('hidden');
+                
+                recordsCards.innerHTML = Array(8).fill(0).map(() => `
+                    <div class="bg-white p-3 rounded-lg shadow animate-pulse">
+                        <div class="flex justify-between items-center">
+                            <div class="w-1/3">
+                                <div class="h-4 bg-gray-200 rounded w-20 mb-1"></div>
+                                <div class="h-3 bg-gray-200 rounded w-16"></div>
+                            </div>
+                            <div class="w-1/3 text-center">
+                                <div class="h-4 bg-gray-200 rounded w-16 mx-auto"></div>
+                            </div>
+                            <div class="w-1/3 text-right">
+                                <div class="h-6 bg-gray-200 rounded-full w-12 ml-auto"></div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function hideSkeletonLoading() {
+            const tableBody = document.getElementById('attendance-table-body');
+            const recordsCards = document.getElementById('records-cards');
+            const recordsTable = document.getElementById('records-table');
+            const noRecords = document.getElementById('no-records');
+            
+            // Clear skeleton content
+            tableBody.innerHTML = '';
+            recordsCards.innerHTML = '';
+            
+            // Hide all containers initially - displayRecords() will show the appropriate one
+            recordsTable.classList.add('hidden');
+            recordsCards.classList.add('hidden');
+            noRecords.classList.add('hidden');
+            
+        }
 
 
 
@@ -367,31 +635,40 @@
         //     `).join('');
         // }
 
-        function displayRecords() {
+        function displayRecords(records = null) {
+            // If no specific records provided, use pagination
+            if (records === null) {
+                setupPagination();
+                records = paginatedRecords;
+            }
+            
             const tableBody = document.getElementById('attendance-table-body');
             const recordsCards = document.getElementById('records-cards');
             const recordsTable = document.getElementById('records-table');
             const noRecords = document.getElementById('no-records');
             const recordCount = document.getElementById('record-count');
 
+            console.log(`Displaying ${records.length} attendance records`);
+
             // Update record count badge
-            recordCount.textContent = `${filteredRecords.length} record${filteredRecords.length !== 1 ? 's' : ''}`;
+            recordCount.textContent = `${records.length} record${records.length !== 1 ? 's' : ''}`;
             recordCount.classList.remove('hidden');
 
-            if (filteredRecords.length === 0) {
+            if (records.length === 0) {
                 tableBody.innerHTML = '';
                 recordsCards.innerHTML = '';
                 recordsTable.classList.add('hidden');
                 recordsCards.classList.add('hidden');
                 noRecords.classList.remove('hidden');
+                document.getElementById('pagination-controls').classList.add('hidden');
                 return;
             }
 
             noRecords.classList.add('hidden');
             recordCount.classList.remove('hidden');
 
-            // 🪄 Show the correct container depending on screen size
-            if (window.innerWidth >= 640) { // sm breakpoint ~ Tailwind
+            // Show the correct container depending on screen size
+            if (window.innerWidth >= 640) { // sm breakpoint
                 recordsTable.classList.remove('hidden');
                 recordsCards.classList.add('hidden');
             } else {
@@ -400,36 +677,57 @@
             }
 
             // Desktop Table Rows
-            tableBody.innerHTML = filteredRecords.map(record => `
-                <tr class="hover:bg-gray-50">
+            tableBody.innerHTML = records.map(record => `
+                <tr class="hover:bg-gray-50 cursor-pointer" onclick="viewDetails('${record.attendanceId}')">
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="text-sm font-medium text-gray-900">${record.accountName}</div>
                         <div class="text-sm text-gray-500">${record.accountId}</div>
+                        <div class="text-xs text-gray-400">${record.accountType || 'N/A'}</div>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        ${formatDate(record.date)}
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">${formatDate(record.date)}</div>
+                        <div class="text-xs text-gray-500">
+                            ${record.timeIn ? `In: ${formatTime(record.timeIn)}` : 'No time in'}
+                        </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(record.status)}">
                             ${record.status}
                         </span>
+                        ${record.location ? `<div class="text-xs text-gray-500 mt-1 max-w-xs truncate" title="${record.location}">📍 ${record.location}</div>` : ''}
+                        ${record.locationVerified ? '<div class="text-xs text-green-600 mt-1">✓ Location verified</div>' : ''}
                     </td>
                 </tr>
             `).join('');
 
             // Mobile Cards
-            recordsCards.innerHTML = filteredRecords.map(record => `
+            recordsCards.innerHTML = records.map(record => `
                 <div onclick="viewDetails('${record.attendanceId}')" 
-                    class="bg-white p-3 rounded-lg shadow flex justify-between items-center text-sm font-medium text-gray-800 cursor-pointer">
-                    <div class="w-1/3 truncate">${record.accountName}</div>
-                    <div class="w-1/3 text-center truncate">${formatDate(record.date)}</div>
-                    <div class="w-1/3 text-right">
-                        <span class="inline-block px-2 py-1 text-xs rounded-full ${getStatusColor(record.status)}">
+                    class="bg-white p-4 rounded-lg shadow-sm border cursor-pointer hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="flex-1">
+                            <div class="font-medium text-gray-900 text-sm">${record.accountName}</div>
+                            <div class="text-xs text-gray-500">${record.accountId}</div>
+                        </div>
+                        <span class="px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(record.status)}">
                             ${record.status}
                         </span>
                     </div>
+                    <div class="flex justify-between items-center text-xs text-gray-600">
+                        <div>
+                            <div>${formatDate(record.date)}</div>
+                            ${record.timeIn ? `<div class="text-gray-500">In: ${formatTime(record.timeIn)}</div>` : ''}
+                        </div>
+                        ${record.location ? `<div class="text-right max-w-24 truncate" title="${record.location}">📍 ${record.location}</div>` : ''}
+                    </div>
+                    ${record.locationVerified ? '<div class="text-xs text-green-600 mt-1">✓ Location verified</div>' : ''}
                 </div>
             `).join('');
+            
+            // Update summary cards and record count after displaying records
+            updateSummaryCards();
+            updateRecordCount();
+            setupPagination();
         }
 
 
@@ -587,18 +885,78 @@
 
         function viewDetails(attendanceId) {
             const record = allRecords.find(r => r.attendanceId === attendanceId);
-            if (!record) return;
+            if (!record) {
+                console.error('Attendance record not found:', attendanceId);
+                return;
+            }
 
             const content = `
-                <div><span class="font-medium">Name:</span> ${record.accountName}</div>
-                <div><span class="font-medium">Account ID:</span> ${record.accountId}</div>
-                <div><span class="font-medium">Date:</span> ${formatDate(record.date)}</div>
-                <div><span class="font-medium">Time In:</span> ${record.timeIn || 'N/A'}</div>
-                <div><span class="font-medium">Time Out:</span> ${record.timeOut || 'N/A'}</div>
-                <div><span class="font-medium">Status:</span> ${record.status}</div>
-                ${record.leaveType ? `<div><span class="font-medium">Leave Type:</span> ${record.leaveType}</div>` : ''}
-                ${record.reason ? `<div><span class="font-medium">Reason:</span> ${record.reason}</div>` : ''}
-                ${record.remarks ? `<div><span class="font-medium">Remarks:</span> ${record.remarks}</div>` : ''}
+                <div class="space-y-3">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <span class="font-medium text-gray-700">Name:</span>
+                            <div class="text-gray-900">${record.accountName}</div>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-700">Account ID:</span>
+                            <div class="text-gray-900">${record.accountId}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <span class="font-medium text-gray-700">Account Type:</span>
+                            <div class="text-gray-900">${record.accountType || 'N/A'}</div>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-700">Status:</span>
+                            <span class="px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(record.status)}">
+                                ${record.status}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <span class="font-medium text-gray-700">Date:</span>
+                            <div class="text-gray-900">${formatDate(record.date)}</div>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-700">Time In:</span>
+                            <div class="text-gray-900">${record.timeIn ? formatTime(record.timeIn) : 'N/A'}</div>
+                        </div>
+                    </div>
+                    
+                    ${record.location ? `
+                    <div>
+                        <span class="font-medium text-gray-700">Location:</span>
+                        <div class="text-gray-900 text-sm">${record.location}</div>
+                        <div class="text-xs text-gray-500 mt-1">
+                            ${record.locationVerified ? '✓ Location verified' : '⚠ Location not verified'}
+                            ${record.locationAccuracy ? ` (Accuracy: ${record.locationAccuracy}m)` : ''}
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    ${record.coordinates ? `
+                    <div>
+                        <span class="font-medium text-gray-700">Coordinates:</span>
+                        <div class="text-gray-900 text-sm font-mono">${record.coordinates}</div>
+                    </div>
+                    ` : ''}
+                    
+                    ${record.remarks ? `
+                    <div>
+                        <span class="font-medium text-gray-700">Remarks:</span>
+                        <div class="text-gray-900 text-sm">${record.remarks}</div>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="pt-2 border-t border-gray-200">
+                        <span class="font-medium text-gray-700">Date Added:</span>
+                        <div class="text-gray-600 text-sm">${record.dateAdded ? formatDateTime(record.dateAdded) : 'N/A'}</div>
+                    </div>
+                </div>
             `;
 
             document.getElementById('details-content').innerHTML = content;
@@ -615,24 +973,28 @@
                 return;
             }
 
-            const headers = ['Account Name', 'Account ID', 'Date', 'Time In', 'Time Out', 'Status', 'Location', 'Location Verified', 'Coordinates', 'Leave Type', 'Reason', 'Remarks', 'Date Added'];
+            const headers = [
+                'Attendance ID', 'Account Name', 'Account ID', 'Account Type', 
+                'Date', 'Time In', 'Status', 'Location', 'Location Verified', 
+                'Location Accuracy', 'Coordinates', 'Remarks', 'Date Added'
+            ];
             
             const csvContent = [
                 headers.join(','),
                 ...filteredRecords.map(record => [
-                    `"${record.accountName}"`,
-                    `"${record.accountId}"`,
-                    `"${record.date}"`,
+                    `"${record.attendanceId || ''}"`,
+                    `"${record.accountName || ''}"`,
+                    `"${record.accountId || ''}"`,
+                    `"${record.accountType || ''}"`,
+                    `"${record.date || ''}"`,
                     `"${record.timeIn || ''}"`,
-                    `"${record.timeOut || ''}"`,
-                    `"${record.status}"`,
+                    `"${record.status || ''}"`,
                     `"${record.location || ''}"`,
                     `"${record.locationVerified ? 'Yes' : 'No'}"`,
+                    `"${record.locationAccuracy || ''}"`,
                     `"${record.coordinates || ''}"`,
-                    `"${record.leaveType || ''}"`,
-                    `"${record.reason || ''}"`,
                     `"${record.remarks || ''}"`,
-                    `"${record.dateAdded}"`
+                    `"${record.dateAdded || ''}"`
                 ].join(','))
             ].join('\n');
 
@@ -694,6 +1056,555 @@
             }
         }
 
+        // Enhanced Features JavaScript Functions
+        
+        // Summary Cards Update Function
+        function updateSummaryCards() {
+            const today = new Date().toISOString().split('T')[0];
+            
+            let todayPresent = 0;
+            let todayLate = 0;
+            let todayLeave = 0;
+            let totalRecords = filteredRecords.length;
+            
+            filteredRecords.forEach(record => {
+                if (record.date === today) {
+                    if (record.status === 'Present') {
+                        todayPresent++;
+                    } else if (record.status === 'Late') {
+                        todayLate++;
+                    } else if (record.status === 'Leave') {
+                        todayLeave++;
+                    }
+                }
+            });
+            
+            document.getElementById('todayPresent').textContent = todayPresent;
+            document.getElementById('todayLate').textContent = todayLate;
+            document.getElementById('todayLeave').textContent = todayLeave;
+            document.getElementById('totalRecords').textContent = totalRecords;
+        }
+        
+        // Date Range Functions
+        function setDateRange(period) {
+            const today = new Date();
+            const startDate = document.getElementById('startDate');
+            const endDate = document.getElementById('endDate');
+            
+            switch(period) {
+                case 'today':
+                    startDate.value = today.toISOString().split('T')[0];
+                    endDate.value = today.toISOString().split('T')[0];
+                    break;
+                case 'yesterday':
+                    const yesterday = new Date(today);
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    startDate.value = yesterday.toISOString().split('T')[0];
+                    endDate.value = yesterday.toISOString().split('T')[0];
+                    break;
+                case 'thisWeek':
+                    const weekStart = new Date(today);
+                    weekStart.setDate(today.getDate() - today.getDay());
+                    startDate.value = weekStart.toISOString().split('T')[0];
+                    endDate.value = today.toISOString().split('T')[0];
+                    break;
+                case 'thisMonth':
+                    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+                    startDate.value = monthStart.toISOString().split('T')[0];
+                    endDate.value = today.toISOString().split('T')[0];
+                    break;
+            }
+            applyEnhancedFilters();
+        }
+        
+        function clearDateRange() {
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            document.getElementById('searchInput').value = '';
+            document.getElementById('statusFilter').value = '';
+            applyEnhancedFilters();
+        }
+        
+        // Enhanced Filtering Function
+        function applyEnhancedFilters() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            filteredRecords = allRecords.filter(record => {
+                // Date range filter
+                if (startDate && record.date < startDate) return false;
+                if (endDate && record.date > endDate) return false;
+                
+                // Search filter
+                if (searchTerm && !record.accountName.toLowerCase().includes(searchTerm)) return false;
+                
+                // Status filter
+                if (statusFilter && record.status !== statusFilter) return false;
+                
+                return true;
+            });
+            
+            // Reset to first page when filtering
+            currentPage = 1;
+            
+            displayRecords();
+            updateSummaryCards();
+            updateRecordCount();
+        }
+        
+        // Refresh Data Function
+        function refreshData() {
+            showMessage('Refreshing data...', 'success');
+            loadAttendanceRecords();
+        }
+        
+        // Export Filtered Function
+        function exportFiltered() {
+            if (filteredRecords.length === 0) {
+                showMessage('No records to export.', 'error');
+                return;
+            }
+            
+            const csv = convertToCSV(filteredRecords);
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `attendance_records_filtered_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showMessage('Filtered records exported successfully!', 'success');
+        }
+        
+        function convertToCSV(records) {
+            const headers = ['Name', 'Account ID', 'Date', 'Status', 'Time In', 'Time Out', 'Account Type'];
+            const csvRows = [headers.join(',')];
+            
+            records.forEach(record => {
+                const row = [
+                    record.accountName,
+                    record.accountId,
+                    record.date,
+                    record.status,
+                    record.timeIn || 'N/A',
+                    record.timeOut || 'N/A',
+                    record.accountType || 'N/A'
+                ];
+                csvRows.push(row.join(','));
+            });
+            
+            return csvRows.join('\n');
+        }
+        
+        function updateRecordCount() {
+            const count = filteredRecords.length;
+            document.getElementById('record-count').textContent = `${count} record${count !== 1 ? 's' : ''}`;
+        }
+        
+        // Pagination System
+        let currentPage = 1;
+        let recordsPerPage = 20;
+        let paginatedRecords = [];
+        
+        function setupPagination() {
+            const totalRecords = filteredRecords.length;
+            const totalPages = Math.ceil(totalRecords / recordsPerPage);
+            
+            // Update pagination display
+            document.getElementById('totalRecordsCount').textContent = totalRecords;
+            
+            if (totalRecords === 0) {
+                document.getElementById('pagination-controls').classList.add('hidden');
+                return;
+            }
+            
+            document.getElementById('pagination-controls').classList.remove('hidden');
+            
+            // Calculate start and end record numbers
+            const startRecord = (currentPage - 1) * recordsPerPage + 1;
+            const endRecord = Math.min(currentPage * recordsPerPage, totalRecords);
+            
+            document.getElementById('startRecord').textContent = startRecord;
+            document.getElementById('endRecord').textContent = endRecord;
+            
+            // Get current page records
+            const startIndex = (currentPage - 1) * recordsPerPage;
+            const endIndex = startIndex + recordsPerPage;
+            paginatedRecords = filteredRecords.slice(startIndex, endIndex);
+            
+            // Update pagination buttons
+            const prevBtn = document.getElementById('prevPage');
+            const nextBtn = document.getElementById('nextPage');
+            const prevBtnMobile = document.getElementById('prevPageMobile');
+            const nextBtnMobile = document.getElementById('nextPageMobile');
+            
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === totalPages;
+            prevBtnMobile.disabled = currentPage === 1;
+            nextBtnMobile.disabled = currentPage === totalPages;
+            
+            // Update button classes
+            if (currentPage === 1) {
+                prevBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                prevBtnMobile.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                prevBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                prevBtnMobile.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+            
+            if (currentPage === totalPages) {
+                nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                nextBtnMobile.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                nextBtnMobile.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+            
+            // Generate page numbers (show max 7 pages)
+            generatePageNumbers(totalPages);
+        }
+        
+        function generatePageNumbers(totalPages) {
+            const paginationNav = document.getElementById('paginationNav');
+            const prevBtn = paginationNav.querySelector('#prevPage');
+            const nextBtn = paginationNav.querySelector('#nextPage');
+            
+            // Remove existing page numbers
+            const existingNumbers = paginationNav.querySelectorAll('.page-number');
+            existingNumbers.forEach(btn => btn.remove());
+            
+            if (totalPages <= 1) return;
+            
+            let startPage = Math.max(1, currentPage - 3);
+            let endPage = Math.min(totalPages, startPage + 6);
+            
+            if (endPage - startPage < 6) {
+                startPage = Math.max(1, endPage - 6);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `page-number relative inline-flex items-center px-4 py-2 text-sm font-medium border ${
+                    i === currentPage 
+                        ? 'z-10 bg-red-50 border-red-500 text-red-600' 
+                        : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                }`;
+                pageBtn.textContent = i;
+                pageBtn.onclick = () => goToPage(i);
+                
+                paginationNav.insertBefore(pageBtn, nextBtn);
+            }
+        }
+        
+        function goToPage(page) {
+            currentPage = page;
+            setupPagination();
+            displayRecords(paginatedRecords);
+        }
+        
+        function nextPage() {
+            const totalPages = Math.ceil(filteredRecords.length / recordsPerPage);
+            if (currentPage < totalPages) {
+                goToPage(currentPage + 1);
+            }
+        }
+        
+        function prevPage() {
+            if (currentPage > 1) {
+                goToPage(currentPage - 1);
+            }
+        }
+        
+        // Add Event Listeners for New Features
+        document.addEventListener('DOMContentLoaded', function() {
+            // Date range filters
+            document.getElementById('startDate').addEventListener('change', applyEnhancedFilters);
+            document.getElementById('endDate').addEventListener('change', applyEnhancedFilters);
+            document.getElementById('statusFilter').addEventListener('change', applyEnhancedFilters);
+            
+            // Override the existing search input event listener
+            const searchInput = document.getElementById('searchInput');
+            searchInput.removeEventListener('input', applyFilters); // Remove old listener if exists
+            searchInput.addEventListener('input', applyEnhancedFilters);
+            
+            // Pagination event listeners
+            document.getElementById('prevPage').addEventListener('click', prevPage);
+            document.getElementById('nextPage').addEventListener('click', nextPage);
+            document.getElementById('prevPageMobile').addEventListener('click', prevPage);
+            document.getElementById('nextPageMobile').addEventListener('click', nextPage);
+        });
+        
+        // DTR (Daily Time Record) Functions
+        
+        function showDTRModal(preSelectedStaffId = null) {
+            populateStaffDropdown();
+            setDTRDateRange('thisMonth'); // Default to current month
+            
+            // Pre-select staff if provided
+            if (preSelectedStaffId) {
+                document.getElementById('dtr-staff-select').value = preSelectedStaffId;
+            }
+            
+            document.getElementById('dtr-modal').classList.remove('hidden');
+        }
+        
+        function closeDTRModal() {
+            document.getElementById('dtr-modal').classList.add('hidden');
+        }
+        
+        function populateStaffDropdown() {
+            const staffSelect = document.getElementById('dtr-staff-select');
+            const uniqueStaff = [...new Set(allRecords.map(record => `${record.accountName}|${record.accountId}`))];
+            
+            staffSelect.innerHTML = '<option value="">Choose a staff member...</option>';
+            
+            uniqueStaff.forEach(staff => {
+                const [name, id] = staff.split('|');
+                const option = document.createElement('option');
+                option.value = id;
+                option.textContent = `${name} (${id})`;
+                staffSelect.appendChild(option);
+            });
+        }
+        
+        function setDTRDateRange(period) {
+            const today = new Date();
+            const startDateInput = document.getElementById('dtr-start-date');
+            const endDateInput = document.getElementById('dtr-end-date');
+            
+            switch(period) {
+                case 'thisWeek':
+                    const weekStart = new Date(today);
+                    weekStart.setDate(today.getDate() - today.getDay());
+                    startDateInput.value = weekStart.toISOString().split('T')[0];
+                    endDateInput.value = today.toISOString().split('T')[0];
+                    break;
+                case 'lastWeek':
+                    const lastWeekEnd = new Date(today);
+                    lastWeekEnd.setDate(today.getDate() - today.getDay() - 1);
+                    const lastWeekStart = new Date(lastWeekEnd);
+                    lastWeekStart.setDate(lastWeekEnd.getDate() - 6);
+                    startDateInput.value = lastWeekStart.toISOString().split('T')[0];
+                    endDateInput.value = lastWeekEnd.toISOString().split('T')[0];
+                    break;
+                case 'thisMonth':
+                    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+                    startDateInput.value = monthStart.toISOString().split('T')[0];
+                    endDateInput.value = today.toISOString().split('T')[0];
+                    break;
+                case 'lastMonth':
+                    const lastMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                    const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
+                    startDateInput.value = lastMonthStart.toISOString().split('T')[0];
+                    endDateInput.value = lastMonthEnd.toISOString().split('T')[0];
+                    break;
+            }
+        }
+        
+        function previewDTR() {
+            const dtrData = generateDTRData();
+            if (!dtrData) return;
+            
+            const previewWindow = window.open('', '_blank', 'width=800,height=600');
+            previewWindow.document.write(generateDTRHTML(dtrData, true));
+            previewWindow.document.close();
+        }
+        
+        function printDTR() {
+            const dtrData = generateDTRData();
+            if (!dtrData) return;
+            
+            const printWindow = window.open('', '_blank', 'width=800,height=600');
+            printWindow.document.write(generateDTRHTML(dtrData, false));
+            printWindow.document.close();
+            
+            // Wait for content to load then print
+            printWindow.onload = function() {
+                printWindow.print();
+                printWindow.close();
+            };
+            
+            closeDTRModal();
+            showMessage('DTR sent to printer!', 'success');
+        }
+        
+        function generateDTRData() {
+            const staffId = document.getElementById('dtr-staff-select').value;
+            const startDate = document.getElementById('dtr-start-date').value;
+            const endDate = document.getElementById('dtr-end-date').value;
+            
+            if (!staffId || !startDate || !endDate) {
+                showMessage('Please select staff and date range.', 'error');
+                return null;
+            }
+            
+            // Find staff info
+            const staffRecord = allRecords.find(r => r.accountId === staffId);
+            if (!staffRecord) {
+                showMessage('Staff not found.', 'error');
+                return null;
+            }
+            
+            // Filter records for this staff and date range
+            const staffRecords = allRecords.filter(record => {
+                return record.accountId === staffId && 
+                       record.date >= startDate && 
+                       record.date <= endDate;
+            });
+            
+            // Group by date and calculate totals
+            const dateGroups = {};
+            let totalHours = 0;
+            let totalDays = 0;
+            
+            staffRecords.forEach(record => {
+                if (!dateGroups[record.date]) {
+                    dateGroups[record.date] = {
+                        date: record.date,
+                        timeIn: record.timeIn,
+                        timeOut: record.timeOut,
+                        status: record.status,
+                        hours: 0
+                    };
+                }
+                
+                // Calculate hours worked
+                if (record.timeIn && record.timeOut && record.status === 'Present') {
+                    const timeIn = new Date(`${record.date} ${record.timeIn}`);
+                    const timeOut = new Date(`${record.date} ${record.timeOut}`);
+                    const hoursWorked = (timeOut - timeIn) / (1000 * 60 * 60);
+                    dateGroups[record.date].hours = hoursWorked;
+                    totalHours += hoursWorked;
+                    totalDays++;
+                }
+            });
+            
+            return {
+                staff: {
+                    name: staffRecord.accountName,
+                    id: staffRecord.accountId,
+                    type: staffRecord.accountType || 'Staff'
+                },
+                period: {
+                    start: startDate,
+                    end: endDate
+                },
+                records: Object.values(dateGroups).sort((a, b) => a.date.localeCompare(b.date)),
+                summary: {
+                    totalHours: totalHours.toFixed(2),
+                    totalDays: totalDays,
+                    averageHours: totalDays > 0 ? (totalHours / totalDays).toFixed(2) : '0.00'
+                }
+            };
+        }
+        
+        function generateDTRHTML(dtrData, isPreview) {
+            const today = new Date().toLocaleDateString();
+            
+            return `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>DTR - ${dtrData.staff.name}</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; }
+                    .dtr-header { text-align: center; margin-bottom: 30px; }
+                    .dtr-info { margin-bottom: 20px; }
+                    .dtr-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                    .dtr-table th, .dtr-table td { border: 1px solid #000; padding: 8px; text-align: center; }
+                    .dtr-table th { background-color: #f0f0f0; font-weight: bold; }
+                    .dtr-summary { margin-top: 20px; }
+                    .signature-section { margin-top: 40px; display: flex; justify-content: space-between; }
+                    .signature-box { text-align: center; width: 200px; }
+                    .signature-line { border-bottom: 1px solid #000; margin-bottom: 5px; height: 30px; }
+                    ${isPreview ? '.preview-notice { background: #fffbf0; border: 2px solid orange; padding: 10px; margin-bottom: 20px; text-align: center; font-weight: bold; }' : ''}
+                    @media print { 
+                        body { margin: 0; } 
+                        .preview-notice { display: none; }
+                    }
+                </style>
+            </head>
+            <body>
+                ${isPreview ? '<div class="preview-notice">🔍 DTR PREVIEW - This is a preview only</div>' : ''}
+                
+                <div class="dtr-header">
+                    <h2>DAILY TIME RECORD (DTR)</h2>
+                    <h3>TNP Organization Management System</h3>
+                </div>
+                
+                <div class="dtr-info">
+                    <div><strong>Name:</strong> ${dtrData.staff.name}</div>
+                    <div><strong>Employee ID:</strong> ${dtrData.staff.id}</div>
+                    <div><strong>Position:</strong> ${dtrData.staff.type}</div>
+                    <div><strong>Period:</strong> ${formatDate(dtrData.period.start)} to ${formatDate(dtrData.period.end)}</div>
+                    <div><strong>Generated:</strong> ${today}</div>
+                </div>
+                
+                <table class="dtr-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Day</th>
+                            <th>Time In</th>
+                            <th>Time Out</th>
+                            <th>Hours Worked</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${dtrData.records.map(record => {
+                            const dayName = new Date(record.date).toLocaleDateString('en-US', { weekday: 'short' });
+                            return `
+                                <tr>
+                                    <td>${formatDate(record.date)}</td>
+                                    <td>${dayName}</td>
+                                    <td>${record.timeIn || '-'}</td>
+                                    <td>${record.timeOut || '-'}</td>
+                                    <td>${record.hours > 0 ? record.hours.toFixed(2) : '-'}</td>
+                                    <td>${record.status}</td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+                
+                <div class="dtr-summary">
+                    <h3>Summary</h3>
+                    <div><strong>Total Days Worked:</strong> ${dtrData.summary.totalDays}</div>
+                    <div><strong>Total Hours Worked:</strong> ${dtrData.summary.totalHours}</div>
+                    <div><strong>Average Hours per Day:</strong> ${dtrData.summary.averageHours}</div>
+                </div>
+                
+                <div class="signature-section">
+                    <div class="signature-box">
+                        <div class="signature-line"></div>
+                        <div>Employee Signature</div>
+                        <div>Date: ___________</div>
+                    </div>
+                    <div class="signature-box">
+                        <div class="signature-line"></div>
+                        <div>Supervisor Signature</div>
+                        <div>Date: ___________</div>
+                    </div>
+                </div>
+            </body>
+            </html>
+            `;
+        }
+        
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: '2-digit'
+            });
+        }
+
         function showMessage(message, type) {
             const container = document.getElementById('messageContainer');
             const bgColor = type === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700';
@@ -714,6 +1625,13 @@
         document.getElementById('leave-approval-modal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeLeaveApprovalModal();
+            }
+        });
+        
+        // DTR Modal close on outside click
+        document.getElementById('dtr-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeDTRModal();
             }
         });
     </script>
