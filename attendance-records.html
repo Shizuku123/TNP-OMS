@@ -299,16 +299,25 @@
         }
 
         // To be replaced with retrieving from firebase
-        function loadAttendanceRecords() {
-            var xhttp = new XMLHttpRequest();
-            xhttp.onload = function() {
-                const attendanceData = JSON.parse(this.responseText);
-                allRecords = (attendanceData.attendance || []).sort((a, b) => new Date(b.date) - new Date(a.date));
-
-                applyFilters();  // Auto-trigger the selected filter (which defaults to Today)
-            };
-            xhttp.open("GET", "data/attendance.json", true);
-            xhttp.send();
+        async function loadAttendanceRecords() {
+            try {
+                const firebaseModule = await import('./firebase.js');
+                const db = firebaseModule.db;
+                const { collection, getDocs } = firebaseModule;
+                const attendanceCol = collection(db, 'attendance');
+                const snapshot = await getDocs(attendanceCol);
+                allRecords = [];
+                snapshot.forEach(docSnap => {
+                    allRecords.push(docSnap.data());
+                });
+                // Sort by date descending
+                allRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
+                applyFilters();
+            } catch (error) {
+                showMessage('Error loading attendance records from database.', 'error');
+                allRecords = [];
+                applyFilters();
+            }
         }
 
         window.addEventListener('resize', () => {
