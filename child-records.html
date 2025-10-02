@@ -533,6 +533,111 @@
         </div>
     </div>
 
+    <!-- Solo Print Modal -->
+    <div id="soloPrintModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative mx-auto border w-11/12 max-w-7xl shadow-lg rounded-md bg-white flex flex-col" style="margin-top: 10px; margin-bottom: 10px; height: 90vh;">
+            <!-- Modal Header -->
+            <div class="p-6 border-b border-gray-200 flex-shrink-0">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-medium text-gray-900">Solo Print Child Record</h3>
+                    <button id="closeSoloPrintModal" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+                </div>
+            </div>
+            
+            <!-- Modal Content -->
+            <div class="flex-1 p-6 overflow-hidden">
+                <!-- Two Column Layout -->
+                <div class="flex gap-6 h-full">
+                    
+                    <!-- Left Column: Child List and Filters -->
+                    <div class="w-96 flex-shrink-0 flex flex-col h-full">
+                        <!-- Filters Section -->
+                        <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                            <h4 class="text-md font-medium text-gray-700 mb-3">Filter Children</h4>
+                            
+                            <!-- Search -->
+                            <div class="mb-3">
+                                <input type="text" id="soloSearchInput" placeholder="Search by name or ID..." 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm">
+                            </div>
+                            
+                            <!-- Filter Row -->
+                            <div class="grid grid-cols-2 gap-2 mb-3">
+                                <!-- Record Type -->
+                                <div>
+                                    <select id="soloRecordTypeFilter" class="w-full px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm">
+                                        <option value="all">All Records</option>
+                                        <option value="incare">In Care</option>
+                                        <option value="discharged">Discharged</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Gender -->
+                                <div>
+                                    <select id="soloGenderFilter" class="w-full px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm">
+                                        <option value="">All Genders</option>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- Status Filter -->
+                            <div class="mb-3">
+                                <select id="soloStatusFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm">
+                                    <option value="">All Statuses</option>
+                                    <option value="Adoptable">Adoptable</option>
+                                    <option value="Under legal custody">Under legal custody</option>
+                                    <option value="Temporary Shelter">Temporary Shelter</option>
+                                    <option value="Awaiting placement">Awaiting placement</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Child List -->
+                        <div class="flex-1 border border-gray-300 rounded-lg overflow-hidden flex flex-col">
+                            <div class="bg-gray-50 px-4 py-3 border-b border-gray-300 flex-shrink-0">
+                                <h4 class="text-md font-medium text-gray-700">Select Child</h4>
+                                <span id="soloChildCount" class="text-sm text-gray-600">0 children found</span>
+                            </div>
+                            
+                            <div id="soloChildList" class="flex-1 overflow-y-auto p-2 space-y-2">
+                                <!-- Child items will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Column: Print Preview -->
+                    <div class="flex-1 flex flex-col min-w-0 h-full">
+                        <div class="bg-white border border-gray-300 rounded-lg flex flex-col h-full">
+                            <div class="bg-gray-50 px-4 py-3 border-b border-gray-300 rounded-t-lg flex-shrink-0">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="text-md font-medium text-gray-700">Print Preview</h4>
+                                    <div class="flex items-center space-x-2">
+                                        <button id="soloPrintBtn" class="disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm" disabled>
+                                            Print Record
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="soloPrintPreview" class="flex-1 overflow-y-auto p-6 bg-white">
+                                <!-- Preview content will be generated here -->
+                                <div class="text-center text-gray-500 py-12">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m0 0v6m0-6h6m-6 0H6m0 0v6m0-6V6"></path>
+                                    </svg>
+                                    <p class="text-lg">Select a child to preview their record</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Print Preview Modal -->
     <div id="printModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
         <div class="relative mx-auto border w-11/12 max-w-7xl shadow-lg rounded-md bg-white flex flex-col" style="margin-top: 10px; margin-bottom: 10px; height: 90vh;">
@@ -724,7 +829,7 @@
                             Reset Filters
                         </button>
                         <button id="printSoloRecord" class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors">
-                            Solo Print
+                            Solo Print Child Record
                         </button>
                         <button id="cancelPrintBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
                             Cancel
@@ -739,7 +844,7 @@
     </div>
 
     <script type="module">
-    import { db, collection, getDocs, setDoc, doc, updateDoc } from './firebase.js';
+    import { db, collection, getDocs, setDoc, doc, updateDoc, getDoc, query, where } from './firebase.js';
 
     let allRecords = [];
     let dischargedRecords = [];
@@ -1031,6 +1136,13 @@
     // Make clearMonthFilter globally available
     window.clearMonthFilter = clearMonthFilter;
 
+    // Helper function to create safe placeholder URLs
+    function createSafePlaceholderUrl(name, width = 150, height = 150) {
+        // Clean the name to avoid URL encoding issues
+        const safeName = (name || 'Child').replace(/[^a-zA-Z0-9\s]/g, '').trim() || 'Child';
+        return `https://via.placeholder.com/${width}x${height}/e5e7eb/6b7280?text=${encodeURIComponent(safeName)}`;
+    }
+
     function populateYearDropdown() {
         const yearSelect = document.getElementById('chartYearFilter');
         const currentYear = new Date().getFullYear();
@@ -1221,7 +1333,7 @@
         snapshot.forEach(docSnap => {
             const data = docSnap.data();
             data._docId = docSnap.id;
-            data.photoData = data.photoString || `https://via.placeholder.com/150x150/e5e7eb/6b7280?text=${encodeURIComponent(data.firstName || 'Child')}`;
+            data.photoData = data.photoString || createSafePlaceholderUrl(data.firstName);
             
             // Store all records for discharge lookup
             allChildrenRecords.push(data);
@@ -1283,7 +1395,7 @@
                     _docId: docSnap.id,
                     _isDischarged: true
                 };
-                childRecord.photoData = data.photoString || `https://via.placeholder.com/150x150/e5e7eb/6b7280?text=${encodeURIComponent(firstName || 'Child')}`;
+                childRecord.photoData = data.photoString || createSafePlaceholderUrl(firstName);
                 console.log('Created discharged child record:', {
                     childId: childRecord.childId, 
                     name: `${childRecord.firstName} ${childRecord.lastName}`, 
@@ -1586,7 +1698,7 @@
         recordsGrid.innerHTML = records.map(child => {
             const fullName = `${child.firstName || ''} ${child.middleName || ''} ${child.lastName || ''}`.trim();
             const age = calculateAge(child.dateOfBirth);
-            const photoSrc = child.photoData || `https://via.placeholder.com/150x150/e5e7eb/6b7280?text=${encodeURIComponent(child.firstName || 'Child')}`;
+            const photoSrc = child.photoData || createSafePlaceholderUrl(child.firstName);
             const statusColor = getStatusColor(child.currentStatus);
 
             let actionButtons = '';
@@ -1797,7 +1909,7 @@
             document.getElementById('cancelPrintBtn').addEventListener('click', closePrintModal);
             document.getElementById('confirmPrintBtn').addEventListener('click', confirmPrint);
             document.getElementById('resetPrintFilters').addEventListener('click', resetPrintFilters);
-            document.getElementById('printSoloRecord').addEventListener('click', printSoloRecord);
+            document.getElementById('printSoloRecord').addEventListener('click', openSoloPrintDialog);
             
             // Auto-apply filters when any filter input changes
             document.getElementById('printRecordType').addEventListener('change', function() { toggleDischargeFilter(); applyPrintFilters(); });
@@ -1813,6 +1925,21 @@
             document.getElementById('printDischargeToDate').addEventListener('change', applyPrintFilters);
             document.getElementById('printReceivedByCheck').addEventListener('change', function() { toggleReceivedByField(); applyPrintFilters(); });
             document.getElementById('printReceivedBy').addEventListener('input', applyPrintFilters);
+            
+            // Solo Print Modal Event Listeners
+            document.getElementById('closeSoloPrintModal').addEventListener('click', closeSoloPrintModal);
+            document.getElementById('soloPrintBtn').addEventListener('click', printSoloRecord);
+            document.getElementById('soloSearchInput').addEventListener('input', applySoloFilters);
+            document.getElementById('soloRecordTypeFilter').addEventListener('change', applySoloFilters);
+            document.getElementById('soloGenderFilter').addEventListener('change', applySoloFilters);
+            document.getElementById('soloStatusFilter').addEventListener('change', applySoloFilters);
+            
+            // Close solo modal when clicking outside
+            document.getElementById('soloPrintModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeSoloPrintModal();
+                }
+            });
             
             // Close modal when clicking outside
             document.getElementById('showAllModal').addEventListener('click', function(e) {
@@ -2434,26 +2561,889 @@
         previewContent.innerHTML = previewHTML;
     }
 
-    function printSoloRecord() {
-        // Show a simple prompt to enter child ID
-        const childId = prompt('Enter Child ID for solo record:');
-        if (!childId) return;
+    // Solo Print Modal Functions
+    let selectedSoloChild = null;
+    let soloChildrenData = [];
+
+    function openSoloPrintModal() {
+        // Close the print modal if it's open
+        closePrintModal();
         
-        // Find the record
-        const record = [...allRecords, ...dischargedRecords].find(r => r.childId === childId);
-        if (!record) {
-            alert('Child record not found with ID: ' + childId);
+        document.getElementById('soloPrintModal').classList.remove('hidden');
+        selectedSoloChild = null;
+        
+        // Reset all filters to show all children
+        document.getElementById('soloSearchInput').value = '';
+        document.getElementById('soloRecordTypeFilter').value = 'all';
+        document.getElementById('soloGenderFilter').value = '';
+        document.getElementById('soloStatusFilter').value = '';
+        
+        // Show skeleton loading
+        showSoloChildrenSkeleton();
+        
+        // Reset preview
+        document.getElementById('soloPrintPreview').innerHTML = '<div class="text-center text-gray-500 py-8">Select a child to see print preview</div>';
+        document.getElementById('soloPrintBtn').disabled = true;
+        
+        loadSoloChildrenList();
+    }
+
+    function showSoloChildrenSkeleton() {
+        const childList = document.getElementById('soloChildList');
+        const childCount = document.getElementById('soloChildCount');
+        
+        childCount.textContent = 'Loading children...';
+        
+        const skeletonHTML = Array(6).fill(0).map(() => `
+            <div class="solo-child-item bg-white border border-gray-200 rounded-lg p-4 animate-pulse">
+                <div class="flex items-center space-x-4">
+                    <div class="h-12 w-12 bg-gray-300 rounded-full"></div>
+                    <div class="flex-1">
+                        <div class="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
+                        <div class="h-3 bg-gray-300 rounded w-1/2"></div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        
+        childList.innerHTML = skeletonHTML;
+    }
+
+    function closeSoloPrintModal() {
+        document.getElementById('soloPrintModal').classList.add('hidden');
+        selectedSoloChild = null;
+        document.getElementById('soloPrintPreview').innerHTML = '<div class="text-center text-gray-500 py-8">Select a child to see print preview</div>';
+        document.getElementById('soloPrintBtn').disabled = true;
+    }
+
+    async function loadSoloChildrenList() {
+        try {
+            // Use existing loaded data instead of making new Firebase calls
+            soloChildrenData = [];
+            
+            // Add in care children from already loaded allRecords
+            allRecords.forEach(child => {
+                soloChildrenData.push({
+                    ...child,
+                    recordType: 'incare'
+                });
+            });
+
+            // Add discharged children from already loaded dischargedRecords
+            dischargedRecords.forEach(child => {
+                soloChildrenData.push({
+                    ...child,
+                    recordType: 'discharged'
+                });
+            });
+
+            console.log(`Loaded ${soloChildrenData.length} children for solo print (${allRecords.length} in care, ${dischargedRecords.length} discharged)`);
+
+            // Hide skeleton and show all children immediately
+            setTimeout(() => {
+                applySoloFilters();
+            }, 300); // Small delay to show loading state
+        } catch (error) {
+            console.error('Error loading solo children list:', error);
+            document.getElementById('soloChildList').innerHTML = '<div class="text-center text-red-500 py-4">Error loading children list. Please try again.</div>';
+            document.getElementById('soloChildCount').textContent = '0 children found';
+        }
+    }
+
+    function applySoloFilters() {
+        const searchTerm = document.getElementById('soloSearchInput').value.toLowerCase();
+        const recordTypeFilter = document.getElementById('soloRecordTypeFilter').value;
+        const genderFilter = document.getElementById('soloGenderFilter').value;
+        const statusFilter = document.getElementById('soloStatusFilter').value;
+
+        let filteredChildren = soloChildrenData.filter(child => {
+            const fullName = `${child.firstName || ''} ${child.middleName || ''} ${child.lastName || ''}`.trim().toLowerCase();
+            const childId = (child.childId || '').toLowerCase();
+            
+            const matchesSearch = !searchTerm || fullName.includes(searchTerm) || childId.includes(searchTerm);
+            const matchesRecordType = !recordTypeFilter || recordTypeFilter === 'all' || child.recordType === recordTypeFilter;
+            const matchesGender = !genderFilter || genderFilter === 'all' || (child.gender || '').toLowerCase() === genderFilter;
+            const matchesStatus = !statusFilter || statusFilter === 'all' || statusFilter === '' || (child.currentStatus || '').toLowerCase() === statusFilter.toLowerCase();
+
+            return matchesSearch && matchesRecordType && matchesGender && matchesStatus;
+        });
+
+        displaySoloChildrenList(filteredChildren);
+    }
+
+    function displaySoloChildrenList(children) {
+        const childList = document.getElementById('soloChildList');
+        const childCount = document.getElementById('soloChildCount');
+        
+        childCount.textContent = `${children.length} children found`;
+
+        if (children.length === 0) {
+            childList.innerHTML = '<div class="text-center text-gray-500 py-4">No children found matching your criteria</div>';
             return;
         }
+
+        const childrenHTML = children.map(child => {
+            const fullName = `${child.firstName || ''} ${child.middleName || ''} ${child.lastName || ''}`.trim();
+            const age = calculateAge(child.dateOfBirth);
+            const hasImage = child.photoData && child.photoData !== '' && !child.photoData.includes('placeholder');
+            const statusColor = child.recordType === 'discharged' ? 'bg-gray-100 text-gray-800' : 'bg-green-100 text-green-800';
+            const statusText = child.recordType === 'discharged' ? 'Discharged' : (child.currentStatus || 'In Care');
+
+            return `
+                <div class="solo-child-item p-4 border border-gray-200 rounded-lg hover:bg-blue-50 cursor-pointer transition-colors" 
+                     onclick="selectChildForSoloPrint('${child.childId}', '${child.recordType}')">
+                    <div class="flex items-center space-x-4">
+                        ${hasImage ? 
+                            `<img src="${child.photoData}" alt="${fullName}" class="h-12 w-12 rounded-full object-cover border-2 border-gray-200">` :
+                            `<div class="h-12 w-12 rounded-full bg-gray-200 border-2 border-gray-300 flex items-center justify-center">
+                                <span class="text-[8px] font-semibold text-gray-600 text-center leading-tight">NO<br>IMAGE</span>
+                            </div>`
+                        }
+                        <div class="flex-1">
+                            <h4 class="text-sm font-semibold text-gray-900">${fullName}</h4>
+                            <p class="text-xs text-gray-500 mb-1">ID: ${child.childId} • Age: ${age} years old</p>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${statusColor}">
+                                ${statusText}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        childList.innerHTML = childrenHTML;
+    }
+
+    async function selectChildForSoloPrint(childId, recordType) {
+        try {
+            // Find the child from the already loaded data
+            const child = soloChildrenData.find(c => c.childId === childId && c.recordType === recordType);
+            
+            if (child) {
+                selectedSoloChild = {
+                    ...child,
+                    recordType: recordType
+                };
+
+                // Highlight selected child
+                document.querySelectorAll('.solo-child-item').forEach(item => {
+                    item.classList.remove('bg-blue-50', 'border-blue-300');
+                });
+                event.target.closest('.solo-child-item').classList.add('bg-blue-50', 'border-blue-300');
+
+                // Generate preview
+                await generateSoloPrintPreview();
+                
+                // Enable print button
+                document.getElementById('soloPrintBtn').disabled = false;
+            }
+        } catch (error) {
+            console.error('Error selecting child:', error);
+            alert('Error loading child details. Please try again.');
+        }
+    }
+
+    // Make selectChildForSoloPrint globally available
+    window.selectChildForSoloPrint = selectChildForSoloPrint;
+
+    async function generateSoloPrintPreview() {
+        if (!selectedSoloChild) return;
+
+        const child = selectedSoloChild;
+        const fullName = `${child.firstName || ''} ${child.middleName || ''} ${child.lastName || ''}`.trim();
+        const age = calculateAge(child.dateOfBirth);
+        const photoSrc = child.photoData || createSafePlaceholderUrl(child.firstName);
+        const hasImage = child.photoData && child.photoData !== '' && !child.photoData.includes('placeholder');
+
+        // Show loading for health and anthropometric data
+        document.getElementById('soloPrintPreview').innerHTML = `
+            <div class="text-center py-8">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
+                <p class="text-gray-500 mt-2">Loading health and measurement data...</p>
+            </div>
+        `;
+
+        let healthMedicalProfile = {};
+        let anthropometricMeasurement = {};
+
+        try {
+            // Get health medical profile and anthropometric measurements using patientId
+            console.log('Querying health data for patientId:', child.childId);
+            
+            // Try both patientId and childId as field names
+            const [healthSnapshot1, healthSnapshot2, anthropometricSnapshot1, anthropometricSnapshot2] = await Promise.all([
+                getDocs(query(collection(db, 'healthMedicalProfile'), where('patientId', '==', child.childId))),
+                getDocs(query(collection(db, 'healthMedicalProfile'), where('childId', '==', child.childId))),
+                getDocs(query(collection(db, 'anthropometricMeasurement'), where('patientId', '==', child.childId))),
+                getDocs(query(collection(db, 'anthropometricMeasurement'), where('childId', '==', child.childId)))
+            ]);
+
+            console.log('Health snapshot (patientId) empty:', healthSnapshot1.empty);
+            console.log('Health snapshot (childId) empty:', healthSnapshot2.empty);
+            console.log('Anthropometric snapshot (patientId) empty:', anthropometricSnapshot1.empty);
+            console.log('Anthropometric snapshot (childId) empty:', anthropometricSnapshot2.empty);
+
+            // Combine results from both queries
+            const healthSnapshot = !healthSnapshot1.empty ? healthSnapshot1 : healthSnapshot2;
+            const anthropometricSnapshot = !anthropometricSnapshot1.empty ? anthropometricSnapshot1 : anthropometricSnapshot2;
+
+            // Get the most recent health profile
+            if (!healthSnapshot.empty) {
+                const healthDocs = [];
+                healthSnapshot.forEach(doc => {
+                    console.log('Health document found:', doc.id, doc.data());
+                    healthDocs.push({ id: doc.id, ...doc.data() });
+                });
+                // Sort by date and get the most recent (check multiple date fields)
+                healthDocs.sort((a, b) => {
+                    const dateA = new Date(a.lastUpdated || a.dateAdded || a.dateRecorded || a.createdAt || 0);
+                    const dateB = new Date(b.lastUpdated || b.dateAdded || b.dateRecorded || b.createdAt || 0);
+                    return dateB - dateA;
+                });
+                healthMedicalProfile = healthDocs[0] || {};
+                console.log('Selected health profile:', healthMedicalProfile);
+            }
+
+            // Get the most recent anthropometric measurement
+            if (!anthropometricSnapshot.empty) {
+                const measurementDocs = [];
+                anthropometricSnapshot.forEach(doc => {
+                    console.log('Anthropometric document found:', doc.id, doc.data());
+                    measurementDocs.push({ id: doc.id, ...doc.data() });
+                });
+                // Sort by date and get the most recent
+                measurementDocs.sort((a, b) => new Date(b.dateRecorded || b.createdAt || 0) - new Date(a.dateRecorded || a.createdAt || 0));
+                anthropometricMeasurement = measurementDocs[0] || {};
+                console.log('Selected anthropometric measurement:', anthropometricMeasurement);
+            }
+
+            console.log('Final health profile object:', healthMedicalProfile);
+            
+            // Debug: Log specific health profile fields to see structure
+            if (healthMedicalProfile.diagnosis) {
+                console.log('Diagnosis:', healthMedicalProfile.diagnosis);
+            }
+            if (healthMedicalProfile.prescribedMedications) {
+                console.log('Prescribed Medications array:', healthMedicalProfile.prescribedMedications);
+            }
+            if (healthMedicalProfile.immunizations) {
+                console.log('Immunizations array:', healthMedicalProfile.immunizations);
+            }
+            if (healthMedicalProfile.createdBy) {
+                console.log('Created By:', healthMedicalProfile.createdBy);
+            }
+            
+            console.log('Final anthropometric object:', anthropometricMeasurement);
+            
+            // Debug: Log specific measurements to see structure
+            if (anthropometricMeasurement.height) {
+                console.log('Height data structure:', anthropometricMeasurement.height);
+            }
+            if (anthropometricMeasurement.weight) {
+                console.log('Weight data structure:', anthropometricMeasurement.weight);
+            }
+            if (anthropometricMeasurement.bmi) {
+                console.log('BMI data structure:', anthropometricMeasurement.bmi);
+            }
+        } catch (error) {
+            console.error('Error loading health and anthropometric data:', error);
+        }
+
+        // Now generate the complete preview with medical records
+        const currentDate = new Date().toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+        const logoUrl = `${window.location.origin}${window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'))}/tahanan-logo.png`;
+
+        const previewHTML = `
+            <div class="print-preview-content bg-white">
+                <!-- Professional Header with Enhanced Styling -->
+                <div class="border-b-4 border-red-600 pb-6 mb-8 bg-gradient-to-r from-red-50 to-white p-6 -m-6 mb-8">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-6">
+                            <img src="${logoUrl}" alt="Tahanan ng Pagmamahal Logo" class="h-20 w-20 rounded-full shadow-lg border-2 border-red-200" onerror="this.style.display='none'">
+                            <div>
+                                <h1 class="text-3xl font-bold text-red-700 mb-2 tracking-wide">TAHANAN NG PAGMAMAHAL FOUNDATION, INC.</h1>
+                                <p class="text-base text-gray-700 font-semibold tracking-wide">COMPREHENSIVE CHILD CARE RECORD</p>
+                                <p class="text-sm text-gray-600 mt-1">Official Documentation & Medical History</p>
+                            </div>
+                        </div>
+                        <div class="text-right text-sm text-gray-600 bg-white p-4 rounded-lg shadow-sm border">
+                            <p class="font-bold text-red-600 mb-1">Document Details</p>
+                            <p class="font-medium">Generated: ${currentDate}</p>
+                            <p>Authorized By: ${getCurrentUser()?.firstName || 'System'} ${getCurrentUser()?.lastName || 'User'}</p>
+                            <p class="text-xs text-gray-500 mt-2">ID: ${Math.random().toString(36).substr(2, 9).toUpperCase()}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enhanced Child Profile Section -->
+                <div class="mb-10">
+                    <div class="flex items-start space-x-10">
+                        <!-- Professional Photo with Frame -->
+                        <div class="flex-shrink-0">
+                            <div class="relative">
+                                ${hasImage ? 
+                                    `<img src="${child.photoData}" alt="${fullName}" class="h-56 w-48 rounded-xl object-cover border-4 border-red-200 shadow-2xl">` :
+                                    `<div class="h-56 w-48 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 border-4 border-gray-300 shadow-2xl flex items-center justify-center">
+                                        <div class="text-center">
+                                            <div class="text-gray-500 font-bold text-2xl mb-2">NO IMAGE</div>
+                                            <div class="text-gray-400 text-sm">Photo Not Available</div>
+                                            <div class="mt-3 text-xs text-gray-400 px-3 py-1 bg-gray-200 rounded-full">Awaiting Photo</div>
+                                        </div>
+                                    </div>`
+                                }
+                                <div class="absolute -bottom-4 left-1/2 transform -translate-x-1/2">
+                                    <span class="px-4 py-2 rounded-full text-sm font-bold shadow-lg ${selectedSoloChild.recordType === 'discharged' ? 'bg-gray-100 text-gray-800 border-2 border-gray-400' : 'bg-green-100 text-green-800 border-2 border-green-400'}">
+                                        ${selectedSoloChild.recordType === 'discharged' ? 'DISCHARGED' : 'ACTIVE RESIDENT'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Enhanced Personal Information -->
+                        <div class="flex-1">
+                            <div class="mb-8">
+                                <div class="border-l-4 border-red-500 pl-6 mb-6">
+                                    <h2 class="text-4xl font-bold text-gray-900 mb-2 tracking-wide">${fullName.toUpperCase()}</h2>
+                                    <p class="text-xl text-red-600 font-semibold mb-1">Child ID: ${child.childId}</p>
+                                    <p class="text-base text-gray-600 font-medium">Current Status: ${child.currentStatus || (selectedSoloChild.recordType === 'discharged' ? 'Discharged' : 'In Care')}</p>
+                                </div>
+                                
+                                <!-- Enhanced Information Grid -->
+                                <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                                    <h3 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b border-gray-300">PERSONAL DETAILS</h3>
+                                    <div class="grid grid-cols-2 gap-6">
+                                        <div class="space-y-4">
+                                            <div class="flex items-center">
+                                                <span class="w-28 text-sm font-bold text-gray-700 bg-gray-200 px-2 py-1 rounded">Age:</span>
+                                                <span class="ml-3 text-sm text-gray-900 font-semibold">${age} years old</span>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <span class="w-28 text-sm font-bold text-gray-700 bg-gray-200 px-2 py-1 rounded">Gender:</span>
+                                                <span class="ml-3 text-sm text-gray-900">${child.gender || 'Not specified'}</span>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <span class="w-28 text-sm font-bold text-gray-700 bg-gray-200 px-2 py-1 rounded">Birth Date:</span>
+                                                <span class="ml-3 text-sm text-gray-900">${child.dateOfBirth ? formatDate(child.dateOfBirth) : 'Not recorded'}</span>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <span class="w-28 text-sm font-bold text-gray-700 bg-gray-200 px-2 py-1 rounded">Blood Type:</span>
+                                                <span class="ml-3 text-sm text-gray-900">${child.bloodType || 'Not tested'}</span>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <span class="w-28 text-sm font-bold text-gray-700 bg-gray-200 px-2 py-1 rounded">Birth Place:</span>
+                                                <span class="ml-3 text-sm text-gray-900">${child.birthPlace || 'Not recorded'}</span>
+                                            </div>
+                                        </div>
+                                        <div class="space-y-4">
+                                            <div class="flex items-center">
+                                                <span class="w-28 text-sm font-bold text-gray-700 bg-gray-200 px-2 py-1 rounded">Nationality:</span>
+                                                <span class="ml-3 text-sm text-gray-900">${child.nationality || 'Not specified'}</span>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <span class="w-28 text-sm font-bold text-gray-700 bg-gray-200 px-2 py-1 rounded">Religion:</span>
+                                                <span class="ml-3 text-sm text-gray-900">${child.religion || 'Not specified'}</span>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <span class="w-28 text-sm font-bold text-gray-700 bg-gray-200 px-2 py-1 rounded">Entry Date:</span>
+                                                <span class="ml-3 text-sm text-gray-900">${child.entryDate ? formatDate(child.entryDate) : 'Not recorded'}</span>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <span class="w-28 text-sm font-bold text-gray-700 bg-gray-200 px-2 py-1 rounded">Record Date:</span>
+                                                <span class="ml-3 text-sm text-gray-900">${child.dateAdded ? formatDate(child.dateAdded) : 'Not recorded'}</span>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <span class="w-28 text-sm font-bold text-gray-700 bg-gray-200 px-2 py-1 rounded">Language:</span>
+                                                <span class="ml-3 text-sm text-gray-900">${child.language || child.primaryLanguage || 'Not specified'}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enhanced Two Column Layout for Professional Resume Style -->
+                <div class="grid grid-cols-2 gap-10">
+                    <!-- Left Column -->
+                    <div class="space-y-8">
+                        <!-- Family & Contacts Information -->
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                            <h3 class="text-lg font-bold text-blue-700 mb-4 pb-2 border-b-2 border-blue-300 flex items-center">
+                                <span class="mr-2">👨‍👩‍👧‍👦</span> FAMILY & EMERGENCY CONTACTS
+                            </h3>
+                            <div class="space-y-3">
+                                <div class="bg-white p-3 rounded border-l-4 border-blue-400">
+                                    <div class="flex items-center"><span class="w-24 text-sm font-bold text-blue-700">Father:</span><span class="text-sm text-gray-900 font-medium">${child.fatherName || 'Not recorded'}</span></div>
+                                    ${child.fatherAge ? `<div class="flex items-center mt-1"><span class="w-24 text-xs text-gray-500">Age:</span><span class="text-xs text-gray-700">${child.fatherAge}</span></div>` : ''}
+                                    ${child.fatherOccupation ? `<div class="flex items-center mt-1"><span class="w-24 text-xs text-gray-500">Work:</span><span class="text-xs text-gray-700">${child.fatherOccupation}</span></div>` : ''}
+                                </div>
+                                <div class="bg-white p-3 rounded border-l-4 border-pink-400">
+                                    <div class="flex items-center"><span class="w-24 text-sm font-bold text-pink-700">Mother:</span><span class="text-sm text-gray-900 font-medium">${child.motherName || 'Not recorded'}</span></div>
+                                    ${child.motherAge ? `<div class="flex items-center mt-1"><span class="w-24 text-xs text-gray-500">Age:</span><span class="text-xs text-gray-700">${child.motherAge}</span></div>` : ''}
+                                    ${child.motherOccupation ? `<div class="flex items-center mt-1"><span class="w-24 text-xs text-gray-500">Work:</span><span class="text-xs text-gray-700">${child.motherOccupation}</span></div>` : ''}
+                                </div>
+                                <div class="bg-white p-3 rounded border-l-4 border-green-400">
+                                    <div class="flex items-center"><span class="w-24 text-sm font-bold text-green-700">Guardian:</span><span class="text-sm text-gray-900 font-medium">${child.guardianName || 'Not assigned'}</span></div>
+                                    ${child.guardianRelationship ? `<div class="flex items-center mt-1"><span class="w-24 text-xs text-gray-500">Relation:</span><span class="text-xs text-gray-700">${child.guardianRelationship}</span></div>` : ''}
+                                    ${child.guardianContact ? `<div class="flex items-center mt-1"><span class="w-24 text-xs text-gray-500">Contact:</span><span class="text-xs text-gray-700">${child.guardianContact}</span></div>` : ''}
+                                </div>
+                                <div class="bg-white p-3 rounded border-l-4 border-red-400">
+                                    <div class="flex items-center"><span class="w-24 text-sm font-bold text-red-700">Emergency:</span><span class="text-sm text-gray-900 font-medium">${child.emergencyContact || child.emergencyContactName || 'Not provided'}</span></div>
+                                    ${child.emergencyContactPhone ? `<div class="flex items-center mt-1"><span class="w-24 text-xs text-gray-500">Phone:</span><span class="text-xs text-gray-700">${child.emergencyContactPhone}</span></div>` : ''}
+                                    ${child.emergencyContactRelation ? `<div class="flex items-center mt-1"><span class="w-24 text-xs text-gray-500">Relation:</span><span class="text-xs text-gray-700">${child.emergencyContactRelation}</span></div>` : ''}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Address & Background Information -->
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-6">
+                            <h3 class="text-lg font-bold text-green-700 mb-4 pb-2 border-b-2 border-green-300 flex items-center">
+                                <span class="mr-2">🏠</span> LOCATION & BACKGROUND
+                            </h3>
+                            <div class="space-y-3">
+                                <div class="bg-white p-3 rounded">
+                                    <div class="flex items-start"><span class="w-24 text-sm font-bold text-green-700">Address:</span><span class="text-sm text-gray-900">${child.address || child.currentAddress || 'Not recorded'}</span></div>
+                                </div>
+                                <div class="bg-white p-3 rounded">
+                                    <div class="flex items-center"><span class="w-24 text-sm font-bold text-green-700">Hometown:</span><span class="text-sm text-gray-900">${child.hometown || child.placeOfBirth || 'Not recorded'}</span></div>
+                                </div>
+                                ${child.previousAddress ? `<div class="bg-white p-3 rounded"><div class="flex items-start"><span class="w-24 text-sm font-bold text-green-700">Previous:</span><span class="text-sm text-gray-900">${child.previousAddress}</span></div></div>` : ''}
+                                ${child.barangay ? `<div class="bg-white p-3 rounded"><div class="flex items-center"><span class="w-24 text-sm font-bold text-green-700">Barangay:</span><span class="text-sm text-gray-900">${child.barangay}</span></div></div>` : ''}
+                                ${child.city || child.municipality ? `<div class="bg-white p-3 rounded"><div class="flex items-center"><span class="w-24 text-sm font-bold text-green-700">City:</span><span class="text-sm text-gray-900">${child.city || child.municipality}</span></div></div>` : ''}
+                                ${child.province ? `<div class="bg-white p-3 rounded"><div class="flex items-center"><span class="w-24 text-sm font-bold text-green-700">Province:</span><span class="text-sm text-gray-900">${child.province}</span></div></div>` : ''}
+                            </div>
+                        </div>
+
+                        <!-- Referral & Legal Information -->
+                        <div class="bg-purple-50 border border-purple-200 rounded-lg p-6">
+                            <h3 class="text-lg font-bold text-purple-700 mb-4 pb-2 border-b-2 border-purple-300 flex items-center">
+                                <span class="mr-2">📋</span> REFERRAL & LEGAL STATUS
+                            </h3>
+                            <div class="space-y-3">
+                                <div class="bg-white p-3 rounded">
+                                    <div class="flex items-center"><span class="w-24 text-sm font-bold text-purple-700">Source:</span><span class="text-sm text-gray-900">${child.referralSource || 'Not recorded'}</span></div>
+                                </div>
+                                <div class="bg-white p-3 rounded">
+                                    <div class="flex items-start"><span class="w-24 text-sm font-bold text-purple-700">Agency:</span><span class="text-sm text-gray-900">${child.referringAgency || 'Not specified'}</span></div>
+                                </div>
+                                ${child.referralDate ? `<div class="bg-white p-3 rounded"><div class="flex items-center"><span class="w-24 text-sm font-bold text-purple-700">Ref. Date:</span><span class="text-sm text-gray-900">${formatDate(child.referralDate)}</span></div></div>` : ''}
+                                ${child.legalStatus ? `<div class="bg-white p-3 rounded"><div class="flex items-center"><span class="w-24 text-sm font-bold text-purple-700">Legal:</span><span class="text-sm text-gray-900">${child.legalStatus}</span></div></div>` : ''}
+                                ${child.caseNumber ? `<div class="bg-white p-3 rounded"><div class="flex items-center"><span class="w-24 text-sm font-bold text-purple-700">Case #:</span><span class="text-sm text-gray-900">${child.caseNumber}</span></div></div>` : ''}
+                                ${child.socialWorker ? `<div class="bg-white p-3 rounded"><div class="flex items-center"><span class="w-24 text-sm font-bold text-purple-700">SW:</span><span class="text-sm text-gray-900">${child.socialWorker}</span></div></div>` : ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="space-y-8">
+                        <!-- Educational Information -->
+                        <div class="bg-orange-50 border border-orange-200 rounded-lg p-6">
+                            <h3 class="text-lg font-bold text-orange-700 mb-4 pb-2 border-b-2 border-orange-300 flex items-center">
+                                <span class="mr-2">🎓</span> EDUCATION & DEVELOPMENT
+                            </h3>
+                            <div class="space-y-3">
+                                <div class="bg-white p-3 rounded">
+                                    <div class="flex items-center"><span class="w-24 text-sm font-bold text-orange-700">Status:</span><span class="text-sm text-gray-900">${child.educationalStatus || child.schoolStatus || 'Not enrolled'}</span></div>
+                                </div>
+                                <div class="bg-white p-3 rounded">
+                                    <div class="flex items-center"><span class="w-24 text-sm font-bold text-orange-700">Grade:</span><span class="text-sm text-gray-900">${child.gradeLevel || child.currentGrade || 'Not specified'}</span></div>
+                                </div>
+                                <div class="bg-white p-3 rounded">
+                                    <div class="flex items-start"><span class="w-24 text-sm font-bold text-orange-700">School:</span><span class="text-sm text-gray-900">${child.school || child.schoolName || 'Not enrolled'}</span></div>
+                                </div>
+                                ${child.schoolAddress ? `<div class="bg-white p-3 rounded"><div class="flex items-start"><span class="w-24 text-sm font-bold text-orange-700">Location:</span><span class="text-sm text-gray-900">${child.schoolAddress}</span></div></div>` : ''}
+                                <div class="bg-white p-3 rounded">
+                                    <div class="flex items-start"><span class="w-24 text-sm font-bold text-orange-700">Special:</span><span class="text-sm text-gray-900">${child.specialNeeds || child.specialEducationNeeds || 'None identified'}</span></div>
+                                </div>
+                                ${child.academicPerformance ? `<div class="bg-white p-3 rounded"><div class="flex items-center"><span class="w-24 text-sm font-bold text-orange-700">Performance:</span><span class="text-sm text-gray-900">${child.academicPerformance}</span></div></div>` : ''}
+                                ${child.learningDisabilities ? `<div class="bg-white p-3 rounded"><div class="flex items-start"><span class="w-24 text-sm font-bold text-orange-700">Challenges:</span><span class="text-sm text-gray-900">${child.learningDisabilities}</span></div></div>` : ''}
+                            </div>
+                        </div>
+
+                        <!-- Health & Medical Information -->
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-6">
+                            <h3 class="text-lg font-bold text-red-700 mb-4 pb-2 border-b-2 border-red-300 flex items-center">
+                                <span class="mr-2">🏥</span> HEALTH & MEDICAL STATUS
+                            </h3>
+                            <div class="space-y-3">
+                                <div class="bg-white p-3 rounded">
+                                    <div class="flex items-center"><span class="w-24 text-sm font-bold text-red-700">Health:</span><span class="text-sm text-gray-900">${child.healthStatus || child.generalHealth || 'Not assessed'}</span></div>
+                                </div>
+                                <div class="bg-white p-3 rounded">
+                                    <div class="flex items-start"><span class="w-24 text-sm font-bold text-red-700">Allergies:</span><span class="text-sm text-gray-900">${child.allergies || child.knownAllergies || 'None known'}</span></div>
+                                </div>
+                                <div class="bg-white p-3 rounded">
+                                    <div class="flex items-start"><span class="w-24 text-sm font-bold text-red-700">Medications:</span><span class="text-sm text-gray-900">${child.medications || child.currentMedications || 'None prescribed'}</span></div>
+                                </div>
+                                <div class="bg-white p-3 rounded">
+                                    <div class="flex items-start"><span class="w-24 text-sm font-bold text-red-700">Conditions:</span><span class="text-sm text-gray-900">${child.medicalConditions || child.chronicConditions || 'None diagnosed'}</span></div>
+                                </div>
+                                ${child.disabilities ? `<div class="bg-white p-3 rounded"><div class="flex items-start"><span class="w-24 text-sm font-bold text-red-700">Disabilities:</span><span class="text-sm text-gray-900">${child.disabilities}</span></div></div>` : ''}
+                                ${child.mentalHealth ? `<div class="bg-white p-3 rounded"><div class="flex items-start"><span class="w-24 text-sm font-bold text-red-700">Mental Health:</span><span class="text-sm text-gray-900">${child.mentalHealth}</span></div></div>` : ''}
+                                ${child.lastCheckup ? `<div class="bg-white p-3 rounded"><div class="flex items-center"><span class="w-24 text-sm font-bold text-red-700">Last Checkup:</span><span class="text-sm text-gray-900">${formatDate(child.lastCheckup)}</span></div></div>` : ''}
+                            </div>
+                        </div>
+
+                        <!-- Additional Information & Notes -->
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                            <h3 class="text-lg font-bold text-yellow-700 mb-4 pb-2 border-b-2 border-yellow-300 flex items-center">
+                                <span class="mr-2">📝</span> ADDITIONAL INFORMATION
+                            </h3>
+                            <div class="space-y-3">
+                                ${child.behavioralNotes ? `<div class="bg-white p-3 rounded"><div class="flex items-start"><span class="w-24 text-sm font-bold text-yellow-700">Behavior:</span><span class="text-sm text-gray-900">${child.behavioralNotes}</span></div></div>` : ''}
+                                ${child.interests || child.hobbies ? `<div class="bg-white p-3 rounded"><div class="flex items-start"><span class="w-24 text-sm font-bold text-yellow-700">Interests:</span><span class="text-sm text-gray-900">${child.interests || child.hobbies}</span></div></div>` : ''}
+                                ${child.skills ? `<div class="bg-white p-3 rounded"><div class="flex items-start"><span class="w-24 text-sm font-bold text-yellow-700">Skills:</span><span class="text-sm text-gray-900">${child.skills}</span></div></div>` : ''}
+                                ${child.goals ? `<div class="bg-white p-3 rounded"><div class="flex items-start"><span class="w-24 text-sm font-bold text-yellow-700">Goals:</span><span class="text-sm text-gray-900">${child.goals}</span></div></div>` : ''}
+                                ${child.culturalBackground ? `<div class="bg-white p-3 rounded"><div class="flex items-start"><span class="w-24 text-sm font-bold text-yellow-700">Culture:</span><span class="text-sm text-gray-900">${child.culturalBackground}</span></div></div>` : ''}
+                                ${child.notes || child.additionalInfo ? `
+                                <div class="bg-white p-3 rounded border-l-4 border-yellow-400">
+                                    <div class="text-sm font-bold text-yellow-700 mb-2">General Notes:</div>
+                                    <p class="text-sm text-gray-900 leading-relaxed">${child.notes || child.additionalInfo}</p>
+                                </div>` : ''}
+                                ${!child.behavioralNotes && !child.interests && !child.hobbies && !child.skills && !child.goals && !child.culturalBackground && !child.notes && !child.additionalInfo ? 
+                                `<div class="bg-white p-3 rounded text-center"><span class="text-sm text-gray-500 italic">No additional information recorded</span></div>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Health & Medical Profile Section -->
+                <div class="mt-8">
+                    <h3 class="text-xl font-bold text-red-600 mb-4 pb-2 border-b-2 border-red-200">HEALTH & MEDICAL PROFILE</h3>
+                    ${Object.keys(healthMedicalProfile).length > 0 ? `
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                <h4 class="font-bold text-blue-800 text-lg mb-3">General Health Information</h4>
+                                ${healthMedicalProfile.diagnosis ? `
+                                <div>
+                                    <h5 class="font-semibold text-gray-700">Diagnosis:</h5>
+                                    <p class="text-gray-900 ml-2">${healthMedicalProfile.diagnosis}</p>
+                                </div>` : ''}
+                                ${healthMedicalProfile.dateOfCheckUp ? `
+                                <div>
+                                    <h5 class="font-semibold text-gray-700">Date of Checkup:</h5>
+                                    <p class="text-gray-900 ml-2">${formatDate(healthMedicalProfile.dateOfCheckUp)}</p>
+                                </div>` : ''}
+                                ${healthMedicalProfile.followUpCheckUpDate ? `
+                                <div>
+                                    <h5 class="font-semibold text-gray-700">Follow-up Checkup:</h5>
+                                    <p class="text-gray-900 ml-2">${formatDate(healthMedicalProfile.followUpCheckUpDate)}</p>
+                                </div>` : ''}
+                                ${healthMedicalProfile.prescribedMedications && healthMedicalProfile.prescribedMedications.length > 0 ? `
+                                <div>
+                                    <h5 class="font-semibold text-gray-700">Prescribed Medications:</h5>
+                                    <div class="ml-2">
+                                        ${healthMedicalProfile.prescribedMedications.map(med => `<p class="text-gray-900">• ${med}</p>`).join('')}
+                                    </div>
+                                </div>` : ''}
+                                ${healthMedicalProfile.doctorRemarks && healthMedicalProfile.doctorRemarks.length > 0 ? `
+                                <div>
+                                    <h5 class="font-semibold text-gray-700">Doctor's Remarks:</h5>
+                                    <div class="ml-2">
+                                        ${healthMedicalProfile.doctorRemarks.map(remark => `<p class="text-gray-900">• ${remark}</p>`).join('')}
+                                    </div>
+                                </div>` : ''}
+                                ${healthMedicalProfile.laboratoryWorkups && healthMedicalProfile.laboratoryWorkups.length > 0 ? `
+                                <div>
+                                    <h5 class="font-semibold text-gray-700">Laboratory Workups:</h5>
+                                    <div class="ml-2">
+                                        ${healthMedicalProfile.laboratoryWorkups.map(workup => `<p class="text-gray-900">• ${workup}</p>`).join('')}
+                                    </div>
+                                </div>` : ''}
+                            </div>
+                            <div class="space-y-4">
+                                <h4 class="font-bold text-blue-800 text-lg mb-3">Medical Procedures & Immunizations</h4>
+                                ${healthMedicalProfile.proceduresUndergone && healthMedicalProfile.proceduresUndergone.length > 0 ? `
+                                <div>
+                                    <h5 class="font-semibold text-gray-700">Procedures Undergone:</h5>
+                                    <div class="ml-2">
+                                        ${healthMedicalProfile.proceduresUndergone.map(proc => `<p class="text-gray-900">• ${proc}</p>`).join('')}
+                                    </div>
+                                </div>` : ''}
+                                ${healthMedicalProfile.proceduresToBeUndertaken && healthMedicalProfile.proceduresToBeUndertaken.length > 0 ? `
+                                <div>
+                                    <h5 class="font-semibold text-gray-700">Procedures to be Undertaken:</h5>
+                                    <div class="ml-2">
+                                        ${healthMedicalProfile.proceduresToBeUndertaken.map(proc => `<p class="text-gray-900">• ${proc}</p>`).join('')}
+                                    </div>
+                                </div>` : ''}
+                                ${healthMedicalProfile.immunizations && healthMedicalProfile.immunizations.length > 0 ? `
+                                <div>
+                                    <h5 class="font-semibold text-gray-700">Immunizations:</h5>
+                                    <div class="ml-2 space-y-1">
+                                        ${healthMedicalProfile.immunizations.map(imm => `
+                                            <div class="bg-white p-2 rounded border">
+                                                <p class="text-gray-900 font-medium">${imm.name || 'Unnamed vaccine'}</p>
+                                                ${imm.dateGiven ? `<p class="text-sm text-gray-600">Date: ${formatDate(imm.dateGiven)}</p>` : ''}
+                                                <p class="text-sm ${imm.isActive ? 'text-green-600' : 'text-red-600'}">${imm.isActive ? 'Active' : 'Inactive'}</p>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>` : ''}
+                                ${healthMedicalProfile.laboratoryResults && healthMedicalProfile.laboratoryResults.length > 0 ? `
+                                <div>
+                                    <h5 class="font-semibold text-gray-700">Laboratory Results:</h5>
+                                    <div class="ml-2 space-y-1">
+                                        ${healthMedicalProfile.laboratoryResults.map(lab => `
+                                            <div class="bg-white p-2 rounded border">
+                                                <p class="text-gray-900 font-medium">${lab.test || 'Unknown test'}</p>
+                                                <p class="text-sm text-gray-600">Result: ${lab.result || 'No result'}</p>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>` : ''}
+                                ${healthMedicalProfile.createdBy ? `
+                                <div>
+                                    <h5 class="font-semibold text-gray-700">Created By:</h5>
+                                    <p class="text-gray-900 ml-2">${healthMedicalProfile.createdBy}</p>
+                                </div>` : ''}
+                            </div>
+                        </div>
+                        ${healthMedicalProfile.profileId ? `
+                        <div class="mt-6 pt-4 border-t border-blue-300">
+                            <h5 class="font-semibold text-gray-700 mb-2">Profile Information:</h5>
+                            <div class="bg-white p-3 rounded border">
+                                <p class="text-gray-900"><strong>Profile ID:</strong> ${healthMedicalProfile.profileId}</p>
+                                ${healthMedicalProfile.patientId ? `<p class="text-gray-900"><strong>Patient ID:</strong> ${healthMedicalProfile.patientId}</p>` : ''}
+                            </div>
+                        </div>` : ''}
+                        ${healthMedicalProfile.scannedDocument ? `
+                        <div class="mt-6 pt-4 border-t border-blue-300">
+                            <h5 class="font-semibold text-gray-700 mb-2">Medical Record Summary:</h5>
+                            <div class="bg-white p-4 rounded border">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="space-y-2">
+                                        ${healthMedicalProfile.diagnosis ? `
+                                        <div class="flex">
+                                            <span class="font-medium text-gray-700 w-20">Diagnosis:</span>
+                                            <span class="text-gray-900">${healthMedicalProfile.diagnosis}</span>
+                                        </div>` : ''}
+                                        ${healthMedicalProfile.prescribedMedications && healthMedicalProfile.prescribedMedications.length > 0 ? `
+                                        <div class="flex">
+                                            <span class="font-medium text-gray-700 w-20">Medications:</span>
+                                            <span class="text-gray-900">${healthMedicalProfile.prescribedMedications.join(', ')}</span>
+                                        </div>` : ''}
+                                        ${healthMedicalProfile.dateOfCheckUp ? `
+                                        <div class="flex">
+                                            <span class="font-medium text-gray-700 w-20">Checkup:</span>
+                                            <span class="text-gray-900">${formatDate(healthMedicalProfile.dateOfCheckUp)}</span>
+                                        </div>` : ''}
+                                    </div>
+                                    <div class="space-y-2">
+                                        ${healthMedicalProfile.followUpCheckUpDate ? `
+                                        <div class="flex">
+                                            <span class="font-medium text-gray-700 w-20">Follow-up:</span>
+                                            <span class="text-gray-900">${formatDate(healthMedicalProfile.followUpCheckUpDate)}</span>
+                                        </div>` : ''}
+                                        ${healthMedicalProfile.createdBy ? `
+                                        <div class="flex">
+                                            <span class="font-medium text-gray-700 w-20">Created by:</span>
+                                            <span class="text-gray-900">${healthMedicalProfile.createdBy}</span>
+                                        </div>` : ''}
+                                        <div class="flex">
+                                            <span class="font-medium text-gray-700 w-20">Document:</span>
+                                            <span class="text-gray-900">Scanned medical record attached</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>` : ''}
+                        ${healthMedicalProfile.dateAdded || healthMedicalProfile.lastUpdated ? `
+                        <div class="mt-4 text-right">
+                            ${healthMedicalProfile.dateAdded ? `<p class="text-sm text-gray-500">Date Added: ${formatDate(healthMedicalProfile.dateAdded)}</p>` : ''}
+                            ${healthMedicalProfile.lastUpdated ? `<p class="text-sm text-gray-500">Last Updated: ${formatDate(healthMedicalProfile.lastUpdated)}</p>` : ''}
+                        </div>` : ''}
+                    </div>
+                    ` : `
+                    <div class="bg-gray-50 border border-gray-300 rounded-lg p-6 text-center">
+                        <p class="text-gray-500 font-medium">No health and medical profile available</p>
+                    </div>
+                    `}
+                </div>
+
+                <!-- Anthropometric Measurements Section -->
+                <div class="mt-6">
+                    <h3 class="text-xl font-bold text-red-600 mb-4 pb-2 border-b-2 border-red-200">ANTHROPOMETRIC MEASUREMENTS</h3>
+                    ${Object.keys(anthropometricMeasurement).length > 0 ? `
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                <h4 class="font-bold text-green-800 text-lg mb-3">Physical Measurements</h4>
+                                ${anthropometricMeasurement.height && anthropometricMeasurement.height[0] && anthropometricMeasurement.height[0].value ? `
+                                <div>
+                                    <h5 class="font-semibold text-gray-700">Height:</h5>
+                                    <p class="text-gray-900 ml-2">${anthropometricMeasurement.height[0].value} ${anthropometricMeasurement.height[0].unit || 'cm'}</p>
+                                </div>` : ''}
+                                ${anthropometricMeasurement.weight && anthropometricMeasurement.weight[0] && anthropometricMeasurement.weight[0].value ? `
+                                <div>
+                                    <h5 class="font-semibold text-gray-700">Weight:</h5>
+                                    <p class="text-gray-900 ml-2">${anthropometricMeasurement.weight[0].value} ${anthropometricMeasurement.weight[0].unit || 'kg'}</p>
+                                </div>` : ''}
+                                ${anthropometricMeasurement.headCircumference && anthropometricMeasurement.headCircumference[0] && anthropometricMeasurement.headCircumference[0].value ? `
+                                <div>
+                                    <h5 class="font-semibold text-gray-700">Head Circumference:</h5>
+                                    <p class="text-gray-900 ml-2">${anthropometricMeasurement.headCircumference[0].value} ${anthropometricMeasurement.headCircumference[0].unit || 'cm'}</p>
+                                </div>` : ''}
+                                ${anthropometricMeasurement.chestCircumference && anthropometricMeasurement.chestCircumference[0] && anthropometricMeasurement.chestCircumference[0].value ? `
+                                <div>
+                                    <h5 class="font-semibold text-gray-700">Chest Circumference:</h5>
+                                    <p class="text-gray-900 ml-2">${anthropometricMeasurement.chestCircumference[0].value} ${anthropometricMeasurement.chestCircumference[0].unit || 'cm'}</p>
+                                </div>` : ''}
+                                ${anthropometricMeasurement.armCircumference && anthropometricMeasurement.armCircumference[0] && anthropometricMeasurement.armCircumference[0].value ? `
+                                <div>
+                                    <h5 class="font-semibold text-gray-700">Arm Circumference:</h5>
+                                    <p class="text-gray-900 ml-2">${anthropometricMeasurement.armCircumference[0].value} ${anthropometricMeasurement.armCircumference[0].unit || 'cm'}</p>
+                                </div>` : ''}
+                            </div>
+                            <div class="space-y-4">
+                                <h4 class="font-bold text-green-800 text-lg mb-3">Growth Indicators</h4>
+                                ${anthropometricMeasurement.bmi && anthropometricMeasurement.bmi[0] ? `
+                                <div>
+                                    <h5 class="font-semibold text-gray-700">Body Mass Index (BMI):</h5>
+                                    <p class="text-gray-900 ml-2">${anthropometricMeasurement.bmi[0].value || anthropometricMeasurement.bmi[0].formula}</p>
+                                </div>` : ''}
+                                ${anthropometricMeasurement.numberOfTeeth && anthropometricMeasurement.numberOfTeeth[0] && anthropometricMeasurement.numberOfTeeth[0].count ? `
+                                <div>
+                                    <h5 class="font-semibold text-gray-700">Number of Teeth:</h5>
+                                    <p class="text-gray-900 ml-2">${anthropometricMeasurement.numberOfTeeth[0].count}</p>
+                                </div>` : ''}
+                                ${anthropometricMeasurement.nutritionalStatus && anthropometricMeasurement.nutritionalStatus[0] && anthropometricMeasurement.nutritionalStatus[0].value ? `
+                                <div>
+                                    <h5 class="font-semibold text-gray-700">Nutritional Status:</h5>
+                                    <p class="text-gray-900 ml-2">${anthropometricMeasurement.nutritionalStatus[0].value}</p>
+                                </div>` : ''}
+                                ${anthropometricMeasurement.growthPercentile && anthropometricMeasurement.growthPercentile[0] && anthropometricMeasurement.growthPercentile[0].value ? `
+                                <div>
+                                    <h5 class="font-semibold text-gray-700">Growth Percentile:</h5>
+                                    <p class="text-gray-900 ml-2">${anthropometricMeasurement.growthPercentile[0].value}</p>
+                                </div>` : ''}
+                                ${anthropometricMeasurement.heightForAge && anthropometricMeasurement.heightForAge[0] && anthropometricMeasurement.heightForAge[0].value ? `
+                                <div>
+                                    <h5 class="font-semibold text-gray-700">Height-for-Age:</h5>
+                                    <p class="text-gray-900 ml-2">${anthropometricMeasurement.heightForAge[0].value}</p>
+                                </div>` : ''}
+                                ${anthropometricMeasurement.weightForAge && anthropometricMeasurement.weightForAge[0] && anthropometricMeasurement.weightForAge[0].value ? `
+                                <div>
+                                    <h5 class="font-semibold text-gray-700">Weight-for-Age:</h5>
+                                    <p class="text-gray-900 ml-2">${anthropometricMeasurement.weightForAge[0].value}</p>
+                                </div>` : ''}
+                                ${anthropometricMeasurement.weightForHeight && anthropometricMeasurement.weightForHeight[0] && anthropometricMeasurement.weightForHeight[0].value ? `
+                                <div>
+                                    <h5 class="font-semibold text-gray-700">Weight-for-Height:</h5>
+                                    <p class="text-gray-900 ml-2">${anthropometricMeasurement.weightForHeight[0].value}</p>
+                                </div>` : ''}
+                            </div>
+                        </div>
+                        ${anthropometricMeasurement.measurementNotes && anthropometricMeasurement.measurementNotes[0] && anthropometricMeasurement.measurementNotes[0].value ? `
+                        <div class="mt-6 pt-4 border-t border-green-300">
+                            <h5 class="font-semibold text-gray-700 mb-2">Measurement Notes:</h5>
+                            <p class="text-gray-900 bg-white p-3 rounded border">${anthropometricMeasurement.measurementNotes[0].value}</p>
+                        </div>` : ''}
+                        ${anthropometricMeasurement.dateRecorded && anthropometricMeasurement.dateRecorded[0] && anthropometricMeasurement.dateRecorded[0].value ? `
+                        <div class="mt-4 text-right">
+                            <p class="text-sm text-gray-500">Measured on: ${formatDate(anthropometricMeasurement.dateRecorded[0].value)}</p>
+                        </div>` : ''}
+                    </div>
+                    ` : `
+                    <div class="bg-gray-50 border border-gray-300 rounded-lg p-6 text-center">
+                        <p class="text-gray-500 font-medium">No anthropometric measurements available</p>
+                    </div>
+                    `}
+                </div>
+
+                <!-- Footer -->
+                <div class="mt-8 pt-4 border-t-2 border-red-600 text-center">
+                    <div class="text-sm text-gray-600">
+                        <p class="font-semibold">This is an official record from Tahanan ng Pagmamahal Foundation, Inc.</p>
+                        <p>Generated on ${currentDate} by ${getCurrentUser()?.firstName || 'System'} ${getCurrentUser()?.lastName || 'User'}</p>
+                        <p class="text-xs mt-2 text-gray-500">For official use only. Confidential information - handle with care.</p>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('soloPrintPreview').innerHTML = previewHTML;
+    }
+
+    function printSoloRecord() {
+        if (!selectedSoloChild) {
+            alert('Please select a child to print');
+            return;
+        }
+
+        const printContent = document.getElementById('soloPrintPreview').innerHTML;
+        const printWindow = window.open('', '_blank');
         
-        // Set filtered records to just this one record
-        printFilteredRecords = [record];
-        updatePrintPreview();
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Child Record - ${selectedSoloChild.firstName} ${selectedSoloChild.lastName}</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+                    .print-preview-content { max-width: 800px; margin: 0 auto; }
+                    .grid { display: grid; }
+                    .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+                    .gap-4 { gap: 1rem; }
+                    .space-y-3 > * + * { margin-top: 0.75rem; }
+                    .border-l-4 { border-left: 4px solid; }
+                    .border-blue-500 { border-color: #3b82f6; }
+                    .border-green-500 { border-color: #10b981; }
+                    .pl-4 { padding-left: 1rem; }
+                    .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+                    .mb-2 { margin-bottom: 0.5rem; }
+                    .mb-3 { margin-bottom: 0.75rem; }
+                    .mb-6 { margin-bottom: 1.5rem; }
+                    .text-center { text-align: center; }
+                    .font-bold { font-weight: bold; }
+                    .font-semibold { font-weight: 600; }
+                    .font-medium { font-weight: 500; }
+                    .text-sm { font-size: 0.875rem; }
+                    .text-xs { font-size: 0.75rem; }
+                    .text-lg { font-size: 1.125rem; }
+                    .text-xl { font-size: 1.25rem; }
+                    .text-2xl { font-size: 1.5rem; }
+                    .flex { display: flex; }
+                    .items-start { align-items: flex-start; }
+                    .items-center { align-items: center; }
+                    .justify-between { justify-content: space-between; }
+                    .space-x-6 > * + * { margin-left: 1.5rem; }
+                    .flex-1 { flex: 1; }
+                    img { max-width: 100%; height: auto; }
+                    .rounded-lg { border-radius: 0.5rem; }
+                    .border { border: 1px solid #d1d5db; }
+                    .border-t { border-top: 1px solid #d1d5db; }
+                    .pt-4 { padding-top: 1rem; }
+                    .mt-8 { margin-top: 2rem; }
+                    @media print {
+                        body { margin: 0; }
+                        .print-preview-content { margin: 0; }
+                    }
+                </style>
+            </head>
+            <body>
+                ${printContent}
+            </body>
+            </html>
+        `);
         
-        // Auto-print immediately
+        printWindow.document.close();
+        printWindow.focus();
+        
         setTimeout(() => {
-            confirmPrint();
+            printWindow.print();
         }, 500);
+    }
+
+    // Solo Print Record function - now opens modal instead of prompt
+    function openSoloPrintDialog() {
+        openSoloPrintModal();
     }
 
     function confirmPrint() {
