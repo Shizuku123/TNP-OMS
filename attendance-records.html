@@ -6,6 +6,10 @@
     <title>Staff Attendance Records - Tahanan ng Pagmamahal OMS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module" src="firebase.js"></script>
+    <!-- PDF Generation Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- HTML to Canvas for PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -351,6 +355,31 @@
                     <button onclick="closeDTRModal()" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">Cancel</button>
                     <button onclick="previewDTR()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Preview DTR</button>
                     <button onclick="printDTR()" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Print DTR</button>
+                </div>
+                
+                <!-- Download Options -->
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <h4 class="text-sm font-medium text-gray-700 mb-3">📥 Download Options</h4>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="downloadDTR('pdf')" class="flex items-center justify-center px-3 py-2 bg-red-50 text-red-700 border border-red-200 rounded-md hover:bg-red-100 text-sm">
+                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                            PDF
+                        </button>
+                        <button onclick="downloadDTR('csv')" class="flex items-center justify-center px-3 py-2 bg-green-50 text-green-700 border border-green-200 rounded-md hover:bg-green-100 text-sm">
+                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                            CSV
+                        </button>
+                        <button onclick="downloadDTR('word')" class="flex items-center justify-center px-3 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-md hover:bg-blue-100 text-sm">
+                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                            Word
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1512,89 +1541,328 @@
             <head>
                 <title>DTR - ${dtrData.staff.name}</title>
                 <style>
-                    body { font-family: Arial, sans-serif; margin: 20px; }
-                    .dtr-header { text-align: center; margin-bottom: 30px; }
-                    .dtr-info { margin-bottom: 20px; }
-                    .dtr-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-                    .dtr-table th, .dtr-table td { border: 1px solid #000; padding: 8px; text-align: center; }
-                    .dtr-table th { background-color: #f0f0f0; font-weight: bold; }
-                    .dtr-summary { margin-top: 20px; }
-                    .signature-section { margin-top: 40px; display: flex; justify-content: space-between; }
-                    .signature-box { text-align: center; width: 200px; }
-                    .signature-line { border-bottom: 1px solid #000; margin-bottom: 5px; height: 30px; }
+                    body { 
+                        font-family: Arial, sans-serif; 
+                        margin: 0; 
+                        padding: 20px;
+                        font-size: 12px;
+                    }
+                    .dtr-container { 
+                        max-width: 800px; 
+                        margin: 0 auto; 
+                        border: 2px solid #000;
+                        padding: 0;
+                    }
+                    .dtr-header { 
+                        text-align: center; 
+                        padding: 15px;
+                        border-bottom: 2px solid #000;
+                        background-color: #f8f9fa;
+                    }
+                    .dtr-header h1 { 
+                        margin: 0; 
+                        font-size: 16px; 
+                        font-weight: bold;
+                    }
+                    .dtr-header h2 { 
+                        margin: 5px 0; 
+                        font-size: 14px; 
+                        font-weight: normal;
+                    }
+                    .dtr-info { 
+                        padding: 15px;
+                        border-bottom: 1px solid #000;
+                    }
+                    .info-row { 
+                        display: flex; 
+                        margin-bottom: 8px;
+                        align-items: center;
+                    }
+                    .info-label { 
+                        font-weight: bold; 
+                        width: 120px; 
+                        display: inline-block;
+                    }
+                    .info-value { 
+                        border-bottom: 1px solid #000; 
+                        flex-grow: 1; 
+                        padding: 2px 5px;
+                        margin-left: 10px;
+                    }
+                    .dtr-table { 
+                        width: 100%; 
+                        border-collapse: collapse; 
+                    }
+                    .dtr-table th { 
+                        background-color: #f0f0f0; 
+                        font-weight: bold; 
+                        padding: 8px 4px;
+                        text-align: center;
+                        border: 1px solid #000;
+                        font-size: 11px;
+                    }
+                    .dtr-table td { 
+                        padding: 6px 4px; 
+                        text-align: center; 
+                        border: 1px solid #000;
+                        font-size: 10px;
+                    }
+                    .time-cell { 
+                        width: 80px; 
+                    }
+                    .date-cell { 
+                        width: 60px; 
+                    }
+                    .day-cell { 
+                        width: 50px; 
+                    }
+                    .status-cell { 
+                        width: 60px; 
+                    }
+                    .remarks-cell { 
+                        width: 100px; 
+                    }
+                    .morning-header, .afternoon-header { 
+                        text-align: center; 
+                        font-weight: bold;
+                        background-color: #e9ecef;
+                    }
+                    .footer-section { 
+                        padding: 20px;
+                        border-top: 1px solid #000;
+                    }
+                    .summary-section { 
+                        display: flex; 
+                        justify-content: space-between; 
+                        margin-bottom: 20px;
+                    }
+                    .summary-box { 
+                        border: 1px solid #000; 
+                        padding: 10px; 
+                        width: 45%;
+                    }
+                    .summary-title { 
+                        font-weight: bold; 
+                        margin-bottom: 10px; 
+                        text-align: center;
+                        border-bottom: 1px solid #000;
+                        padding-bottom: 5px;
+                    }
+                    .summary-item { 
+                        display: flex; 
+                        justify-content: space-between; 
+                        margin-bottom: 5px;
+                    }
+                    .signature-section { 
+                        display: flex; 
+                        justify-content: space-between; 
+                        margin-top: 30px;
+                    }
+                    .signature-box { 
+                        text-align: center; 
+                        width: 30%;
+                        border: 1px solid #000;
+                        padding: 15px;
+                    }
+                    .signature-title { 
+                        font-weight: bold; 
+                        margin-bottom: 40px;
+                    }
+                    .signature-line { 
+                        border-bottom: 1px solid #000; 
+                        margin-bottom: 5px; 
+                        height: 30px;
+                    }
+                    .certify-section {
+                        margin: 20px 0;
+                        padding: 15px;
+                        border: 1px solid #000;
+                        font-size: 11px;
+                        text-align: justify;
+                    }
                     ${isPreview ? '.preview-notice { background: #fffbf0; border: 2px solid orange; padding: 10px; margin-bottom: 20px; text-align: center; font-weight: bold; }' : ''}
                     @media print { 
-                        body { margin: 0; } 
+                        body { margin: 0; padding: 10px; } 
                         .preview-notice { display: none; }
+                        .dtr-container { border: 2px solid #000; }
                     }
                 </style>
             </head>
             <body>
                 ${isPreview ? '<div class="preview-notice">🔍 DTR PREVIEW - This is a preview only</div>' : ''}
                 
-                <div class="dtr-header">
-                    <h2>DAILY TIME RECORD (DTR)</h2>
-                    <h3>TNP Organization Management System</h3>
-                </div>
-                
-                <div class="dtr-info">
-                    <div><strong>Name:</strong> ${dtrData.staff.name}</div>
-                    <div><strong>Employee ID:</strong> ${dtrData.staff.id}</div>
-                    <div><strong>Position:</strong> ${dtrData.staff.type}</div>
-                    <div><strong>Period:</strong> ${formatDate(dtrData.period.start)} to ${formatDate(dtrData.period.end)}</div>
-                    <div><strong>Generated:</strong> ${today}</div>
-                </div>
-                
-                <table class="dtr-table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Day</th>
-                            <th>Time In</th>
-                            <th>Time Out</th>
-                            <th>Hours Worked</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${dtrData.records.map(record => {
-                            const dayName = new Date(record.date).toLocaleDateString('en-US', { weekday: 'short' });
-                            return `
-                                <tr>
-                                    <td>${formatDate(record.date)}</td>
-                                    <td>${dayName}</td>
-                                    <td>${record.timeIn || '-'}</td>
-                                    <td>${record.timeOut || '-'}</td>
-                                    <td>${record.hours > 0 ? record.hours.toFixed(2) : '-'}</td>
-                                    <td>${record.status}</td>
-                                </tr>
-                            `;
-                        }).join('')}
-                    </tbody>
-                </table>
-                
-                <div class="dtr-summary">
-                    <h3>Summary</h3>
-                    <div><strong>Total Days Worked:</strong> ${dtrData.summary.totalDays}</div>
-                    <div><strong>Total Hours Worked:</strong> ${dtrData.summary.totalHours}</div>
-                    <div><strong>Average Hours per Day:</strong> ${dtrData.summary.averageHours}</div>
-                </div>
-                
-                <div class="signature-section">
-                    <div class="signature-box">
-                        <div class="signature-line"></div>
-                        <div>Employee Signature</div>
-                        <div>Date: ___________</div>
+                <div class="dtr-container">
+                    <div class="dtr-header">
+                        <h1>DAILY TIME RECORD</h1>
+                        <h2>TNP Organization Management System</h2>
+                        <div style="font-size: 12px; margin-top: 10px;">
+                            (To be accomplished by employee and submitted to the Administrative Office)
+                        </div>
                     </div>
-                    <div class="signature-box">
-                        <div class="signature-line"></div>
-                        <div>Supervisor Signature</div>
-                        <div>Date: ___________</div>
+                    
+                    <div class="dtr-info">
+                        <div class="info-row">
+                            <span class="info-label">Name:</span>
+                            <span class="info-value">${dtrData.staff.name.toUpperCase()}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Employee ID:</span>
+                            <span class="info-value">${dtrData.staff.id}</span>
+                            <span class="info-label" style="margin-left: 30px;">Position:</span>
+                            <span class="info-value">${dtrData.staff.type}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">For the Period:</span>
+                            <span class="info-value">${formatDate(dtrData.period.start)} TO ${formatDate(dtrData.period.end)}</span>
+                        </div>
+                    </div>
+                    
+                    <table class="dtr-table">
+                        <thead>
+                            <tr>
+                                <th rowspan="2" class="date-cell">DATE</th>
+                                <th rowspan="2" class="day-cell">DAY</th>
+                                <th colspan="2" class="morning-header">ARRIVAL & DEPARTURE TIME</th>
+                                <th rowspan="2" class="status-cell">STATUS</th>
+                                <th rowspan="2" class="remarks-cell">REMARKS</th>
+                            </tr>
+                            <tr>
+                                <th class="time-cell">A.M.</th>
+                                <th class="time-cell">P.M.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${generateDTRRows(dtrData.records)}
+                        </tbody>
+                    </table>
+                    
+                    <div class="footer-section">
+                        <div class="summary-section">
+                            <div class="summary-box">
+                                <div class="summary-title">ATTENDANCE SUMMARY</div>
+                                <div class="summary-item">
+                                    <span>Total Days Worked:</span>
+                                    <span><strong>${dtrData.summary.totalDays}</strong></span>
+                                </div>
+                                <div class="summary-item">
+                                    <span>Total Hours:</span>
+                                    <span><strong>${dtrData.summary.totalHours}</strong></span>
+                                </div>
+                                <div class="summary-item">
+                                    <span>Average Hours/Day:</span>
+                                    <span><strong>${dtrData.summary.averageHours}</strong></span>
+                                </div>
+                            </div>
+                            
+                            <div class="summary-box">
+                                <div class="summary-title">LATE/ABSENT SUMMARY</div>
+                                <div class="summary-item">
+                                    <span>Times Late:</span>
+                                    <span><strong>${countStatus(dtrData.records, 'Late')}</strong></span>
+                                </div>
+                                <div class="summary-item">
+                                    <span>Days Absent:</span>
+                                    <span><strong>${countStatus(dtrData.records, 'Absent')}</strong></span>
+                                </div>
+                                <div class="summary-item">
+                                    <span>Leave Days:</span>
+                                    <span><strong>${countStatus(dtrData.records, 'Leave')}</strong></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="certify-section">
+                            <strong>CERTIFICATION:</strong> I certify on my honor that the above is a true and correct report of the hours of work performed, 
+                            record of which was made daily at the time of arrival and departure from office.
+                        </div>
+                        
+                        <div class="signature-section">
+                            <div class="signature-box">
+                                <div class="signature-title">EMPLOYEE</div>
+                                <div class="signature-line"></div>
+                                <div style="margin-top: 5px; font-size: 10px;">Signature</div>
+                                <div style="margin-top: 15px;">Date: _______________</div>
+                            </div>
+                            
+                            <div class="signature-box">
+                                <div class="signature-title">VERIFIED BY</div>
+                                <div class="signature-line"></div>
+                                <div style="margin-top: 5px; font-size: 10px;">Immediate Supervisor</div>
+                                <div style="margin-top: 15px;">Date: _______________</div>
+                            </div>
+                            
+                            <div class="signature-box">
+                                <div class="signature-title">APPROVED BY</div>
+                                <div class="signature-line"></div>
+                                <div style="margin-top: 5px; font-size: 10px;">HR Manager/Administrator</div>
+                                <div style="margin-top: 15px;">Date: _______________</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </body>
             </html>
             `;
+        }
+        
+        function generateDTRRows(records) {
+            return records.map(record => {
+                const date = new Date(record.date);
+                const dayName = date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
+                const dayNum = date.getDate().toString().padStart(2, '0');
+                
+                // Split time in/out for AM/PM format
+                const timeIn = record.timeIn ? formatTimeAMPM(record.timeIn) : '';
+                const timeOut = record.timeOut ? formatTimeAMPM(record.timeOut) : '';
+                
+                const statusBadge = getStatusBadge(record.status);
+                const remarks = getRemarks(record);
+                
+                return `
+                    <tr>
+                        <td class="date-cell"><strong>${dayNum}</strong></td>
+                        <td class="day-cell">${dayName}</td>
+                        <td class="time-cell">${timeIn}</td>
+                        <td class="time-cell">${timeOut}</td>
+                        <td class="status-cell">${statusBadge}</td>
+                        <td class="remarks-cell">${remarks}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        
+        function formatTimeAMPM(timeString) {
+            if (!timeString) return '';
+            try {
+                const [hours, minutes] = timeString.split(':');
+                const hour12 = hours % 12 || 12;
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                return `${hour12}:${minutes} ${ampm}`;
+            } catch (error) {
+                return timeString;
+            }
+        }
+        
+        function getStatusBadge(status) {
+            switch(status) {
+                case 'Present': return '✓';
+                case 'Late': return 'L';
+                case 'Absent': return 'A';
+                case 'Leave': return 'LV';
+                default: return status;
+            }
+        }
+        
+        function getRemarks(record) {
+            if (record.status === 'Late') return 'Late arrival';
+            if (record.status === 'Leave') return 'On leave';
+            if (record.status === 'Absent') return 'Absent';
+            if (record.location) return `Location: ${record.location}`;
+            return '';
+        }
+        
+        function countStatus(records, status) {
+            return records.filter(record => record.status === status).length;
         }
         
         function formatDate(dateString) {
@@ -1603,6 +1871,397 @@
                 month: 'short',
                 day: '2-digit'
             });
+        }
+        
+        // Download DTR Functions
+        function downloadDTR(format) {
+            const dtrData = generateDTRData();
+            if (!dtrData) return;
+            
+            switch(format) {
+                case 'pdf':
+                    downloadDTRPDF(dtrData);
+                    break;
+                case 'csv':
+                    downloadDTRCSV(dtrData);
+                    break;
+                case 'word':
+                    downloadDTRWord(dtrData);
+                    break;
+            }
+            
+            showMessage(`DTR downloaded as ${format.toUpperCase()}!`, 'success');
+        }
+        
+        function downloadDTRPDF(dtrData) {
+            // Create a temporary div to render HTML for PDF
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = generateDTRHTML(dtrData, false);
+            tempDiv.style.position = 'absolute';
+            tempDiv.style.left = '-9999px';
+            tempDiv.style.background = 'white';
+            tempDiv.style.width = '800px';
+            document.body.appendChild(tempDiv);
+            
+            // Use html2canvas to convert HTML to canvas, then to PDF
+            html2canvas(tempDiv, {
+                scale: 2,
+                backgroundColor: '#ffffff'
+            }).then(canvas => {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                
+                const imgData = canvas.toDataURL('image/png');
+                const imgWidth = 210; // A4 width in mm
+                const pageHeight = 295; // A4 height in mm
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                let heightLeft = imgHeight;
+                
+                let position = 0;
+                
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+                
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+                
+                pdf.save(`DTR_${dtrData.staff.name}_${dtrData.period.start}_to_${dtrData.period.end}.pdf`);
+                document.body.removeChild(tempDiv);
+            });
+        }
+        
+        function downloadDTRCSV(dtrData) {
+            const csvContent = [
+                // Header
+                'DTR - Daily Time Record',
+                `Name: ${dtrData.staff.name}`,
+                `Employee ID: ${dtrData.staff.id}`,
+                `Position: ${dtrData.staff.type}`,
+                `Period: ${formatDate(dtrData.period.start)} to ${formatDate(dtrData.period.end)}`,
+                `Generated: ${new Date().toLocaleDateString()}`,
+                '',
+                // Table headers
+                'Date,Day,Time In,Time Out,Hours Worked,Status',
+                // Data rows
+                ...dtrData.records.map(record => {
+                    const dayName = new Date(record.date).toLocaleDateString('en-US', { weekday: 'short' });
+                    return [
+                        formatDate(record.date),
+                        dayName,
+                        record.timeIn || '-',
+                        record.timeOut || '-',
+                        record.hours > 0 ? record.hours.toFixed(2) : '-',
+                        record.status
+                    ].join(',');
+                }),
+                '',
+                // Summary
+                'Summary',
+                `Total Days Worked: ${dtrData.summary.totalDays}`,
+                `Total Hours Worked: ${dtrData.summary.totalHours}`,
+                `Average Hours per Day: ${dtrData.summary.averageHours}`
+            ].join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `DTR_${dtrData.staff.name}_${dtrData.period.start}_to_${dtrData.period.end}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+        
+        function downloadDTRWord(dtrData) {
+            // Generate HTML content for Word with proper DTR formatting
+            const wordContent = `
+                <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+                <head>
+                    <meta charset="utf-8">
+                    <title>DTR - ${dtrData.staff.name}</title>
+                    <style>
+                        body { 
+                            font-family: Arial, sans-serif; 
+                            margin: 0; 
+                            padding: 20px;
+                            font-size: 12px;
+                        }
+                        .dtr-container { 
+                            max-width: 800px; 
+                            margin: 0 auto; 
+                            border: 2px solid #000;
+                            padding: 0;
+                        }
+                        .dtr-header { 
+                            text-align: center; 
+                            padding: 15px;
+                            border-bottom: 2px solid #000;
+                            background-color: #f8f9fa;
+                        }
+                        .dtr-header h1 { 
+                            margin: 0; 
+                            font-size: 16px; 
+                            font-weight: bold;
+                        }
+                        .dtr-header h2 { 
+                            margin: 5px 0; 
+                            font-size: 14px; 
+                            font-weight: normal;
+                        }
+                        .dtr-info { 
+                            padding: 15px;
+                            border-bottom: 1px solid #000;
+                        }
+                        .info-row { 
+                            display: flex; 
+                            margin-bottom: 8px;
+                            align-items: center;
+                        }
+                        .info-label { 
+                            font-weight: bold; 
+                            width: 120px; 
+                            display: inline-block;
+                        }
+                        .info-value { 
+                            border-bottom: 1px solid #000; 
+                            flex-grow: 1; 
+                            padding: 2px 5px;
+                            margin-left: 10px;
+                        }
+                        .dtr-table { 
+                            width: 100%; 
+                            border-collapse: collapse; 
+                        }
+                        .dtr-table th { 
+                            background-color: #f0f0f0; 
+                            font-weight: bold; 
+                            padding: 8px 4px;
+                            text-align: center;
+                            border: 1px solid #000;
+                            font-size: 11px;
+                        }
+                        .dtr-table td { 
+                            padding: 6px 4px; 
+                            text-align: center; 
+                            border: 1px solid #000;
+                            font-size: 10px;
+                        }
+                        .time-cell { width: 80px; }
+                        .date-cell { width: 60px; }
+                        .day-cell { width: 50px; }
+                        .status-cell { width: 60px; }
+                        .remarks-cell { width: 100px; }
+                        .morning-header, .afternoon-header { 
+                            text-align: center; 
+                            font-weight: bold;
+                            background-color: #e9ecef;
+                        }
+                        .footer-section { 
+                            padding: 20px;
+                            border-top: 1px solid #000;
+                        }
+                        .summary-section { 
+                            display: flex; 
+                            justify-content: space-between; 
+                            margin-bottom: 20px;
+                        }
+                        .summary-box { 
+                            border: 1px solid #000; 
+                            padding: 10px; 
+                            width: 45%;
+                        }
+                        .summary-title { 
+                            font-weight: bold; 
+                            margin-bottom: 10px; 
+                            text-align: center;
+                            border-bottom: 1px solid #000;
+                            padding-bottom: 5px;
+                        }
+                        .summary-item { 
+                            display: flex; 
+                            justify-content: space-between; 
+                            margin-bottom: 5px;
+                        }
+                        .signature-section { 
+                            display: flex; 
+                            justify-content: space-between; 
+                            margin-top: 30px;
+                        }
+                        .signature-box { 
+                            text-align: center; 
+                            width: 30%;
+                            border: 1px solid #000;
+                            padding: 15px;
+                        }
+                        .signature-title { 
+                            font-weight: bold; 
+                            margin-bottom: 40px;
+                        }
+                        .signature-line { 
+                            border-bottom: 1px solid #000; 
+                            margin-bottom: 5px; 
+                            height: 30px;
+                        }
+                        .certify-section {
+                            margin: 20px 0;
+                            padding: 15px;
+                            border: 1px solid #000;
+                            font-size: 11px;
+                            text-align: justify;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="dtr-container">
+                        <div class="dtr-header">
+                            <h1>DAILY TIME RECORD</h1>
+                            <h2>TNP Organization Management System</h2>
+                            <div style="font-size: 12px; margin-top: 10px;">
+                                (To be accomplished by employee and submitted to the Administrative Office)
+                            </div>
+                        </div>
+                        
+                        <div class="dtr-info">
+                            <div class="info-row">
+                                <span class="info-label">Name:</span>
+                                <span class="info-value">${dtrData.staff.name.toUpperCase()}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Employee ID:</span>
+                                <span class="info-value">${dtrData.staff.id}</span>
+                                <span class="info-label" style="margin-left: 30px;">Position:</span>
+                                <span class="info-value">${dtrData.staff.type}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">For the Period:</span>
+                                <span class="info-value">${formatDate(dtrData.period.start)} TO ${formatDate(dtrData.period.end)}</span>
+                            </div>
+                        </div>
+                        
+                        <table class="dtr-table">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2" class="date-cell">DATE</th>
+                                    <th rowspan="2" class="day-cell">DAY</th>
+                                    <th colspan="2" class="morning-header">ARRIVAL & DEPARTURE TIME</th>
+                                    <th rowspan="2" class="status-cell">STATUS</th>
+                                    <th rowspan="2" class="remarks-cell">REMARKS</th>
+                                </tr>
+                                <tr>
+                                    <th class="time-cell">A.M.</th>
+                                    <th class="time-cell">P.M.</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${dtrData.records.map(record => {
+                                    const date = new Date(record.date);
+                                    const dayName = date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
+                                    const dayNum = date.getDate().toString().padStart(2, '0');
+                                    
+                                    const timeIn = record.timeIn ? formatTimeAMPM(record.timeIn) : '';
+                                    const timeOut = record.timeOut ? formatTimeAMPM(record.timeOut) : '';
+                                    
+                                    const statusBadge = getStatusBadge(record.status);
+                                    const remarks = getRemarks(record);
+                                    
+                                    return `
+                                        <tr>
+                                            <td class="date-cell"><strong>${dayNum}</strong></td>
+                                            <td class="day-cell">${dayName}</td>
+                                            <td class="time-cell">${timeIn}</td>
+                                            <td class="time-cell">${timeOut}</td>
+                                            <td class="status-cell">${statusBadge}</td>
+                                            <td class="remarks-cell">${remarks}</td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                        
+                        <div class="footer-section">
+                            <div class="summary-section">
+                                <div class="summary-box">
+                                    <div class="summary-title">ATTENDANCE SUMMARY</div>
+                                    <div class="summary-item">
+                                        <span>Total Days Worked:</span>
+                                        <span><strong>${dtrData.summary.totalDays}</strong></span>
+                                    </div>
+                                    <div class="summary-item">
+                                        <span>Total Hours:</span>
+                                        <span><strong>${dtrData.summary.totalHours}</strong></span>
+                                    </div>
+                                    <div class="summary-item">
+                                        <span>Average Hours/Day:</span>
+                                        <span><strong>${dtrData.summary.averageHours}</strong></span>
+                                    </div>
+                                </div>
+                                
+                                <div class="summary-box">
+                                    <div class="summary-title">LATE/ABSENT SUMMARY</div>
+                                    <div class="summary-item">
+                                        <span>Times Late:</span>
+                                        <span><strong>${dtrData.records.filter(r => r.status === 'Late').length}</strong></span>
+                                    </div>
+                                    <div class="summary-item">
+                                        <span>Days Absent:</span>
+                                        <span><strong>${dtrData.records.filter(r => r.status === 'Absent').length}</strong></span>
+                                    </div>
+                                    <div class="summary-item">
+                                        <span>Leave Days:</span>
+                                        <span><strong>${dtrData.records.filter(r => r.status === 'Leave').length}</strong></span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="certify-section">
+                                <strong>CERTIFICATION:</strong> I certify on my honor that the above is a true and correct report of the hours of work performed, 
+                                record of which was made daily at the time of arrival and departure from office.
+                            </div>
+                            
+                            <div class="signature-section">
+                                <div class="signature-box">
+                                    <div class="signature-title">EMPLOYEE</div>
+                                    <div class="signature-line"></div>
+                                    <div style="margin-top: 5px; font-size: 10px;">Signature</div>
+                                    <div style="margin-top: 15px;">Date: _______________</div>
+                                </div>
+                                
+                                <div class="signature-box">
+                                    <div class="signature-title">VERIFIED BY</div>
+                                    <div class="signature-line"></div>
+                                    <div style="margin-top: 5px; font-size: 10px;">Immediate Supervisor</div>
+                                    <div style="margin-top: 15px;">Date: _______________</div>
+                                </div>
+                                
+                                <div class="signature-box">
+                                    <div class="signature-title">APPROVED BY</div>
+                                    <div class="signature-line"></div>
+                                    <div style="margin-top: 5px; font-size: 10px;">HR Manager/Administrator</div>
+                                    <div style="margin-top: 15px;">Date: _______________</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `;
+            
+            const blob = new Blob([wordContent], { 
+                type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' 
+            });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `DTR_${dtrData.staff.name}_${dtrData.period.start}_to_${dtrData.period.end}.doc`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
         }
 
         function showMessage(message, type) {
