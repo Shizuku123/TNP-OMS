@@ -40,6 +40,43 @@
         </div>
     </header>
 
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <div class="text-center">
+                <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-red-primary mx-auto"></div>
+                <h3 class="mt-4 text-lg font-medium text-gray-900">Saving Staff Record</h3>
+                <p class="mt-2 text-sm text-gray-500">Please wait while we save the staff information...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <div class="text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+                    <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <h3 class="mt-4 text-lg font-medium text-gray-900">Staff Record Created Successfully!</h3>
+                <p id="successMessage" class="mt-2 text-sm text-gray-500"></p>
+                <div class="mt-6 space-y-3">
+                    <button id="addAnotherBtn" class="w-full px-4 py-2 bg-red-primary text-white rounded-md hover:bg-red-700 transition-colors">
+                        Add Another Staff
+                    </button>
+                    <button id="viewRecordsBtn" class="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors">
+                        View Staff Records
+                    </button>
+                    <button id="closeModalBtn" class="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Content -->
     <div class="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <!-- Success/Error Messages -->
@@ -331,7 +368,7 @@
             doc,
             auth
         } from './firebase.js';
-        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
         import { logActivity } from './activity-logger.js';
 
         let createAccountEnabled = false;
@@ -357,6 +394,23 @@
         document.addEventListener('DOMContentLoaded', function() {
             setupEventListeners();
             document.getElementById('dateHired').value = new Date().toISOString().split('T')[0];
+            
+            // Test Firebase Auth connection
+            console.log('Firebase Auth instance:', auth);
+            console.log('Auth state:', auth.currentUser);
+
+            // Add keyboard support for modals
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    if (!document.getElementById('successModal').classList.contains('hidden')) {
+                        hideSuccessModal();
+                    }
+                    if (!document.getElementById('loadingScreen').classList.contains('hidden')) {
+                        // Don't allow closing loading screen with ESC
+                        return;
+                    }
+                }
+            });
         });
 
         function setupEventListeners() {
@@ -380,6 +434,21 @@
 
             // Form submission
             document.getElementById('staffForm').addEventListener('submit', handleSubmit);
+
+            // Success modal buttons
+            document.getElementById('addAnotherBtn').addEventListener('click', function() {
+                hideSuccessModal();
+                resetForm();
+            });
+
+            document.getElementById('viewRecordsBtn').addEventListener('click', function() {
+                window.location.href = 'staff-records.html';
+            });
+
+            document.getElementById('closeModalBtn').addEventListener('click', function() {
+                hideSuccessModal();
+                window.location.href = 'add-staff.html';
+            });
         }
 
         function updateAccountToggle() {
@@ -417,8 +486,45 @@
             }
         }
 
+        function showLoadingScreen() {
+            document.getElementById('loadingScreen').classList.remove('hidden');
+        }
+
+        function hideLoadingScreen() {
+            document.getElementById('loadingScreen').classList.add('hidden');
+        }
+
+        function showSuccessModal(staffName, staffId) {
+            const message = `Staff record for ${staffName} (${staffId}) has been ${createAccountEnabled ? 'created with system account' : 'created successfully'}.`;
+            document.getElementById('successMessage').textContent = message;
+            document.getElementById('successModal').classList.remove('hidden');
+        }
+
+        function hideSuccessModal() {
+            document.getElementById('successModal').classList.add('hidden');
+        }
+
+        function resetForm() {
+            document.getElementById('staffForm').reset();
+            document.getElementById('photoPreview').src = 'user.png';
+            document.getElementById('dateHired').value = new Date().toISOString().split('T')[0];
+            document.getElementById('nationality').value = 'Filipino';
+            createAccountEnabled = false;
+            updateAccountToggle();
+            hideMessageContainer();
+        }
+
+        function hideMessageContainer() {
+            document.getElementById('messageContainer').classList.add('hidden');
+        }
+
         async function handleSubmit(e) {
             e.preventDefault();
+
+            // Prevent double submission
+            if (!document.getElementById('loadingScreen').classList.contains('hidden')) {
+                return;
+            }
 
             const formData = new FormData(e.target);
             const data = {};
@@ -459,6 +565,11 @@
 
         async function saveStaffRecord(data) {
             try {
+                console.log('Starting saveStaffRecord with data:', data);
+                
+                // Show loading screen
+                showLoadingScreen();
+                
                 // Validate required fields
                 const requiredFields = ['firstName', 'lastName', 'gender', 'dateOfBirth', 'currentAddress', 'contactNumber', 'emailAddress', 'position'];
                 if (createAccountEnabled) {
@@ -466,25 +577,54 @@
                 }
                 for (const field of requiredFields) {
                     if (!data[field]) {
+                        hideLoadingScreen();
                         showMessage(`Please fill in the ${field.replace(/([A-Z])/g, ' $1').toLowerCase()} field.`, 'error');
                         return;
                     }
                 }
 
+                // Validate email format
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(data.emailAddress)) {
+                    hideLoadingScreen();
+                    showMessage('Please enter a valid email address.', 'error');
+                    return;
+                }
+
                 let userId = crypto.randomUUID();
+                console.log('Generated initial userId:', userId);
 
                 // If account creation is enabled, create user in Firebase Auth
                 if (createAccountEnabled) {
-                    // Format password: TNPOMS@BirthdateDDMMYYYY
+                    // Format password: TNPOMS@BirthdateDDMMYYYY (ensure at least 6 characters)
                     const dob = data.dateOfBirth; // YYYY-MM-DD
                     const [yyyy, mm, dd] = dob.split('-');
                     const password = `TNPOMS@${dd}${mm}${yyyy}`;
+                    
+                    // Validate password length
+                    if (password.length < 6) {
+                        hideLoadingScreen();
+                        showMessage('Generated password is too short. Please contact administrator.', 'error');
+                        return;
+                    }
+                    
+                    console.log('Attempting to create user with email:', data.emailAddress);
+                    
                     try {
                         const userCredential = await createUserWithEmailAndPassword(auth, data.emailAddress, password);
                         userId = userCredential.user.uid;
+                        console.log('User created successfully with UID:', userId);
                     } catch (error) {
+                        console.error('Firebase Auth Error:', error);
+                        hideLoadingScreen();
                         if (error.code === 'auth/email-already-in-use') {
                             showMessage('Email address is already in use.', 'error');
+                        } else if (error.code === 'auth/weak-password') {
+                            showMessage('Password is too weak. Please contact administrator.', 'error');
+                        } else if (error.code === 'auth/invalid-email') {
+                            showMessage('Invalid email address format.', 'error');
+                        } else if (error.code === 'auth/operation-not-allowed') {
+                            showMessage('Email/password accounts are not enabled. Contact administrator.', 'error');
                         } else {
                             showMessage('Error creating user account: ' + error.message, 'error');
                         }
@@ -540,20 +680,14 @@
                     );
                 }
 
-                showMessage(`Staff record${createAccountEnabled ? " and account" : ""} created successfully!`, 'success');
-                document.getElementById('staffForm').reset();
-                document.getElementById('photoPreview').src = '/placeholder.svg?height=128&width=128';
-                document.getElementById('dateHired').value = new Date().toISOString().split('T')[0];
-                document.getElementById('nationality').value = 'Filipino';
-                createAccountEnabled = false;
-                updateAccountToggle();
-
-                setTimeout(() => {
-                    window.location.href = 'staff-records.html';
-                }, 2000);
+                // Hide loading screen and show success modal
+                hideLoadingScreen();
+                const fullName = `${data.firstName} ${data.middleName ? data.middleName + ' ' : ''}${data.lastName}`;
+                showSuccessModal(fullName, data.staffId);
 
             } catch (error) {
                 console.error('Error saving staff record:', error);
+                hideLoadingScreen();
                 showMessage('Error saving staff record. Please try again.', 'error');
             }
         }

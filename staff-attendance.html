@@ -233,6 +233,10 @@
             if (!sessionManager.requireLogin()) return;
 
             currentUser = sessionManager.getCurrentUser();
+            
+            // Debug: Check current user and authentication
+            console.log('Current user:', currentUser);
+            console.log('User role:', currentUser?.role);
 
             if (currentUser.role !== 'staff' && currentUser.role !== 'volunteer') {
                 showMessage('Access denied. Only staff and volunteers can access this page.', 'error');
@@ -463,7 +467,17 @@
                 loadTodayRecord();
             } catch (error) {
                 console.error('Error saving attendance:', error);
-                showMessage('Error saving attendance. Please try again.', 'error');
+                if (error.code === 'permission-denied') {
+                    showMessage('Permission denied: Unable to save attendance. Please contact your administrator to ensure your account has proper access rights.', 'error');
+                } else if (error.code === 'unauthenticated') {
+                    showMessage('Authentication error: Please log out and log back in.', 'error');
+                    setTimeout(() => {
+                        localStorage.removeItem('currentUser');
+                        window.location.href = 'login.html';
+                    }, 3000);
+                } else {
+                    showMessage(`Error saving attendance: ${error.message}. Please try again or contact support.`, 'error');
+                }
             }
         };
 
@@ -487,7 +501,17 @@
                 loadTodayRecord();
             } catch (error) {
                 console.error('Error updating attendance:', error);
-                showMessage('Error updating attendance. Please try again.', 'error');
+                if (error.code === 'permission-denied') {
+                    showMessage('Permission denied: Unable to update attendance. Please contact your administrator.', 'error');
+                } else if (error.code === 'unauthenticated') {
+                    showMessage('Authentication error: Please log out and log back in.', 'error');
+                    setTimeout(() => {
+                        localStorage.removeItem('currentUser');
+                        window.location.href = 'login.html';
+                    }, 3000);
+                } else {
+                    showMessage(`Error updating attendance: ${error.message}. Please try again.`, 'error');
+                }
             }
         };
 
@@ -578,7 +602,17 @@
                 closeLeaveModal();
             } catch (error) {
                 console.error('Error submitting leave request:', error);
-                showMessage('Error submitting leave request. Please try again.', 'error');
+                if (error.code === 'permission-denied') {
+                    showMessage('Permission denied: Unable to submit leave request. Please contact your administrator.', 'error');
+                } else if (error.code === 'unauthenticated') {
+                    showMessage('Authentication error: Please log out and log back in.', 'error');
+                    setTimeout(() => {
+                        localStorage.removeItem('currentUser');
+                        window.location.href = 'login.html';
+                    }, 3000);
+                } else {
+                    showMessage(`Error submitting leave request: ${error.message}. Please try again.`, 'error');
+                }
             }
         });
 
