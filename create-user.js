@@ -33,7 +33,8 @@ async function createUser() {
     role: "admin",
     isActive: true,
     isBlocked: false,
-    isVerified: false
+    isVerified: false,
+    firstTimeLogin: true
   };
 
   try {
