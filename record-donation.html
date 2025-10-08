@@ -36,6 +36,131 @@
         </div>
     </header>
 
+    <!-- Offline Records Modal -->
+    <div id="offlineModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[80vh] flex flex-col">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-medium text-gray-900">Offline Saved Records</h3>
+                <button id="closeOfflineModal" class="text-gray-400 hover:text-gray-600">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div id="offlineRecordsContent" class="flex-1 overflow-y-auto">
+                <div id="noOfflineRecords" class="text-center py-8 text-gray-500">
+                    <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <p>No offline records saved</p>
+                    <p class="text-sm">Records will appear here when saved offline</p>
+                </div>
+                
+                <div id="offlineRecordsList" class="space-y-4 hidden">
+                    <!-- Records will be populated here -->
+                </div>
+            </div>
+            
+            <div class="mt-6 flex justify-between items-center pt-4 border-t">
+                <p class="text-sm text-gray-500">
+                    Records are automatically synced when internet connection is restored.
+                </p>
+                <div class="space-x-3">
+                    <button id="syncAllOffline" class="px-4 py-2 bg-red-primary text-white rounded-md hover:bg-red-700 transition-colors">
+                        Sync All
+                    </button>
+                    <button id="clearAllOffline" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                        Clear All
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <div class="text-center">
+                <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-red-primary mx-auto"></div>
+                <h3 class="mt-4 text-lg font-medium text-gray-900">Saving Donation Record</h3>
+                <p class="mt-2 text-sm text-gray-500">Please wait while we save the donation information...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <div class="text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+                    <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <h3 class="mt-4 text-lg font-medium text-gray-900">Donation Record Created Successfully!</h3>
+                <p id="successMessage" class="mt-2 text-sm text-gray-500"></p>
+                <div class="mt-6 space-y-3">
+                    <button id="addAnotherBtn" class="w-full px-4 py-2 bg-red-primary text-white rounded-md hover:bg-red-700 transition-colors">
+                        Record Another Donation
+                    </button>
+                    <button id="viewRecordsBtn" class="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                        View All Records
+                    </button>
+                    <button id="closeModalBtn" class="w-full px-4 py-2 text-gray-500 hover:text-gray-700 transition-colors">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Modal -->
+    <div id="errorModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <div class="text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                    <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                    </svg>
+                </div>
+                <h3 class="mt-4 text-lg font-medium text-gray-900">Error</h3>
+                <p id="errorMessage" class="mt-2 text-sm text-gray-500"></p>
+                <div class="mt-6">
+                    <button id="closeErrorModalBtn" class="w-full px-4 py-2 bg-red-primary text-white rounded-md hover:bg-red-700 transition-colors">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Offline Save Success Modal -->
+    <div id="offlineSuccessModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <div class="text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-orange-100">
+                    <svg class="h-6 w-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"></path>
+                    </svg>
+                </div>
+                <h3 class="mt-4 text-lg font-medium text-gray-900">Saved Offline</h3>
+                <p id="offlineSuccessMessage" class="mt-2 text-sm text-gray-500"></p>
+                <div class="mt-6 space-y-3">
+                    <button id="addAnotherOfflineBtn" class="w-full px-4 py-2 bg-red-primary text-white rounded-md hover:bg-red-700 transition-colors">
+                        Record Another Donation
+                    </button>
+                    <button id="viewOfflineRecordsBtn" class="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                        View Offline Records
+                    </button>
+                    <button id="closeOfflineSuccessBtn" class="w-full px-4 py-2 text-gray-500 hover:text-gray-700 transition-colors">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Success/Error Messages -->
     <div id="messageContainer" class="fixed top-20 right-4 z-50 max-w-sm hidden"></div>
 
@@ -234,6 +359,17 @@
                         </div>
                     </form>
                 </div>
+                
+                <!-- Money Donation Offline Button -->
+                <div id="moneyOfflineBtn" class="fixed bottom-20 right-80 z-50">
+                    <button class="relative bg-red-primary hover:bg-red-700 text-white rounded-full p-4 shadow-lg transition-all duration-300 transform hover:scale-110" title="View Offline Money Donation Records">
+                        <svg class="h-10 w-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+                        </svg>
+                        <!-- Yellow notification dot for better visibility on red background -->
+                        <span id="moneyOfflineIndicator" class="absolute -top-1 -right-1 h-3 w-3 bg-yellow-500 rounded-full border-2 border-white hidden"></span>
+                    </button>
+                </div>
             </div>
 
             <!-- In-Kind Donation Form -->
@@ -352,6 +488,17 @@
                         </div>
                     </form>
                 </div>
+                
+                <!-- In-Kind Donation Offline Button -->
+                <div id="inKindOfflineBtn" class="fixed bottom-20 right-80 z-50">
+                    <button class="relative bg-red-primary hover:bg-red-700 text-white rounded-full p-4 shadow-lg transition-all duration-300 transform hover:scale-110" title="View Offline In-Kind Donation Records">
+                        <svg class="h-10 w-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+                        </svg>
+                        <!-- Yellow notification dot for better visibility on red background -->
+                        <span id="inKindOfflineIndicator" class="absolute -top-1 -right-1 h-3 w-3 bg-yellow-500 rounded-full border-2 border-white hidden"></span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -374,11 +521,594 @@
         function setupEventListeners() {
             document.getElementById('moneyDonationForm').addEventListener('submit', handleMoneyDonationSubmit);
             document.getElementById('inKindDonationForm').addEventListener('submit', handleInKindDonationSubmit);
+            
+            // Setup offline modal event listeners
+            document.getElementById('offlineSaveBtn').addEventListener('click', openOfflineModal);
+            document.getElementById('closeOfflineModal').addEventListener('click', closeOfflineModal);
+            document.getElementById('syncAllOffline').addEventListener('click', syncAllOfflineRecords);
+            document.getElementById('clearAllOffline').addEventListener('click', clearAllOfflineRecords);
+            
+            // Setup context-specific offline buttons
+            document.getElementById('moneyOfflineBtn').addEventListener('click', openOfflineModal);
+            document.getElementById('inKindOfflineBtn').addEventListener('click', openOfflineModal);
+            
+            // Success modal event listeners
+            document.getElementById('addAnotherBtn').addEventListener('click', () => {
+                closeSuccessModal();
+                goBack();
+            });
+            document.getElementById('viewRecordsBtn').addEventListener('click', () => {
+                closeSuccessModal();
+                window.location.href = 'donation-records.html';
+            });
+            document.getElementById('closeModalBtn').addEventListener('click', closeSuccessModal);
+            
+            // Error modal event listeners
+            document.getElementById('closeErrorModalBtn').addEventListener('click', closeErrorModal);
+            
+            // Offline success modal event listeners
+            document.getElementById('addAnotherOfflineBtn').addEventListener('click', () => {
+                closeOfflineSuccessModal();
+                // Reset the form but stay in the same donation type
+                if (currentDonationType === 'money') {
+                    resetMoneyForm();
+                } else if (currentDonationType === 'in-kind') {
+                    resetInKindForm();
+                }
+            });
+            document.getElementById('viewOfflineRecordsBtn').addEventListener('click', () => {
+                closeOfflineSuccessModal();
+                openOfflineModal();
+            });
+            document.getElementById('closeOfflineSuccessBtn').addEventListener('click', closeOfflineSuccessModal);
+            
+            // Update offline indicator on page load
+            updateOfflineIndicator();
+        }
+
+        // ========== OFFLINE STORAGE FUNCTIONS FOR MONEY DONATIONS ==========
+        
+        function saveMoneyDonationOffline(donationData) {
+            try {
+                const offlineRecords = getOfflineMoneyDonations();
+                
+                // Check for duplicates based on key fields
+                const isDuplicate = offlineRecords.some(record => 
+                    record.donorName === donationData.donorName &&
+                    record.amount === donationData.amount &&
+                    record.dateOfDonation === donationData.dateOfDonation &&
+                    record.typeOfDonation === donationData.typeOfDonation
+                );
+                
+                if (isDuplicate) {
+                    console.log('Duplicate money donation detected, not saving offline');
+                    return false;
+                }
+                
+                const offlineRecord = {
+                    ...donationData,
+                    savedAt: new Date().toISOString(),
+                    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days
+                    offlineId: 'money_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+                };
+                
+                offlineRecords.push(offlineRecord);
+                localStorage.setItem('offlineMoneyDonations', JSON.stringify(offlineRecords));
+                updateOfflineIndicator();
+                
+                console.log('Money donation saved offline:', offlineRecord);
+                return true;
+            } catch (error) {
+                console.error('Error saving money donation offline:', error);
+                return false;
+            }
+        }
+        
+        function getOfflineMoneyDonations() {
+            try {
+                const stored = localStorage.getItem('offlineMoneyDonations');
+                const records = stored ? JSON.parse(stored) : [];
+                
+                // Filter out expired records
+                const now = new Date().toISOString();
+                const validRecords = records.filter(record => 
+                    record.expiresAt && record.expiresAt > now
+                );
+                
+                // Update storage if any records were removed
+                if (validRecords.length !== records.length) {
+                    localStorage.setItem('offlineMoneyDonations', JSON.stringify(validRecords));
+                }
+                
+                return validRecords;
+            } catch (error) {
+                console.error('Error getting offline money donations:', error);
+                return [];
+            }
+        }
+        
+        function removeOfflineMoneyDonation(offlineId) {
+            try {
+                const records = getOfflineMoneyDonations();
+                const filteredRecords = records.filter(record => record.offlineId !== offlineId);
+                localStorage.setItem('offlineMoneyDonations', JSON.stringify(filteredRecords));
+                updateOfflineIndicator();
+                return true;
+            } catch (error) {
+                console.error('Error removing offline money donation:', error);
+                return false;
+            }
+        }
+        
+        function clearAllOfflineMoneyDonations() {
+            try {
+                localStorage.removeItem('offlineMoneyDonations');
+                updateOfflineIndicator();
+                return true;
+            } catch (error) {
+                console.error('Error clearing offline money donations:', error);
+                return false;
+            }
+        }
+
+        // ========== OFFLINE STORAGE FUNCTIONS FOR IN-KIND DONATIONS ==========
+        
+        function saveInKindDonationOffline(donationData) {
+            try {
+                const offlineRecords = getOfflineInKindDonations();
+                
+                // Check for duplicates based on key fields
+                const isDuplicate = offlineRecords.some(record => 
+                    record.donorName === donationData.donorName &&
+                    record.itemCategory === donationData.itemCategory &&
+                    record.itemDescription === donationData.itemDescription &&
+                    record.quantity === donationData.quantity &&
+                    record.dateOfDonation === donationData.dateOfDonation
+                );
+                
+                if (isDuplicate) {
+                    console.log('Duplicate in-kind donation detected, not saving offline');
+                    return false;
+                }
+                
+                const offlineRecord = {
+                    ...donationData,
+                    savedAt: new Date().toISOString(),
+                    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days
+                    offlineId: 'inkind_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+                };
+                
+                offlineRecords.push(offlineRecord);
+                localStorage.setItem('offlineInKindDonations', JSON.stringify(offlineRecords));
+                updateOfflineIndicator();
+                
+                console.log('In-kind donation saved offline:', offlineRecord);
+                return true;
+            } catch (error) {
+                console.error('Error saving in-kind donation offline:', error);
+                return false;
+            }
+        }
+        
+        function getOfflineInKindDonations() {
+            try {
+                const stored = localStorage.getItem('offlineInKindDonations');
+                const records = stored ? JSON.parse(stored) : [];
+                
+                // Filter out expired records
+                const now = new Date().toISOString();
+                const validRecords = records.filter(record => 
+                    record.expiresAt && record.expiresAt > now
+                );
+                
+                // Update storage if any records were removed
+                if (validRecords.length !== records.length) {
+                    localStorage.setItem('offlineInKindDonations', JSON.stringify(validRecords));
+                }
+                
+                return validRecords;
+            } catch (error) {
+                console.error('Error getting offline in-kind donations:', error);
+                return [];
+            }
+        }
+        
+        function removeOfflineInKindDonation(offlineId) {
+            try {
+                const records = getOfflineInKindDonations();
+                const filteredRecords = records.filter(record => record.offlineId !== offlineId);
+                localStorage.setItem('offlineInKindDonations', JSON.stringify(filteredRecords));
+                updateOfflineIndicator();
+                return true;
+            } catch (error) {
+                console.error('Error removing offline in-kind donation:', error);
+                return false;
+            }
+        }
+        
+        function clearAllOfflineInKindDonations() {
+            try {
+                localStorage.removeItem('offlineInKindDonations');
+                updateOfflineIndicator();
+                return true;
+            } catch (error) {
+                console.error('Error clearing offline in-kind donations:', error);
+                return false;
+            }
+        }
+
+        // ========== GENERAL OFFLINE MANAGEMENT FUNCTIONS ==========
+        
+        function getAllOfflineDonations() {
+            const moneyDonations = getOfflineMoneyDonations();
+            const inKindDonations = getOfflineInKindDonations();
+            return [...moneyDonations, ...inKindDonations];
+        }
+        
+        function updateOfflineIndicator() {
+            const generalIndicator = document.getElementById('offlineIndicator');
+            const moneyIndicator = document.getElementById('moneyOfflineIndicator');
+            const inKindIndicator = document.getElementById('inKindOfflineIndicator');
+            
+            const moneyRecords = getOfflineMoneyDonations();
+            const inKindRecords = getOfflineInKindDonations();
+            const allRecords = [...moneyRecords, ...inKindRecords];
+            
+            // Update general indicator (for main selection screen)
+            if (allRecords.length > 0) {
+                generalIndicator.classList.remove('hidden');
+            } else {
+                generalIndicator.classList.add('hidden');
+            }
+            
+            // Update money donation indicator
+            if (moneyRecords.length > 0) {
+                moneyIndicator.classList.remove('hidden');
+            } else {
+                moneyIndicator.classList.add('hidden');
+            }
+            
+            // Update in-kind donation indicator
+            if (inKindRecords.length > 0) {
+                inKindIndicator.classList.remove('hidden');
+            } else {
+                inKindIndicator.classList.add('hidden');
+            }
+        }
+        
+        function openOfflineModal() {
+            const modal = document.getElementById('offlineModal');
+            const noRecordsDiv = document.getElementById('noOfflineRecords');
+            const recordsList = document.getElementById('offlineRecordsList');
+            
+            let filteredRecords = [];
+            
+            // Filter records based on current donation type
+            if (currentDonationType === 'money') {
+                filteredRecords = getOfflineMoneyDonations();
+            } else if (currentDonationType === 'in-kind') {
+                filteredRecords = getOfflineInKindDonations();
+            } else {
+                // If no specific type selected, show all records
+                filteredRecords = getAllOfflineDonations();
+            }
+            
+            if (filteredRecords.length === 0) {
+                noRecordsDiv.classList.remove('hidden');
+                recordsList.classList.add('hidden');
+                
+                // Update the no records message based on donation type
+                const noRecordsText = noRecordsDiv.querySelector('p');
+                if (currentDonationType === 'money') {
+                    noRecordsText.textContent = 'No offline money donation records saved';
+                } else if (currentDonationType === 'in-kind') {
+                    noRecordsText.textContent = 'No offline in-kind donation records saved';
+                } else {
+                    noRecordsText.textContent = 'No offline records saved';
+                }
+                
+                const subText = noRecordsDiv.querySelector('p.text-sm');
+                if (currentDonationType) {
+                    subText.textContent = `${currentDonationType === 'money' ? 'Money' : 'In-kind'} donation records will appear here when saved offline`;
+                } else {
+                    subText.textContent = 'Records will appear here when saved offline';
+                }
+            } else {
+                noRecordsDiv.classList.add('hidden');
+                recordsList.classList.remove('hidden');
+                populateOfflineRecordsList(filteredRecords);
+            }
+            
+            // Update modal title based on donation type
+            const modalTitle = modal.querySelector('h3');
+            if (currentDonationType === 'money') {
+                modalTitle.textContent = 'Offline Money Donation Records';
+            } else if (currentDonationType === 'in-kind') {
+                modalTitle.textContent = 'Offline In-Kind Donation Records';
+            } else {
+                modalTitle.textContent = 'Offline Saved Records';
+            }
+            
+            modal.classList.remove('hidden');
+        }
+        
+        function closeOfflineModal() {
+            document.getElementById('offlineModal').classList.add('hidden');
+        }
+        
+        function populateOfflineRecordsList(records) {
+            const container = document.getElementById('offlineRecordsList');
+            
+            container.innerHTML = records.map(record => {
+                const savedDate = new Date(record.savedAt).toLocaleDateString();
+                const expiresDate = new Date(record.expiresAt).toLocaleDateString();
+                
+                let recordDetails = '';
+                if (record.donationType === 'money') {
+                    recordDetails = `
+                        <div class="text-sm text-gray-600">
+                            <p><strong>Amount:</strong> ₱${record.amount?.toFixed(2) || '0.00'}</p>
+                            <p><strong>Payment Type:</strong> ${record.typeOfDonation}</p>
+                            <p><strong>Purpose:</strong> ${record.purpose || 'General'}</p>
+                        </div>
+                    `;
+                } else if (record.donationType === 'in-kind') {
+                    recordDetails = `
+                        <div class="text-sm text-gray-600">
+                            <p><strong>Items:</strong> ${record.quantity} ${record.unit} of ${record.itemCategory}</p>
+                            <p><strong>Description:</strong> ${record.itemDescription}</p>
+                            <p><strong>Condition:</strong> ${record.conditionOfItems}</p>
+                        </div>
+                    `;
+                }
+                
+                return `
+                    <div class="border rounded-lg p-4 bg-gray-50">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h4 class="font-medium text-gray-900">
+                                    ${record.donationType === 'money' ? 'Money' : 'In-Kind'} Donation - ${record.donorName}
+                                </h4>
+                                <p class="text-sm text-gray-500">Date: ${record.dateOfDonation}</p>
+                                <p class="text-xs text-gray-400">Saved: ${savedDate} | Expires: ${expiresDate}</p>
+                            </div>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                ${record.donationType === 'money' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}">
+                                ${record.donationType === 'money' ? 'Money' : 'In-Kind'}
+                            </span>
+                        </div>
+                        
+                        ${recordDetails}
+                        
+                        <div class="mt-4 flex space-x-2">
+                            <button onclick="syncSingleOfflineRecord('${record.offlineId}', '${record.donationType}')"
+                                class="text-xs px-3 py-1 bg-red-primary text-white rounded hover:bg-red-700 transition-colors">
+                                Sync Now
+                            </button>
+                            <button onclick="viewOfflineRecordDetails('${record.offlineId}', '${record.donationType}')"
+                                class="text-xs px-3 py-1 border border-gray-300 rounded text-gray-700 hover:bg-gray-50 transition-colors">
+                                View Details
+                            </button>
+                            <button onclick="deleteOfflineRecord('${record.offlineId}', '${record.donationType}')"
+                                class="text-xs px-3 py-1 border border-red-300 rounded text-red-700 hover:bg-red-50 transition-colors">
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        async function syncAllOfflineRecords() {
+            let recordsToSync = [];
+            
+            // Get records based on current donation type
+            if (currentDonationType === 'money') {
+                recordsToSync = getOfflineMoneyDonations();
+            } else if (currentDonationType === 'in-kind') {
+                recordsToSync = getOfflineInKindDonations();
+            } else {
+                recordsToSync = getAllOfflineDonations();
+            }
+            
+            if (recordsToSync.length === 0) {
+                const typeText = currentDonationType ? `${currentDonationType} donation ` : '';
+                showErrorModal(`No offline ${typeText}records to sync.`);
+                return;
+            }
+            
+            if (!navigator.onLine) {
+                showErrorModal('No internet connection. Please try again when online.');
+                return;
+            }
+            
+            const typeText = currentDonationType ? `${currentDonationType} donation ` : '';
+            showLoadingScreen(`Syncing all offline ${typeText}records...`);
+            
+            let successCount = 0;
+            let errorCount = 0;
+            
+            for (const record of recordsToSync) {
+                try {
+                    // Remove offline-specific properties
+                    const { savedAt, expiresAt, offlineId, ...donationData } = record;
+                    
+                    // Generate new donation ID to avoid conflicts
+                    donationData.donationId = await generateDonationId();
+                    
+                    // Save to Firestore
+                    const donationCol = collection(db, 'donations');
+                    const newDonationRef = doc(donationCol);
+                    await setDoc(newDonationRef, donationData);
+                    
+                    // Log activity
+                    let currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                    if (!currentUser.username) {
+                        currentUser = { username: 'Anonymous', role: 'donor', staffId: '' };
+                    }
+                    
+                    let activityDetails = '';
+                    if (donationData.donationType === 'money') {
+                        activityDetails = `Synced offline money donation (${donationData.donationId}): ₱${donationData.amount.toFixed(2)} from ${donationData.donorName}`;
+                    } else {
+                        activityDetails = `Synced offline in-kind donation (${donationData.donationId}): ${donationData.quantity} ${donationData.unit} of ${donationData.itemCategory} from ${donationData.donorName}`;
+                    }
+                    await logActivity('Synced Offline Donation', activityDetails, currentUser);
+                    
+                    // Remove from offline storage
+                    if (record.donationType === 'money') {
+                        removeOfflineMoneyDonation(record.offlineId);
+                    } else {
+                        removeOfflineInKindDonation(record.offlineId);
+                    }
+                    
+                    successCount++;
+                } catch (error) {
+                    console.error('Error syncing record:', record.offlineId, error);
+                    errorCount++;
+                }
+            }
+            
+            hideLoadingScreen();
+            closeOfflineModal();
+            
+            if (successCount > 0 && errorCount === 0) {
+                showSuccessModal(`Successfully synced ${successCount} ${typeText}record${successCount > 1 ? 's' : ''}!`);
+            } else if (successCount > 0 && errorCount > 0) {
+                showErrorModal(`Synced ${successCount} records successfully, but ${errorCount} failed. Please try again for the failed records.`);
+            } else {
+                showErrorModal('Failed to sync records. Please check your connection and try again.');
+            }
+        }
+        
+        function clearAllOfflineRecords() {
+            const typeText = currentDonationType ? `${currentDonationType} donation ` : '';
+            if (confirm(`Are you sure you want to delete all offline ${typeText}records? This action cannot be undone.`)) {
+                if (currentDonationType === 'money') {
+                    clearAllOfflineMoneyDonations();
+                } else if (currentDonationType === 'in-kind') {
+                    clearAllOfflineInKindDonations();
+                } else {
+                    clearAllOfflineMoneyDonations();
+                    clearAllOfflineInKindDonations();
+                }
+                closeOfflineModal();
+                showMessage(`All offline ${typeText}records cleared.`, 'success');
+            }
+        }
+        
+        async function syncSingleOfflineRecord(offlineId, donationType) {
+            if (!navigator.onLine) {
+                showErrorModal('No internet connection. Please try again when online.');
+                return;
+            }
+            
+            let record;
+            if (donationType === 'money') {
+                const records = getOfflineMoneyDonations();
+                record = records.find(r => r.offlineId === offlineId);
+            } else {
+                const records = getOfflineInKindDonations();
+                record = records.find(r => r.offlineId === offlineId);
+            }
+            
+            if (!record) {
+                showErrorModal('Record not found.');
+                return;
+            }
+            
+            try {
+                showLoadingScreen('Syncing donation record...');
+                
+                // Remove offline-specific properties
+                const { savedAt, expiresAt, offlineId: id, ...donationData } = record;
+                
+                // Generate new donation ID
+                donationData.donationId = await generateDonationId();
+                
+                // Save to Firestore
+                const donationCol = collection(db, 'donations');
+                const newDonationRef = doc(donationCol);
+                await setDoc(newDonationRef, donationData);
+                
+                // Log activity
+                let currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                if (!currentUser.username) {
+                    currentUser = { username: 'Anonymous', role: 'donor', staffId: '' };
+                }
+                
+                let activityDetails = '';
+                if (donationData.donationType === 'money') {
+                    activityDetails = `Synced offline money donation (${donationData.donationId}): ₱${donationData.amount.toFixed(2)} from ${donationData.donorName}`;
+                } else {
+                    activityDetails = `Synced offline in-kind donation (${donationData.donationId}): ${donationData.quantity} ${donationData.unit} of ${donationData.itemCategory} from ${donationData.donorName}`;
+                }
+                await logActivity('Synced Offline Donation', activityDetails, currentUser);
+                
+                // Remove from offline storage
+                if (donationType === 'money') {
+                    removeOfflineMoneyDonation(offlineId);
+                } else {
+                    removeOfflineInKindDonation(offlineId);
+                }
+                
+                hideLoadingScreen();
+                closeOfflineModal();
+                showSuccessModal('Donation record synced successfully!');
+                
+            } catch (error) {
+                console.error('Error syncing single record:', error);
+                hideLoadingScreen();
+                showErrorModal('Failed to sync record. Please try again.');
+            }
+        }
+        
+        function deleteOfflineRecord(offlineId, donationType) {
+            if (confirm('Are you sure you want to delete this offline record?')) {
+                let success = false;
+                if (donationType === 'money') {
+                    success = removeOfflineMoneyDonation(offlineId);
+                } else {
+                    success = removeOfflineInKindDonation(offlineId);
+                }
+                
+                if (success) {
+                    openOfflineModal(); // Refresh the modal
+                    showMessage('Offline record deleted.', 'success');
+                } else {
+                    showErrorModal('Failed to delete offline record.');
+                }
+            }
+        }
+        
+        function viewOfflineRecordDetails(offlineId, donationType) {
+            let record;
+            if (donationType === 'money') {
+                const records = getOfflineMoneyDonations();
+                record = records.find(r => r.offlineId === offlineId);
+            } else {
+                const records = getOfflineInKindDonations();
+                record = records.find(r => r.offlineId === offlineId);
+            }
+            
+            if (!record) {
+                showErrorModal('Record not found.');
+                return;
+            }
+            
+            // You can implement a detailed view modal here
+            // For now, just log the record details
+            console.log('Offline Record Details:', record);
+            alert('Record details logged to console. Check browser developer tools.');
         }
 
         function selectDonationType(type) {
             currentDonationType = type;
             document.getElementById('donation-type-selection').classList.add('hidden');
+            
+            // Hide the floating offline button when a donation type is selected
+            document.getElementById('offlineSaveBtn').classList.add('hidden');
+            
             if (type === 'money') {
                 document.getElementById('money-donation-form').classList.remove('hidden');
             } else if (type === 'in-kind') {
@@ -390,6 +1120,10 @@
             document.getElementById('donation-type-selection').classList.remove('hidden');
             document.getElementById('money-donation-form').classList.add('hidden');
             document.getElementById('in-kind-donation-form').classList.add('hidden');
+            
+            // Show the floating offline button when going back to selection
+            document.getElementById('offlineSaveBtn').classList.remove('hidden');
+            
             currentDonationType = null;
         }
 
@@ -495,99 +1229,261 @@
             }
         }
 
+        // ========== MODAL MANAGEMENT FUNCTIONS ==========
+        
+        function showLoadingScreen(message = 'Saving Donation Record...') {
+            const loadingScreen = document.getElementById('loadingScreen');
+            const loadingText = loadingScreen.querySelector('h3');
+            if (loadingText) {
+                loadingText.textContent = message;
+            }
+            loadingScreen.classList.remove('hidden');
+        }
+        
+        function hideLoadingScreen() {
+            document.getElementById('loadingScreen').classList.add('hidden');
+        }
+        
+        function showSuccessModal(message, donationId = '') {
+            const successModal = document.getElementById('successModal');
+            const successMessage = document.getElementById('successMessage');
+            successMessage.textContent = message;
+            if (donationId) {
+                successMessage.textContent += ` Donation ID: ${donationId}`;
+            }
+            successModal.classList.remove('hidden');
+        }
+        
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.add('hidden');
+        }
+        
+        function showErrorModal(message) {
+            const errorModal = document.getElementById('errorModal');
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            errorModal.classList.remove('hidden');
+        }
+        
+        function closeErrorModal() {
+            document.getElementById('errorModal').classList.add('hidden');
+        }
+        
+        function showOfflineSuccessModal(message, donationType) {
+            const offlineSuccessModal = document.getElementById('offlineSuccessModal');
+            const offlineSuccessMessage = document.getElementById('offlineSuccessMessage');
+            offlineSuccessMessage.textContent = message + ` The ${donationType} donation will be synced when internet connection is restored.`;
+            offlineSuccessModal.classList.remove('hidden');
+        }
+        
+        function closeOfflineSuccessModal() {
+            document.getElementById('offlineSuccessModal').classList.add('hidden');
+        }
+
         async function handleMoneyDonationSubmit(e) {
-    e.preventDefault();
-    const form = e.target;
-    const formData = new FormData(form);
-    const isAnonymous = formData.get('anonymous') === 'on';
-    const paymentType = formData.get('typeOfDonation');
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const isAnonymous = formData.get('anonymous') === 'on';
+            const paymentType = formData.get('typeOfDonation');
 
-    const donationData = {
-        donationType: 'money',
-        dateOfDonation: formData.get('dateOfDonation'),
-        donorName: isAnonymous ? 'Anonymous' : formData.get('donorName'),
-        contactNumber: formData.get('contactNumber') || '',
-        emailAddress: isAnonymous ? '' : formData.get('emailAddress'),
-        address: formData.get('address') || '',
-        typeOfDonation: paymentType,
-        amount: parseFloat(formData.get('amount')),
-        purpose: formData.get('purpose') || '',
-        tin: formData.get('tin') || '',
-        isAnonymous: isAnonymous,
-        dateAdded: new Date().toISOString().split('T')[0],
-        donationId: await generateDonationId()
-    };
+            const donationData = {
+                donationType: 'money',
+                dateOfDonation: formData.get('dateOfDonation'),
+                donorName: isAnonymous ? 'Anonymous' : formData.get('donorName'),
+                contactNumber: formData.get('contactNumber') || '',
+                emailAddress: isAnonymous ? '' : formData.get('emailAddress'),
+                address: formData.get('address') || '',
+                typeOfDonation: paymentType,
+                amount: parseFloat(formData.get('amount')),
+                purpose: formData.get('purpose') || '',
+                tin: formData.get('tin') || '',
+                isAnonymous: isAnonymous,
+                dateAdded: new Date().toISOString().split('T')[0],
+                donationId: await generateDonationId()
+            };
 
-    // Add payment-specific fields
-    if (paymentType === 'Bank Transfer') {
-        donationData.paymentDetails = {
-            bankName: formData.get('bankName'),
-            bankBranch: formData.get('bankBranch') || '',
-            accountInfo: formData.get('accountInfo'),
-            transactionRef: formData.get('transactionRef')
-        };
-    } else if (paymentType === 'Check') {
-        donationData.paymentDetails = {
-            checkNumber: formData.get('checkNumber'),
-            bankName: formData.get('checkBankName'),
-            bankBranch: formData.get('checkBranch') || '',
-            checkDate: formData.get('checkDate'),
-            payeeName: formData.get('payeeName')
-        };
-    } else if (paymentType === 'Online Payment') {
-        donationData.paymentDetails = {
-            paymentMethod: formData.get('onlinePaymentMethod'),
-            transactionRef: formData.get('onlineTransactionRef')
-        };
-    }
+            // Add payment-specific fields
+            if (paymentType === 'Bank Transfer') {
+                donationData.paymentDetails = {
+                    bankName: formData.get('bankName'),
+                    bankBranch: formData.get('bankBranch') || '',
+                    accountInfo: formData.get('accountInfo'),
+                    transactionRef: formData.get('transactionRef')
+                };
+            } else if (paymentType === 'Check') {
+                donationData.paymentDetails = {
+                    checkNumber: formData.get('checkNumber'),
+                    bankName: formData.get('checkBankName'),
+                    bankBranch: formData.get('checkBranch') || '',
+                    checkDate: formData.get('checkDate'),
+                    payeeName: formData.get('payeeName')
+                };
+            } else if (paymentType === 'Online Payment') {
+                donationData.paymentDetails = {
+                    paymentMethod: formData.get('onlinePaymentMethod'),
+                    transactionRef: formData.get('onlineTransactionRef')
+                };
+            }
 
-    // Save to Firestore (this will also log the activity inside saveDonationToFirestore)
-    await saveDonationToFirestore(donationData);
-}
+            // Validate required fields
+            if (!donationData.dateOfDonation || !donationData.typeOfDonation || isNaN(donationData.amount)) {
+                showErrorModal('Please fill in all required fields.');
+                return;
+            }
+            
+            if (paymentType === 'Bank Transfer' && donationData.paymentDetails) {
+                if (!donationData.paymentDetails.bankName || !donationData.paymentDetails.accountInfo || !donationData.paymentDetails.transactionRef) {
+                    showErrorModal('Please fill in all required bank transfer details.');
+                    return;
+                }
+            } else if (paymentType === 'Check' && donationData.paymentDetails) {
+                if (!donationData.paymentDetails.checkNumber || !donationData.paymentDetails.bankName || !donationData.paymentDetails.checkDate || !donationData.paymentDetails.payeeName) {
+                    showErrorModal('Please fill in all required check details.');
+                    return;
+                }
+            } else if (paymentType === 'Online Payment' && donationData.paymentDetails) {
+                if (!donationData.paymentDetails.paymentMethod || !donationData.paymentDetails.transactionRef) {
+                    showErrorModal('Please fill in all required online payment details.');
+                    return;
+                }
+            }
 
+            // Check if online
+            if (navigator.onLine) {
+                // Try to save online first
+                try {
+                    showLoadingScreen('Saving money donation...');
+                    await saveDonationToFirestore(donationData);
+                    hideLoadingScreen();
+                    showSuccessModal('Money donation saved successfully!', donationData.donationId);
+                    resetMoneyForm();
+                } catch (error) {
+                    console.error('Online save failed:', error);
+                    hideLoadingScreen();
+                    
+                    // If online save fails, save offline
+                    const savedOffline = saveMoneyDonationOffline(donationData);
+                    if (savedOffline) {
+                        showOfflineSuccessModal('Money donation saved offline due to connection issues.', 'money');
+                        resetMoneyForm();
+                    } else {
+                        showErrorModal('Failed to save donation. Please try again.');
+                    }
+                }
+            } else {
+                // Save offline when no internet connection
+                const savedOffline = saveMoneyDonationOffline(donationData);
+                if (savedOffline) {
+                    showOfflineSuccessModal('Money donation saved offline. No internet connection detected.', 'money');
+                    resetMoneyForm();
+                } else {
+                    showErrorModal('Failed to save donation offline. Please try again.');
+                }
+            }
+        }
 
+        async function handleInKindDonationSubmit(e) {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const isAnonymous = formData.get('anonymous') === 'on';
 
-      async function handleInKindDonationSubmit(e) {
-    e.preventDefault();
-    const form = e.target;
-    const formData = new FormData(form);
-    const isAnonymous = formData.get('anonymous') === 'on';
+            const donationData = {
+                donationType: 'in-kind',
+                dateOfDonation: formData.get('dateOfDonation'),
+                itemCategory: formData.get('itemCategory'),
+                itemDescription: formData.get('itemDescription'),
+                quantity: parseInt(formData.get('quantity'), 10),
+                unit: formData.get('unit'),
+                expiryDate: formData.get('expiryDate') || '',
+                conditionOfItems: formData.get('conditionOfItems'),
+                receiverName: formData.get('receiverName') || '',
+                donorName: isAnonymous ? 'Anonymous' : formData.get('donorName'),
+                contactNumber: formData.get('contactNumber') || '',
+                emailAddress: isAnonymous ? '' : formData.get('emailAddress'),
+                address: formData.get('address') || '',
+                isAnonymous: isAnonymous,
+                dateAdded: new Date().toISOString().split('T')[0],
+                donationId: await generateDonationId()
+            };
 
-    const donationData = {
-        donationType: 'in-kind',
-        dateOfDonation: formData.get('dateOfDonation'),
-        itemCategory: formData.get('itemCategory'),
-        itemDescription: formData.get('itemDescription'),
-        quantity: parseInt(formData.get('quantity'), 10),
-        unit: formData.get('unit'),
-        expiryDate: formData.get('expiryDate') || '',
-        conditionOfItems: formData.get('conditionOfItems'),
-        receiverName: formData.get('receiverName') || '',
-        donorName: isAnonymous ? 'Anonymous' : formData.get('donorName'),
-        contactNumber: formData.get('contactNumber') || '',
-        emailAddress: isAnonymous ? '' : formData.get('emailAddress'),
-        address: formData.get('address') || '',
-        isAnonymous: isAnonymous,
-        dateAdded: new Date().toISOString().split('T')[0],
-        donationId: await generateDonationId()
-    };
+            // Handle photo upload (base64 string)
+            const photoFile = form.querySelector('input[name="photo"]').files[0];
+            if (photoFile) {
+                try {
+                    donationData.photoString = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(photoFile);
+                    });
+                } catch (error) {
+                    console.error('Error reading photo file:', error);
+                    donationData.photoString = '';
+                }
+            } else {
+                donationData.photoString = '';
+            }
 
-    // Handle photo upload (base64 string)
-    const photoFile = form.querySelector('input[name="photo"]').files[0];
-    if (photoFile) {
-        donationData.photoString = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(photoFile);
-        });
-    } else {
-        donationData.photoString = '';
-    }
+            // Validate required fields
+            if (!donationData.dateOfDonation || !donationData.itemCategory || !donationData.itemDescription || 
+                isNaN(donationData.quantity) || !donationData.conditionOfItems) {
+                showErrorModal('Please fill in all required fields.');
+                return;
+            }
 
-    // Save to Firestore (this will also log the activity inside saveDonationToFirestore)
-    await saveDonationToFirestore(donationData);
-}
+            // Check if online
+            if (navigator.onLine) {
+                // Try to save online first
+                try {
+                    showLoadingScreen('Saving in-kind donation...');
+                    await saveDonationToFirestore(donationData);
+                    hideLoadingScreen();
+                    showSuccessModal('In-kind donation saved successfully!', donationData.donationId);
+                    resetInKindForm();
+                } catch (error) {
+                    console.error('Online save failed:', error);
+                    hideLoadingScreen();
+                    
+                    // If online save fails, save offline
+                    const savedOffline = saveInKindDonationOffline(donationData);
+                    if (savedOffline) {
+                        showOfflineSuccessModal('In-kind donation saved offline due to connection issues.', 'in-kind');
+                        resetInKindForm();
+                    } else {
+                        showErrorModal('Failed to save donation. Please try again.');
+                    }
+                }
+            } else {
+                // Save offline when no internet connection
+                const savedOffline = saveInKindDonationOffline(donationData);
+                if (savedOffline) {
+                    showOfflineSuccessModal('In-kind donation saved offline. No internet connection detected.', 'in-kind');
+                    resetInKindForm();
+                } else {
+                    showErrorModal('Failed to save donation offline. Please try again.');
+                }
+            }
+        }
+
+        function resetMoneyForm() {
+            document.getElementById('moneyDonationForm').reset();
+            document.getElementById('anonymousCheckboxMoney').checked = false;
+            toggleAnonymousMoney();
+            togglePaymentFields();
+            const today = new Date().toISOString().split('T')[0];
+            document.querySelector('#money-donation-form input[name="dateOfDonation"]').value = today;
+        }
+
+        function resetInKindForm() {
+            document.getElementById('inKindDonationForm').reset();
+            document.getElementById('anonymousCheckboxInKind').checked = false;
+            toggleAnonymousInKind();
+            document.getElementById('expiryDateField').classList.add('hidden');
+            const today = new Date().toISOString().split('T')[0];
+            document.querySelector('#in-kind-donation-form input[name="dateOfDonation"]').value = today;
+        }
 
 
 
@@ -662,23 +1558,44 @@
             }
         }
 
-        // Generate unique donationId by checking Firestore (unchanged)
+        // Generate unique donationId by checking both Firestore and offline records
         async function generateDonationId() {
             try {
-                const donationCol = collection(db, 'donations');
-                const snapshot = await getDocs(donationCol);
                 let lastId = 0;
-                snapshot.forEach(docSnap => {
-                    const data = docSnap.data();
-                    if (data.donationId && /^DN\d+$/.test(data.donationId)) {
-                        const idNum = parseInt(data.donationId.replace('DN', ''), 10);
+                
+                // Check Firestore records
+                try {
+                    const donationCol = collection(db, 'donations');
+                    const snapshot = await getDocs(donationCol);
+                    snapshot.forEach(docSnap => {
+                        const data = docSnap.data();
+                        if (data.donationId && /^DN\d+$/.test(data.donationId)) {
+                            const idNum = parseInt(data.donationId.replace('DN', ''), 10);
+                            if (idNum > lastId) lastId = idNum;
+                        }
+                    });
+                } catch (error) {
+                    console.warn('Could not fetch Firestore records for ID generation:', error);
+                }
+                
+                // Check offline records for both money and in-kind donations
+                const offlineMoneyDonations = getOfflineMoneyDonations();
+                const offlineInKindDonations = getOfflineInKindDonations();
+                const allOfflineRecords = [...offlineMoneyDonations, ...offlineInKindDonations];
+                
+                allOfflineRecords.forEach(record => {
+                    if (record.donationId && /^DN\d+$/.test(record.donationId)) {
+                        const idNum = parseInt(record.donationId.replace('DN', ''), 10);
                         if (idNum > lastId) lastId = idNum;
                     }
                 });
+                
                 return `DN${String(lastId + 1).padStart(3, '0')}`;
             } catch (error) {
                 console.error('Failed to generate Donation ID:', error);
-                return 'DN001';
+                // Fallback: use timestamp-based ID
+                const timestamp = Date.now().toString().slice(-6);
+                return `DN${timestamp}`;
             }
         }
 
@@ -714,6 +1631,20 @@
         window.toggleAnonymousInKind = toggleAnonymousInKind;
         window.toggleExpiryDate = toggleExpiryDate;
         window.togglePaymentFields = togglePaymentFields;
+        window.syncSingleOfflineRecord = syncSingleOfflineRecord;
+        window.viewOfflineRecordDetails = viewOfflineRecordDetails;
+        window.deleteOfflineRecord = deleteOfflineRecord;
     </script>
+
+    <!-- Floating Offline Save Button -->
+    <div id="offlineSaveBtn" class="fixed bottom-20 right-80 z-50">
+        <button class="relative bg-red-primary hover:bg-red-700 text-white rounded-full p-4 shadow-lg transition-all duration-300 transform hover:scale-110" title="View Offline Saved Records">
+            <svg class="h-10 w-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+            </svg>
+            <!-- Yellow notification dot for better visibility on red background -->
+            <span id="offlineIndicator" class="absolute -top-1 -right-1 h-3 w-3 bg-yellow-500 rounded-full border-2 border-white hidden"></span>
+        </button>
+    </div>
 </body>
 </html>
