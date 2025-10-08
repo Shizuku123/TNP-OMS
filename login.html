@@ -50,6 +50,16 @@
 
           <!-- Error Message -->
           <div id="errorMessage" class="mb-4 hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded"></div>
+          
+          <!-- Account Blocked Warning -->
+          <div id="blockedWarning" class="mb-4 hidden bg-red-600 border border-red-700 text-white px-4 py-3 rounded shadow-lg">
+            <div class="flex items-center">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+              </svg>
+              <span class="font-semibold">Account Blocked</span>
+            </div>
+          </div>
 
           <form id="loginForm" method="POST" action="login.php" class="space-y-6">
             <div>
@@ -591,7 +601,9 @@
         role: "admin",
         isActive: true,
         isBlocked: false,
-        isVerified: true
+        isVerified: true,
+        failedLoginAttempts: 0,
+        lastFailedLogin: null
       };
       await setDoc(userDocRef, userData);
     }
@@ -611,15 +623,20 @@ ensureAdminUser();
         const loginBtn = document.getElementById('loginBtn');
         const loginText = document.getElementById('loginText');
         const errorMessage = document.getElementById('errorMessage');
+        const blockedWarning = document.getElementById('blockedWarning');
         errorMessage.classList.add('hidden');
+        blockedWarning.classList.add('hidden');
         loginBtn.disabled = true;
         loginText.textContent = 'Signing in...';
 
+        // Declare variables outside try block so they're accessible in catch
+        let userEmail = null;
+        let userData = null;
+        let userDocId = null;
+        let userDocRef = null;
+
         try {
           // Step 1: Fetch user's email and doc from Firestore (by username or email)
-          let userEmail = null;
-          let userData = null;
-          let userDocId = null;
           if (userInput.includes('@')) {
             // Login by email
             const q = query(collection(db, 'users'), where('emailAddress', '==', userInput));
@@ -629,6 +646,7 @@ ensureAdminUser();
             userData = userDoc.data();
             userEmail = userData.emailAddress;
             userDocId = userDoc.id;
+            userDocRef = doc(db, 'users', userDocId);
           } else {
             // Login by username
             const q = query(collection(db, 'users'), where('username', '==', userInput));
@@ -638,18 +656,39 @@ ensureAdminUser();
             userData = userDoc.data();
             userEmail = userData.emailAddress;
             userDocId = userDoc.id;
+            userDocRef = doc(db, 'users', userDocId);
+          }
+
+          // Step 1.5: Check if account is blocked
+          if (userData.isBlocked) {
+            const blockReason = userData.blockReason || 'Account has been blocked';
+            const blockedDate = userData.blockedDate ? new Date(userData.blockedDate).toLocaleDateString() : 'Unknown';
+            throw new Error(`Account is blocked. Reason: ${blockReason}. Blocked on: ${blockedDate}. Please contact an administrator.`);
           }
 
           // Step 2: Authenticate with Firebase Auth
           const userCredential = await signInWithEmailAndPassword(auth, userEmail, password);
 
+          // Step 2.5: Reset failed login attempts on successful login
+          if (userData.failedLoginAttempts && userData.failedLoginAttempts > 0) {
+            await updateDoc(userDocRef, {
+              failedLoginAttempts: 0,
+              lastFailedLogin: null
+            });
+          }
+
           // Step 3: Get latest user doc from Firestore (by auth uid)
           const userUid = userCredential.user.uid;
-          const userDocRef = doc(db, "users", userUid);
-          const userDocSnap = await getDoc(userDocRef);
+          const userDocRef2 = doc(db, "users", userUid);
+          const userDocSnap = await getDoc(userDocRef2);
           let userFirestoreData = userDocSnap.exists() ? userDocSnap.data() : userData;
 
-          // Step 4: Save role and featuresGranted to localStorage for use in index.html
+          // Step 4: Update last login time
+          await updateDoc(userDocRef2, {
+            lastLogin: new Date().toISOString()
+          });
+
+          // Step 5: Save role and featuresGranted to localStorage for use in index.html
           const persistUser = {
             ...userFirestoreData,
             role: userFirestoreData.role || "staff",
@@ -668,8 +707,71 @@ ensureAdminUser();
               window.location.href = 'index.html';
             }
           }, 500);
+          
         } catch (error) {
-          errorMessage.textContent = 'Invalid username/email or password. Please try again.';
+          console.error('Login error:', error);
+          
+          // Handle failed login attempts (only if we have user data)
+          if ((error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') && userData && userDocRef) {
+            try {
+              // Get current failed attempts
+              const currentAttempts = userData.failedLoginAttempts || 0;
+              const newAttempts = currentAttempts + 1;
+              
+              // Update failed login attempts
+              const updateData = {
+                failedLoginAttempts: newAttempts,
+                lastFailedLogin: new Date().toISOString()
+              };
+              
+              // Block account if this is the 3rd failed attempt
+              if (newAttempts >= 3) {
+                updateData.isBlocked = true;
+                updateData.blockReason = 'Account automatically blocked due to 3 consecutive failed login attempts';
+                updateData.blockedDate = new Date().toISOString();
+                updateData.blockedBy = 'System';
+                
+                // Update user document
+                await updateDoc(userDocRef, updateData);
+                
+                // Log the account blocking activity
+                await logActivity('Account Blocked', `Account ${userInput} was automatically blocked due to 3 failed login attempts`, { username: userInput });
+                
+                errorMessage.textContent = 'Account has been blocked due to 3 consecutive failed login attempts. Please contact an administrator.';
+              } else {
+                // Update failed attempts count
+                await updateDoc(userDocRef, updateData);
+                
+                const remainingAttempts = 3 - newAttempts;
+                errorMessage.textContent = `Invalid password. ${remainingAttempts} attempt${remainingAttempts !== 1 ? 's' : ''} remaining before account is blocked.`;
+              }
+            } catch (updateError) {
+              console.error('Error updating failed login attempts:', updateError);
+              errorMessage.textContent = 'Invalid username/email or password. Please try again.';
+            }
+          } else if (error.message.includes('blocked')) {
+            // Account is already blocked - show special warning
+            blockedWarning.innerHTML = `
+              <div class="flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+                <div>
+                  <div class="font-semibold">Account Blocked</div>
+                  <div class="text-sm mt-1">${error.message}</div>
+                </div>
+              </div>
+            `;
+            blockedWarning.classList.remove('hidden');
+          } else {
+            // Other errors (user not found, invalid credentials without user data, etc.)
+            if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
+              errorMessage.textContent = 'Invalid username/email or password. Please try again.';
+            } else {
+              errorMessage.textContent = 'Invalid username/email or password. Please try again.';
+            }
+          }
+          
           errorMessage.classList.remove('hidden');
           loginBtn.disabled = false;
           loginText.textContent = 'Sign in';

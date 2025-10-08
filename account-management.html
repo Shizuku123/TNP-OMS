@@ -492,9 +492,14 @@
                 
                 allAccounts = [];
                 
+                // Also get auth users to get email addresses
+                const { getAuth } = await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js');
+                const authInstance = getAuth();
+                
                 usersSnapshot.forEach((docSnap) => {
                     const userData = docSnap.data();
                     console.log('Processing user:', docSnap.id, userData);
+                    console.log('Available fields:', Object.keys(userData));
                     
                     // Create full name from firstName and lastName, or use name field
                     let fullName = '';
@@ -508,10 +513,27 @@
                         fullName = 'N/A';
                     }
                     
+                    // Get email - try multiple possible field names
+                    let userEmail = userData.email || userData.emailAddress || userData.userEmail || userData.Email || '';
+                    console.log('Found email for user:', userEmail);
+                    
+                    // If no email in document, we'll try to get it from auth later
+                    if (!userEmail && authInstance.currentUser && authInstance.currentUser.uid === docSnap.id) {
+                        userEmail = authInstance.currentUser.email;
+                        console.log('Got email from auth:', userEmail);
+                    }
+                    
+                    // If still no email, log warning
+                    if (!userEmail) {
+                        console.warn('No email found for user:', docSnap.id, userData);
+                        userEmail = 'No email found';
+                    }
+                    
                     allAccounts.push({
                         uid: docSnap.id,
                         ...userData,
                         fullName: fullName, // Standardize the name field
+                        email: userEmail, // Standardize the email field
                         isBlocked: userData.isBlocked || false,
                         blockReason: userData.blockReason || '',
                         blockedBy: userData.blockedBy || '',
@@ -586,6 +608,8 @@
                         account.lastName || '',
                         account.name || '',
                         account.email || '',
+                        account.emailAddress || '',
+                        account.userEmail || '',
                         account.uid || '',
                         account.accountId || ''
                     ].join(' ').toLowerCase();
@@ -1014,6 +1038,19 @@
 
             try {
                 const reason = document.getElementById('blockReason').value.trim() || 'No reason provided';
+                
+                // Get current user's display name
+                let blockedByName = '';
+                if (currentUser.firstName && currentUser.lastName) {
+                    blockedByName = `${currentUser.firstName} ${currentUser.lastName}`;
+                } else if (currentUser.name) {
+                    blockedByName = currentUser.name;
+                } else if (currentUser.fullName) {
+                    blockedByName = currentUser.fullName;
+                } else {
+                    blockedByName = currentUser.email || 'Unknown User';
+                }
+                
                 const batch = writeBatch(db);
 
                 pendingAction.accounts.forEach(account => {
@@ -1021,7 +1058,7 @@
                     batch.update(userRef, {
                         isBlocked: true,
                         blockReason: reason,
-                        blockedBy: currentUser.fullName,
+                        blockedBy: blockedByName,
                         blockedDate: new Date().toISOString()
                     });
                 });
@@ -1034,7 +1071,7 @@
                     if (localAccount) {
                         localAccount.isBlocked = true;
                         localAccount.blockReason = reason;
-                        localAccount.blockedBy = currentUser.fullName;
+                        localAccount.blockedBy = blockedByName;
                         localAccount.blockedDate = new Date().toISOString();
                     }
                 });
@@ -1056,6 +1093,18 @@
             if (!pendingAction || pendingAction.type !== 'unblock') return;
 
             try {
+                // Get current user's display name
+                let unblockedByName = '';
+                if (currentUser.firstName && currentUser.lastName) {
+                    unblockedByName = `${currentUser.firstName} ${currentUser.lastName}`;
+                } else if (currentUser.name) {
+                    unblockedByName = currentUser.name;
+                } else if (currentUser.fullName) {
+                    unblockedByName = currentUser.fullName;
+                } else {
+                    unblockedByName = currentUser.email || 'Unknown User';
+                }
+                
                 const batch = writeBatch(db);
 
                 pendingAction.accounts.forEach(account => {
@@ -1065,7 +1114,7 @@
                         blockReason: null,
                         blockedBy: null,
                         blockedDate: null,
-                        unblockedBy: currentUser.fullName,
+                        unblockedBy: unblockedByName,
                         unblockedDate: new Date().toISOString()
                     });
                 });
