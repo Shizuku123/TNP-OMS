@@ -54,6 +54,21 @@
             border-radius: 4px;
             font-size: 12px;
         }
+
+        /* Print styles */
+        @media print {
+            body * { visibility: hidden; }
+            .print-content, .print-content * { visibility: visible; }
+            .print-content { 
+                position: absolute !important; 
+                left: 0 !important; 
+                top: 0 !important; 
+                width: 100% !important;
+                background: white !important;
+                color: black !important;
+            }
+            .no-print { display: none !important; }
+        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -533,6 +548,111 @@
         </div>
     </div>
 
+    <!-- Solo Print Modal -->
+    <div id="soloPrintModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative mx-auto border w-11/12 max-w-7xl shadow-lg rounded-md bg-white flex flex-col" style="margin-top: 10px; margin-bottom: 10px; height: 90vh;">
+            <!-- Modal Header -->
+            <div class="p-6 border-b border-gray-200 flex-shrink-0">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-medium text-gray-900">Solo Print Child Record</h3>
+                    <button id="closeSoloPrintModal" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+                </div>
+            </div>
+            
+            <!-- Modal Content -->
+            <div class="flex-1 p-6 overflow-hidden">
+                <!-- Two Column Layout -->
+                <div class="flex gap-6 h-full">
+                    
+                    <!-- Left Column: Child List and Filters -->
+                    <div class="w-96 flex-shrink-0 flex flex-col h-full">
+                        <!-- Filters Section -->
+                        <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                            <h4 class="text-md font-medium text-gray-700 mb-3">Filter Children</h4>
+                            
+                            <!-- Search -->
+                            <div class="mb-3">
+                                <input type="text" id="soloSearchInput" placeholder="Search by name or ID..." 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm">
+                            </div>
+                            
+                            <!-- Filter Row -->
+                            <div class="grid grid-cols-2 gap-2 mb-3">
+                                <!-- Record Type -->
+                                <div>
+                                    <select id="soloRecordTypeFilter" class="w-full px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm">
+                                        <option value="all">All Records</option>
+                                        <option value="incare">In Care</option>
+                                        <option value="discharged">Discharged</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Gender -->
+                                <div>
+                                    <select id="soloGenderFilter" class="w-full px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm">
+                                        <option value="">All Genders</option>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- Status Filter -->
+                            <div class="mb-3">
+                                <select id="soloStatusFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm">
+                                    <option value="">All Statuses</option>
+                                    <option value="Adoptable">Adoptable</option>
+                                    <option value="Under legal custody">Under legal custody</option>
+                                    <option value="Temporary Shelter">Temporary Shelter</option>
+                                    <option value="Awaiting placement">Awaiting placement</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Child List -->
+                        <div class="flex-1 border border-gray-300 rounded-lg overflow-hidden flex flex-col">
+                            <div class="bg-gray-50 px-4 py-3 border-b border-gray-300 flex-shrink-0">
+                                <h4 class="text-md font-medium text-gray-700">Select Child</h4>
+                                <span id="soloChildCount" class="text-sm text-gray-600">0 children found</span>
+                            </div>
+                            
+                            <div id="soloChildList" class="flex-1 overflow-y-auto p-2 space-y-2">
+                                <!-- Child items will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Column: Print Preview -->
+                    <div class="flex-1 flex flex-col min-w-0 h-full">
+                        <div class="bg-white border border-gray-300 rounded-lg flex flex-col h-full">
+                            <div class="bg-gray-50 px-4 py-3 border-b border-gray-300 rounded-t-lg flex-shrink-0">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="text-md font-medium text-gray-700">Print Preview</h4>
+                                    <div class="flex items-center space-x-2">
+                                        <button id="soloPrintBtn" class="disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm" disabled>
+                                            Print Record
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="soloPrintPreview" class="flex-1 overflow-y-auto p-6 bg-white">
+                                <!-- Preview content will be generated here -->
+                                <div class="text-center text-gray-500 py-12">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m0 0v6m0-6h6m-6 0H6m0 0v6m0-6V6"></path>
+                                    </svg>
+                                    <p class="text-lg">Select a child to preview their record</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Print Preview Modal -->
     <div id="printModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
         <div class="relative mx-auto border w-11/12 max-w-7xl shadow-lg rounded-md bg-white flex flex-col" style="margin-top: 10px; margin-bottom: 10px; height: 90vh;">
@@ -724,7 +844,7 @@
                             Reset Filters
                         </button>
                         <button id="printSoloRecord" class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors">
-                            Solo Print
+                            Solo Print Child Record
                         </button>
                         <button id="cancelPrintBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
                             Cancel
@@ -739,7 +859,7 @@
     </div>
 
     <script type="module">
-    import { db, collection, getDocs, setDoc, doc, updateDoc } from './firebase.js';
+    import { db, collection, getDocs, setDoc, doc, updateDoc, getDoc, query, where } from './firebase.js';
 
     let allRecords = [];
     let dischargedRecords = [];
@@ -1031,6 +1151,13 @@
     // Make clearMonthFilter globally available
     window.clearMonthFilter = clearMonthFilter;
 
+    // Helper function to create safe placeholder URLs
+    function createSafePlaceholderUrl(name, width = 150, height = 150) {
+        // Clean the name to avoid URL encoding issues
+        const safeName = (name || 'Child').replace(/[^a-zA-Z0-9\s]/g, '').trim() || 'Child';
+        return `https://via.placeholder.com/${width}x${height}/e5e7eb/6b7280?text=${encodeURIComponent(safeName)}`;
+    }
+
     function populateYearDropdown() {
         const yearSelect = document.getElementById('chartYearFilter');
         const currentYear = new Date().getFullYear();
@@ -1221,7 +1348,7 @@
         snapshot.forEach(docSnap => {
             const data = docSnap.data();
             data._docId = docSnap.id;
-            data.photoData = data.photoString || `https://via.placeholder.com/150x150/e5e7eb/6b7280?text=${encodeURIComponent(data.firstName || 'Child')}`;
+            data.photoData = data.photoString || createSafePlaceholderUrl(data.firstName);
             
             // Store all records for discharge lookup
             allChildrenRecords.push(data);
@@ -1283,7 +1410,7 @@
                     _docId: docSnap.id,
                     _isDischarged: true
                 };
-                childRecord.photoData = data.photoString || `https://via.placeholder.com/150x150/e5e7eb/6b7280?text=${encodeURIComponent(firstName || 'Child')}`;
+                childRecord.photoData = data.photoString || createSafePlaceholderUrl(firstName);
                 console.log('Created discharged child record:', {
                     childId: childRecord.childId, 
                     name: `${childRecord.firstName} ${childRecord.lastName}`, 
@@ -1586,7 +1713,7 @@
         recordsGrid.innerHTML = records.map(child => {
             const fullName = `${child.firstName || ''} ${child.middleName || ''} ${child.lastName || ''}`.trim();
             const age = calculateAge(child.dateOfBirth);
-            const photoSrc = child.photoData || `https://via.placeholder.com/150x150/e5e7eb/6b7280?text=${encodeURIComponent(child.firstName || 'Child')}`;
+            const photoSrc = child.photoData || createSafePlaceholderUrl(child.firstName);
             const statusColor = getStatusColor(child.currentStatus);
 
             let actionButtons = '';
@@ -1797,7 +1924,7 @@
             document.getElementById('cancelPrintBtn').addEventListener('click', closePrintModal);
             document.getElementById('confirmPrintBtn').addEventListener('click', confirmPrint);
             document.getElementById('resetPrintFilters').addEventListener('click', resetPrintFilters);
-            document.getElementById('printSoloRecord').addEventListener('click', printSoloRecord);
+            document.getElementById('printSoloRecord').addEventListener('click', openSoloPrintDialog);
             
             // Auto-apply filters when any filter input changes
             document.getElementById('printRecordType').addEventListener('change', function() { toggleDischargeFilter(); applyPrintFilters(); });
@@ -1813,6 +1940,21 @@
             document.getElementById('printDischargeToDate').addEventListener('change', applyPrintFilters);
             document.getElementById('printReceivedByCheck').addEventListener('change', function() { toggleReceivedByField(); applyPrintFilters(); });
             document.getElementById('printReceivedBy').addEventListener('input', applyPrintFilters);
+            
+            // Solo Print Modal Event Listeners
+            document.getElementById('closeSoloPrintModal').addEventListener('click', closeSoloPrintModal);
+            document.getElementById('soloPrintBtn').addEventListener('click', printSoloRecord);
+            document.getElementById('soloSearchInput').addEventListener('input', applySoloFilters);
+            document.getElementById('soloRecordTypeFilter').addEventListener('change', applySoloFilters);
+            document.getElementById('soloGenderFilter').addEventListener('change', applySoloFilters);
+            document.getElementById('soloStatusFilter').addEventListener('change', applySoloFilters);
+            
+            // Close solo modal when clicking outside
+            document.getElementById('soloPrintModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeSoloPrintModal();
+                }
+            });
             
             // Close modal when clicking outside
             document.getElementById('showAllModal').addEventListener('click', function(e) {
@@ -2434,26 +2576,543 @@
         previewContent.innerHTML = previewHTML;
     }
 
-    function printSoloRecord() {
-        // Show a simple prompt to enter child ID
-        const childId = prompt('Enter Child ID for solo record:');
-        if (!childId) return;
+    // Solo Print Modal Functions
+    let selectedSoloChild = null;
+    let soloChildrenData = [];
+
+    function openSoloPrintModal() {
+        // Close the print modal if it's open
+        closePrintModal();
         
-        // Find the record
-        const record = [...allRecords, ...dischargedRecords].find(r => r.childId === childId);
-        if (!record) {
-            alert('Child record not found with ID: ' + childId);
+        document.getElementById('soloPrintModal').classList.remove('hidden');
+        selectedSoloChild = null;
+        
+        // Reset all filters to show all children
+        document.getElementById('soloSearchInput').value = '';
+        document.getElementById('soloRecordTypeFilter').value = 'all';
+        document.getElementById('soloGenderFilter').value = '';
+        document.getElementById('soloStatusFilter').value = '';
+        
+        // Show skeleton loading
+        showSoloChildrenSkeleton();
+        
+        // Reset preview
+        document.getElementById('soloPrintPreview').innerHTML = '<div class="text-center text-gray-500 py-8">Select a child to see print preview</div>';
+        document.getElementById('soloPrintBtn').disabled = true;
+        
+        loadSoloChildrenList();
+    }
+
+    function showSoloChildrenSkeleton() {
+        const childList = document.getElementById('soloChildList');
+        const childCount = document.getElementById('soloChildCount');
+        
+        childCount.textContent = 'Loading children...';
+        
+        const skeletonHTML = Array(6).fill(0).map(() => `
+            <div class="solo-child-item bg-white border border-gray-200 rounded-lg p-4 animate-pulse">
+                <div class="flex items-center space-x-4">
+                    <div class="h-12 w-12 bg-gray-300 rounded-full"></div>
+                    <div class="flex-1">
+                        <div class="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
+                        <div class="h-3 bg-gray-300 rounded w-1/2"></div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        
+        childList.innerHTML = skeletonHTML;
+    }
+
+    function closeSoloPrintModal() {
+        document.getElementById('soloPrintModal').classList.add('hidden');
+        selectedSoloChild = null;
+        document.getElementById('soloPrintPreview').innerHTML = '<div class="text-center text-gray-500 py-8">Select a child to see print preview</div>';
+        document.getElementById('soloPrintBtn').disabled = true;
+    }
+
+    async function loadSoloChildrenList() {
+        try {
+            // Use existing loaded data instead of making new Firebase calls
+            soloChildrenData = [];
+            
+            // Add in care children from already loaded allRecords
+            allRecords.forEach(child => {
+                soloChildrenData.push({
+                    ...child,
+                    recordType: 'incare'
+                });
+            });
+
+            // Add discharged children from already loaded dischargedRecords
+            dischargedRecords.forEach(child => {
+                soloChildrenData.push({
+                    ...child,
+                    recordType: 'discharged'
+                });
+            });
+
+            console.log(`Loaded ${soloChildrenData.length} children for solo print (${allRecords.length} in care, ${dischargedRecords.length} discharged)`);
+
+            // Hide skeleton and show all children immediately
+            setTimeout(() => {
+                applySoloFilters();
+            }, 300); // Small delay to show loading state
+        } catch (error) {
+            console.error('Error loading solo children list:', error);
+            document.getElementById('soloChildList').innerHTML = '<div class="text-center text-red-500 py-4">Error loading children list. Please try again.</div>';
+            document.getElementById('soloChildCount').textContent = '0 children found';
+        }
+    }
+
+    function applySoloFilters() {
+        const searchTerm = document.getElementById('soloSearchInput').value.toLowerCase();
+        const recordTypeFilter = document.getElementById('soloRecordTypeFilter').value;
+        const genderFilter = document.getElementById('soloGenderFilter').value;
+        const statusFilter = document.getElementById('soloStatusFilter').value;
+
+        let filteredChildren = soloChildrenData.filter(child => {
+            const fullName = `${child.firstName || ''} ${child.middleName || ''} ${child.lastName || ''}`.trim().toLowerCase();
+            const childId = (child.childId || '').toLowerCase();
+            
+            const matchesSearch = !searchTerm || fullName.includes(searchTerm) || childId.includes(searchTerm);
+            const matchesRecordType = !recordTypeFilter || recordTypeFilter === 'all' || child.recordType === recordTypeFilter;
+            const matchesGender = !genderFilter || genderFilter === 'all' || (child.gender || '').toLowerCase() === genderFilter;
+            const matchesStatus = !statusFilter || statusFilter === 'all' || statusFilter === '' || (child.currentStatus || '').toLowerCase() === statusFilter.toLowerCase();
+
+            return matchesSearch && matchesRecordType && matchesGender && matchesStatus;
+        });
+
+        displaySoloChildrenList(filteredChildren);
+    }
+
+    function displaySoloChildrenList(children) {
+        const childList = document.getElementById('soloChildList');
+        const childCount = document.getElementById('soloChildCount');
+        
+        childCount.textContent = `${children.length} children found`;
+
+        if (children.length === 0) {
+            childList.innerHTML = '<div class="text-center text-gray-500 py-4">No children found matching your criteria</div>';
             return;
         }
+
+        const childrenHTML = children.map(child => {
+            const fullName = `${child.firstName || ''} ${child.middleName || ''} ${child.lastName || ''}`.trim();
+            const age = calculateAge(child.dateOfBirth);
+            const hasImage = child.photoData && child.photoData !== '' && !child.photoData.includes('placeholder');
+            const statusColor = child.recordType === 'discharged' ? 'bg-gray-100 text-gray-800' : 'bg-green-100 text-green-800';
+            const statusText = child.recordType === 'discharged' ? 'Discharged' : (child.currentStatus || 'In Care');
+
+            return `
+                <div class="solo-child-item p-4 border border-gray-200 rounded-lg hover:bg-blue-50 cursor-pointer transition-colors" 
+                     onclick="selectChildForSoloPrint('${child.childId}', '${child.recordType}')">
+                    <div class="flex items-center space-x-4">
+                        ${hasImage ? 
+                            `<img src="${child.photoData}" alt="${fullName}" class="h-12 w-12 rounded-full object-cover border-2 border-gray-200">` :
+                            `<div class="h-12 w-12 rounded-full bg-gray-200 border-2 border-gray-300 flex items-center justify-center">
+                                <span class="text-[8px] font-semibold text-gray-600 text-center leading-tight">NO<br>IMAGE</span>
+                            </div>`
+                        }
+                        <div class="flex-1">
+                            <h4 class="text-sm font-semibold text-gray-900">${fullName}</h4>
+                            <p class="text-xs text-gray-500 mb-1">ID: ${child.childId} • Age: ${age} years old</p>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${statusColor}">
+                                ${statusText}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        childList.innerHTML = childrenHTML;
+    }
+
+    async function selectChildForSoloPrint(childId, recordType) {
+        try {
+            // Find the child from the already loaded data
+            const child = soloChildrenData.find(c => c.childId === childId && c.recordType === recordType);
+            
+            if (child) {
+                selectedSoloChild = {
+                    ...child,
+                    recordType: recordType
+                };
+
+                // Highlight selected child
+                document.querySelectorAll('.solo-child-item').forEach(item => {
+                    item.classList.remove('bg-blue-50', 'border-blue-300');
+                });
+                event.target.closest('.solo-child-item').classList.add('bg-blue-50', 'border-blue-300');
+
+                // Generate preview
+                await generateSoloPrintPreview();
+                
+                // Enable print button
+                document.getElementById('soloPrintBtn').disabled = false;
+            }
+        } catch (error) {
+            console.error('Error selecting child:', error);
+            alert('Error loading child details. Please try again.');
+        }
+    }
+
+    // Make selectChildForSoloPrint globally available
+    window.selectChildForSoloPrint = selectChildForSoloPrint;
+
+    async function generateSoloPrintPreview() {
+        if (!selectedSoloChild) return;
+
+        const child = selectedSoloChild;
+        const fullName = `${child.firstName || ''} ${child.middleName || ''} ${child.lastName || ''}`.trim();
+        const age = calculateAge(child.dateOfBirth);
+        const photoSrc = child.photoData || createSafePlaceholderUrl(child.firstName);
+        const hasImage = child.photoData && child.photoData !== '' && !child.photoData.includes('placeholder');
+
+        // Show loading for health and anthropometric data
+        document.getElementById('soloPrintPreview').innerHTML = `
+            <div class="text-center py-8">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
+                <p class="text-gray-500 mt-2">Loading health and measurement data...</p>
+            </div>
+        `;
+
+        let healthMedicalProfile = {};
+        let anthropometricMeasurement = {};
+
+        try {
+            // Get health medical profile and anthropometric measurements using patientId
+            console.log('Querying health data for patientId:', child.childId);
+            
+            // Try both patientId and childId as field names
+            const [healthSnapshot1, healthSnapshot2, anthropometricSnapshot1, anthropometricSnapshot2] = await Promise.all([
+                getDocs(query(collection(db, 'healthMedicalProfile'), where('patientId', '==', child.childId))),
+                getDocs(query(collection(db, 'healthMedicalProfile'), where('childId', '==', child.childId))),
+                getDocs(query(collection(db, 'anthropometricMeasurement'), where('patientId', '==', child.childId))),
+                getDocs(query(collection(db, 'anthropometricMeasurement'), where('childId', '==', child.childId)))
+            ]);
+
+            console.log('Health snapshot (patientId) empty:', healthSnapshot1.empty);
+            console.log('Health snapshot (childId) empty:', healthSnapshot2.empty);
+            console.log('Anthropometric snapshot (patientId) empty:', anthropometricSnapshot1.empty);
+            console.log('Anthropometric snapshot (childId) empty:', anthropometricSnapshot2.empty);
+
+            // Combine results from both queries
+            const healthSnapshot = !healthSnapshot1.empty ? healthSnapshot1 : healthSnapshot2;
+            const anthropometricSnapshot = !anthropometricSnapshot1.empty ? anthropometricSnapshot1 : anthropometricSnapshot2;
+
+            // Get the most recent health profile
+            if (!healthSnapshot.empty) {
+                const healthDocs = [];
+                healthSnapshot.forEach(doc => {
+                    console.log('Health document found:', doc.id, doc.data());
+                    healthDocs.push({ id: doc.id, ...doc.data() });
+                });
+                // Sort by date and get the most recent (check multiple date fields)
+                healthDocs.sort((a, b) => {
+                    const dateA = new Date(a.lastUpdated || a.dateAdded || a.dateRecorded || a.createdAt || 0);
+                    const dateB = new Date(b.lastUpdated || b.dateAdded || b.dateRecorded || b.createdAt || 0);
+                    return dateB - dateA;
+                });
+                healthMedicalProfile = healthDocs[0] || {};
+                console.log('Selected health profile:', healthMedicalProfile);
+            }
+
+            // Get the most recent anthropometric measurement
+            if (!anthropometricSnapshot.empty) {
+                const measurementDocs = [];
+                anthropometricSnapshot.forEach(doc => {
+                    console.log('Anthropometric document found:', doc.id, doc.data());
+                    measurementDocs.push({ id: doc.id, ...doc.data() });
+                });
+                // Sort by date and get the most recent
+                measurementDocs.sort((a, b) => new Date(b.dateRecorded || b.createdAt || 0) - new Date(a.dateRecorded || a.createdAt || 0));
+                anthropometricMeasurement = measurementDocs[0] || {};
+                console.log('Selected anthropometric measurement:', anthropometricMeasurement);
+            }
+
+            console.log('Final health profile object:', healthMedicalProfile);
+            
+            // Debug: Log specific health profile fields to see structure
+            if (healthMedicalProfile.diagnosis) {
+                console.log('Diagnosis:', healthMedicalProfile.diagnosis);
+            }
+            if (healthMedicalProfile.prescribedMedications) {
+                console.log('Prescribed Medications array:', healthMedicalProfile.prescribedMedications);
+            }
+            if (healthMedicalProfile.immunizations) {
+                console.log('Immunizations array:', healthMedicalProfile.immunizations);
+            }
+            if (healthMedicalProfile.createdBy) {
+                console.log('Created By:', healthMedicalProfile.createdBy);
+            }
+            
+            console.log('Final anthropometric object:', anthropometricMeasurement);
+            
+            // Debug: Log specific measurements to see structure
+            if (anthropometricMeasurement.height) {
+                console.log('Height data structure:', anthropometricMeasurement.height);
+            }
+            if (anthropometricMeasurement.weight) {
+                console.log('Weight data structure:', anthropometricMeasurement.weight);
+            }
+            if (anthropometricMeasurement.bmi) {
+                console.log('BMI data structure:', anthropometricMeasurement.bmi);
+            }
+        } catch (error) {
+            console.error('Error loading health and anthropometric data:', error);
+        }
+
+        // Now generate the complete preview with medical records
+        const currentDate = new Date().toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+
+        const previewHTML = `
+            <style>
+                @media print {
+                    body * { visibility: hidden; }
+                    .print-content, .print-content * { visibility: visible; }
+                    .print-content { 
+                        position: absolute; 
+                        left: 0; 
+                        top: 0; 
+                        width: 100%;
+                        background: white !important;
+                    }
+                    .no-print { display: none !important; }
+                }
+                .print-content { 
+                    background: white; 
+                    color: black; 
+                    font-family: Arial, sans-serif;
+                    font-size: 12px;
+                    line-height: 1.4;
+                    max-width: 210mm;
+                    margin: 0 auto;
+                    padding: 20mm;
+                }
+            </style>
+            <div class="print-content">
+                <!-- Simple Header -->
+                <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #000; padding-bottom: 20px;">
+                    <img src="${window.location.origin}${window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'))}/tahanan-logo.png" alt="Tahanan ng Pagmamahal Logo" style="height: 80px; margin: 0 auto 10px auto; display: block;" onerror="this.style.display='none'">
+                    <p style="font-size: 11px; margin: 10px 0;">45 Dr. Pilapil St., Brgy. Sagad, Pasig, Metro Manila, Philippines</p>
+                    <p style="font-size: 11px; margin: 5px 0;">Contact: (+63) 917 525 7188 Tel: +632 8631 7188</p>
+                    <p style="font-size: 11px; margin: 5px 0;">Email: tahananph@gmail.com</p>
+                    <p style="font-size: 10px; margin: 5px 0;">Generated on ${currentDate}</p>
+                </div>
+
+                <!-- Basic Three-Column Layout -->
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <!-- Left Column - Photo and Personal Data (Wider) -->
+                        <td style="width: 35%; vertical-align: top; padding-right: 15px;">
+                            <!-- Photo -->
+                            <div style="text-align: center; margin-bottom: 20px;">
+                                ${hasImage ? 
+                                    `<img src="${child.photoData}" alt="${fullName}" style="width: 120px; height: 150px; object-fit: cover; border: 1px solid #333;">` :
+                                    `<div style="width: 120px; height: 150px; border: 1px solid #333; background: #f5f5f5; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                                        <span style="font-size: 10px; color: #666;">NO PHOTO</span>
+                                    </div>`
+                                }
+                            </div>
+                            
+                            <!-- Personal Data -->
+                            <div style="margin-bottom: 20px;">
+                                <h3 style="font-size: 14px; font-weight: bold; margin-bottom: 10px;">Personal Data</h3>
+                                <table style="width: 100%; font-size: 12px; line-height: 1.5;">
+                                    <tr><td style="font-weight: bold; width: 100px; padding: 3px 0;">Name:</td><td style="padding: 3px 0;">${fullName}</td></tr>
+                                    <tr><td style="font-weight: bold; padding: 3px 0;">ID:</td><td style="padding: 3px 0;">${child.childId}</td></tr>
+                                    <tr><td style="font-weight: bold; padding: 3px 0;">Birthday:</td><td style="padding: 3px 0;">${child.dateOfBirth ? formatDate(child.dateOfBirth) : 'Not recorded'}</td></tr>
+                                    <tr><td style="font-weight: bold; padding: 3px 0;">Age:</td><td style="padding: 3px 0;">${age} years old</td></tr>
+                                    <tr><td style="font-weight: bold; padding: 3px 0;">Gender:</td><td style="padding: 3px 0;">${child.gender || 'Not specified'}</td></tr>
+                                    <tr><td style="font-weight: bold; padding: 3px 0;">Place of Birth:</td><td style="padding: 3px 0;">${child.placeOfBirth || 'Not recorded'}</td></tr>
+                                    <tr><td style="font-weight: bold; padding: 3px 0;">Nationality:</td><td style="padding: 3px 0;">${child.nationality || 'Not specified'}</td></tr>
+                                    <tr><td style="font-weight: bold; padding: 3px 0;">Religion:</td><td style="padding: 3px 0;">${child.religion || 'Not specified'}</td></tr>
+                                </table>
+                            </div>
+                        </td>
+
+                        <!-- Middle Column - Care History and Family Background (Narrower) -->
+                        <td style="width: 35%; vertical-align: top; padding-right: 15px;">
+                            <!-- Care History -->
+                            <div style="margin-bottom: 20px;">
+                                <h3 style="font-size: 14px; font-weight: bold; margin-bottom: 10px;">Care History</h3>
+                                <div style="font-size: 11px;">
+                                    <p><strong>Entry Date:</strong> ${child.entryDate ? formatDate(child.entryDate) : 'Date not recorded'}</p>
+                                    <p style="margin: 5px 0;"><strong>Entry Age:</strong> ${child.entryAge || 'Not recorded'}</p>
+                                    <p style="margin: 5px 0;"><strong>Current Status:</strong> ${child.currentStatus || 'Not specified'}</p>
+                                    <p style="margin: 5px 0;"><strong>Reason for Admission:</strong> ${child.reasonForAdmission || 'Not specified'}</p>
+                                    <p style="margin: 5px 0;"><strong>Date Added:</strong> ${child.dateAdded ? formatDate(child.dateAdded) : 'Not recorded'}</p>
+                                    <p style="margin: 5px 0;"><strong>Last Check-up:</strong> ${child.lastCheckupDate ? formatDate(child.lastCheckupDate) : 'No recent check-up'}</p>
+                                    
+                                    ${selectedSoloChild.recordType === 'discharged' ? `
+                                    <p style="margin-top: 15px;"><strong>${child.dischargeDate ? formatDate(child.dischargeDate) : 'Discharge date'}</strong></p>
+                                    <p style="margin: 5px 0;"><strong>Discharge from Care</strong></p>
+                                    <p style="margin: 2px 0;">• Successfully discharged from facility</p>
+                                    ${child.dischargeReason ? `<p style="margin: 2px 0;">• Reason: ${child.dischargeReason}</p>` : ''}
+                                    ` : ''}
+                                </div>
+                            </div>
+
+                            <!-- Family Background -->
+                            <div style="margin-bottom: 20px;">
+                                <h3 style="font-size: 14px; font-weight: bold; margin-bottom: 10px;">Family Background</h3>
+                                <div style="font-size: 11px;">
+                                    <p><strong>Father:</strong> ${child.fatherName || 'Not recorded'}</p>
+                                    <p style="margin-top: 10px;"><strong>Mother:</strong> ${child.motherName || 'Not recorded'}</p>
+                                    <p style="margin-top: 10px;"><strong>Parental Status:</strong> ${child.parentalStatus || 'Not specified'}</p>
+                                    <p style="margin: 5px 0;"><strong>Siblings in Orphanage:</strong> ${child.siblingsInOrphanage || 'No'}</p>
+                                    ${child.siblingsNamesList ? `<p style="margin: 5px 0;"><strong>Siblings Names:</strong> ${child.siblingsNamesList}</p>` : ''}
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Right Column - Health, Education, Medical, Skills -->
+                        <td style="width: 30%; vertical-align: top;">
+                            <!-- Health Status -->
+                            <div style="margin-bottom: 20px;">
+                                <h3 style="font-size: 14px; font-weight: bold; margin-bottom: 10px;">Health Status</h3>
+                                <table style="width: 100%; font-size: 11px;">
+                                    <tr><td style="font-weight: bold; width: 80px;">Allergies:</td><td>${child.allergies || 'None'}</td></tr>
+                                    <tr><td style="font-weight: bold;">Blood Type:</td><td>${child.bloodType || 'Not tested'}</td></tr>
+                                    <tr><td style="font-weight: bold;">Medical Conditions:</td><td>${child.medicalConditions || 'None'}</td></tr>
+                                </table>
+                            </div>
+
+                            <!-- Physical Measurements -->
+                            ${Object.keys(anthropometricMeasurement).length > 0 ? `
+                            <div style="margin-bottom: 20px;">
+                                <h3 style="font-size: 14px; font-weight: bold; margin-bottom: 10px;">Measurements</h3>
+                                <table style="width: 100%; font-size: 11px;">
+                                    ${anthropometricMeasurement.height && anthropometricMeasurement.height[0] && anthropometricMeasurement.height[0].value ? 
+                                        `<tr><td style="font-weight: bold; width: 80px;">Height:</td><td>${anthropometricMeasurement.height[0].value} ${anthropometricMeasurement.height[0].unit || 'cm'}</td></tr>` : ''}
+                                    ${anthropometricMeasurement.weight && anthropometricMeasurement.weight[0] && anthropometricMeasurement.weight[0].value ? 
+                                        `<tr><td style="font-weight: bold;">Weight:</td><td>${anthropometricMeasurement.weight[0].value} ${anthropometricMeasurement.weight[0].unit || 'kg'}</td></tr>` : ''}
+                                    ${anthropometricMeasurement.bmi && anthropometricMeasurement.bmi[0] ? 
+                                        `<tr><td style="font-weight: bold;">BMI:</td><td>${anthropometricMeasurement.bmi[0].value || anthropometricMeasurement.bmi[0].formula}</td></tr>` : ''}
+                                </table>
+                            </div>` : ''}
+
+                            <!-- Medical Records -->
+                            ${Object.keys(healthMedicalProfile).length > 0 ? `
+                            <div style="margin-bottom: 20px;">
+                                <h3 style="font-size: 14px; font-weight: bold; margin-bottom: 10px;">Medical Records</h3>
+                                <div style="font-size: 11px;">
+                                    ${healthMedicalProfile.diagnosis ? `
+                                    <p><strong>Latest Diagnosis:</strong> ${healthMedicalProfile.diagnosis}</p>
+                                    ${healthMedicalProfile.dateOfCheckUp ? `<p style="margin: 2px 0;">Date: ${formatDate(healthMedicalProfile.dateOfCheckUp)}</p>` : ''}
+                                    ` : ''}
+                                    
+                                    ${healthMedicalProfile.prescribedMedications && healthMedicalProfile.prescribedMedications.length > 0 ? `
+                                    <p style="margin-top: 10px;"><strong>Current Medications:</strong></p>
+                                    ${healthMedicalProfile.prescribedMedications.map(med => `<p style="margin: 2px 0;">• ${med}</p>`).join('')}
+                                    ` : ''}
+
+                                    ${healthMedicalProfile.immunizations && healthMedicalProfile.immunizations.length > 0 ? `
+                                    <p style="margin-top: 10px;"><strong>Immunizations:</strong></p>
+                                    ${healthMedicalProfile.immunizations.map(imm => `
+                                        <p style="margin: 2px 0;">• ${imm.name || 'Vaccine'} ${imm.dateGiven ? `(${formatDate(imm.dateGiven)})` : ''}</p>
+                                    `).join('')}
+                                    ` : ''}
+
+                                    ${healthMedicalProfile.createdBy ? `
+                                    <p style="margin-top: 10px; font-size: 10px; color: #666;">Medical records by: ${healthMedicalProfile.createdBy}</p>
+                                    ` : ''}
+                                </div>
+                            </div>` : ''}
+
+                            <!-- Additional Notes -->
+                            ${child.notes || child.additionalInfo || child.behavioralNotes ? `
+                            <div style="margin-bottom: 20px;">
+                                <h3 style="font-size: 14px; font-weight: bold; margin-bottom: 10px;">Additional Information</h3>
+                                <div style="font-size: 11px;">
+                                    ${child.behavioralNotes ? `<p><strong>Behavioral Notes:</strong> ${child.behavioralNotes}</p>` : ''}
+                                    ${child.notes ? `<p style="margin-top: 5px;"><strong>General Notes:</strong> ${child.notes}</p>` : ''}
+                                    ${child.additionalInfo ? `<p style="margin-top: 5px;"><strong>Additional Information:</strong> ${child.additionalInfo}</p>` : ''}
+                                </div>
+                            </div>` : ''}
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- Footer -->
+                <div style="margin-top: 30px; text-align: center; border-top: 1px solid #000; padding-top: 15px;">
+                    <p style="font-size: 11px;">${child.birthPlace || 'Philippines'}, ${currentDate}</p>
+                    <div style="margin-top: 20px;">
+                        <div style="width: 200px; height: 1px; background: #000; margin: 0 auto 5px;"></div>
+                        <p style="font-size: 11px; font-weight: bold;">Digital Signature</p>
+                        <p style="font-size: 10px; color: #666;">Authorized by: ${getCurrentUser()?.firstName || 'System'} ${getCurrentUser()?.lastName || 'User'}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('soloPrintPreview').innerHTML = previewHTML;
+    }
+
+    function printSoloRecord() {
+        if (!selectedSoloChild) {
+            alert('Please select a child to print');
+            return;
+        }
+
+        const printContent = document.querySelector('.print-content').innerHTML;
+        const printWindow = window.open('', '_blank');
         
-        // Set filtered records to just this one record
-        printFilteredRecords = [record];
-        updatePrintPreview();
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Child Record - ${selectedSoloChild.firstName} ${selectedSoloChild.lastName}</title>
+                <style>
+                    * { box-sizing: border-box; }
+                    body { 
+                        margin: 0; 
+                        padding: 20mm; 
+                        font-family: Arial, sans-serif; 
+                        font-size: 12px;
+                        line-height: 1.4;
+                        background: white;
+                        color: black;
+                    }
+                    table { border-collapse: collapse; }
+                    h1, h2, h3 { margin: 0; padding: 0; }
+                    p { margin: 0; padding: 0; }
+                    img { max-width: 100%; height: auto; }
+                    @media print {
+                        body { margin: 0; padding: 15mm; }
+                        @page { margin: 15mm; }
+                    }
+                </style>
+            </head>
+            <body>
+                ${printContent}
+            </body>
+            </html>
+        `);
         
-        // Auto-print immediately
+        printWindow.document.close();
+        
+        // Wait for content to load then print
         setTimeout(() => {
-            confirmPrint();
+            printWindow.focus();
+            printWindow.print();
+            
+            // Close window after printing
+            setTimeout(() => {
+                printWindow.close();
+            }, 1000);
         }, 500);
+    }
+
+    // Solo Print Record function - now opens modal instead of prompt
+    function openSoloPrintDialog() {
+        openSoloPrintModal();
     }
 
     function confirmPrint() {

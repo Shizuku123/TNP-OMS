@@ -65,6 +65,7 @@ export {
   where,
   orderBy,
   ref,
+  getAuth,
   uploadBytes,
   getDownloadURL,
   limit,
