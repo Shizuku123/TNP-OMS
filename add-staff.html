@@ -460,7 +460,7 @@
             doc,
             auth
         } from './firebase.js';
-        import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+        import { createUserWithEmailAndPassword, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
         import { logActivity } from './activity-logger.js';
 
         let createAccountEnabled = false;
@@ -471,6 +471,35 @@
         function saveOfflineRecord(data) {
             try {
                 const offlineRecords = getOfflineRecords();
+                
+                // Check for duplicates based on key identifying fields
+                const isDuplicate = offlineRecords.some(record => {
+                    const existingData = record.data;
+                    // Check for duplicate based on email address (primary identifier)
+                    if (data.emailAddress && existingData.emailAddress === data.emailAddress) {
+                        return true;
+                    }
+                    // Check for duplicate based on staff ID if both have it
+                    if (data.staffId && existingData.staffId === data.staffId) {
+                        return true;
+                    }
+                    // Check for duplicate based on full name and contact number combination
+                    const sameFullName = (
+                        existingData.firstName === data.firstName &&
+                        existingData.lastName === data.lastName &&
+                        existingData.middleName === data.middleName
+                    );
+                    if (sameFullName && data.contactNumber && existingData.contactNumber === data.contactNumber) {
+                        return true;
+                    }
+                    return false;
+                });
+                
+                if (isDuplicate) {
+                    console.log('Duplicate record detected, not saving offline');
+                    return { success: false, reason: 'duplicate' };
+                }
+                
                 const record = {
                     id: crypto.randomUUID(),
                     data: data,
@@ -480,10 +509,10 @@
                 offlineRecords.push(record);
                 localStorage.setItem(OFFLINE_STORAGE_KEY, JSON.stringify(offlineRecords));
                 updateOfflineIndicator();
-                return true;
+                return { success: true };
             } catch (error) {
                 console.error('Error saving offline record:', error);
-                return false;
+                return { success: false, reason: 'error' };
             }
         }
 
@@ -541,6 +570,39 @@
 
         function isOnline() {
             return navigator.onLine;
+        }
+
+        // Check if email already exists in Firebase Auth or Firestore
+        async function checkEmailExists(email) {
+            try {
+                // Check Firebase Auth first
+                const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+                if (signInMethods && signInMethods.length > 0) {
+                    return { exists: true, location: 'Firebase Auth' };
+                }
+                
+                // Check Firestore users collection
+                const usersCol = collection(db, 'users');
+                const snapshot = await getDocs(usersCol);
+                
+                let foundInFirestore = false;
+                snapshot.forEach(docSnap => {
+                    const userData = docSnap.data();
+                    if (userData.emailAddress && userData.emailAddress.toLowerCase() === email.toLowerCase()) {
+                        foundInFirestore = true;
+                    }
+                });
+                
+                if (foundInFirestore) {
+                    return { exists: true, location: 'Firestore' };
+                }
+                
+                return { exists: false };
+            } catch (error) {
+                console.error('Error checking email existence:', error);
+                // If we can't check, assume it doesn't exist and let Firebase Auth handle the error
+                return { exists: false };
+            }
         }
 
         // Generate unique staff ID by checking Firestore and offline records
@@ -1055,10 +1117,13 @@
                     hideLoadingScreen();
                     
                     // Try to save offline
-                    if (saveOfflineRecord(data)) {
+                    const saveResult = saveOfflineRecord(data);
+                    if (saveResult.success) {
                         const fullName = `${data.firstName} ${data.middleName ? data.middleName + ' ' : ''}${data.lastName}`;
                         showOfflineSuccessModal(fullName, data.staffId);
                         resetForm();
+                    } else if (saveResult.reason === 'duplicate') {
+                        showErrorModal('This staff record appears to already exist in offline storage. Please check your offline records or try with different information.');
                     } else {
                         showErrorModal('Failed to save record offline. Please try again.');
                     }
@@ -1091,6 +1156,16 @@
 
                 // If account creation is enabled, create user in Firebase Auth
                 if (createAccountEnabled && data.createAccount === '1') {
+                    // Check if email already exists before attempting to create account
+                    console.log('Checking if email already exists:', data.emailAddress);
+                    const emailCheck = await checkEmailExists(data.emailAddress);
+                    
+                    if (emailCheck.exists) {
+                        hideLoadingScreen();
+                        showErrorModal(`Email address is already in use in ${emailCheck.location}. Please use a different email address.`);
+                        return;
+                    }
+                    
                     // Format password: TNPOMS@BirthdateDDMMYYYY (ensure at least 6 characters)
                     const dob = data.dateOfBirth; // YYYY-MM-DD
                     const [yyyy, mm, dd] = dob.split('-');
@@ -1113,7 +1188,7 @@
                         console.error('Firebase Auth Error:', error);
                         hideLoadingScreen();
                         if (error.code === 'auth/email-already-in-use') {
-                            showErrorModal('Email address is already in use.');
+                            showErrorModal('Email address is already in use. This may be due to a previously created account.');
                         } else if (error.code === 'auth/weak-password') {
                             showErrorModal('Password is too weak. Please contact administrator.');
                         } else if (error.code === 'auth/invalid-email') {
@@ -1188,10 +1263,13 @@
                 
                 // If this was an attempted online save that failed, try to save offline
                 if (!isSync && !isOnline()) {
-                    if (saveOfflineRecord(data)) {
+                    const saveResult = saveOfflineRecord(data);
+                    if (saveResult.success) {
                         const fullName = `${data.firstName} ${data.middleName ? data.middleName + ' ' : ''}${data.lastName}`;
                         showOfflineSuccessModal(fullName, data.staffId);
                         resetForm();
+                    } else if (saveResult.reason === 'duplicate') {
+                        showErrorModal('This staff record appears to already exist in offline storage. Please check your offline records or try with different information.');
                     } else {
                         showErrorModal('Error saving staff record. Please try again.');
                     }
