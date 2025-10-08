@@ -88,7 +88,7 @@
             <div class="text-center">
                 <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-red-primary mx-auto"></div>
                 <h3 class="mt-4 text-lg font-medium text-gray-900">Saving Staff Record</h3>
-                <p class="mt-2 text-sm text-gray-500">Please wait while we save the staff information...</p>
+                <p class="mt-2 text-sm text-gray-500">Please wait while we save the staff information and upload documents...</p>
             </div>
         </div>
     </div>
@@ -165,6 +165,214 @@
         </div>
     </div>
 
+    <!-- Camera Capture Modal -->
+    <div id="cameraModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white rounded-lg p-4 sm:p-6 max-w-2xl w-full mx-4">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Take Photo</h3>
+                <button id="closeCameraModal" class="text-gray-400 hover:text-gray-600 p-1">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                <!-- Camera preview -->
+                <div class="relative bg-gray-100 rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+                    <video id="cameraPreview" class="w-full h-full object-cover" autoplay muted playsinline></video>
+                    <canvas id="photoCanvas" class="hidden"></canvas>
+                </div>
+                
+                <!-- Camera controls -->
+                <div class="flex flex-col sm:flex-row justify-center gap-3">
+                    <button id="switchCameraBtn" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors text-sm">
+                        <svg class="h-4 w-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                        </svg>
+                        Switch Camera
+                    </button>
+                    <button id="capturePhotoBtn" class="px-6 py-2 bg-red-primary text-white rounded-md hover:bg-red-700 transition-colors text-sm">
+                        <svg class="h-4 w-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        Capture Photo
+                    </button>
+                    <button id="cancelCameraBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-sm">
+                        Cancel
+                    </button>
+                </div>
+                
+                <!-- Camera status -->
+                <div id="cameraStatus" class="text-center text-sm text-gray-500 hidden">
+                    <p>Initializing camera...</p>
+                </div>
+                
+                <!-- Camera error -->
+                <div id="cameraError" class="text-center text-sm text-red-600 hidden">
+                    <p></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Document Information Modals -->
+    <!-- Basic Employment Requirements Modal -->
+    <div id="basicDocumentModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white rounded-lg p-4 sm:p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Basic Employment Requirements</h3>
+                <button onclick="hideDocumentInfoModal('basic')" class="text-gray-400 hover:text-gray-600 p-1">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                <p class="text-sm text-gray-600 mb-4">These are the standard documents required for any legal employment in the Philippines:</p>
+                
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Document</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Purpose</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Required From</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Resume / Application Form</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Background and qualifications</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">All applicants</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Valid ID (Government-issued)</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Identity verification</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">All applicants</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">NBI Clearance</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Certifies no criminal record nationwide</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">All applicants (very important for orphanages)</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Barangay Clearance</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Confirms good moral character and residency</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">All applicants</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Police Clearance</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Optional but sometimes required for added background check</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Recommended</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Birth Certificate (PSA)</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Proof of age and citizenship</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">All applicants</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">SSS Number / E1 Form</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Social Security System registration</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Required upon hiring</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">PhilHealth Number</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">For government health insurance</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Required upon hiring</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Pag-IBIG Number (HDMF)</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">For housing and savings fund</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Required upon hiring</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">TIN (Tax Identification Number)</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">For payroll and tax purposes</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Required upon hiring</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Medical Certificate / Fit-to-Work</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Certifies physical fitness</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Required before starting work</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                    <h4 class="text-sm font-medium text-blue-900 mb-2">Legal Basis:</h4>
+                    <ul class="text-sm text-blue-800 space-y-1">
+                        <li>• <strong>Labor Code of the Philippines</strong> – Standard employment documentation and benefits</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Special Requirements Modal -->
+    <div id="specialDocumentModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white rounded-lg p-4 sm:p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Special Requirements for Child-Caring Institution</h3>
+                <button onclick="hideDocumentInfoModal('special')" class="text-gray-400 hover:text-gray-600 p-1">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                <p class="text-sm text-gray-600 mb-4">Since our organization cares for children, additional screening is strongly recommended or required under DSWD and child protection laws:</p>
+                
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Document</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Purpose</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Legal / Regulatory Basis</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">DSWD Clearance</td>
+                                <td class="px-6 py-4 text-sm text-gray-500">Some positions (especially management or direct care staff) may require DSWD approval</td>
+                                <td class="px-6 py-4 text-sm text-gray-500">DSWD Administrative Order No. 16, series of 2012</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Certificate of Good Moral Character</td>
+                                <td class="px-6 py-4 text-sm text-gray-500">From previous employer or school - Ensures integrity, especially when working with minors</td>
+                                <td class="px-6 py-4 text-sm text-gray-500">DSWD standards for child-caring staff</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Psychological Evaluation / Neuro Exam</td>
+                                <td class="px-6 py-4 text-sm text-gray-500">Recommended for key staff (assistant director, social workers, house parents)</td>
+                                <td class="px-6 py-4 text-sm text-gray-500">DSWD standards for child-caring staff</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Proof of Training / Certificate in Child Protection</td>
+                                <td class="px-6 py-4 text-sm text-gray-500">Training in child protection protocols and social work (if applicable)</td>
+                                <td class="px-6 py-4 text-sm text-gray-500">Child protection requirements</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="mt-6 p-4 bg-red-50 rounded-lg">
+                    <h4 class="text-sm font-medium text-red-900 mb-2">Legal Basis:</h4>
+                    <ul class="text-sm text-red-800 space-y-1">
+                        <li>• <strong>Republic Act No. 7610</strong> – "Special Protection of Children Against Abuse, Exploitation, and Discrimination Act"</li>
+                        <li>• <strong>Republic Act No. 10173</strong> – Data Privacy Act (relevant for staff handling child records)</li>
+                        <li>• <strong>DSWD Administrative Order No. 16, s. 2012</strong> – Standards for Residential-Based Child Caring and Placing Agencies</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Content -->
     <div class="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <form id="staffForm" class="space-y-6 sm:space-y-8">
@@ -177,9 +385,26 @@
                     </div>
                     <div class="flex-1 w-full">
                         <label for="photo" class="block text-sm font-medium text-gray-700 mb-2">Upload Photo</label>
-                        <input type="file" id="photo" name="photo" accept="image/*"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
-                        <p class="mt-2 text-sm text-gray-500">JPG, PNG or GIF up to 2MB</p>
+                        <div class="space-y-3">
+                            <input type="file" id="photo" name="photo" accept="image/*"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <button type="button" id="captureBtn" class="flex-1 px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm">
+                                    <svg class="h-4 w-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                    Take Photo
+                                </button>
+                                <button type="button" id="removePhotoBtn" class="flex-1 px-3 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors text-sm hidden">
+                                    <svg class="h-4 w-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1-1H8a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                    Remove Photo
+                                </button>
+                            </div>
+                        </div>
+                        <p class="mt-2 text-sm text-gray-500">JPG, PNG or GIF <span class="font-medium text-blue-600">up to 1MB</span> • Take photo with camera or upload from device</p>
                     </div>
                 </div>
             </div>
@@ -191,17 +416,17 @@
                     <div>
                         <label for="firstName" class="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
                         <input type="text" id="firstName" name="firstName" required
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                     </div>
                     <div>
                         <label for="middleName" class="block text-sm font-medium text-gray-700 mb-2">Middle Name</label>
                         <input type="text" id="middleName" name="middleName"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                     </div>
                     <div>
                         <label for="lastName" class="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
                         <input type="text" id="lastName" name="lastName" required
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Gender *</label>
@@ -219,27 +444,27 @@
                     <div>
                         <label for="dateOfBirth" class="block text-sm font-medium text-gray-700 mb-2">Date of Birth *</label>
                         <input type="date" id="dateOfBirth" name="dateOfBirth" required
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                     </div>
                     <div>
                         <label for="placeOfBirth" class="block text-sm font-medium text-gray-700 mb-2">Place of Birth</label>
                         <input type="text" id="placeOfBirth" name="placeOfBirth" placeholder="Municipality, City, Province"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                     </div>
                     <div>
                         <label for="nationality" class="block text-sm font-medium text-gray-700 mb-2">Nationality</label>
                         <input type="text" id="nationality" name="nationality" value="Filipino"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                     </div>
                     <div>
                         <label for="religion" class="block text-sm font-medium text-gray-700 mb-2">Religion</label>
                         <input type="text" id="religion" name="religion"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                     </div>
                     <div>
                         <label for="civilStatus" class="block text-sm font-medium text-gray-700 mb-2">Civil Status</label>
                         <select id="civilStatus" name="civilStatus"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                             <option value="">Select status</option>
                             <option value="Single">Single</option>
                             <option value="Married">Married</option>
@@ -251,17 +476,32 @@
                     <div class="sm:col-span-2 lg:col-span-3">
                         <label for="currentAddress" class="block text-sm font-medium text-gray-700 mb-2">Current Address *</label>
                         <textarea id="currentAddress" name="currentAddress" rows="3" required
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary"></textarea>
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base"></textarea>
+                    </div>
+                    <div>
+                        <label for="educationalBackground" class="block text-sm font-medium text-gray-700 mb-2">Highest Educational Background *</label>
+                        <select id="educationalBackground" name="educationalBackground" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
+                            <option value="">Select Educational Background</option>
+                            <option value="Elementary Graduate">Elementary Graduate</option>
+                            <option value="High School Graduate">High School Graduate</option>
+                            <option value="Senior High School Graduate">Senior High School Graduate</option>
+                            <option value="Vocational/Technical Graduate">Vocational/Technical Graduate</option>
+                            <option value="College Undergraduate">College Undergraduate</option>
+                            <option value="College Graduate">College Graduate</option>
+                            <option value="Master's Degree">Master's Degree</option>
+                            <option value="Doctorate Degree">Doctorate Degree</option>
+                        </select>
                     </div>
                     <div>
                         <label for="contactNumber" class="block text-sm font-medium text-gray-700 mb-2">Contact Number *</label>
                         <input type="tel" id="contactNumber" name="contactNumber" required
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                     </div>
                     <div>
                         <label for="emailAddress" class="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
                         <input type="email" id="emailAddress" name="emailAddress" required
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                     </div>
                 </div>
             </div>
@@ -273,14 +513,14 @@
                     <div>
                         <label for="staffId" class="block text-sm font-medium text-gray-700 mb-2">Staff ID *</label>
                         <input type="text" id="staffId" name="staffId" readonly
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-600 cursor-not-allowed focus:outline-none"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-600 cursor-not-allowed focus:outline-none text-sm sm:text-base"
                                placeholder="Auto-generated">
                         <p class="mt-1 text-xs text-gray-500">Automatically generated - SE001, SE002, etc.</p>
                     </div>
                     <div>
                         <label for="position" class="block text-sm font-medium text-gray-700 mb-2">Position *</label>
                         <select id="position" name="position" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                             <option value="">Select position</option>
                             <option value="Director">Director</option>
                             <option value="Assistant Director">Assistant Director</option>
@@ -298,7 +538,7 @@
                     <div>
                         <label for="department" class="block text-sm font-medium text-gray-700 mb-2">Department / Unit</label>
                         <select id="department" name="department"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                             <option value="">Select department</option>
                             <option value="Administration">Administration</option>
                             <option value="Child Care">Child Care</option>
@@ -313,7 +553,7 @@
                     <div>
                         <label for="employmentStatus" class="block text-sm font-medium text-gray-700 mb-2">Employment Status</label>
                         <select id="employmentStatus" name="employmentStatus"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                             <option value="">Select status</option>
                             <option value="Regular">Regular</option>
                             <option value="Contractual">Contractual</option>
@@ -324,17 +564,179 @@
                     <div>
                         <label for="dateHired" class="block text-sm font-medium text-gray-700 mb-2">Date Hired</label>
                         <input type="date" id="dateHired" name="dateHired"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                     </div>
                     <div>
                         <label for="assignedSchedule" class="block text-sm font-medium text-gray-700 mb-2">Assigned Schedule</label>
                         <input type="text" id="assignedSchedule" name="assignedSchedule" placeholder="e.g., Monday-Friday 8AM-5PM"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                     </div>
                     <div>
                         <label for="supervisor" class="block text-sm font-medium text-gray-700 mb-2">Supervisor</label>
                         <input type="text" id="supervisor" name="supervisor"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Employment Documents -->
+            <div class="bg-white shadow rounded-lg p-4 sm:p-6">
+                <h2 class="text-lg font-medium text-gray-900 mb-6">Employment Documents</h2>
+                
+                <!-- File Size Notice -->
+                <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-blue-800">File Upload Requirements</h3>
+                            <div class="mt-1 text-sm text-blue-700">
+                                <p>• Maximum file size: <span class="font-semibold">1MB per file</span> (Firebase Storage limit)</p>
+                                <p>• Accepted formats: PDF for documents, PNG/JPG for images</p>
+                                <p>• Tip: Use PDF compression tools if your files exceed the size limit</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Basic Employment Requirements -->
+                <div class="mb-8">
+                    <div class="flex items-center mb-4">
+                        <h3 class="text-md font-semibold text-gray-700">Basic Employment Requirements</h3>
+                        <button type="button" onclick="showDocumentInfoModal('basic')" class="ml-2 text-gray-400 hover:text-blue-600 transition-colors">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="resume" class="block text-sm font-medium text-gray-700 mb-2">Resume / Application Form <span class="text-blue-600 text-xs font-normal">(PDF, Max 1MB)</span></label>
+                            <input type="file" id="resume" name="resume" accept=".pdf" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
+                        </div>
+                        
+                        <div>
+                            <label for="validId" class="block text-sm font-medium text-gray-700 mb-2">Valid Government-issued ID</label>
+                            <div class="space-y-3">
+                                <select id="validIdType" name="validIdType" required
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
+                                    <option value="">Select ID Type</option>
+                                    <option value="National ID">National ID</option>
+                                    <option value="Driver License">Driver's License</option>
+                                    <option value="SSS ID">SSS ID</option>
+                                    <option value="PhilHealth ID">PhilHealth ID</option>
+                                    <option value="Postal ID">Postal ID</option>
+                                    <option value="PRC ID">PRC ID</option>
+                                    <option value="Voter's ID">Voter's ID</option>
+                                    <option value="Senior Citizen ID">Senior Citizen ID</option>
+                                    <option value="PWD ID">PWD ID</option>
+                                    <option value="Passport">Passport</option>
+                                    <option value="UMID">UMID</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs text-gray-500 mb-1">Front Side <span class="text-blue-600 text-xs font-normal">(PNG, JPG, Max 1MB)</span></label>
+                                        <input type="file" id="validIdFront" name="validIdFront" accept=".png,.jpg,.jpeg" required
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs text-gray-500 mb-1">Back Side <span class="text-blue-600 text-xs font-normal">(PNG, JPG, Max 1MB)</span></label>
+                                        <input type="file" id="validIdBack" name="validIdBack" accept=".png,.jpg,.jpeg" required
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label for="nbiClearance" class="block text-sm font-medium text-gray-700 mb-2">NBI Clearance <span class="text-blue-600 text-xs font-normal">(PDF, Max 1MB)</span></label>
+                            <input type="file" id="nbiClearance" name="nbiClearance" accept=".pdf" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
+                        </div>
+                        
+                        <div>
+                            <label for="barangayClearance" class="block text-sm font-medium text-gray-700 mb-2">Barangay Clearance <span class="text-blue-600 text-xs font-normal">(PDF, Max 1MB)</span></label>
+                            <input type="file" id="barangayClearance" name="barangayClearance" accept=".pdf" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
+                        </div>
+                        
+                        <div>
+                            <label for="policeClearance" class="block text-sm font-medium text-gray-700 mb-2">Police Clearance <span class="text-blue-600 text-xs font-normal">(PDF, Max 1MB)</span></label>
+                            <input type="file" id="policeClearance" name="policeClearance" accept=".pdf" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
+                        </div>
+                        
+                        <div>
+                            <label for="birthCertificate" class="block text-sm font-medium text-gray-700 mb-2">Birth Certificate (PSA) <span class="text-blue-600 text-xs font-normal">(PDF, Max 1MB)</span></label>
+                            <input type="file" id="birthCertificate" name="birthCertificate" accept=".pdf" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
+                        </div>
+                        
+                        <div>
+                            <label for="medicalCertificate" class="block text-sm font-medium text-gray-700 mb-2">Medical Certificate / Fit-to-Work <span class="text-blue-600 text-xs font-normal">(PDF, Max 1MB)</span></label>
+                            <input type="file" id="medicalCertificate" name="medicalCertificate" accept=".pdf" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
+                        </div>
+                        
+                        <div>
+                            <label for="sssId" class="block text-sm font-medium text-gray-700 mb-2">SSS ID <span class="text-blue-600 text-xs font-normal">(PNG, JPG, Max 1MB)</span></label>
+                            <input type="file" id="sssId" name="sssId" accept=".png,.jpg,.jpeg" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
+                        </div>
+                        
+                        <div>
+                            <label for="philHealthId" class="block text-sm font-medium text-gray-700 mb-2">PhilHealth ID <span class="text-blue-600 text-xs font-normal">(PNG, JPG, Max 1MB)</span></label>
+                            <input type="file" id="philHealthId" name="philHealthId" accept=".png,.jpg,.jpeg" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
+                        </div>
+                        
+                        <div>
+                            <label for="diploma" class="block text-sm font-medium text-gray-700 mb-2">Highest Educational Attainment Diploma <span class="text-blue-600 text-xs font-normal">(PDF, Max 1MB)</span></label>
+                            <input type="file" id="diploma" name="diploma" accept=".pdf" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Special Requirements for Orphanage -->
+                <div>
+                    <div class="flex items-center mb-4">
+                        <h3 class="text-md font-semibold text-gray-700">Special Requirements (Child-Caring Institution)</h3>
+                        <button type="button" onclick="showDocumentInfoModal('special')" class="ml-2 text-gray-400 hover:text-blue-600 transition-colors">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="dswdClearance" class="block text-sm font-medium text-gray-700 mb-2">DSWD Clearance <span class="text-blue-600 text-xs font-normal">(PDF, Max 1MB)</span></label>
+                            <input type="file" id="dswdClearance" name="dswdClearance" accept=".pdf" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
+                        </div>
+                        
+                        <div>
+                            <label for="moralCharacterCert" class="block text-sm font-medium text-gray-700 mb-2">Certificate of Good Moral Character <span class="text-blue-600 text-xs font-normal">(PDF, Max 1MB)</span></label>
+                            <input type="file" id="moralCharacterCert" name="moralCharacterCert" accept=".pdf" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
+                        </div>
+                        
+                        <div>
+                            <label for="psychologicalEvaluation" class="block text-sm font-medium text-gray-700 mb-2">Psychological Evaluation / Neuro Exam <span class="text-blue-600 text-xs font-normal">(PDF, Max 1MB)</span></label>
+                            <input type="file" id="psychologicalEvaluation" name="psychologicalEvaluation" accept=".pdf" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
+                        </div>
+                        
+                        <div>
+                            <label for="childProtectionTraining" class="block text-sm font-medium text-gray-700 mb-2">Proof of Training / Certificate in Child Protection <span class="text-blue-600 text-xs font-normal">(PDF, Max 1MB)</span></label>
+                            <input type="file" id="childProtectionTraining" name="childProtectionTraining" accept=".pdf" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -429,7 +831,7 @@
                     <div>
                         <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Username *</label>
                         <input type="text" id="username" name="username"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                     </div>
                     
                 </div>
@@ -461,11 +863,23 @@
             auth
         } from './firebase.js';
         import { createUserWithEmailAndPassword, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
         import { logActivity } from './activity-logger.js';
 
         let createAccountEnabled = false;
         const OFFLINE_STORAGE_KEY = 'tnp_offline_staff_records';
         const OFFLINE_EXPIRY_DAYS = 7;
+        const storage = getStorage();
+        
+        // Test Firebase Storage connection on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔥 Firebase Storage initialized:', storage);
+            console.log('📦 Storage bucket:', storage._bucket);
+            console.log('🌐 Current origin:', window.location.origin);
+            
+            // Test storage access
+            console.log('🧪 Testing Firebase Storage access...');
+        });
 
         // Offline storage functions
         function saveOfflineRecord(data) {
@@ -570,6 +984,85 @@
 
         function isOnline() {
             return navigator.onLine;
+        }
+
+        // Upload file to Firebase Storage with error handling
+        async function uploadFileToStorage(file, filePath) {
+            try {
+                console.log('Attempting to upload file to:', filePath);
+                const storageRef = ref(storage, filePath);
+                const snapshot = await uploadBytes(storageRef, file);
+                const downloadURL = await getDownloadURL(snapshot.ref);
+                console.log('File uploaded successfully:', downloadURL);
+                return downloadURL;
+            } catch (error) {
+                console.error('Error uploading file to Firebase Storage:', error);
+                console.error('Error code:', error.code);
+                console.error('Error message:', error.message);
+                
+                // Check if it's a CORS or network issue
+                if (error.code === 'storage/unknown' || error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
+                    console.warn('Firebase Storage upload failed, likely due to CORS or network issues');
+                    throw new Error('Firebase Storage is not accessible. This may be due to CORS configuration or network issues.');
+                }
+                
+                throw error;
+            }
+        }
+
+        // Convert base64 data to File object
+        function base64ToFile(base64String, filename) {
+            const arr = base64String.split(',');
+            const mime = arr[0].match(/:(.*?);/)[1];
+            const bstr = atob(arr[1]);
+            let n = bstr.length;
+            const u8arr = new Uint8Array(n);
+            while (n--) {
+                u8arr[n] = bstr.charCodeAt(n);
+            }
+            return new File([u8arr], filename, { type: mime });
+        }
+
+        // Convert offline record to online format (base64 to Firebase Storage URLs)
+        async function convertOfflineRecordToOnline(offlineData) {
+            const onlineData = { ...offlineData };
+            
+            // Convert photo from base64 to Firebase Storage
+            if (offlineData.photoString) {
+                try {
+                    const photoFile = base64ToFile(offlineData.photoString, `photo_${offlineData.staffId}.jpg`);
+                    const photoPath = `staff-photos/${offlineData.staffId}_${Date.now()}_photo.jpg`;
+                    const photoURL = await uploadFileToStorage(photoFile, photoPath);
+                    onlineData.photoURL = photoURL;
+                    delete onlineData.photoString; // Remove base64 data
+                } catch (error) {
+                    console.error('Error converting photo to storage:', error);
+                }
+            }
+            
+            // Convert documents from base64 to Firebase Storage
+            if (offlineData.employmentDocuments) {
+                onlineData.employmentDocuments = {};
+                for (const [fieldName, docData] of Object.entries(offlineData.employmentDocuments)) {
+                    if (docData.fileData) {
+                        try {
+                            const file = base64ToFile(docData.fileData, docData.fileName);
+                            const filePath = `staff-documents/${offlineData.staffId}/${fieldName}_${Date.now()}_${docData.fileName}`;
+                            const downloadURL = await uploadFileToStorage(file, filePath);
+                            onlineData.employmentDocuments[fieldName] = {
+                                url: downloadURL,
+                                name: docData.fileName,
+                                size: file.size,
+                                type: docData.fileType
+                            };
+                        } catch (error) {
+                            console.error(`Error converting ${fieldName} to storage:`, error);
+                        }
+                    }
+                }
+            }
+            
+            return onlineData;
         }
 
         // Check if email already exists in Firebase Auth or Firestore
@@ -678,6 +1171,12 @@
                         hideOfflineSuccessModal();
                     } else if (!document.getElementById('offlineModal').classList.contains('hidden')) {
                         hideOfflineModal();
+                    } else if (!document.getElementById('basicDocumentModal').classList.contains('hidden')) {
+                        hideDocumentInfoModal('basic');
+                    } else if (!document.getElementById('specialDocumentModal').classList.contains('hidden')) {
+                        hideDocumentInfoModal('special');
+                    } else if (!document.getElementById('cameraModal').classList.contains('hidden')) {
+                        closeCamera();
                     }
                     if (!document.getElementById('loadingScreen').classList.contains('hidden')) {
                         // Don't allow closing loading screen with ESC
@@ -695,9 +1194,18 @@
                     const reader = new FileReader();
                     reader.onload = function(e) {
                         document.getElementById('photoPreview').src = e.target.result;
+                        updatePhotoButtons(true);
                     };
                     reader.readAsDataURL(file);
                 }
+            });
+
+            // Camera capture functionality
+            setupCameraFunctionality();
+
+            // Remove photo button
+            document.getElementById('removePhotoBtn').addEventListener('click', function() {
+                removePhoto();
             });
 
             // Account creation toggle
@@ -853,9 +1361,147 @@
             document.getElementById('nationality').value = 'Filipino';
             createAccountEnabled = false;
             updateAccountToggle();
+            updatePhotoButtons(false);
             
             // Generate new staff ID for the fresh form
             generateAndDisplayStaffId();
+        }
+
+        // Camera functionality
+        let currentStream = null;
+        let currentFacingMode = 'user'; // 'user' for front camera, 'environment' for back camera
+
+        function setupCameraFunctionality() {
+            const captureBtn = document.getElementById('captureBtn');
+            const cameraModal = document.getElementById('cameraModal');
+            const closeCameraModal = document.getElementById('closeCameraModal');
+            const cancelCameraBtn = document.getElementById('cancelCameraBtn');
+            const switchCameraBtn = document.getElementById('switchCameraBtn');
+            const capturePhotoBtn = document.getElementById('capturePhotoBtn');
+
+            captureBtn.addEventListener('click', openCamera);
+            closeCameraModal.addEventListener('click', closeCamera);
+            cancelCameraBtn.addEventListener('click', closeCamera);
+            switchCameraBtn.addEventListener('click', switchCamera);
+            capturePhotoBtn.addEventListener('click', capturePhoto);
+        }
+
+        async function openCamera() {
+            const cameraModal = document.getElementById('cameraModal');
+            const cameraStatus = document.getElementById('cameraStatus');
+            const cameraError = document.getElementById('cameraError');
+            
+            cameraModal.classList.remove('hidden');
+            cameraStatus.classList.remove('hidden');
+            cameraError.classList.add('hidden');
+            
+            try {
+                await startCamera();
+                cameraStatus.classList.add('hidden');
+            } catch (error) {
+                console.error('Error accessing camera:', error);
+                cameraStatus.classList.add('hidden');
+                cameraError.classList.remove('hidden');
+                document.querySelector('#cameraError p').textContent = 'Unable to access camera. Please check permissions or try uploading a file instead.';
+            }
+        }
+
+        async function startCamera() {
+            try {
+                // Stop any existing stream
+                if (currentStream) {
+                    currentStream.getTracks().forEach(track => track.stop());
+                }
+
+                const constraints = {
+                    video: {
+                        facingMode: currentFacingMode,
+                        width: { ideal: 1280 },
+                        height: { ideal: 960 }
+                    }
+                };
+
+                currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+                const video = document.getElementById('cameraPreview');
+                video.srcObject = currentStream;
+                
+                return new Promise((resolve) => {
+                    video.onloadedmetadata = () => {
+                        video.play();
+                        resolve();
+                    };
+                });
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        async function switchCamera() {
+            currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+            
+            try {
+                await startCamera();
+            } catch (error) {
+                console.error('Error switching camera:', error);
+                // Revert to previous facing mode if switch fails
+                currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+                showErrorModal('Unable to switch camera. This device may only have one camera.');
+            }
+        }
+
+        function capturePhoto() {
+            const video = document.getElementById('cameraPreview');
+            const canvas = document.getElementById('photoCanvas');
+            const context = canvas.getContext('2d');
+            
+            // Set canvas dimensions to match video
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            // Draw the video frame to canvas
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Convert to blob and update photo preview
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                document.getElementById('photoPreview').src = url;
+                
+                // Create a File object from the blob to simulate file input
+                const file = new File([blob], 'camera-photo.jpg', { type: 'image/jpeg' });
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                document.getElementById('photo').files = dataTransfer.files;
+                
+                updatePhotoButtons(true);
+                closeCamera();
+            }, 'image/jpeg', 0.8);
+        }
+
+        function closeCamera() {
+            const cameraModal = document.getElementById('cameraModal');
+            
+            // Stop camera stream
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                currentStream = null;
+            }
+            
+            cameraModal.classList.add('hidden');
+        }
+
+        function updatePhotoButtons(hasPhoto) {
+            const removeBtn = document.getElementById('removePhotoBtn');
+            if (hasPhoto) {
+                removeBtn.classList.remove('hidden');
+            } else {
+                removeBtn.classList.add('hidden');
+            }
+        }
+
+        function removePhoto() {
+            document.getElementById('photo').value = '';
+            document.getElementById('photoPreview').src = 'user.png';
+            updatePhotoButtons(false);
         }
 
         function showOfflineModal() {
@@ -958,7 +1604,9 @@
 
                 showLoadingScreen();
                 try {
-                    await saveStaffRecord(record.data, true); // Pass true to indicate it's a sync operation
+                    // Convert offline record (base64) to online format (Firebase Storage URLs)
+                    const onlineData = await convertOfflineRecordToOnline(record.data);
+                    await saveStaffRecord(onlineData, true); // Pass true to indicate it's a sync operation
                     deleteOfflineRecord(recordId);
                     populateOfflineModal();
                     hideLoadingScreen();
@@ -995,6 +1643,8 @@
             document.getElementById('department').value = data.department || '';
             document.getElementById('employmentStatus').value = data.employmentStatus || '';
             document.getElementById('dateHired').value = data.dateHired || '';
+            document.getElementById('validIdType').value = data.validIdType || '';
+            document.getElementById('educationalBackground').value = data.educationalBackground || '';
 
             // Populate staff ID (but keep it read-only)
             if (data.staffId) {
@@ -1011,9 +1661,18 @@
                 checkbox.checked = data.featureGranted && data.featureGranted.includes(checkbox.value);
             });
 
-            // Handle photo
-            if (data.photoString) {
+            // Handle photo (check both URL and base64)
+            if (data.photoURL) {
+                document.getElementById('photoPreview').src = data.photoURL;
+            } else if (data.photoString) {
                 document.getElementById('photoPreview').src = data.photoString;
+            }
+
+            // Handle employment documents (note: files cannot be programmatically set for security reasons)
+            // Display a message to the user that documents were previously uploaded
+            if (data.employmentDocuments && Object.keys(data.employmentDocuments).length > 0) {
+                console.log('Employment documents were previously uploaded:', Object.keys(data.employmentDocuments));
+                // You could show a notification to the user about previously uploaded documents
             }
 
             // Handle account creation toggle
@@ -1022,6 +1681,23 @@
                 updateAccountToggle();
             }
         }
+
+        // Document information modal functions
+        window.showDocumentInfoModal = function(type) {
+            if (type === 'basic') {
+                document.getElementById('basicDocumentModal').classList.remove('hidden');
+            } else if (type === 'special') {
+                document.getElementById('specialDocumentModal').classList.remove('hidden');
+            }
+        };
+
+        window.hideDocumentInfoModal = function(type) {
+            if (type === 'basic') {
+                document.getElementById('basicDocumentModal').classList.add('hidden');
+            } else if (type === 'special') {
+                document.getElementById('specialDocumentModal').classList.add('hidden');
+            }
+        };
 
         async function syncAllOfflineRecords() {
             const records = getOfflineRecords();
@@ -1041,7 +1717,9 @@
 
             for (const record of records) {
                 try {
-                    await saveStaffRecord(record.data, true);
+                    // Convert offline record (base64) to online format (Firebase Storage URLs)
+                    const onlineData = await convertOfflineRecordToOnline(record.data);
+                    await saveStaffRecord(onlineData, true);
                     deleteOfflineRecord(record.id);
                     successCount++;
                 } catch (error) {
@@ -1073,7 +1751,7 @@
 
             // Collect form data (plain text only, not files)
             for (let [key, value] of formData.entries()) {
-                if (key !== "photo" && key !== "featureGranted[]") {
+                if (key !== "photo" && key !== "featureGranted[]" && !isDocumentField(key)) {
                     data[key] = value;
                 }
             }
@@ -1089,38 +1767,151 @@
             data.dateAdded = new Date().toISOString().split('T')[0];
             data.createAccount = createAccountEnabled ? '1' : '0';
 
-            // Handle photo base64
+            // Handle photo upload with fallback to base64
+            let photoURL = "";
             const photoFile = document.getElementById('photo').files[0];
             if (photoFile) {
-                data.photoString = await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(photoFile);
-                });
-            } else {
-                data.photoString = "";
+                try {
+                    const photoPath = `staff-photos/${data.staffId}_${Date.now()}_${photoFile.name}`;
+                    photoURL = await uploadFileToStorage(photoFile, photoPath);
+                    data.photoURL = photoURL;
+                    console.log('Photo uploaded to Firebase Storage successfully');
+                } catch (error) {
+                    console.warn('Firebase Storage upload failed, falling back to base64:', error.message);
+                    // Fallback to base64 storage in Firestore
+                    data.photoString = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(photoFile);
+                    });
+                    console.log('Photo stored as base64 fallback');
+                }
+            }
+
+            // Handle employment documents upload with fallback to base64
+            data.employmentDocuments = {};
+            const documentFields = [
+                'resume', 'validIdFront', 'validIdBack', 'nbiClearance', 'barangayClearance', 'policeClearance', 
+                'birthCertificate', 'medicalCertificate', 'sssId', 'philHealthId', 'diploma', 'dswdClearance', 'moralCharacterCert', 'psychologicalEvaluation', 
+                'childProtectionTraining'
+            ];
+
+            let storageFailedCount = 0;
+            for (const fieldName of documentFields) {
+                const fileInput = document.getElementById(fieldName);
+                if (fileInput && fileInput.files[0]) {
+                    try {
+                        const file = fileInput.files[0];
+                        const filePath = `staff-documents/${data.staffId}/${fieldName}_${Date.now()}_${file.name}`;
+                        const downloadURL = await uploadFileToStorage(file, filePath);
+                        data.employmentDocuments[fieldName] = {
+                            url: downloadURL,
+                            name: file.name,
+                            size: file.size,
+                            type: file.type
+                        };
+                        console.log(`${fieldName} uploaded to Firebase Storage successfully`);
+                    } catch (error) {
+                        console.warn(`Firebase Storage upload failed for ${fieldName}, falling back to base64:`, error.message);
+                        storageFailedCount++;
+                        
+                        // Fallback to base64 storage in Firestore
+                        const file = fileInput.files[0];
+                        data.employmentDocuments[fieldName] = await new Promise((resolve, reject) => {
+                            const reader = new FileReader();
+                            reader.onload = () => resolve({
+                                fileName: file.name,
+                                fileType: file.type,
+                                fileData: reader.result,
+                                size: file.size,
+                                storedAs: 'base64' // Flag to indicate storage method
+                            });
+                            reader.onerror = reject;
+                            reader.readAsDataURL(file);
+                        });
+                        console.log(`${fieldName} stored as base64 fallback`);
+                    }
+                }
+            }
+            
+            // Show warning if some files couldn't be uploaded to Firebase Storage
+            if (storageFailedCount > 0) {
+                console.warn(`${storageFailedCount} files were stored as base64 due to Firebase Storage issues`);
+                // You could show a user notification here if desired
+                // showErrorModal(`Note: ${storageFailedCount} files were stored differently due to connection issues, but your data was saved successfully.`);
             }
 
             saveStaffRecord(data);
         }
 
+        // Helper function to check if a field is a document field
+        function isDocumentField(fieldName) {
+            const documentFields = [
+                'resume', 'validIdFront', 'validIdBack', 'nbiClearance', 'barangayClearance', 'policeClearance', 
+                'birthCertificate', 'medicalCertificate', 'sssId', 'philHealthId', 'diploma', 'dswdClearance', 'moralCharacterCert', 'psychologicalEvaluation', 
+                'childProtectionTraining'
+            ];
+            return documentFields.includes(fieldName);
+        }
+
         async function saveStaffRecord(data, isSync = false) {
             try {
                 console.log('Starting saveStaffRecord with data:', data);
+                console.log('Is sync operation:', isSync);
+                console.log('Is online:', navigator.onLine);
                 
                 // Show loading screen
                 if (!isSync) showLoadingScreen();
                 
                 // Check if online for new records (not for sync operations)
                 if (!isSync && !isOnline()) {
+                    console.log('No internet connection, saving offline...');
                     hideLoadingScreen();
                     
+                    // For offline storage, convert files to base64 since we can't use Firebase Storage
+                    const offlineData = { ...data };
+                    
+                    // Convert photo to base64 for offline storage
+                    const photoFile = document.getElementById('photo').files[0];
+                    if (photoFile) {
+                        offlineData.photoString = await new Promise((resolve, reject) => {
+                            const reader = new FileReader();
+                            reader.onload = () => resolve(reader.result);
+                            reader.onerror = reject;
+                            reader.readAsDataURL(photoFile);
+                        });
+                    }
+                    
+                    // Convert documents to base64 for offline storage
+                    const documentFields = [
+                        'resume', 'validIdFront', 'validIdBack', 'nbiClearance', 'barangayClearance', 'policeClearance', 
+                        'birthCertificate', 'medicalCertificate', 'sssId', 'philHealthId', 'diploma', 'dswdClearance', 'moralCharacterCert', 'psychologicalEvaluation', 
+                        'childProtectionTraining'
+                    ];
+                    
+                    offlineData.employmentDocuments = {};
+                    for (const fieldName of documentFields) {
+                        const fileInput = document.getElementById(fieldName);
+                        if (fileInput && fileInput.files[0]) {
+                            offlineData.employmentDocuments[fieldName] = await new Promise((resolve, reject) => {
+                                const reader = new FileReader();
+                                reader.onload = () => resolve({
+                                    fileName: fileInput.files[0].name,
+                                    fileType: fileInput.files[0].type,
+                                    fileData: reader.result
+                                });
+                                reader.onerror = reject;
+                                reader.readAsDataURL(fileInput.files[0]);
+                            });
+                        }
+                    }
+                    
                     // Try to save offline
-                    const saveResult = saveOfflineRecord(data);
+                    const saveResult = saveOfflineRecord(offlineData);
                     if (saveResult.success) {
-                        const fullName = `${data.firstName} ${data.middleName ? data.middleName + ' ' : ''}${data.lastName}`;
-                        showOfflineSuccessModal(fullName, data.staffId);
+                        const fullName = `${offlineData.firstName} ${offlineData.middleName ? offlineData.middleName + ' ' : ''}${offlineData.lastName}`;
+                        showOfflineSuccessModal(fullName, offlineData.staffId);
                         resetForm();
                     } else if (saveResult.reason === 'duplicate') {
                         showErrorModal('This staff record appears to already exist in offline storage. Please check your offline records or try with different information.');
@@ -1131,15 +1922,111 @@
                 }
                 
                 // Validate required fields
-                const requiredFields = ['firstName', 'lastName', 'gender', 'dateOfBirth', 'currentAddress', 'contactNumber', 'emailAddress', 'position'];
+                const requiredFields = ['firstName', 'lastName', 'gender', 'dateOfBirth', 'currentAddress', 'educationalBackground', 'contactNumber', 'emailAddress', 'position'];
                 if (createAccountEnabled) {
                     requiredFields.push('username');
                 }
                 for (const field of requiredFields) {
-                    if (!data[field]) {
+                    // Special handling for gender field (radio button)
+                    if (field === 'gender') {
+                        const genderSelected = document.querySelector('input[name="gender"]:checked');
+                        if (!genderSelected) {
+                            hideLoadingScreen();
+                            showErrorModal('Please select a gender.');
+                            // Focus the first gender radio button
+                            const firstGenderOption = document.querySelector('input[name="gender"]');
+                            if (firstGenderOption) {
+                                firstGenderOption.focus();
+                                firstGenderOption.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+                            return;
+                        }
+                    } else if (!data[field] || data[field].trim() === '') {
                         hideLoadingScreen();
-                        showErrorModal(`Please fill in the ${field.replace(/([A-Z])/g, ' $1').toLowerCase()} field.`);
+                        const fieldName = field.replace(/([A-Z])/g, ' $1').toLowerCase();
+                        showErrorModal(`Please fill in the ${fieldName} field.`);
+                        
+                        // Focus the field if it exists
+                        const fieldElement = document.getElementById(field);
+                        if (fieldElement) {
+                            fieldElement.focus();
+                            fieldElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
                         return;
+                    }
+                }
+
+                // Validate required document fields
+                const requiredDocuments = [
+                    { id: 'resume', name: 'Resume/Application Form', type: 'PDF' },
+                    { id: 'validIdType', name: 'Government ID Type', type: 'selection' },
+                    { id: 'validIdFront', name: 'Government ID Front', type: 'Image (PNG/JPG)' },
+                    { id: 'validIdBack', name: 'Government ID Back', type: 'Image (PNG/JPG)' },
+                    { id: 'nbiClearance', name: 'NBI Clearance', type: 'PDF' },
+                    { id: 'barangayClearance', name: 'Barangay Clearance', type: 'PDF' },
+                    { id: 'policeClearance', name: 'Police Clearance', type: 'PDF' },
+                    { id: 'birthCertificate', name: 'Birth Certificate', type: 'PDF' },
+                    { id: 'medicalCertificate', name: 'Medical Certificate', type: 'PDF' },
+                    { id: 'sssId', name: 'SSS ID', type: 'Image (PNG/JPG)' },
+                    { id: 'philHealthId', name: 'PhilHealth ID', type: 'Image (PNG/JPG)' },
+                    { id: 'diploma', name: 'Educational Diploma', type: 'PDF' },
+                    { id: 'dswdClearance', name: 'DSWD Clearance', type: 'PDF' },
+                    { id: 'moralCharacterCert', name: 'Certificate of Good Moral Character', type: 'PDF' },
+                    { id: 'psychologicalEvaluation', name: 'Psychological Evaluation', type: 'PDF' },
+                    { id: 'childProtectionTraining', name: 'Child Protection Training Certificate', type: 'PDF' }
+                ];
+
+                for (const doc of requiredDocuments) {
+                    const element = document.getElementById(doc.id);
+                    if (!element) {
+                        hideLoadingScreen();
+                        showErrorModal(`Form field for ${doc.name} not found. Please refresh the page and try again.`);
+                        return;
+                    }
+                    
+                    if (doc.type === 'selection') {
+                        if (!element.value || element.value.trim() === '') {
+                            hideLoadingScreen();
+                            showErrorModal(`Please select the ${doc.name}.`);
+                            element.focus();
+                            return;
+                        }
+                    } else {
+                        if (!element.files || element.files.length === 0) {
+                            hideLoadingScreen();
+                            showErrorModal(`Please upload the required ${doc.name} (${doc.type}).`);
+                            element.focus();
+                            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            return;
+                        }
+                        
+                        // Validate file type
+                        const file = element.files[0];
+                        
+                        // Check file size (max 1MB)
+                        const maxSize = 1 * 1024 * 1024; // 1MB
+                        if (file.size > maxSize) {
+                            hideLoadingScreen();
+                            showErrorModal(`⚠️ File Size Limit Exceeded!\n\n${doc.name} file size must be less than 1MB for Firebase compatibility.\n\nCurrent file size: ${(file.size / (1024 * 1024)).toFixed(2)}MB\n\nTip: Please compress your file or use a PDF compression tool to reduce the file size before uploading.`);
+                            element.focus();
+                            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            return;
+                        }
+                        
+                        if (doc.type === 'PDF' && file.type !== 'application/pdf') {
+                            hideLoadingScreen();
+                            showErrorModal(`${doc.name} must be a PDF file. Selected file type: ${file.type || 'unknown'}`);
+                            element.focus();
+                            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            return;
+                        }
+                        if (doc.type === 'Image (PNG/JPG)' && !['image/png', 'image/jpeg', 'image/jpg'].includes(file.type)) {
+                            hideLoadingScreen();
+                            showErrorModal(`${doc.name} must be a PNG or JPG image file. Selected file type: ${file.type || 'unknown'}`);
+                            element.focus();
+                            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            return;
+                        }
                     }
                 }
 
@@ -1212,6 +2099,7 @@
                     emailAddress: data.emailAddress || "",
                     contactNumber: data.contactNumber || "",
                     username: data.username || "",
+                    photoURL: data.photoURL || "",
                     photoString: data.photoString || "",
                     gender: data.gender || "",
                     civilStatus: data.civilStatus || "",
@@ -1220,11 +2108,13 @@
                     placeOfBirth: data.placeOfBirth || "",
                     dateOfBirth: data.dateOfBirth || "",
                     currentAddress: data.currentAddress || "",
+                    educationalBackground: data.educationalBackground || "",
                     assignedSchedule: data.assignedSchedule || "",
                     department: data.department || "",
                     position: data.position || "",
                     supervisor: data.supervisor || "",
                     employmentStatus: data.employmentStatus || "",
+                    validIdType: data.validIdType || "",
                     createAccount: data.createAccount || "0",
                     dateAdded: data.dateAdded || "",
                     dateHired: data.dateHired || "",
@@ -1235,14 +2125,18 @@
                     isVerified: false,
                     firstTimeLogin: true,
                     featureGranted: data.featureGranted || [],
+                    employmentDocuments: data.employmentDocuments || {},
                 };
 
                 // Save to Firestore: users/{userId}
+                console.log('Attempting to save to Firestore with document:', staffDoc);
                 const userRef = doc(collection(db, 'users'), userId);
                 await setDoc(userRef, staffDoc);
+                console.log('Successfully saved to Firestore with ID:', userId);
 
                 const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
                 if (currentUser.username) {
+                    console.log('Logging activity for user:', currentUser.username);
                     await logActivity(
                         'Added Staff Record',
                         `Added staff record: ${data.firstName} ${data.lastName} (${data.staffId}) - Position: ${data.position}`,
@@ -1254,6 +2148,7 @@
                 if (!isSync) {
                     hideLoadingScreen();
                     const fullName = `${data.firstName} ${data.middleName ? data.middleName + ' ' : ''}${data.lastName}`;
+                    console.log('Showing success modal for:', fullName);
                     showSuccessModal(fullName, data.staffId);
                 }
 
@@ -1261,22 +2156,51 @@
                 console.error('Error saving staff record:', error);
                 hideLoadingScreen();
                 
+                let errorMessage = 'Error saving staff record. Please try again.';
+                
+                // Provide more specific error messages based on error type
+                if (error.code) {
+                    switch (error.code) {
+                        case 'auth/email-already-in-use':
+                            errorMessage = 'The email address is already registered. Please use a different email address.';
+                            break;
+                        case 'auth/invalid-email':
+                            errorMessage = 'The email address is not valid. Please enter a valid email address.';
+                            break;
+                        case 'auth/weak-password':
+                            errorMessage = 'The password is too weak. Please ensure the birthdate is valid.';
+                            break;
+                        case 'permission-denied':
+                            errorMessage = 'Permission denied. You may not have the required permissions to save staff records.';
+                            break;
+                        case 'unavailable':
+                            errorMessage = 'Service temporarily unavailable. Please check your internet connection and try again.';
+                            break;
+                        default:
+                            errorMessage = `Error: ${error.message || error.code}`;
+                    }
+                }
+                
                 // If this was an attempted online save that failed, try to save offline
-                if (!isSync && !isOnline()) {
+                if (!isSync && navigator.onLine === false) {
+                    console.log('No internet connection, attempting to save offline...');
                     const saveResult = saveOfflineRecord(data);
                     if (saveResult.success) {
                         const fullName = `${data.firstName} ${data.middleName ? data.middleName + ' ' : ''}${data.lastName}`;
                         showOfflineSuccessModal(fullName, data.staffId);
                         resetForm();
+                        return;
                     } else if (saveResult.reason === 'duplicate') {
                         showErrorModal('This staff record appears to already exist in offline storage. Please check your offline records or try with different information.');
+                        return;
                     } else {
-                        showErrorModal('Error saving staff record. Please try again.');
+                        showErrorModal('Unable to save record online or offline. Please try again.');
+                        return;
                     }
-                } else {
-                    // Only show error modal for actual save failures, not offline saves
-                    showErrorModal('Error saving staff record. Please try again.');
                 }
+                
+                // Show the specific error message
+                showErrorModal(errorMessage);
                 
                 if (isSync) {
                     throw error; // Re-throw for sync operations
@@ -1286,13 +2210,13 @@
     </script>
 
     <!-- Floating Offline Save Button -->
-    <div id="offlineSaveBtn" class="fixed bottom-20 right-80 z-50">
-        <button class="relative bg-red-primary hover:bg-red-700 text-white rounded-full p-4 shadow-lg transition-all duration-300 transform hover:scale-110" title="View Offline Saved Records">
-            <svg class="h-10 w-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div id="offlineSaveBtn" class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 lg:bottom-20 lg:right-80 z-50">
+        <button class="relative bg-red-primary hover:bg-red-700 text-white rounded-full p-3 sm:p-4 shadow-lg transition-all duration-300 transform hover:scale-110" title="View Offline Saved Records">
+            <svg class="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12"></path>
             </svg>
             <!-- Yellow notification dot for better visibility on red background -->
-            <span id="offlineIndicator" class="absolute -top-1 -right-1 h-3 w-3 bg-yellow-500 rounded-full border-2 border-white hidden"></span>
+            <span id="offlineIndicator" class="absolute -top-1 -right-1 h-2 w-2 sm:h-3 sm:w-3 bg-yellow-500 rounded-full border-2 border-white hidden"></span>
         </button>
     </div>
 </body>

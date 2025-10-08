@@ -146,6 +146,8 @@
                             <option value="Abandoned">Abandoned</option>
                             <option value="Rescue">Rescue</option>
                             <option value="Surrendered">Surrendered</option>
+                            <option value="Foundling">Foundling</option>
+                            <option value="Neglected">Neglected</option>
                             <option value="Other">Other</option>
                         </select>
                     </div>
@@ -313,6 +315,12 @@
             document.getElementById('entryAge').value = childData.entryAge || '';
             document.getElementById('reasonForAdmission').value = childData.reasonForAdmission || '';
             document.getElementById('currentStatus').value = childData.currentStatus || '';
+            
+            // Handle reason for admission change (this will auto-populate family fields if Foundling)
+            if (childData.reasonForAdmission) {
+                handleReasonForAdmissionChange(childData.reasonForAdmission);
+            }
+            
             document.getElementById('fatherName').value = childData.fatherName || '';
             document.getElementById('motherName').value = childData.motherName || '';
             document.getElementById('parentalStatus').value = childData.parentalStatus || '';
@@ -334,6 +342,48 @@
             document.getElementById('childForm').style.display = 'block';
         }
 
+        function handleReasonForAdmissionChange(reason) {
+            const fatherNameField = document.getElementById('fatherName');
+            const motherNameField = document.getElementById('motherName');
+            const parentalStatusField = document.getElementById('parentalStatus');
+
+            if (reason === 'Foundling') {
+                // Set fields to "Unknown" and disable them
+                fatherNameField.value = 'Unknown';
+                motherNameField.value = 'Unknown';
+                parentalStatusField.value = 'Unknown';
+                
+                // Disable the fields
+                fatherNameField.disabled = true;
+                motherNameField.disabled = true;
+                parentalStatusField.disabled = true;
+                
+                // Add visual indication that fields are disabled
+                fatherNameField.classList.add('bg-gray-100', 'cursor-not-allowed');
+                motherNameField.classList.add('bg-gray-100', 'cursor-not-allowed');
+                parentalStatusField.classList.add('bg-gray-100', 'cursor-not-allowed');
+            } else {
+                // Enable the fields and clear the "Unknown" values if they were set by Foundling
+                const wasDisabled = fatherNameField.disabled;
+                
+                fatherNameField.disabled = false;
+                motherNameField.disabled = false;
+                parentalStatusField.disabled = false;
+                
+                // Remove visual indication
+                fatherNameField.classList.remove('bg-gray-100', 'cursor-not-allowed');
+                motherNameField.classList.remove('bg-gray-100', 'cursor-not-allowed');
+                parentalStatusField.classList.remove('bg-gray-100', 'cursor-not-allowed');
+                
+                // Clear the "Unknown" values only if they were set by the Foundling option
+                if (wasDisabled) {
+                    if (fatherNameField.value === 'Unknown') fatherNameField.value = '';
+                    if (motherNameField.value === 'Unknown') motherNameField.value = '';
+                    if (parentalStatusField.value === 'Unknown') parentalStatusField.value = '';
+                }
+            }
+        }
+
         function setupEventListeners() {
             document.getElementById('photo').addEventListener('change', function(e) {
                 const file = e.target.files[0];
@@ -345,6 +395,12 @@
                     reader.readAsDataURL(file);
                 }
             });
+            
+            // Reason for admission field changes
+            document.getElementById('reasonForAdmission').addEventListener('change', function() {
+                handleReasonForAdmissionChange(this.value);
+            });
+            
             document.getElementById('siblingsInOrphanage').addEventListener('change', function() {
                 const siblingsNames = document.getElementById('siblingsNames');
                 if (this.value === 'Yes') {

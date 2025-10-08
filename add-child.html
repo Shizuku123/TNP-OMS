@@ -171,6 +171,58 @@
         </div>
     </div>
 
+    <!-- Camera Capture Modal -->
+    <div id="cameraModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Take Photo</h3>
+                <button id="closeCameraModal" class="text-gray-400 hover:text-gray-600 p-1">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                <!-- Camera preview -->
+                <div class="relative bg-gray-100 rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+                    <video id="cameraPreview" class="w-full h-full object-cover" autoplay muted playsinline></video>
+                    <canvas id="photoCanvas" class="hidden"></canvas>
+                </div>
+                
+                <!-- Camera controls -->
+                <div class="flex flex-col sm:flex-row justify-center gap-3">
+                    <button id="switchCameraBtn" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors text-sm">
+                        <svg class="h-4 w-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                        </svg>
+                        Switch Camera
+                    </button>
+                    <button id="capturePhotoBtn" class="px-6 py-2 bg-red-primary text-white rounded-md hover:bg-red-700 transition-colors text-sm">
+                        <svg class="h-4 w-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        Capture Photo
+                    </button>
+                    <button id="cancelCameraBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-sm">
+                        Cancel
+                    </button>
+                </div>
+                
+                <!-- Camera status -->
+                <div id="cameraStatus" class="text-center text-sm text-gray-500 hidden">
+                    <p>Initializing camera...</p>
+                </div>
+                
+                <!-- Camera error -->
+                <div id="cameraError" class="text-center text-sm text-red-600 hidden">
+                    <p></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Content -->
     <div class="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <!-- Success/Error Messages -->
@@ -186,9 +238,26 @@
                     </div>
                     <div class="flex-1 w-full">
                         <label for="photo" class="block text-sm font-medium text-gray-700 mb-2">Upload Photo</label>
-                        <input type="file" id="photo" name="photo" accept="image/*"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
-                        <p class="mt-2 text-sm text-gray-500">JPG, PNG or GIF up to 2MB</p>
+                        <div class="space-y-3">
+                            <input type="file" id="photo" name="photo" accept="image/*"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <button type="button" id="captureBtn" class="flex-1 px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm">
+                                    <svg class="h-4 w-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                    Take Photo
+                                </button>
+                                <button type="button" id="removePhotoBtn" class="flex-1 px-3 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors text-sm hidden">
+                                    <svg class="h-4 w-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1-1H8a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                    Remove Photo
+                                </button>
+                            </div>
+                        </div>
+                        <p class="mt-2 text-sm text-gray-500">JPG, PNG or GIF up to 2MB • Take photo with camera or upload from device</p>
                     </div>
                 </div>
             </div>
@@ -297,6 +366,8 @@
                             <option value="Abandoned">Abandoned</option>
                             <option value="Rescue">Rescue</option>
                             <option value="Surrendered">Surrendered</option>
+                            <option value="Foundling">Foundling</option>
+                            <option value="Neglected">Neglected</option>
                             <option value="Other">Other</option>
                         </select>
                     </div>
@@ -693,6 +764,11 @@
             document.getElementById('reasonForAdmission').value = data.reasonForAdmission || '';
             document.getElementById('currentStatus').value = data.currentStatus || '';
             
+            // Handle reason for admission change (this will auto-populate family fields if Foundling)
+            if (data.reasonForAdmission) {
+                handleReasonForAdmissionChange(data.reasonForAdmission);
+            }
+            
             // Family information
             document.getElementById('fatherName').value = data.fatherName || '';
             document.getElementById('motherName').value = data.motherName || '';
@@ -830,6 +906,199 @@
             document.getElementById('photoPreview').src = 'user.png';
             document.getElementById('siblingsNames').classList.add('hidden');
             document.getElementById('nationality').value = 'Filipino';
+            updatePhotoButtons(false);
+            
+            // Reset parent fields disabled state
+            const fatherNameField = document.getElementById('fatherName');
+            const motherNameField = document.getElementById('motherName');
+            const parentalStatusField = document.getElementById('parentalStatus');
+            
+            fatherNameField.disabled = false;
+            motherNameField.disabled = false;
+            parentalStatusField.disabled = false;
+            
+            fatherNameField.classList.remove('bg-gray-100', 'cursor-not-allowed');
+            motherNameField.classList.remove('bg-gray-100', 'cursor-not-allowed');
+            parentalStatusField.classList.remove('bg-gray-100', 'cursor-not-allowed');
+        }
+
+        // Camera functionality
+        let currentStream = null;
+        let currentFacingMode = 'user'; // 'user' for front camera, 'environment' for back camera
+
+        function setupCameraFunctionality() {
+            const captureBtn = document.getElementById('captureBtn');
+            const cameraModal = document.getElementById('cameraModal');
+            const closeCameraModal = document.getElementById('closeCameraModal');
+            const cancelCameraBtn = document.getElementById('cancelCameraBtn');
+            const switchCameraBtn = document.getElementById('switchCameraBtn');
+            const capturePhotoBtn = document.getElementById('capturePhotoBtn');
+
+            captureBtn.addEventListener('click', openCamera);
+            closeCameraModal.addEventListener('click', closeCamera);
+            cancelCameraBtn.addEventListener('click', closeCamera);
+            switchCameraBtn.addEventListener('click', switchCamera);
+            capturePhotoBtn.addEventListener('click', capturePhoto);
+        }
+
+        async function openCamera() {
+            const cameraModal = document.getElementById('cameraModal');
+            const cameraStatus = document.getElementById('cameraStatus');
+            const cameraError = document.getElementById('cameraError');
+            
+            cameraModal.classList.remove('hidden');
+            cameraStatus.classList.remove('hidden');
+            cameraError.classList.add('hidden');
+            
+            try {
+                await startCamera();
+                cameraStatus.classList.add('hidden');
+            } catch (error) {
+                console.error('Error accessing camera:', error);
+                cameraStatus.classList.add('hidden');
+                cameraError.classList.remove('hidden');
+                document.querySelector('#cameraError p').textContent = 'Unable to access camera. Please check permissions or try uploading a file instead.';
+            }
+        }
+
+        async function startCamera() {
+            try {
+                // Stop any existing stream
+                if (currentStream) {
+                    currentStream.getTracks().forEach(track => track.stop());
+                }
+
+                const constraints = {
+                    video: {
+                        facingMode: currentFacingMode,
+                        width: { ideal: 1280 },
+                        height: { ideal: 960 }
+                    }
+                };
+
+                currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+                const video = document.getElementById('cameraPreview');
+                video.srcObject = currentStream;
+                
+                return new Promise((resolve) => {
+                    video.onloadedmetadata = () => {
+                        video.play();
+                        resolve();
+                    };
+                });
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        async function switchCamera() {
+            currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+            
+            try {
+                await startCamera();
+            } catch (error) {
+                console.error('Error switching camera:', error);
+                // Revert to previous facing mode if switch fails
+                currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+                showErrorModal('Unable to switch camera. This device may only have one camera.');
+            }
+        }
+
+        function capturePhoto() {
+            const video = document.getElementById('cameraPreview');
+            const canvas = document.getElementById('photoCanvas');
+            const context = canvas.getContext('2d');
+            
+            // Set canvas dimensions to match video
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            // Draw the video frame to canvas
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Convert to blob and update photo preview
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                document.getElementById('photoPreview').src = url;
+                
+                // Create a File object from the blob to simulate file input
+                const file = new File([blob], 'camera-photo.jpg', { type: 'image/jpeg' });
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                document.getElementById('photo').files = dataTransfer.files;
+                
+                updatePhotoButtons(true);
+                closeCamera();
+            }, 'image/jpeg', 0.8);
+        }
+
+        function closeCamera() {
+            const cameraModal = document.getElementById('cameraModal');
+            
+            // Stop camera stream
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                currentStream = null;
+            }
+            
+            cameraModal.classList.add('hidden');
+        }
+
+        function updatePhotoButtons(hasPhoto) {
+            const removeBtn = document.getElementById('removePhotoBtn');
+            if (hasPhoto) {
+                removeBtn.classList.remove('hidden');
+            } else {
+                removeBtn.classList.add('hidden');
+            }
+        }
+
+        function removePhoto() {
+            document.getElementById('photo').value = '';
+            document.getElementById('photoPreview').src = 'user.png';
+            updatePhotoButtons(false);
+        }
+
+        function handleReasonForAdmissionChange(reason) {
+            const fatherNameField = document.getElementById('fatherName');
+            const motherNameField = document.getElementById('motherName');
+            const parentalStatusField = document.getElementById('parentalStatus');
+
+            if (reason === 'Foundling') {
+                // Set fields to "Unknown" and disable them
+                fatherNameField.value = 'Unknown';
+                motherNameField.value = 'Unknown';
+                parentalStatusField.value = 'Unknown';
+                
+                // Disable the fields
+                fatherNameField.disabled = true;
+                motherNameField.disabled = true;
+                parentalStatusField.disabled = true;
+                
+                // Add visual indication that fields are disabled
+                fatherNameField.classList.add('bg-gray-100', 'cursor-not-allowed');
+                motherNameField.classList.add('bg-gray-100', 'cursor-not-allowed');
+                parentalStatusField.classList.add('bg-gray-100', 'cursor-not-allowed');
+            } else {
+                // Enable the fields and clear the "Unknown" values if they were set by Foundling
+                const wasDisabled = fatherNameField.disabled;
+                
+                fatherNameField.disabled = false;
+                motherNameField.disabled = false;
+                parentalStatusField.disabled = false;
+                
+                // Remove visual indication
+                fatherNameField.classList.remove('bg-gray-100', 'cursor-not-allowed');
+                motherNameField.classList.remove('bg-gray-100', 'cursor-not-allowed');
+                parentalStatusField.classList.remove('bg-gray-100', 'cursor-not-allowed');
+                
+                // Clear the "Unknown" values only if they were set by the Foundling option
+                if (wasDisabled) {
+                    if (fatherNameField.value === 'Unknown') fatherNameField.value = '';
+                    if (motherNameField.value === 'Unknown') motherNameField.value = '';
+                    if (parentalStatusField.value === 'Unknown') parentalStatusField.value = '';
+                }
+            }
         }
 
         // Initialize page
@@ -852,6 +1121,11 @@
                 }
             });
 
+            // Reason for admission field changes
+            document.getElementById('reasonForAdmission').addEventListener('change', function() {
+                handleReasonForAdmissionChange(this.value);
+            });
+
             // Photo preview
             document.getElementById('photo').addEventListener('change', function(e) {
                 const file = e.target.files[0];
@@ -859,9 +1133,18 @@
                     const reader = new FileReader();
                     reader.onload = function(e) {
                         document.getElementById('photoPreview').src = e.target.result;
+                        updatePhotoButtons(true);
                     };
                     reader.readAsDataURL(file);
                 }
+            });
+
+            // Camera capture functionality
+            setupCameraFunctionality();
+
+            // Remove photo button
+            document.getElementById('removePhotoBtn').addEventListener('click', function() {
+                removePhoto();
             });
 
             // Entry age auto-calc
