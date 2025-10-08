@@ -28,6 +28,14 @@
             return;
         }
         const userData = JSON.parse(user);
+        
+        // Check if this is a first-time login
+        if (userData.firstTimeLogin === true) {
+            // Show password change modal
+            document.getElementById('passwordChangeModal').style.display = 'flex';
+            return; // Don't proceed to dashboard setup until password is changed
+        }
+        
         // Set profile name and role
         if (userData.firstName && userData.lastName) {
             document.getElementById('profileName').textContent = `${userData.firstName} ${userData.lastName}`;
@@ -48,10 +56,42 @@
     });
 
 
-    /* custom fonts for small text */
     </script>
 </head>
 <body class="bg-gray-50">
+    <!-- Password Change Modal (for first-time login) -->
+    <div id="passwordChangeModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="display: none;">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Change Your Password</h2>
+                <p class="text-gray-600">This is your first time logging in. Please change your password to continue.</p>
+            </div>
+            
+            <form id="passwordChangeForm">
+                <div class="mb-4">
+                    <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-2">New Password</label>
+                    <input type="password" id="newPassword" name="newPassword" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                           minlength="6" placeholder="Enter new password">
+                </div>
+                
+                <div class="mb-6">
+                    <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                           minlength="6" placeholder="Confirm new password">
+                </div>
+                
+                <div id="passwordError" class="text-red-600 text-sm mb-4" style="display: none;"></div>
+                
+                <button type="submit" 
+                        class="w-full bg-red-primary hover:bg-red-secondary text-white font-medium py-2 px-4 rounded-md transition duration-200">
+                    Change Password
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- Mobile Menu Button -->
     <div id="mobile-menu-container" class="lg:hidden fixed top-4 left-4 z-50">
         <button id="mobile-menu-btn" class="bg-white p-3 hover:bg-red-light z-30 rounded-lg ">
@@ -188,7 +228,7 @@
                                 <svg class="h-7 w-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1-1H8a1 1 0 00-1 1v3M4 7h16"></path>
                                 </svg>
-                                Deleted Records
+                                Records Archive
                             </a>
                         </li>
                         <li data-feature="Staff Attendance">
@@ -585,24 +625,46 @@
                     </div>
 
                 <!-- Staff Attendance Summary (Admin Only) -->
-                <div id="attendanceSummary" class="bg-white rounded-lg shadow-sm p-4 sm:p-6 hidden w-full">
+                <div id="attendanceSummary" class="bg-white rounded-lg shadow-sm p-4 sm:p-6 w-full">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg sm:text-xl font-semibold text-gray-900">Staff Attendance Today</h3>
                         <a href="attendance-records.html" class="text-blue-600 hover:text-blue-800 text-sm font-medium">View All →</a>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    
+                    <!-- Loading Indicator -->
+                    <div id="attendanceLoader" class="flex justify-center items-center py-8">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+                        <span class="ml-3 text-gray-600">Loading attendance data...</span>
+                    </div>
+                    
+                    <!-- Summary Stats -->
+                    <div id="attendanceStats" class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6" style="display: none;">
                         <div class="text-center">
                             <div id="presentCount" class="text-2xl font-bold text-green-600">0</div>
                             <div class="text-sm text-gray-600">Present</div>
+                        </div>
+                        <div class="text-center">
+                            <div id="absentCount" class="text-2xl font-bold text-red-600">0</div>
+                            <div class="text-sm text-gray-600">Absent</div>
                         </div>
                         <div class="text-center">
                             <div id="leaveCount" class="text-2xl font-bold text-yellow-600">0</div>
                             <div class="text-sm text-gray-600">On Leave</div>
                         </div>
                         <div class="text-center">
-                            <div id="pendingCount" class="text-2xl font-bold text-red-600">0</div>
-                            <div class="text-sm text-gray-600">Pending Requests</div>
+                            <div id="lateCount" class="text-2xl font-bold text-orange-600">0</div>
+                            <div class="text-sm text-gray-600">Late</div>
                         </div>
+                    </div>
+                    
+                    <!-- Detailed Staff List -->
+                    <div id="staffAttendanceList" class="space-y-3" style="display: none;">
+                        <!-- Staff attendance items will be populated here -->
+                    </div>
+                    
+                    <!-- Error Message -->
+                    <div id="attendanceError" class="text-center py-8 text-red-600" style="display: none;">
+                        <p>Error loading attendance data. Please try again later.</p>
                     </div>
                 </div>
             </div>
@@ -3885,6 +3947,229 @@ async function loadDonorsData() {
         // Initial check when page loads
         document.addEventListener('DOMContentLoaded', function() {
             toggleFloatingButton();
+        });
+
+        // Password change functionality for first-time login
+        document.getElementById('passwordChangeForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const errorDiv = document.getElementById('passwordError');
+            
+            // Clear previous errors
+            errorDiv.style.display = 'none';
+            errorDiv.textContent = '';
+            
+            // Validate passwords
+            if (newPassword.length < 6) {
+                errorDiv.textContent = 'Password must be at least 6 characters long.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                errorDiv.textContent = 'Passwords do not match.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            try {
+                // Get current user data
+                const user = localStorage.getItem('currentUser');
+                const userData = JSON.parse(user);
+                
+                // Import Firebase modules
+                const { updateDoc, doc } = await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js');
+                const { updatePassword } = await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js');
+                const { db, auth } = await import('./firebase.js');
+                
+                // Update password in Firebase Auth
+                const currentUser = auth.currentUser;
+                if (currentUser) {
+                    await updatePassword(currentUser, newPassword);
+                }
+                
+                // Update firstTimeLogin in Firestore if user has uid
+                if (userData.uid) {
+                    const userDocRef = doc(db, "users", userData.uid);
+                    await updateDoc(userDocRef, {
+                        firstTimeLogin: false
+                    });
+                }
+                
+                // Update local storage
+                userData.firstTimeLogin = false;
+                localStorage.setItem('currentUser', JSON.stringify(userData));
+                
+                // Hide the modal
+                document.getElementById('passwordChangeModal').style.display = 'none';
+                
+                // Show success message
+                alert('Password changed successfully! You can now access the dashboard.');
+                
+                // Reload the page to initialize the dashboard
+                window.location.reload();
+                
+            } catch (error) {
+                errorDiv.textContent = 'An error occurred while changing your password. Please try again.';
+                errorDiv.style.display = 'block';
+                console.error('Password change error:', error);
+            }
+        });
+
+        // Staff Attendance Functionality
+        async function loadStaffAttendanceToday() {
+            const loader = document.getElementById('attendanceLoader');
+            const stats = document.getElementById('attendanceStats');
+            const list = document.getElementById('staffAttendanceList');
+            const error = document.getElementById('attendanceError');
+            
+            try {
+                // Show loader
+                loader.style.display = 'flex';
+                stats.style.display = 'none';
+                list.style.display = 'none';
+                error.style.display = 'none';
+                
+                // Get today's date in YYYY-MM-DD format
+                const today = new Date();
+                const todayStr = today.toISOString().split('T')[0];
+                
+                // Fetch attendance records for today
+                const attendanceRef = collection(db, 'attendance');
+                const attendanceSnapshot = await getDocs(attendanceRef);
+                
+                // Fetch all staff records
+                const staffRef = collection(db, 'users');
+                const staffSnapshot = await getDocs(staffRef);
+                
+                // Create maps for easier lookup
+                const attendanceMap = new Map();
+                const staffMap = new Map();
+                
+                // Process attendance records for today
+                attendanceSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.date === todayStr && data.role !== 'volunteer') {
+                        attendanceMap.set(data.staffId || data.userId, data);
+                    }
+                });
+                
+                // Process staff records (excluding volunteers)
+                staffSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.role === 'staff' || data.role === 'admin') {
+                        staffMap.set(doc.id, { ...data, uid: doc.id });
+                    }
+                });
+                
+                // Combine attendance and staff data
+                const staffAttendanceData = [];
+                let presentCount = 0, absentCount = 0, leaveCount = 0, lateCount = 0;
+                
+                staffMap.forEach((staff, staffId) => {
+                    const attendance = attendanceMap.get(staffId) || attendanceMap.get(staff.staffId);
+                    let status = 'Absent';
+                    let timeIn = null;
+                    let statusColor = 'text-red-600 bg-red-100';
+                    
+                    if (attendance) {
+                        if (attendance.status === 'Present') {
+                            status = 'Present';
+                            statusColor = 'text-green-600 bg-green-100';
+                            presentCount++;
+                            timeIn = attendance.timeIn;
+                            
+                            // Check if late (assuming 8:00 AM is the standard time)
+                            if (attendance.timeIn && attendance.timeIn > '08:00') {
+                                status = 'Late';
+                                statusColor = 'text-orange-600 bg-orange-100';
+                                lateCount++;
+                                presentCount--; // Remove from present count
+                            }
+                        } else if (attendance.status === 'On Leave') {
+                            status = 'On Leave';
+                            statusColor = 'text-yellow-600 bg-yellow-100';
+                            leaveCount++;
+                        }
+                    } else {
+                        absentCount++;
+                    }
+                    
+                    staffAttendanceData.push({
+                        name: `${staff.firstName || ''} ${staff.lastName || ''}`.trim() || staff.name || 'Unknown',
+                        role: staff.role || 'Staff',
+                        status: status,
+                        timeIn: timeIn,
+                        statusColor: statusColor,
+                        avatar: staff.photoString || null
+                    });
+                });
+                
+                // Sort by status (Present/Late first, then On Leave, then Absent)
+                staffAttendanceData.sort((a, b) => {
+                    const statusOrder = { 'Present': 1, 'Late': 2, 'On Leave': 3, 'Absent': 4 };
+                    return statusOrder[a.status] - statusOrder[b.status];
+                });
+                
+                // Update stats
+                document.getElementById('presentCount').textContent = presentCount;
+                document.getElementById('absentCount').textContent = absentCount;
+                document.getElementById('leaveCount').textContent = leaveCount;
+                document.getElementById('lateCount').textContent = lateCount;
+                
+                // Generate staff list HTML
+                const listHTML = staffAttendanceData.map(staff => `
+                    <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-sm font-medium text-gray-700">
+                                ${staff.avatar ? 
+                                    `<img src="${staff.avatar}" alt="${staff.name}" class="w-10 h-10 rounded-full object-cover">` : 
+                                    staff.name.charAt(0).toUpperCase()
+                                }
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">${staff.name}</p>
+                                <p class="text-sm text-gray-500">${staff.role.charAt(0).toUpperCase() + staff.role.slice(1)}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${staff.statusColor}">
+                                ${staff.status}
+                            </span>
+                            ${staff.timeIn ? `<p class="text-xs text-gray-500 mt-1">Time In: ${staff.timeIn}</p>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+                
+                list.innerHTML = listHTML;
+                
+                // Hide loader and show content
+                loader.style.display = 'none';
+                stats.style.display = 'grid';
+                list.style.display = 'block';
+                
+            } catch (err) {
+                console.error('Error loading staff attendance:', err);
+                loader.style.display = 'none';
+                error.style.display = 'block';
+            }
+        }
+
+        // Load attendance data when page loads (only if user is logged in and not first-time)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait a bit to ensure user authentication check is complete
+            setTimeout(() => {
+                const user = localStorage.getItem('currentUser');
+                if (user) {
+                    const userData = JSON.parse(user);
+                    // Only load if not first-time login and user has appropriate role
+                    if (userData.firstTimeLogin !== true && (userData.role === 'admin' || userData.role === 'staff')) {
+                        loadStaffAttendanceToday();
+                    }
+                }
+            }, 1000);
         });
     </script>
 
