@@ -138,7 +138,7 @@
                     <!-- Search -->
                     <div>
                         <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
-                        <input type="text" id="searchInput" placeholder="Search staff name..." 
+                        <input type="text" id="searchInput" placeholder="Search name, ID, type, location, remarks..." 
                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
                     </div>
                     
@@ -152,6 +152,45 @@
                             <option value="Absent">Absent</option>
                             <option value="Leave">Leave</option>
                         </select>
+                    </div>
+                </div>
+
+                <!-- Advanced Search Options -->
+                <div class="mt-4">
+                    <button type="button" id="toggleAdvanced" class="text-sm text-red-600 hover:text-red-800 font-medium">
+                        ▼ Advanced Search Options
+                    </button>
+                    <div id="advancedOptions" class="hidden mt-3 grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
+                        <div>
+                            <label for="accountTypeFilter" class="block text-sm font-medium text-gray-700 mb-1">Account Type</label>
+                            <select id="accountTypeFilter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                                <option value="">All Types</option>
+                                <option value="Admin">Admin</option>
+                                <option value="Staff">Staff</option>
+                                <option value="Volunteer">Volunteer</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="locationFilter" class="block text-sm font-medium text-gray-700 mb-1">Location Contains</label>
+                            <input type="text" id="locationFilter" placeholder="Search location..." 
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label for="timeRangeFilter" class="block text-sm font-medium text-gray-700 mb-1">Time Range</label>
+                            <select id="timeRangeFilter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                                <option value="">Any Time</option>
+                                <option value="early">Early (Before 8 AM)</option>
+                                <option value="ontime">On Time (8-9 AM)</option>
+                                <option value="late">Late (After 9 AM)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter Validation Messages -->
+                <div id="filterMessages" class="mt-3 hidden">
+                    <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 px-3 py-2 rounded text-sm">
+                        <span id="filterMessageText"></span>
                     </div>
                 </div>
                 
@@ -675,15 +714,11 @@
             const recordsCards = document.getElementById('records-cards');
             const recordsTable = document.getElementById('records-table');
             const noRecords = document.getElementById('no-records');
-            const recordCount = document.getElementById('record-count');
 
-            console.log(`Displaying ${records.length} attendance records`);
+            console.log(`Displaying ${records.length} attendance records from ${filteredRecords.length} filtered`);
 
-            // Update record count badge
-            recordCount.textContent = `${records.length} record${records.length !== 1 ? 's' : ''}`;
-            recordCount.classList.remove('hidden');
-
-            if (records.length === 0) {
+            // Check if we have any filtered records at all
+            if (filteredRecords.length === 0) {
                 tableBody.innerHTML = '';
                 recordsCards.innerHTML = '';
                 recordsTable.classList.add('hidden');
@@ -693,8 +728,8 @@
                 return;
             }
 
+            // We have filtered records, so show the appropriate display
             noRecords.classList.add('hidden');
-            recordCount.classList.remove('hidden');
 
             // Show the correct container depending on screen size
             if (window.innerWidth >= 640) { // sm breakpoint
@@ -1151,29 +1186,90 @@
             document.getElementById('endDate').value = '';
             document.getElementById('searchInput').value = '';
             document.getElementById('statusFilter').value = '';
+            document.getElementById('accountTypeFilter').value = '';
+            document.getElementById('locationFilter').value = '';
+            document.getElementById('timeRangeFilter').value = '';
+            
+            // Clear URL parameters
+            const url = new URL(window.location);
+            url.search = '';
+            window.history.replaceState({}, '', url);
+            
+            hideFilterMessage();
             applyEnhancedFilters();
         }
         
-        // Enhanced Filtering Function
+        // Enhanced Filtering Function with Comprehensive Search
         function applyEnhancedFilters() {
             const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
             const statusFilter = document.getElementById('statusFilter').value;
+            const accountTypeFilter = document.getElementById('accountTypeFilter').value;
+            const locationFilter = document.getElementById('locationFilter').value.toLowerCase().trim();
+            const timeRangeFilter = document.getElementById('timeRangeFilter').value;
+            
+            // Validate date range
+            if (startDate && endDate && startDate > endDate) {
+                showFilterMessage('Start date cannot be after end date', 'error');
+                return;
+            }
+            
+            // Clear previous filter messages
+            hideFilterMessage();
             
             filteredRecords = allRecords.filter(record => {
                 // Date range filter
                 if (startDate && record.date < startDate) return false;
                 if (endDate && record.date > endDate) return false;
                 
-                // Search filter
-                if (searchTerm && !record.accountName.toLowerCase().includes(searchTerm)) return false;
+                // Enhanced multi-field search
+                if (searchTerm) {
+                    const searchableText = [
+                        record.accountName || '',
+                        record.accountId || '',
+                        record.accountType || '',
+                        record.location || '',
+                        record.remarks || '',
+                        record.status || ''
+                    ].join(' ').toLowerCase();
+                    
+                    // Support for multiple search terms (AND logic)
+                    const searchTerms = searchTerm.split(' ').filter(term => term.length > 0);
+                    const matchesAllTerms = searchTerms.every(term => 
+                        searchableText.includes(term)
+                    );
+                    
+                    if (!matchesAllTerms) return false;
+                }
                 
-                // Status filter
-                if (statusFilter && record.status !== statusFilter) return false;
+                // Flexible status filter (includes partial matching)
+                if (statusFilter) {
+                    const recordStatus = (record.status || '').toLowerCase();
+                    const filterStatus = statusFilter.toLowerCase();
+                    
+                    // Direct match or partial match for common variations
+                    if (recordStatus !== filterStatus && 
+                        !recordStatus.includes(filterStatus) && 
+                        !getStatusVariations(filterStatus).includes(recordStatus)) {
+                        return false;
+                    }
+                }
+                
+                // Account type filter
+                if (accountTypeFilter && record.accountType !== accountTypeFilter) return false;
+                
+                // Location filter
+                if (locationFilter && !(record.location || '').toLowerCase().includes(locationFilter)) return false;
+                
+                // Time range filter
+                if (timeRangeFilter && !matchesTimeRange(record.timeIn, timeRangeFilter)) return false;
                 
                 return true;
             });
+            
+            // Show results summary
+            showFilterSummary();
             
             // Reset to first page when filtering
             currentPage = 1;
@@ -1181,6 +1277,85 @@
             displayRecords();
             updateSummaryCards();
             updateRecordCount();
+            saveFiltersToURL(); // Persist filter state
+        }
+        
+        // Helper function for status variations
+        function getStatusVariations(status) {
+            const variations = {
+                'present': ['present', 'on time', 'checked in'],
+                'late': ['late', 'tardy', 'delayed'],
+                'absent': ['absent', 'no show', 'missing'],
+                'leave': ['leave', 'on leave', 'vacation', 'sick leave', 'personal leave']
+            };
+            return variations[status] || [];
+        }
+        
+        // Helper function for time range matching
+        function matchesTimeRange(timeIn, range) {
+            if (!timeIn) return false;
+            
+            const [hours, minutes] = timeIn.split(':').map(Number);
+            const timeInMinutes = hours * 60 + minutes;
+            
+            switch(range) {
+                case 'early':
+                    return timeInMinutes < 8 * 60; // Before 8 AM
+                case 'ontime':
+                    return timeInMinutes >= 8 * 60 && timeInMinutes <= 9 * 60; // 8-9 AM
+                case 'late':
+                    return timeInMinutes > 9 * 60; // After 9 AM
+                default:
+                    return true;
+            }
+        }
+        
+        // Show filter validation messages
+        function showFilterMessage(message, type = 'warning') {
+            const messageContainer = document.getElementById('filterMessages');
+            const messageText = document.getElementById('filterMessageText');
+            const messageDiv = messageContainer.querySelector('div');
+            
+            messageText.textContent = message;
+            
+            // Update styling based on type
+            if (type === 'error') {
+                messageDiv.className = 'bg-red-50 border border-red-200 text-red-800 px-3 py-2 rounded text-sm';
+            } else if (type === 'info') {
+                messageDiv.className = 'bg-blue-50 border border-blue-200 text-blue-800 px-3 py-2 rounded text-sm';
+            } else {
+                messageDiv.className = 'bg-yellow-50 border border-yellow-200 text-yellow-800 px-3 py-2 rounded text-sm';
+            }
+            
+            messageContainer.classList.remove('hidden');
+        }
+        
+        function hideFilterMessage() {
+            document.getElementById('filterMessages').classList.add('hidden');
+        }
+        
+        // Show filter results summary
+        function showFilterSummary() {
+            const total = allRecords.length;
+            const filtered = filteredRecords.length;
+            
+            // Only show summary if filters are applied and results are different from total
+            if (filtered < total && hasActiveFilters()) {
+                showFilterMessage(`Showing ${filtered} of ${total} records`, 'info');
+            } else {
+                hideFilterMessage();
+            }
+        }
+        
+        // Check if any filters are currently active
+        function hasActiveFilters() {
+            return document.getElementById('startDate').value ||
+                   document.getElementById('endDate').value ||
+                   document.getElementById('searchInput').value ||
+                   document.getElementById('statusFilter').value ||
+                   document.getElementById('accountTypeFilter').value ||
+                   document.getElementById('locationFilter').value ||
+                   document.getElementById('timeRangeFilter').value;
         }
         
         // Refresh Data Function
@@ -1334,6 +1509,7 @@
             currentPage = page;
             setupPagination();
             displayRecords(paginatedRecords);
+            saveFiltersToURL(); // Persist current page
         }
         
         function nextPage() {
@@ -1356,17 +1532,93 @@
             document.getElementById('endDate').addEventListener('change', applyEnhancedFilters);
             document.getElementById('statusFilter').addEventListener('change', applyEnhancedFilters);
             
-            // Override the existing search input event listener
+            // Advanced filter listeners
+            document.getElementById('accountTypeFilter').addEventListener('change', applyEnhancedFilters);
+            document.getElementById('locationFilter').addEventListener('input', debounceFilter);
+            document.getElementById('timeRangeFilter').addEventListener('change', applyEnhancedFilters);
+            
+            // Debounced search input
             const searchInput = document.getElementById('searchInput');
             searchInput.removeEventListener('input', applyFilters); // Remove old listener if exists
-            searchInput.addEventListener('input', applyEnhancedFilters);
+            searchInput.addEventListener('input', debounceFilter);
+            
+            // Advanced options toggle
+            document.getElementById('toggleAdvanced').addEventListener('click', toggleAdvancedOptions);
             
             // Pagination event listeners
             document.getElementById('prevPage').addEventListener('click', prevPage);
             document.getElementById('nextPage').addEventListener('click', nextPage);
             document.getElementById('prevPageMobile').addEventListener('click', prevPage);
             document.getElementById('nextPageMobile').addEventListener('click', nextPage);
+            
+            // Initialize filter persistence
+            loadFiltersFromURL();
         });
+        
+        // Debounce function for better performance
+        let filterTimeout;
+        function debounceFilter() {
+            clearTimeout(filterTimeout);
+            filterTimeout = setTimeout(applyEnhancedFilters, 300);
+        }
+        
+        // Toggle advanced options
+        function toggleAdvancedOptions() {
+            const toggle = document.getElementById('toggleAdvanced');
+            const options = document.getElementById('advancedOptions');
+            
+            if (options.classList.contains('hidden')) {
+                options.classList.remove('hidden');
+                toggle.innerHTML = '▲ Advanced Search Options';
+            } else {
+                options.classList.add('hidden');
+                toggle.innerHTML = '▼ Advanced Search Options';
+            }
+        }
+        
+        // Filter persistence functions
+        function saveFiltersToURL() {
+            const params = new URLSearchParams();
+            
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const search = document.getElementById('searchInput').value;
+            const status = document.getElementById('statusFilter').value;
+            const accountType = document.getElementById('accountTypeFilter').value;
+            const location = document.getElementById('locationFilter').value;
+            const timeRange = document.getElementById('timeRangeFilter').value;
+            
+            if (startDate) params.set('start', startDate);
+            if (endDate) params.set('end', endDate);
+            if (search) params.set('search', search);
+            if (status) params.set('status', status);
+            if (accountType) params.set('type', accountType);
+            if (location) params.set('location', location);
+            if (timeRange) params.set('time', timeRange);
+            if (currentPage > 1) params.set('page', currentPage);
+            
+            const url = new URL(window.location);
+            url.search = params.toString();
+            window.history.replaceState({}, '', url);
+        }
+        
+        function loadFiltersFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            
+            if (params.get('start')) document.getElementById('startDate').value = params.get('start');
+            if (params.get('end')) document.getElementById('endDate').value = params.get('end');
+            if (params.get('search')) document.getElementById('searchInput').value = params.get('search');
+            if (params.get('status')) document.getElementById('statusFilter').value = params.get('status');
+            if (params.get('type')) document.getElementById('accountTypeFilter').value = params.get('type');
+            if (params.get('location')) document.getElementById('locationFilter').value = params.get('location');
+            if (params.get('time')) document.getElementById('timeRangeFilter').value = params.get('time');
+            if (params.get('page')) currentPage = parseInt(params.get('page')) || 1;
+            
+            // Apply filters if any were loaded
+            if (params.toString()) {
+                applyEnhancedFilters();
+            }
+        }
         
         // DTR (Daily Time Record) Functions
         
