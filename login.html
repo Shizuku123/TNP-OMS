@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Tahanan ng Pagmamahal OMS</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- EmailJS CDN -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -86,7 +88,9 @@
           </form>
 
           <div class="mt-6 text-center">
-            <p class="text-sm text-gray-600"></p>
+            <button id="forgotPasswordBtn" class="text-sm text-red-primary hover:text-red-700 underline">
+              Forgot Password?
+            </button>
           </div>
 
           <div>
@@ -101,11 +105,436 @@
       </div>
     </div>
 
+    <!-- Forgot Password Modal -->
+    <div id="forgotPasswordModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+      <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md mx-4">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold text-gray-900">Reset Password</h3>
+          <button id="closeForgotModal" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        
+        <div id="emailStep">
+          <p class="text-sm text-gray-600 mb-4">Enter your email address and we'll send you a secure password reset link.</p>
+          <div class="mb-4">
+            <label for="resetEmail" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+            <input
+              id="resetEmail"
+              type="email"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary"
+              placeholder="Enter your email"
+            />
+          </div>
+          <div id="emailErrorMessage" class="mb-4 hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded text-sm"></div>
+          <button
+            id="sendResetBtn"
+            class="w-full py-2 px-4 bg-red-primary text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-primary"
+          >
+            <span id="sendResetText">Send Reset Link</span>
+          </button>
+          
+          <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <div class="flex items-start">
+              <svg class="w-5 h-5 text-blue-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <div class="text-sm text-blue-700">
+                <p class="font-medium">How it works:</p>
+                <ul class="mt-1 list-disc list-inside space-y-1">
+                  <li>Click "Send Reset Link"</li>
+                  <li>Check your email for the reset link</li>
+                  <li>Click the link to set a new password</li>
+                  <li>Return here to login with new password</li>
+                </ul>
+                <p class="mt-2 text-xs">✅ Powered by Firebase - Completely free and secure!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="otpStep" class="hidden">
+          <!-- This step is now simplified - Firebase handles everything -->
+          <div class="text-center py-8">
+            <svg class="w-16 h-16 text-green-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <h4 class="text-lg font-medium text-gray-900 mb-2">Reset Link Sent!</h4>
+            <p class="text-sm text-gray-600 mb-4">Check your email for the password reset link.</p>
+            <button onclick="hideForgotPasswordModal()" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">
+              Close
+            </button>
+          </div>
+        </div>
+
+        <div id="passwordStep" class="hidden">
+          <!-- This is now handled by Firebase's secure reset page -->
+        </div>
+      </div>
+    </div>
+
     <script type="module">
     import { auth, db } from './firebase.js';
-    import { signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
-    import { doc, getDoc, getDocs, collection, query, where, setDoc } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js';
+    import { signInWithEmailAndPassword, sendPasswordResetEmail, updatePassword, signInWithEmailAndPassword as reAuth } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
+    import { doc, getDoc, getDocs, collection, query, where, setDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js';
     import { logActivity } from './activity-logger.js';
+
+    // ========================================
+    // EMAIL CONFIGURATION
+    // ========================================
+    // TO ENABLE REAL EMAIL SENDING:
+    // 1. Sign up at https://www.emailjs.com/
+    // 2. Create an email service and template
+    // 3. Replace the values below with your actual EmailJS credentials
+    // 4. See EMAIL_SETUP_GUIDE.md for detailed instructions
+    
+    const EMAIL_CONFIG = {
+      enabled: false, // Set to true when you have configured EmailJS
+      emailjs: {
+        publicKey: 'YOUR_PUBLIC_KEY',     // Replace with your EmailJS public key
+        serviceId: 'YOUR_SERVICE_ID',     // Replace with your EmailJS service ID
+        templateId: 'YOUR_TEMPLATE_ID'    // Replace with your EmailJS template ID
+      }
+    };
+
+    // ========================================
+
+    // Forgot Password State
+    let forgotPasswordState = {
+      email: '',
+      otpCode: '',
+      generatedOtp: '',
+      otpExpiry: 0,
+      userUid: ''
+    };
+
+    // --- FORGOT PASSWORD FUNCTIONALITY ---
+    function showForgotPasswordModal() {
+      document.getElementById('forgotPasswordModal').classList.remove('hidden');
+      resetForgotPasswordFlow();
+    }
+
+    function hideForgotPasswordModal() {
+      document.getElementById('forgotPasswordModal').classList.add('hidden');
+      resetForgotPasswordFlow();
+    }
+
+    function resetForgotPasswordFlow() {
+      // Reset all steps
+      document.getElementById('emailStep').classList.remove('hidden');
+      document.getElementById('otpStep').classList.add('hidden');
+      document.getElementById('passwordStep').classList.add('hidden');
+      
+      // Clear all inputs
+      document.getElementById('resetEmail').value = '';
+      
+      // Clear error messages
+      hideErrorMessage('emailErrorMessage');
+      
+      // Reset button states
+      resetButtonState('sendResetBtn', 'sendResetText', 'Send Reset Link');
+    }
+
+    function showErrorMessage(elementId, message) {
+      const element = document.getElementById(elementId);
+      element.textContent = message;
+      element.classList.remove('hidden');
+    }
+
+    function hideErrorMessage(elementId) {
+      document.getElementById(elementId).classList.add('hidden');
+    }
+
+    function resetButtonState(btnId, textId, defaultText) {
+      const btn = document.getElementById(btnId);
+      const text = document.getElementById(textId);
+      btn.disabled = false;
+      text.textContent = defaultText;
+    }
+
+    function setButtonLoading(btnId, textId, loadingText) {
+      const btn = document.getElementById(btnId);
+      const text = document.getElementById(textId);
+      btn.disabled = true;
+      text.textContent = loadingText;
+    }
+
+    // Generate 6-digit OTP
+    function generateOTP() {
+      return Math.floor(100000 + Math.random() * 900000).toString();
+    }
+
+    // Send OTP via email using EmailJS
+    async function sendOTPEmail(email, otp) {
+      try {
+        if (EMAIL_CONFIG.enabled) {
+          // Initialize EmailJS with your credentials
+          emailjs.init(EMAIL_CONFIG.emailjs.publicKey);
+          
+          const templateParams = {
+            to_email: email,
+            otp_code: otp,
+            expiry_minutes: '10',
+            organization_name: 'Tahanan ng Pagmamahal OMS',
+            user_name: email.split('@')[0] // Extract username from email
+          };
+
+          // Send email using EmailJS
+          const response = await emailjs.send(
+            EMAIL_CONFIG.emailjs.serviceId,
+            EMAIL_CONFIG.emailjs.templateId,
+            templateParams
+          );
+          
+          console.log('Email sent successfully:', response);
+          
+          // Show success message
+          showSuccessMessage('OTP has been sent to your email address. Please check your inbox.');
+          return true;
+          
+        } else {
+          // Email not configured - show OTP in alert for demo
+          console.log(`Demo Mode - OTP for ${email}: ${otp}`);
+          alert(`🔑 OTP Code: ${otp}\n\n📧 Email: ${email}\n⏰ Valid for: 10 minutes\n\n⚠️ Demo Mode: Email service not configured.\nTo enable real emails, see EMAIL_SETUP_GUIDE.md`);
+          return true;
+        }
+        
+      } catch (error) {
+        console.error('Failed to send email:', error);
+        
+        // Show error message but still provide OTP for demo
+        alert(`❌ Failed to send email: ${error.message}\n\n🔑 Demo OTP: ${otp}\n📧 For: ${email}\n⏰ Valid for: 10 minutes\n\nPlease configure EmailJS credentials to enable real email sending.`);
+        return true;
+      }
+    }
+
+    // Show success message
+    function showSuccessMessage(message) {
+      // Create a temporary success message element
+      const successDiv = document.createElement('div');
+      successDiv.className = 'fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded shadow-lg z-50';
+      successDiv.innerHTML = `
+        <div class="flex items-center">
+          <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+          </svg>
+          <span>${message}</span>
+        </div>
+      `;
+      
+      document.body.appendChild(successDiv);
+      
+      // Remove after 5 seconds
+      setTimeout(() => {
+        if (successDiv.parentNode) {
+          successDiv.parentNode.removeChild(successDiv);
+        }
+      }, 5000);
+    }
+
+    async function handleSendPasswordReset() {
+      const email = document.getElementById('resetEmail').value.trim();
+      
+      if (!email) {
+        showErrorMessage('emailErrorMessage', 'Please enter your email address.');
+        return;
+      }
+
+      if (!email.includes('@')) {
+        showErrorMessage('emailErrorMessage', 'Please enter a valid email address.');
+        return;
+      }
+
+      setButtonLoading('sendResetBtn', 'sendResetText', 'Sending Reset Link...');
+      hideErrorMessage('emailErrorMessage');
+
+      try {
+        // Check if user exists in Firestore first
+        const q = query(collection(db, 'users'), where('emailAddress', '==', email));
+        const querySnapshot = await getDocs(q);
+        
+        if (querySnapshot.empty) {
+          showErrorMessage('emailErrorMessage', 'No account found with this email address.');
+          resetButtonState('sendResetBtn', 'sendResetText', 'Send Reset Link');
+          return;
+        }
+
+        // Send Firebase Auth password reset email (completely free!)
+        await sendPasswordResetEmail(auth, email);
+        
+        // Log activity
+        await logActivity(
+          'Password Reset Request', 
+          `Password reset email sent to ${email}`, 
+          { email: email }
+        );
+        
+        // Show success step
+        document.getElementById('emailStep').classList.add('hidden');
+        document.getElementById('otpStep').classList.remove('hidden');
+        
+        resetButtonState('sendResetBtn', 'sendResetText', 'Send Reset Link');
+        
+      } catch (error) {
+        console.error('Error sending reset email:', error);
+        let errorMsg = 'Failed to send reset email. Please try again.';
+        
+        if (error.code === 'auth/user-not-found') {
+          errorMsg = 'No account found with this email address.';
+        } else if (error.code === 'auth/invalid-email') {
+          errorMsg = 'Invalid email address format.';
+        } else if (error.code === 'auth/too-many-requests') {
+          errorMsg = 'Too many requests. Please wait before trying again.';
+        }
+        
+        showErrorMessage('emailErrorMessage', errorMsg);
+        resetButtonState('sendResetBtn', 'sendResetText', 'Send Reset Link');
+      }
+    }
+
+    async function handleVerifyOTP() {
+      const enteredOtp = document.getElementById('otpCode').value.trim();
+      
+      if (!enteredOtp) {
+        showErrorMessage('otpErrorMessage', 'Please enter the OTP code.');
+        return;
+      }
+
+      if (enteredOtp.length !== 6) {
+        showErrorMessage('otpErrorMessage', 'OTP must be 6 digits.');
+        return;
+      }
+
+      setButtonLoading('verifyOtpBtn', 'verifyOtpText', 'Verifying...');
+      hideErrorMessage('otpErrorMessage');
+
+      try {
+        // Check if OTP is expired
+        if (Date.now() > forgotPasswordState.otpExpiry) {
+          showErrorMessage('otpErrorMessage', 'OTP has expired. Please request a new one.');
+          resetButtonState('verifyOtpBtn', 'verifyOtpText', 'Verify OTP');
+          return;
+        }
+
+        // Verify OTP
+        if (enteredOtp !== forgotPasswordState.generatedOtp) {
+          showErrorMessage('otpErrorMessage', 'Invalid OTP. Please try again.');
+          resetButtonState('verifyOtpBtn', 'verifyOtpText', 'Verify OTP');
+          return;
+        }
+
+        // OTP verified, move to password reset step
+        document.getElementById('otpStep').classList.add('hidden');
+        document.getElementById('passwordStep').classList.remove('hidden');
+        
+        resetButtonState('verifyOtpBtn', 'verifyOtpText', 'Verify OTP');
+        
+      } catch (error) {
+        console.error('Error verifying OTP:', error);
+        showErrorMessage('otpErrorMessage', 'Failed to verify OTP. Please try again.');
+        resetButtonState('verifyOtpBtn', 'verifyOtpText', 'Verify OTP');
+      }
+    }
+
+    async function handleResendOTP() {
+      setButtonLoading('resendOtpBtn', 'resendOtpText', 'Resending...');
+      hideErrorMessage('otpErrorMessage');
+
+      try {
+        // Generate new OTP
+        const otp = generateOTP();
+        const expiry = Date.now() + (10 * 60 * 1000); // 10 minutes expiry
+        
+        // Update state
+        forgotPasswordState.generatedOtp = otp;
+        forgotPasswordState.otpExpiry = expiry;
+        
+        // Send new OTP email
+        await sendOTPEmail(forgotPasswordState.email, otp);
+        
+        // Clear OTP input
+        document.getElementById('otpCode').value = '';
+        
+        resetButtonState('resendOtpBtn', 'resendOtpText', 'Resend OTP');
+        
+      } catch (error) {
+        console.error('Error resending OTP:', error);
+        showErrorMessage('otpErrorMessage', 'Failed to resend OTP. Please try again.');
+        resetButtonState('resendOtpBtn', 'resendOtpText', 'Resend OTP');
+      }
+    }
+
+    async function handleResetPassword() {
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      
+      if (!newPassword) {
+        showErrorMessage('passwordErrorMessage', 'Please enter a new password.');
+        return;
+      }
+
+      if (newPassword.length < 6) {
+        showErrorMessage('passwordErrorMessage', 'Password must be at least 6 characters long.');
+        return;
+      }
+
+      if (newPassword !== confirmPassword) {
+        showErrorMessage('passwordErrorMessage', 'Passwords do not match.');
+        return;
+      }
+
+      setButtonLoading('resetPasswordBtn', 'resetPasswordText', 'Sending Reset Email...');
+      hideErrorMessage('passwordErrorMessage');
+
+      try {
+        // Use Firebase Auth's built-in password reset (completely free!)
+        await sendPasswordResetEmail(auth, forgotPasswordState.email);
+        
+        // Log activity
+        await logActivity(
+          'Password Reset Request', 
+          `Password reset email sent to ${forgotPasswordState.email}`, 
+          { email: forgotPasswordState.email }
+        );
+        
+        // Show success message
+        alert(`✅ Password reset email sent to ${forgotPasswordState.email}!\n\n📧 Please check your email and click the reset link.\n\n🔒 You can then set a new password directly through the secure link.\n\n💡 This uses Firebase's free built-in email service.`);
+        
+        hideForgotPasswordModal();
+        
+      } catch (error) {
+        console.error('Error sending reset email:', error);
+        let errorMsg = 'Failed to send reset email. Please try again.';
+        
+        if (error.code === 'auth/user-not-found') {
+          errorMsg = 'No account found with this email address.';
+        } else if (error.code === 'auth/invalid-email') {
+          errorMsg = 'Invalid email address format.';
+        } else if (error.code === 'auth/too-many-requests') {
+          errorMsg = 'Too many requests. Please wait before trying again.';
+        }
+        
+        showErrorMessage('passwordErrorMessage', errorMsg);
+        resetButtonState('resetPasswordBtn', 'resetPasswordText', 'Send Reset Email');
+      }
+    }
+
+    // Event listeners for forgot password
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('forgotPasswordBtn').addEventListener('click', showForgotPasswordModal);
+      document.getElementById('closeForgotModal').addEventListener('click', hideForgotPasswordModal);
+      document.getElementById('sendResetBtn').addEventListener('click', handleSendPasswordReset);
+      
+      // Close modal when clicking outside
+      document.getElementById('forgotPasswordModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+          hideForgotPasswordModal();
+        }
+      });
+    });
 
     // --- EXECUTE create-user.js LOGIC ON PAGE LOAD (if user does not exist) ---
     async function ensureAdminUser() {
