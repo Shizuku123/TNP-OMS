@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Tahanan ng Pagmamahal OMS</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="tailwind.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         tailwind.config = {
@@ -624,10 +624,10 @@
                         </div>
                     </div>
 
-                <!-- Staff Attendance Summary (Admin Only) -->
+                <!-- Staff & Volunteer Attendance Summary (Admin or Staff with "Staff Records" permission) -->
                 <div id="attendanceSummary" class="bg-white rounded-lg shadow-sm p-4 sm:p-6 w-full">
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg sm:text-xl font-semibold text-gray-900">Staff Attendance Today</h3>
+                        <h3 class="text-lg sm:text-xl font-semibold text-gray-900">Attendance Today</h3>
                         <a href="attendance-records.html" class="text-blue-600 hover:text-blue-800 text-sm font-medium">View All →</a>
                     </div>
                     
@@ -638,28 +638,49 @@
                     </div>
                     
                     <!-- Summary Stats -->
-                    <div id="attendanceStats" class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6" style="display: none;">
+                    <div id="attendanceStats" class="grid grid-cols-4 gap-2 sm:gap-4 mb-6" style="display: none;">
                         <div class="text-center">
-                            <div id="presentCount" class="text-2xl font-bold text-green-600">0</div>
-                            <div class="text-sm text-gray-600">Present</div>
+                            <div id="presentCount" class="text-lg sm:text-2xl font-bold text-green-600">0</div>
+                            <div class="text-xs sm:text-sm text-gray-600">Present</div>
                         </div>
                         <div class="text-center">
-                            <div id="absentCount" class="text-2xl font-bold text-red-600">0</div>
-                            <div class="text-sm text-gray-600">Absent</div>
+                            <div id="absentCount" class="text-lg sm:text-2xl font-bold text-red-600">0</div>
+                            <div class="text-xs sm:text-sm text-gray-600">Absent</div>
                         </div>
                         <div class="text-center">
-                            <div id="leaveCount" class="text-2xl font-bold text-yellow-600">0</div>
-                            <div class="text-sm text-gray-600">On Leave</div>
+                            <div id="leaveCount" class="text-lg sm:text-2xl font-bold text-yellow-600">0</div>
+                            <div class="text-xs sm:text-sm text-gray-600">On Leave</div>
                         </div>
                         <div class="text-center">
-                            <div id="lateCount" class="text-2xl font-bold text-orange-600">0</div>
-                            <div class="text-sm text-gray-600">Late</div>
+                            <div id="lateCount" class="text-lg sm:text-2xl font-bold text-orange-600">0</div>
+                            <div class="text-xs sm:text-sm text-gray-600">Late</div>
                         </div>
                     </div>
                     
-                    <!-- Detailed Staff List -->
-                    <div id="staffAttendanceList" class="space-y-3" style="display: none;">
-                        <!-- Staff attendance items will be populated here -->
+                    <!-- Detailed Staff List with Pagination -->
+                    <div id="staffAttendanceContainer" style="display: none;">
+                        <!-- Staff Cards Grid (2 cards per page) -->
+                        <div id="staffAttendanceGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <!-- Staff cards will be populated here -->
+                        </div>
+                        
+                        <!-- Pagination Info and Controls -->
+                        <div class="flex flex-col items-center space-y-3 pt-4 border-t border-gray-200">
+                            <div class="text-sm text-gray-600">
+                                Showing <span id="currentPageInfo">1-2</span> of <span id="totalStaffCount">0</span> staff
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button id="prevPage" class="px-3 py-1 text-sm bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                    ← Previous
+                                </button>
+                                <div id="pageNumbers" class="flex items-center space-x-1">
+                                    <!-- Page numbers will be generated here -->
+                                </div>
+                                <button id="nextPage" class="px-3 py-1 text-sm bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                    Next →
+                                </button>
+                            </div>
+                        </div>
                     </div>
                     
                     <!-- Error Message -->
@@ -4018,18 +4039,37 @@ async function loadDonorsData() {
             }
         });
 
-        // Staff Attendance Functionality
+        // Staff Attendance Functionality with Pagination
+        let currentStaffData = [];
+        let currentPage = 1;
+        const staffItemsPerPage = 2;
+
+        // Helper function to check if user has specific feature permission
+        function hasFeaturePermission(featureName) {
+            const user = localStorage.getItem('currentUser');
+            if (!user) return false;
+            
+            const userData = JSON.parse(user);
+            
+            // Admin always has access
+            if (userData.role === 'admin') return true;
+            
+            // Check featuresGranted array (with different possible field names)
+            const featuresGranted = userData.featuresGranted || userData.featureGranted || [];
+            return featuresGranted.includes(featureName);
+        }
+
         async function loadStaffAttendanceToday() {
             const loader = document.getElementById('attendanceLoader');
             const stats = document.getElementById('attendanceStats');
-            const list = document.getElementById('staffAttendanceList');
+            const container = document.getElementById('staffAttendanceContainer');
             const error = document.getElementById('attendanceError');
             
             try {
                 // Show loader
                 loader.style.display = 'flex';
                 stats.style.display = 'none';
-                list.style.display = 'none';
+                container.style.display = 'none';
                 error.style.display = 'none';
                 
                 // Get today's date in YYYY-MM-DD format
@@ -4048,70 +4088,168 @@ async function loadDonorsData() {
                 const attendanceMap = new Map();
                 const staffMap = new Map();
                 
-                // Process attendance records for today
+                // Process attendance records for today (including volunteers)
                 attendanceSnapshot.forEach(doc => {
                     const data = doc.data();
-                    if (data.date === todayStr && data.role !== 'volunteer') {
-                        attendanceMap.set(data.staffId || data.userId, data);
+                    if (data.date === todayStr) {
+                        const key = data.staffId || data.userId || data.uid;
+                        attendanceMap.set(key, data);
                     }
                 });
                 
-                // Process staff records (excluding volunteers)
+                // Process all user records (staff, admin, and volunteers)
                 staffSnapshot.forEach(doc => {
                     const data = doc.data();
-                    if (data.role === 'staff' || data.role === 'admin') {
+                    if (data.role === 'staff' || data.role === 'admin' || data.role === 'volunteer') {
                         staffMap.set(doc.id, { ...data, uid: doc.id });
+                        // Also map by staffId if available
+                        if (data.staffId) {
+                            staffMap.set(data.staffId, { ...data, uid: doc.id });
+                        }
                     }
                 });
                 
-                // Combine attendance and staff data
+                // Get current time for absence checking
+                const now = new Date();
+                const currentTime = now.toTimeString().slice(0, 5); // HH:MM format
+                const isAfterWorkHours = currentTime > '17:00'; // Assuming work ends at 5 PM
+                
+                // Combine attendance and staff data (including volunteers)
                 const staffAttendanceData = [];
                 let presentCount = 0, absentCount = 0, leaveCount = 0, lateCount = 0;
                 
-                staffMap.forEach((staff, staffId) => {
-                    const attendance = attendanceMap.get(staffId) || attendanceMap.get(staff.staffId);
+                staffMap.forEach((person, personId) => {
+                    // Try multiple keys to find attendance record
+                    const attendance = attendanceMap.get(personId) || 
+                                     attendanceMap.get(person.uid) || 
+                                     attendanceMap.get(person.staffId);
+                    
                     let status = 'Absent';
                     let timeIn = null;
+                    let timeOut = null;
                     let statusColor = 'text-red-600 bg-red-100';
+                    let statusDetails = '';
+                    
+                    // Different expectations for volunteers vs staff
+                    const isVolunteer = person.role === 'volunteer';
+                    const lateThreshold = isVolunteer ? '09:00' : '08:00'; // Volunteers might have flexible hours
                     
                     if (attendance) {
-                        if (attendance.status === 'Present') {
-                            status = 'Present';
-                            statusColor = 'text-green-600 bg-green-100';
-                            presentCount++;
-                            timeIn = attendance.timeIn;
-                            
-                            // Check if late (assuming 8:00 AM is the standard time)
-                            if (attendance.timeIn && attendance.timeIn > '08:00') {
-                                status = 'Late';
-                                statusColor = 'text-orange-600 bg-orange-100';
-                                lateCount++;
-                                presentCount--; // Remove from present count
-                            }
-                        } else if (attendance.status === 'On Leave') {
-                            status = 'On Leave';
-                            statusColor = 'text-yellow-600 bg-yellow-100';
-                            leaveCount++;
+                        timeIn = attendance.timeIn;
+                        timeOut = attendance.timeOut;
+                        
+                        // Check different attendance statuses
+                        switch (attendance.status) {
+                            case 'Present':
+                                // Check if they're late based on role
+                                if (timeIn && timeIn > lateThreshold) {
+                                    status = 'Late';
+                                    statusColor = 'text-orange-600 bg-orange-100';
+                                    statusDetails = isVolunteer ? 
+                                        `Late arrival at ${timeIn}` : 
+                                        `Late arrival at ${timeIn}`;
+                                    lateCount++;
+                                } else {
+                                    status = 'Present';
+                                    statusColor = 'text-green-600 bg-green-100';
+                                    statusDetails = isVolunteer ? 
+                                        `Checked in at ${timeIn || 'N/A'}` : 
+                                        `On time at ${timeIn || 'N/A'}`;
+                                    presentCount++;
+                                }
+                                break;
+                                
+                            case 'On Leave':
+                            case 'Leave':
+                                status = 'On Leave';
+                                statusColor = 'text-yellow-600 bg-yellow-100';
+                                statusDetails = attendance.leaveType ? `${attendance.leaveType}` : 'Approved leave';
+                                leaveCount++;
+                                break;
+                                
+                            case 'Sick Leave':
+                                status = 'On Leave';
+                                statusColor = 'text-yellow-600 bg-yellow-100';
+                                statusDetails = 'Sick leave';
+                                leaveCount++;
+                                break;
+                                
+                            case 'Absent':
+                                status = 'Absent';
+                                statusColor = 'text-red-600 bg-red-100';
+                                statusDetails = 'Marked absent';
+                                absentCount++;
+                                break;
+                                
+                            default:
+                                // If they have a time-in record but no specific status
+                                if (timeIn) {
+                                    if (timeIn > lateThreshold) {
+                                        status = 'Late';
+                                        statusColor = 'text-orange-600 bg-orange-100';
+                                        statusDetails = `Late arrival at ${timeIn}`;
+                                        lateCount++;
+                                    } else {
+                                        status = 'Present';
+                                        statusColor = 'text-green-600 bg-green-100';
+                                        statusDetails = `Checked in at ${timeIn}`;
+                                        presentCount++;
+                                    }
+                                } else {
+                                    status = 'Absent';
+                                    statusColor = 'text-red-600 bg-red-100';
+                                    statusDetails = 'No attendance record';
+                                    absentCount++;
+                                }
                         }
                     } else {
+                        // No attendance record found
+                        if (isVolunteer) {
+                            // Volunteers are not expected to be present every day
+                            status = 'Absent';
+                            statusColor = 'text-gray-500 bg-gray-100';
+                            statusDetails = 'Not scheduled or did not attend';
+                        } else if (isAfterWorkHours) {
+                            status = 'Absent';
+                            statusColor = 'text-red-600 bg-red-100';
+                            statusDetails = 'Did not show up for work';
+                        } else {
+                            status = 'Absent';
+                            statusColor = 'text-red-600 bg-red-100';
+                            statusDetails = 'Not yet checked in';
+                        }
                         absentCount++;
                     }
                     
                     staffAttendanceData.push({
-                        name: `${staff.firstName || ''} ${staff.lastName || ''}`.trim() || staff.name || 'Unknown',
-                        role: staff.role || 'Staff',
+                        name: `${person.firstName || ''} ${person.lastName || ''}`.trim() || person.name || 'Unknown',
+                        role: person.role || 'Staff',
                         status: status,
                         timeIn: timeIn,
+                        timeOut: timeOut,
                         statusColor: statusColor,
-                        avatar: staff.photoString || null
+                        statusDetails: statusDetails,
+                        avatar: person.photoString || null
                     });
                 });
                 
-                // Sort by status (Present/Late first, then On Leave, then Absent)
+                // Sort by status first (Present/Late first, then On Leave, then Absent)
+                // Then by role (Admin, Staff, Volunteer)
                 staffAttendanceData.sort((a, b) => {
                     const statusOrder = { 'Present': 1, 'Late': 2, 'On Leave': 3, 'Absent': 4 };
-                    return statusOrder[a.status] - statusOrder[b.status];
+                    const roleOrder = { 'admin': 1, 'staff': 2, 'volunteer': 3 };
+                    
+                    // Primary sort by status
+                    const statusDiff = statusOrder[a.status] - statusOrder[b.status];
+                    if (statusDiff !== 0) return statusDiff;
+                    
+                    // Secondary sort by role
+                    return roleOrder[a.role.toLowerCase()] - roleOrder[b.role.toLowerCase()];
                 });
+                
+                // Store data globally for pagination
+                currentStaffData = staffAttendanceData;
+                currentPage = 1;
                 
                 // Update stats
                 document.getElementById('presentCount').textContent = presentCount;
@@ -4119,41 +4257,148 @@ async function loadDonorsData() {
                 document.getElementById('leaveCount').textContent = leaveCount;
                 document.getElementById('lateCount').textContent = lateCount;
                 
-                // Generate staff list HTML
-                const listHTML = staffAttendanceData.map(staff => `
-                    <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-sm font-medium text-gray-700">
-                                ${staff.avatar ? 
-                                    `<img src="${staff.avatar}" alt="${staff.name}" class="w-10 h-10 rounded-full object-cover">` : 
-                                    staff.name.charAt(0).toUpperCase()
-                                }
-                            </div>
-                            <div>
-                                <p class="font-medium text-gray-900">${staff.name}</p>
-                                <p class="text-sm text-gray-500">${staff.role.charAt(0).toUpperCase() + staff.role.slice(1)}</p>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${staff.statusColor}">
-                                ${staff.status}
-                            </span>
-                            ${staff.timeIn ? `<p class="text-xs text-gray-500 mt-1">Time In: ${staff.timeIn}</p>` : ''}
-                        </div>
-                    </div>
-                `).join('');
-                
-                list.innerHTML = listHTML;
+                // Setup pagination
+                setupPagination();
+                displayCurrentPage();
                 
                 // Hide loader and show content
                 loader.style.display = 'none';
                 stats.style.display = 'grid';
-                list.style.display = 'block';
+                container.style.display = 'block';
                 
             } catch (err) {
                 console.error('Error loading staff attendance:', err);
                 loader.style.display = 'none';
                 error.style.display = 'block';
+            }
+        }
+
+        function setupPagination() {
+            const totalPages = Math.ceil(currentStaffData.length / staffItemsPerPage);
+            const totalCount = currentStaffData.length;
+            
+            document.getElementById('totalStaffCount').textContent = totalCount;
+            
+            // Setup pagination controls
+            const prevButton = document.getElementById('prevPage');
+            const nextButton = document.getElementById('nextPage');
+            
+            prevButton.onclick = () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    displayCurrentPage();
+                }
+            };
+            
+            nextButton.onclick = () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    displayCurrentPage();
+                }
+            };
+            
+            updatePaginationControls();
+        }
+
+        function displayCurrentPage() {
+            const startIndex = (currentPage - 1) * staffItemsPerPage;
+            const endIndex = startIndex + staffItemsPerPage;
+            const pageData = currentStaffData.slice(startIndex, endIndex);
+            
+            // Generate staff cards HTML
+            const cardsHTML = pageData.map(staff => `
+                <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div class="flex items-center space-x-4 mb-3">
+                        <div class="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-lg font-medium text-gray-700 flex-shrink-0">
+                            ${staff.avatar ? 
+                                `<img src="${staff.avatar}" alt="${staff.name}" class="w-12 h-12 rounded-full object-cover">` : 
+                                staff.name.charAt(0).toUpperCase()
+                            }
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-medium text-gray-900 truncate">${staff.name}</h4>
+                            <p class="text-sm text-gray-500">${staff.role.charAt(0).toUpperCase() + staff.role.slice(1)}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Status Badge -->
+                    <div class="mb-3">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${staff.statusColor}">
+                            ${staff.status}
+                        </span>
+                        ${staff.statusDetails ? 
+                            `<p class="text-xs text-gray-500 mt-1">${staff.statusDetails}</p>` : 
+                            ''
+                        }
+                    </div>
+                    
+                    <!-- Time Information -->
+                    <div class="flex justify-between items-center text-sm">
+                        ${staff.timeIn ? 
+                            `<div>
+                                <p class="text-gray-600">Time In</p>
+                                <p class="font-medium text-gray-900">${staff.timeIn}</p>
+                            </div>` : 
+                            `<div>
+                                <p class="text-gray-400">No check-in</p>
+                            </div>`
+                        }
+                        ${staff.timeOut ? 
+                            `<div class="text-right">
+                                <p class="text-gray-600">Time Out</p>
+                                <p class="font-medium text-gray-900">${staff.timeOut}</p>
+                            </div>` : 
+                            (staff.timeIn ? 
+                                `<div class="text-right">
+                                    <p class="text-gray-400">Still working</p>
+                                </div>` : 
+                                ''
+                            )
+                        }
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('staffAttendanceGrid').innerHTML = cardsHTML;
+            updatePaginationControls();
+        }
+
+        function updatePaginationControls() {
+            const totalPages = Math.ceil(currentStaffData.length / staffItemsPerPage);
+            const startItem = ((currentPage - 1) * staffItemsPerPage) + 1;
+            const endItem = Math.min(currentPage * staffItemsPerPage, currentStaffData.length);
+            
+            // Update page info
+            document.getElementById('currentPageInfo').textContent = `${startItem}-${endItem}`;
+            
+            // Update button states
+            const prevButton = document.getElementById('prevPage');
+            const nextButton = document.getElementById('nextPage');
+            
+            prevButton.disabled = currentPage === 1;
+            nextButton.disabled = currentPage === totalPages || totalPages === 0;
+            
+            // Generate page numbers
+            generatePageNumbers(totalPages);
+        }
+
+        function generatePageNumbers(totalPages) {
+            const pageNumbers = document.getElementById('pageNumbers');
+            pageNumbers.innerHTML = '';
+            
+            for (let i = 1; i <= totalPages; i++) {
+                const button = document.createElement('button');
+                button.textContent = i;
+                button.className = `px-2 py-1 text-sm rounded ${
+                    i === currentPage 
+                        ? 'bg-red-600 text-white' 
+                        : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                }`;
+                button.onclick = () => {
+                    currentPage = i;
+                    displayCurrentPage();
+                };
+                pageNumbers.appendChild(button);
             }
         }
 
@@ -4164,9 +4409,16 @@ async function loadDonorsData() {
                 const user = localStorage.getItem('currentUser');
                 if (user) {
                     const userData = JSON.parse(user);
-                    // Only load if not first-time login and user has appropriate role
-                    if (userData.firstTimeLogin !== true && (userData.role === 'admin' || userData.role === 'staff')) {
+                    
+                    // Check if user has permission to view staff attendance
+                    if (userData.firstTimeLogin !== true && hasFeaturePermission('Staff Records')) {
                         loadStaffAttendanceToday();
+                    } else {
+                        // Hide the attendance summary if user doesn't have permission
+                        const attendanceSummary = document.getElementById('attendanceSummary');
+                        if (attendanceSummary) {
+                            attendanceSummary.style.display = 'none';
+                        }
                     }
                 }
             }, 1000);

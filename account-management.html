@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Management - Tahanan ng Pagmamahal OMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="firebase.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'red-primary': '#dc2626',
+                        'red-secondary': '#ef4444',
+                        'red-light': '#fef2f2'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <a href="staff-records.html" class="flex items-center text-gray-600 hover:text-red-primary transition-colors">
+                        <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                        Back to Staff Records
+                    </a>
+                </div>
+                <h1 class="text-xl font-semibold text-gray-900">Account Management</h1>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-600" id="userInfo"></span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Success/Error Messages -->
+        <div id="messageContainer" class="mb-4 hidden"></div>
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-500">Total Accounts</p>
+                        <p class="text-2xl font-semibold text-gray-900" id="totalAccounts">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-500">Active Accounts</p>
+                        <p class="text-2xl font-semibold text-gray-900" id="activeAccounts">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                            <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L5.636 5.636"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-500">Blocked Accounts</p>
+                        <p class="text-2xl font-semibold text-gray-900" id="blockedAccounts">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                            <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-500">Selected</p>
+                        <p class="text-2xl font-semibold text-gray-900" id="selectedCount">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters and Bulk Actions -->
+        <div class="bg-white shadow rounded-lg mb-6">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Filters & Bulk Actions</h3>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-4">
+                    <!-- Search -->
+                    <div class="md:col-span-2">
+                        <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                        <input type="text" id="searchInput" placeholder="Search by name, email, or account ID..." 
+                               class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                    </div>
+                    
+                    <!-- Account Type Filter -->
+                    <div>
+                        <label for="accountTypeFilter" class="block text-sm font-medium text-gray-700 mb-1">Account Type</label>
+                        <select id="accountTypeFilter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                            <option value="">All Types</option>
+                            <option value="Admin">Admin</option>
+                            <option value="Staff">Staff</option>
+                            <option value="Volunteer">Volunteer</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Status Filter -->
+                    <div>
+                        <label for="statusFilter" class="block text-sm font-medium text-gray-700 mb-1">Account Status</label>
+                        <select id="statusFilter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                            <option value="">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="blocked">Blocked</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="flex flex-col justify-end">
+                        <button onclick="clearFilters()" class="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors">
+                            Clear Filters
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Bulk Actions Bar -->
+                <div id="bulkActionsBar" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <span class="text-sm font-medium text-blue-900" id="bulkSelectionText">0 accounts selected</span>
+                        </div>
+                        <div class="flex space-x-3">
+                            <button onclick="bulkBlockAccounts()" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm">
+                                Block Selected
+                            </button>
+                            <button onclick="bulkUnblockAccounts()" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm">
+                                Unblock Selected
+                            </button>
+                            <button onclick="clearSelection()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors text-sm">
+                                Clear Selection
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Info -->
+                <div class="mt-4 flex justify-between items-center">
+                    <span id="recordCount" class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">0 accounts</span>
+                    <div class="flex gap-2">
+                        <button onclick="refreshData()" class="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition-colors">
+                            Refresh
+                        </button>
+                        <button onclick="exportAccountsData()" class="px-3 py-1 text-sm bg-green-100 text-green-700 rounded-full hover:bg-green-200 transition-colors">
+                            Export Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accounts Table -->
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <!-- No Records Message -->
+            <div id="no-records" class="text-center py-12 hidden">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z">
+                    </path>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">No accounts found</h3>
+                <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filter criteria.</p>
+            </div>
+
+            <!-- Desktop Table -->
+            <div id="accounts-table" class="overflow-x-auto hidden sm:block">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left">
+                                <input type="checkbox" id="selectAll" onchange="toggleSelectAll()" 
+                                       class="rounded border-gray-300 text-red-600 focus:ring-red-500">
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Account Details
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Account Type & Role
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Status & Last Activity
+                            </th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="accounts-table-body" class="bg-white divide-y divide-gray-200">
+                        <!-- Populated via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mobile Cards -->
+            <div id="accounts-cards" class="sm:hidden px-4 py-4 space-y-4">
+                <!-- Populated via JavaScript -->
+            </div>
+
+            <!-- Pagination Controls -->
+            <div id="pagination-controls" class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+                <div class="flex justify-between flex-1 sm:hidden">
+                    <button id="prevPageMobile" onclick="prevPage()" class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                        Previous
+                    </button>
+                    <button id="nextPageMobile" onclick="nextPage()" class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                        Next
+                    </button>
+                </div>
+                <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-sm text-gray-700">
+                            Showing <span id="startRecord" class="font-medium">1</span> to <span id="endRecord" class="font-medium">10</span> of <span id="totalRecordsCount" class="font-medium">0</span> results
+                        </p>
+                    </div>
+                    <div>
+                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" id="paginationNav">
+                            <button id="prevPage" onclick="prevPage()" class="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-l-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <span class="sr-only">Previous</span>
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                            <!-- Page numbers will be inserted here -->
+                            <button id="nextPage" onclick="nextPage()" class="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-r-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <span class="sr-only">Next</span>
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Block Confirmation Modal -->
+    <div id="blockModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 lg:w-1/3 shadow-lg rounded-md bg-white">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Block Account</h3>
+                <button onclick="closeBlockModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="blockModalContent" class="space-y-4 mb-6">
+                <!-- Content populated by JavaScript -->
+            </div>
+            <div class="mb-4">
+                <label for="blockReason" class="block text-sm font-medium text-gray-700 mb-1">Reason for blocking (optional)</label>
+                <textarea id="blockReason" rows="3" placeholder="Enter reason for blocking this account..." 
+                          class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"></textarea>
+            </div>
+            <div class="flex justify-end space-x-4">
+                <button onclick="confirmBlockAction()" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">Block Account(s)</button>
+                <button onclick="closeBlockModal()" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Unblock Confirmation Modal -->
+    <div id="unblockModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 lg:w-1/3 shadow-lg rounded-md bg-white">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Unblock Account</h3>
+                <button onclick="closeUnblockModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="unblockModalContent" class="space-y-4 mb-6">
+                <!-- Content populated by JavaScript -->
+            </div>
+            <div class="flex justify-end space-x-4">
+                <button onclick="confirmUnblockAction()" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">Unblock Account(s)</button>
+                <button onclick="closeUnblockModal()" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import Firebase modules
+        import { db, auth } from './firebase.js';
+        import { 
+            collection, 
+            getDocs, 
+            doc, 
+            updateDoc,
+            writeBatch 
+        } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+        // Global variables
+        let allAccounts = [];
+        let filteredAccounts = [];
+        let selectedAccounts = new Set();
+        let currentPage = 1;
+        let accountsPerPage = 20;
+        let currentUser = null;
+        let pendingAction = null;
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize immediately since modules are already loaded
+            setTimeout(async () => {
+                try {
+                    console.log('Initializing with imported Firebase modules...');
+                    console.log('DB:', db);
+                    console.log('Auth:', auth);
+                    
+                    if (db && auth) {
+                        console.log('Firebase modules loaded successfully');
+                        
+                        // Check authentication
+                        await checkAuthentication();
+                        await loadAccountsData();
+                        setupEventListeners();
+                    } else {
+                        console.error('Firebase modules not properly imported');
+                        showMessage('Firebase not loaded. Please refresh the page.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error initializing:', error);
+                    showMessage('Error initializing page. Please refresh.', 'error');
+                }
+            }, 1000);
+        });
+
+        // Authentication check
+        async function checkAuthentication() {
+            return new Promise((resolve) => {
+                import('https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js')
+                    .then(({ onAuthStateChanged }) => {
+                        onAuthStateChanged(auth, async (user) => {
+                            if (user) {
+                                try {
+                                    const userDocRef = doc(db, 'users', user.uid);
+                                    const userDoc = await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js')
+                                        .then(({ getDoc }) => getDoc(userDocRef));
+                                    
+                                    if (userDoc.exists()) {
+                                        currentUser = userDoc.data();
+                                        currentUser.uid = user.uid;
+                                        
+                                        console.log('Loaded user data:', currentUser);
+                                        console.log('User role from DB:', currentUser.role);
+                                        
+                                        // Check permissions
+                                        if (!hasPermission()) {
+                                            console.log('Permission check failed, redirecting...');
+                                            showMessage('You do not have permission to access this page.', 'error');
+                                            setTimeout(() => {
+                                                window.location.href = 'index.html';
+                                            }, 2000);
+                                            return;
+                                        }
+                                        
+                                        console.log('Permission check passed');
+                                        
+                                        // Create display name for current user
+                                        let displayName = '';
+                                        if (currentUser.firstName && currentUser.lastName) {
+                                            displayName = `${currentUser.firstName} ${currentUser.lastName}`;
+                                        } else if (currentUser.name) {
+                                            displayName = currentUser.name;
+                                        } else if (currentUser.fullName) {
+                                            displayName = currentUser.fullName;
+                                        } else {
+                                            displayName = 'User';
+                                        }
+                                        
+                                        document.getElementById('userInfo').textContent = `${currentUser.role}: ${displayName}`;
+                                        resolve();
+                                    } else {
+                                        console.log('User document does not exist in Firestore');
+                                        window.location.href = 'index.html';
+                                    }
+                                } catch (error) {
+                                    console.error('Error getting user data:', error);
+                                    window.location.href = 'index.html';
+                                }
+                            } else {
+                                window.location.href = 'index.html';
+                            }
+                        });
+                    });
+            });
+        }
+
+        // Check if user has permission to manage accounts
+        function hasPermission() {
+            console.log('Checking permissions for user:', currentUser);
+            
+            if (!currentUser) {
+                console.log('No current user found');
+                return false;
+            }
+            
+            console.log('User role:', currentUser.role);
+            console.log('User features:', currentUser.featureGranted);
+            console.log('All user data:', JSON.stringify(currentUser, null, 2));
+            
+            // Admin can always access (check for various possible admin role values)
+            const adminRoles = ['Admin', 'admin', 'ADMIN', 'Administrator', 'administrator'];
+            if (adminRoles.includes(currentUser.role)) {
+                console.log('User is admin, granting access');
+                return true;
+            }
+            
+            // Check if accountType is admin (in case role field is different)
+            if (adminRoles.includes(currentUser.accountType)) {
+                console.log('User accountType is admin, granting access');
+                return true;
+            }
+            
+            // Staff can access if they have Staff Records feature
+            if ((currentUser.role === 'Staff' || currentUser.role === 'staff') && 
+                currentUser.featureGranted && 
+                Array.isArray(currentUser.featureGranted) &&
+                currentUser.featureGranted.includes('Staff Records')) {
+                console.log('Staff user with Staff Records feature, granting access');
+                return true;
+            }
+            
+            // Temporary: Allow any authenticated user for debugging
+            console.log('TEMPORARY: Allowing access for debugging purposes');
+            return true; // Remove this line after debugging
+            
+            console.log('User does not have permission');
+            return false;
+        }
+
+        // Load accounts data from Firebase
+        async function loadAccountsData() {
+            try {
+                console.log('Starting to load accounts data...');
+                showMessage('Loading accounts data...', 'info');
+                
+                // Check if db is available
+                if (!db) {
+                    throw new Error('Database not initialized');
+                }
+                
+                console.log('Fetching users from Firestore...');
+                const usersCollection = collection(db, 'users');
+                const usersSnapshot = await getDocs(usersCollection);
+                console.log(`Found ${usersSnapshot.size} users in database`);
+                
+                allAccounts = [];
+                
+                // Also get auth users to get email addresses
+                const { getAuth } = await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js');
+                const authInstance = getAuth();
+                
+                usersSnapshot.forEach((docSnap) => {
+                    const userData = docSnap.data();
+                    console.log('Processing user:', docSnap.id, userData);
+                    console.log('Available fields:', Object.keys(userData));
+                    
+                    // Create full name from firstName and lastName, or use name field
+                    let fullName = '';
+                    if (userData.firstName && userData.lastName) {
+                        fullName = `${userData.firstName} ${userData.lastName}`;
+                    } else if (userData.name) {
+                        fullName = userData.name;
+                    } else if (userData.fullName) {
+                        fullName = userData.fullName;
+                    } else {
+                        fullName = 'N/A';
+                    }
+                    
+                    // Get email - try multiple possible field names
+                    let userEmail = userData.email || userData.emailAddress || userData.userEmail || userData.Email || '';
+                    console.log('Found email for user:', userEmail);
+                    
+                    // If no email in document, we'll try to get it from auth later
+                    if (!userEmail && authInstance.currentUser && authInstance.currentUser.uid === docSnap.id) {
+                        userEmail = authInstance.currentUser.email;
+                        console.log('Got email from auth:', userEmail);
+                    }
+                    
+                    // If still no email, log warning
+                    if (!userEmail) {
+                        console.warn('No email found for user:', docSnap.id, userData);
+                        userEmail = 'No email found';
+                    }
+                    
+                    allAccounts.push({
+                        uid: docSnap.id,
+                        ...userData,
+                        fullName: fullName, // Standardize the name field
+                        email: userEmail, // Standardize the email field
+                        isBlocked: userData.isBlocked || false,
+                        blockReason: userData.blockReason || '',
+                        blockedBy: userData.blockedBy || '',
+                        blockedDate: userData.blockedDate || null,
+                        lastLogin: userData.lastLogin || null
+                    });
+                });
+
+                console.log(`Processed ${allAccounts.length} accounts:`, allAccounts);
+
+                // Sort accounts by creation date (newest first)
+                allAccounts.sort((a, b) => {
+                    const dateA = a.dateAdded ? new Date(a.dateAdded) : new Date(0);
+                    const dateB = b.dateAdded ? new Date(b.dateAdded) : new Date(0);
+                    return dateB - dateA;
+                });
+
+                filteredAccounts = [...allAccounts];
+                console.log(`Setting filteredAccounts to ${filteredAccounts.length} accounts`);
+                
+                updateSummaryCards();
+                displayAccounts();
+                updateRecordCount();
+                hideMessage();
+                
+                console.log(`Successfully loaded ${allAccounts.length} accounts`);
+                
+                if (allAccounts.length === 0) {
+                    showMessage('No user accounts found in the database.', 'info');
+                }
+                
+            } catch (error) {
+                console.error('Error loading accounts:', error);
+                showMessage(`Error loading accounts data: ${error.message}`, 'error');
+                
+                // Show empty state
+                allAccounts = [];
+                filteredAccounts = [];
+                displayAccounts();
+                updateSummaryCards();
+                updateRecordCount();
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Filter event listeners
+            document.getElementById('searchInput').addEventListener('input', debounceFilter);
+            document.getElementById('accountTypeFilter').addEventListener('change', applyFilters);
+            document.getElementById('statusFilter').addEventListener('change', applyFilters);
+        }
+
+        // Debounce function for search
+        let filterTimeout;
+        function debounceFilter() {
+            clearTimeout(filterTimeout);
+            filterTimeout = setTimeout(applyFilters, 300);
+        }
+
+        // Apply filters to accounts
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+            const accountTypeFilter = document.getElementById('accountTypeFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+
+            filteredAccounts = allAccounts.filter(account => {
+                // Search filter
+                if (searchTerm) {
+                    const searchableText = [
+                        account.fullName || '',
+                        account.firstName || '',
+                        account.lastName || '',
+                        account.name || '',
+                        account.email || '',
+                        account.emailAddress || '',
+                        account.userEmail || '',
+                        account.uid || '',
+                        account.accountId || ''
+                    ].join(' ').toLowerCase();
+                    
+                    if (!searchableText.includes(searchTerm)) return false;
+                }
+
+                // Account type filter
+                if (accountTypeFilter && account.role !== accountTypeFilter) return false;
+
+                // Status filter
+                if (statusFilter) {
+                    if (statusFilter === 'active' && account.isBlocked) return false;
+                    if (statusFilter === 'blocked' && !account.isBlocked) return false;
+                }
+
+                return true;
+            });
+
+            currentPage = 1;
+            clearSelection();
+            displayAccounts();
+            updateSummaryCards();
+            updateRecordCount();
+        }
+
+        // Clear all filters
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('accountTypeFilter').value = '';
+            document.getElementById('statusFilter').value = '';
+            applyFilters();
+        }
+
+        // Display accounts in table/cards
+        function displayAccounts() {
+            console.log('displayAccounts called');
+            console.log('filteredAccounts length:', filteredAccounts.length);
+            console.log('filteredAccounts:', filteredAccounts);
+            
+            const startIndex = (currentPage - 1) * accountsPerPage;
+            const endIndex = startIndex + accountsPerPage;
+            const accountsToShow = filteredAccounts.slice(startIndex, endIndex);
+
+            console.log('accountsToShow:', accountsToShow);
+
+            const tableBody = document.getElementById('accounts-table-body');
+            const cardsContainer = document.getElementById('accounts-cards');
+            const accountsTable = document.getElementById('accounts-table');
+            const accountsCards = document.getElementById('accounts-cards');
+            const noRecords = document.getElementById('no-records');
+
+            // Check if elements exist
+            if (!tableBody || !cardsContainer || !accountsTable || !accountsCards || !noRecords) {
+                console.error('Required DOM elements not found');
+                return;
+            }
+
+            if (filteredAccounts.length === 0) {
+                console.log('No filtered accounts, showing no records message');
+                tableBody.innerHTML = '';
+                cardsContainer.innerHTML = '';
+                accountsTable.classList.add('hidden');
+                accountsCards.classList.add('hidden');
+                noRecords.classList.remove('hidden');
+                document.getElementById('pagination-controls').style.display = 'none';
+                return;
+            }
+
+            console.log('Showing records, hiding no records message');
+            noRecords.classList.add('hidden');
+            accountsTable.classList.remove('hidden');
+            accountsCards.classList.remove('hidden');
+            document.getElementById('pagination-controls').style.display = 'block';
+
+            // Desktop table
+            tableBody.innerHTML = accountsToShow.map(account => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <input type="checkbox" value="${account.uid}" onchange="toggleAccountSelection('${account.uid}')" 
+                               ${selectedAccounts.has(account.uid) ? 'checked' : ''}
+                               class="rounded border-gray-300 text-red-600 focus:ring-red-500">
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10">
+                                <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                                    <span class="text-sm font-medium text-gray-700">${getInitials(account.fullName)}</span>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900">${account.fullName || 'N/A'}</div>
+                                <div class="text-sm text-gray-500">${account.email || 'N/A'}</div>
+                                <div class="text-xs text-gray-400">ID: ${account.uid.substring(0, 8)}...</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">${account.role || 'N/A'}</div>
+                        <div class="text-sm text-gray-500">
+                            ${account.role === 'Staff' && account.featureGranted ? 
+                                `Features: ${account.featureGranted.slice(0, 2).join(', ')}${account.featureGranted.length > 2 ? '...' : ''}` : 
+                                'Standard access'}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${account.isBlocked ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}">
+                            ${account.isBlocked ? 'Blocked' : 'Active'}
+                        </span>
+                        <div class="text-xs text-gray-500 mt-1">
+                            ${account.lastLogin ? `Last: ${formatDate(account.lastLogin)}` : 'Never logged in'}
+                        </div>
+                        ${account.isBlocked ? `<div class="text-xs text-red-600 mt-1" title="${account.blockReason || 'No reason provided'}">Blocked ${formatDate(account.blockedDate)}</div>` : ''}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                        <div class="flex justify-center space-x-2">
+                            ${account.isBlocked ? 
+                                `<button onclick="showUnblockModal('${account.uid}')" class="text-green-600 hover:text-green-900 text-sm">Unblock</button>` :
+                                `<button onclick="showBlockModal('${account.uid}')" class="text-red-600 hover:text-red-900 text-sm">Block</button>`
+                            }
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Mobile cards
+            cardsContainer.innerHTML = accountsToShow.map(account => `
+                <div class="bg-white border border-gray-200 rounded-lg p-4">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex items-center">
+                            <input type="checkbox" value="${account.uid}" onchange="toggleAccountSelection('${account.uid}')" 
+                                   ${selectedAccounts.has(account.uid) ? 'checked' : ''}
+                                   class="rounded border-gray-300 text-red-600 focus:ring-red-500 mr-3">
+                            <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                                <span class="text-sm font-medium text-gray-700">${getInitials(account.fullName)}</span>
+                            </div>
+                            <div class="ml-3">
+                                <div class="text-sm font-medium text-gray-900">${account.fullName || 'N/A'}</div>
+                                <div class="text-xs text-gray-500">${account.email || 'N/A'}</div>
+                            </div>
+                        </div>
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${account.isBlocked ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}">
+                            ${account.isBlocked ? 'Blocked' : 'Active'}
+                        </span>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3 text-sm mb-3">
+                        <div>
+                            <span class="text-gray-500">Role:</span>
+                            <span class="ml-1 font-medium">${account.role || 'N/A'}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">ID:</span>
+                            <span class="ml-1 font-mono text-xs">${account.uid.substring(0, 8)}...</span>
+                        </div>
+                        <div class="col-span-2">
+                            <span class="text-gray-500">Last Login:</span>
+                            <span class="ml-1">${account.lastLogin ? formatDate(account.lastLogin) : 'Never'}</span>
+                        </div>
+                        ${account.isBlocked ? `
+                        <div class="col-span-2">
+                            <span class="text-gray-500">Blocked:</span>
+                            <span class="ml-1 text-red-600">${formatDate(account.blockedDate)}</span>
+                            ${account.blockReason ? `<div class="text-xs text-gray-500 mt-1">"${account.blockReason}"</div>` : ''}
+                        </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="flex justify-end">
+                        ${account.isBlocked ? 
+                            `<button onclick="showUnblockModal('${account.uid}')" class="px-3 py-1 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors">Unblock</button>` :
+                            `<button onclick="showBlockModal('${account.uid}')" class="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors">Block</button>`
+                        }
+                    </div>
+                </div>
+            `).join('');
+
+            setupPagination();
+        }
+
+        // Toggle individual account selection
+        function toggleAccountSelection(uid) {
+            if (selectedAccounts.has(uid)) {
+                selectedAccounts.delete(uid);
+            } else {
+                selectedAccounts.add(uid);
+            }
+            updateSelectionUI();
+        }
+
+        // Toggle select all accounts
+        function toggleSelectAll() {
+            const selectAllCheckbox = document.getElementById('selectAll');
+            
+            if (selectAllCheckbox.checked) {
+                // Select all visible accounts
+                filteredAccounts.forEach(account => selectedAccounts.add(account.uid));
+            } else {
+                // Clear selection
+                selectedAccounts.clear();
+            }
+            
+            updateSelectionUI();
+            displayAccounts(); // Refresh to update checkboxes
+        }
+
+        // Update selection-related UI
+        function updateSelectionUI() {
+            const count = selectedAccounts.size;
+            const bulkActionsBar = document.getElementById('bulkActionsBar');
+            const bulkSelectionText = document.getElementById('bulkSelectionText');
+            const selectedCountDisplay = document.getElementById('selectedCount');
+            
+            selectedCountDisplay.textContent = count;
+            
+            if (count > 0) {
+                bulkActionsBar.classList.remove('hidden');
+                bulkSelectionText.textContent = `${count} account${count !== 1 ? 's' : ''} selected`;
+            } else {
+                bulkActionsBar.classList.add('hidden');
+            }
+
+            // Update select all checkbox state
+            const selectAllCheckbox = document.getElementById('selectAll');
+            if (filteredAccounts.length === 0) {
+                selectAllCheckbox.indeterminate = false;
+                selectAllCheckbox.checked = false;
+            } else if (selectedAccounts.size === filteredAccounts.length) {
+                selectAllCheckbox.indeterminate = false;
+                selectAllCheckbox.checked = true;
+            } else if (selectedAccounts.size > 0) {
+                selectAllCheckbox.indeterminate = true;
+                selectAllCheckbox.checked = false;
+            } else {
+                selectAllCheckbox.indeterminate = false;
+                selectAllCheckbox.checked = false;
+            }
+        }
+
+        // Clear selection
+        function clearSelection() {
+            selectedAccounts.clear();
+            updateSelectionUI();
+            displayAccounts();
+        }
+
+        // Show block modal for single account
+        function showBlockModal(uid) {
+            const account = allAccounts.find(acc => acc.uid === uid);
+            if (!account) return;
+
+            pendingAction = { type: 'block', accounts: [account] };
+            
+            document.getElementById('blockModalContent').innerHTML = `
+                <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h4 class="text-sm font-medium text-red-800">Confirm Account Block</h4>
+                            <p class="text-sm text-red-700 mt-1">
+                                Are you sure you want to block the account for <strong>${account.fullName}</strong>?
+                                This will prevent them from logging into the system.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 p-3 rounded">
+                    <div class="text-sm">
+                        <strong>Account Details:</strong><br>
+                        Name: ${account.fullName}<br>
+                        Email: ${account.email}<br>
+                        Role: ${account.role}<br>
+                        Account ID: ${account.uid.substring(0, 8)}...
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('blockReason').value = '';
+            document.getElementById('blockModal').classList.remove('hidden');
+        }
+
+        // Show unblock modal for single account
+        function showUnblockModal(uid) {
+            const account = allAccounts.find(acc => acc.uid === uid);
+            if (!account) return;
+
+            pendingAction = { type: 'unblock', accounts: [account] };
+            
+            document.getElementById('unblockModalContent').innerHTML = `
+                <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h4 class="text-sm font-medium text-green-800">Confirm Account Unblock</h4>
+                            <p class="text-sm text-green-700 mt-1">
+                                Are you sure you want to unblock the account for <strong>${account.fullName}</strong>?
+                                This will restore their access to the system.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 p-3 rounded">
+                    <div class="text-sm">
+                        <strong>Account Details:</strong><br>
+                        Name: ${account.fullName}<br>
+                        Email: ${account.email}<br>
+                        Role: ${account.role}<br>
+                        ${account.blockReason ? `<strong>Block Reason:</strong> ${account.blockReason}<br>` : ''}
+                        ${account.blockedDate ? `<strong>Blocked Date:</strong> ${formatDate(account.blockedDate)}<br>` : ''}
+                        Account ID: ${account.uid.substring(0, 8)}...
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('unblockModal').classList.remove('hidden');
+        }
+
+        // Bulk block accounts
+        function bulkBlockAccounts() {
+            if (selectedAccounts.size === 0) {
+                showMessage('No accounts selected.', 'error');
+                return;
+            }
+
+            const accounts = Array.from(selectedAccounts).map(uid => 
+                allAccounts.find(acc => acc.uid === uid)
+            ).filter(acc => acc && !acc.isBlocked);
+
+            if (accounts.length === 0) {
+                showMessage('Selected accounts are already blocked.', 'error');
+                return;
+            }
+
+            pendingAction = { type: 'block', accounts };
+            
+            document.getElementById('blockModalContent').innerHTML = `
+                <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h4 class="text-sm font-medium text-red-800">Confirm Bulk Block</h4>
+                            <p class="text-sm text-red-700 mt-1">
+                                Are you sure you want to block <strong>${accounts.length} account${accounts.length !== 1 ? 's' : ''}</strong>?
+                                This will prevent them from logging into the system.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 p-3 rounded max-h-40 overflow-y-auto">
+                    <div class="text-sm">
+                        <strong>Accounts to be blocked:</strong><br>
+                        ${accounts.map(acc => `• ${acc.fullName} (${acc.role})`).join('<br>')}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('blockReason').value = '';
+            document.getElementById('blockModal').classList.remove('hidden');
+        }
+
+        // Bulk unblock accounts
+        function bulkUnblockAccounts() {
+            if (selectedAccounts.size === 0) {
+                showMessage('No accounts selected.', 'error');
+                return;
+            }
+
+            const accounts = Array.from(selectedAccounts).map(uid => 
+                allAccounts.find(acc => acc.uid === uid)
+            ).filter(acc => acc && acc.isBlocked);
+
+            if (accounts.length === 0) {
+                showMessage('Selected accounts are not blocked.', 'error');
+                return;
+            }
+
+            pendingAction = { type: 'unblock', accounts };
+            
+            document.getElementById('unblockModalContent').innerHTML = `
+                <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h4 class="text-sm font-medium text-green-800">Confirm Bulk Unblock</h4>
+                            <p class="text-sm text-green-700 mt-1">
+                                Are you sure you want to unblock <strong>${accounts.length} account${accounts.length !== 1 ? 's' : ''}</strong>?
+                                This will restore their access to the system.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 p-3 rounded max-h-40 overflow-y-auto">
+                    <div class="text-sm">
+                        <strong>Accounts to be unblocked:</strong><br>
+                        ${accounts.map(acc => `• ${acc.fullName} (${acc.role})`).join('<br>')}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('unblockModal').classList.remove('hidden');
+        }
+
+        // Confirm block action
+        async function confirmBlockAction() {
+            if (!pendingAction || pendingAction.type !== 'block') return;
+
+            try {
+                const reason = document.getElementById('blockReason').value.trim() || 'No reason provided';
+                
+                // Get current user's display name
+                let blockedByName = '';
+                if (currentUser.firstName && currentUser.lastName) {
+                    blockedByName = `${currentUser.firstName} ${currentUser.lastName}`;
+                } else if (currentUser.name) {
+                    blockedByName = currentUser.name;
+                } else if (currentUser.fullName) {
+                    blockedByName = currentUser.fullName;
+                } else {
+                    blockedByName = currentUser.email || 'Unknown User';
+                }
+                
+                const batch = writeBatch(db);
+
+                pendingAction.accounts.forEach(account => {
+                    const userRef = doc(db, 'users', account.uid);
+                    batch.update(userRef, {
+                        isBlocked: true,
+                        blockReason: reason,
+                        blockedBy: blockedByName,
+                        blockedDate: new Date().toISOString()
+                    });
+                });
+
+                await batch.commit();
+
+                // Update local data
+                pendingAction.accounts.forEach(account => {
+                    const localAccount = allAccounts.find(acc => acc.uid === account.uid);
+                    if (localAccount) {
+                        localAccount.isBlocked = true;
+                        localAccount.blockReason = reason;
+                        localAccount.blockedBy = blockedByName;
+                        localAccount.blockedDate = new Date().toISOString();
+                    }
+                });
+
+                showMessage(`Successfully blocked ${pendingAction.accounts.length} account${pendingAction.accounts.length !== 1 ? 's' : ''}.`, 'success');
+                closeBlockModal();
+                clearSelection();
+                applyFilters();
+                updateSummaryCards();
+
+            } catch (error) {
+                console.error('Error blocking accounts:', error);
+                showMessage('Error blocking accounts. Please try again.', 'error');
+            }
+        }
+
+        // Confirm unblock action
+        async function confirmUnblockAction() {
+            if (!pendingAction || pendingAction.type !== 'unblock') return;
+
+            try {
+                // Get current user's display name
+                let unblockedByName = '';
+                if (currentUser.firstName && currentUser.lastName) {
+                    unblockedByName = `${currentUser.firstName} ${currentUser.lastName}`;
+                } else if (currentUser.name) {
+                    unblockedByName = currentUser.name;
+                } else if (currentUser.fullName) {
+                    unblockedByName = currentUser.fullName;
+                } else {
+                    unblockedByName = currentUser.email || 'Unknown User';
+                }
+                
+                const batch = writeBatch(db);
+
+                pendingAction.accounts.forEach(account => {
+                    const userRef = doc(db, 'users', account.uid);
+                    batch.update(userRef, {
+                        isBlocked: false,
+                        blockReason: null,
+                        blockedBy: null,
+                        blockedDate: null,
+                        unblockedBy: unblockedByName,
+                        unblockedDate: new Date().toISOString()
+                    });
+                });
+
+                await batch.commit();
+
+                // Update local data
+                pendingAction.accounts.forEach(account => {
+                    const localAccount = allAccounts.find(acc => acc.uid === account.uid);
+                    if (localAccount) {
+                        localAccount.isBlocked = false;
+                        localAccount.blockReason = null;
+                        localAccount.blockedBy = null;
+                        localAccount.blockedDate = null;
+                    }
+                });
+
+                showMessage(`Successfully unblocked ${pendingAction.accounts.length} account${pendingAction.accounts.length !== 1 ? 's' : ''}.`, 'success');
+                closeUnblockModal();
+                clearSelection();
+                applyFilters();
+                updateSummaryCards();
+
+            } catch (error) {
+                console.error('Error unblocking accounts:', error);
+                showMessage('Error unblocking accounts. Please try again.', 'error');
+            }
+        }
+
+        // Close modals
+        function closeBlockModal() {
+            document.getElementById('blockModal').classList.add('hidden');
+            pendingAction = null;
+        }
+
+        function closeUnblockModal() {
+            document.getElementById('unblockModal').classList.add('hidden');
+            pendingAction = null;
+        }
+
+        // Update summary cards
+        function updateSummaryCards() {
+            const total = allAccounts.length;
+            const active = allAccounts.filter(acc => !acc.isBlocked).length;
+            const blocked = allAccounts.filter(acc => acc.isBlocked).length;
+
+            document.getElementById('totalAccounts').textContent = total;
+            document.getElementById('activeAccounts').textContent = active;
+            document.getElementById('blockedAccounts').textContent = blocked;
+        }
+
+        // Update record count
+        function updateRecordCount() {
+            const count = filteredAccounts.length;
+            document.getElementById('recordCount').textContent = `${count} account${count !== 1 ? 's' : ''}`;
+        }
+
+        // Pagination functions
+        function setupPagination() {
+            const totalPages = Math.ceil(filteredAccounts.length / accountsPerPage);
+            const startRecord = (currentPage - 1) * accountsPerPage + 1;
+            const endRecord = Math.min(currentPage * accountsPerPage, filteredAccounts.length);
+
+            document.getElementById('startRecord').textContent = filteredAccounts.length > 0 ? startRecord : 0;
+            document.getElementById('endRecord').textContent = endRecord;
+            document.getElementById('totalRecordsCount').textContent = filteredAccounts.length;
+
+            // Update button states
+            const prevBtn = document.getElementById('prevPage');
+            const nextBtn = document.getElementById('nextPage');
+            const prevBtnMobile = document.getElementById('prevPageMobile');
+            const nextBtnMobile = document.getElementById('nextPageMobile');
+
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === totalPages;
+            prevBtnMobile.disabled = currentPage === 1;
+            nextBtnMobile.disabled = currentPage === totalPages;
+
+            generatePageNumbers(totalPages);
+        }
+
+        function generatePageNumbers(totalPages) {
+            const paginationNav = document.getElementById('paginationNav');
+            const prevBtn = paginationNav.querySelector('#prevPage');
+            const nextBtn = paginationNav.querySelector('#nextPage');
+            
+            // Remove existing page numbers
+            const existingNumbers = paginationNav.querySelectorAll('.page-number');
+            existingNumbers.forEach(btn => btn.remove());
+            
+            if (totalPages <= 1) return;
+            
+            let startPage = Math.max(1, currentPage - 3);
+            let endPage = Math.min(totalPages, startPage + 6);
+            
+            if (endPage - startPage < 6) {
+                startPage = Math.max(1, endPage - 6);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `page-number relative inline-flex items-center px-4 py-2 text-sm font-medium border ${
+                    i === currentPage 
+                        ? 'z-10 bg-red-50 border-red-500 text-red-600' 
+                        : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                }`;
+                pageBtn.textContent = i;
+                pageBtn.onclick = () => goToPage(i);
+                
+                paginationNav.insertBefore(pageBtn, nextBtn);
+            }
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            displayAccounts();
+        }
+
+        function nextPage() {
+            const totalPages = Math.ceil(filteredAccounts.length / accountsPerPage);
+            if (currentPage < totalPages) {
+                goToPage(currentPage + 1);
+            }
+        }
+
+        function prevPage() {
+            if (currentPage > 1) {
+                goToPage(currentPage - 1);
+            }
+        }
+
+        // Refresh data
+        async function refreshData() {
+            await loadAccountsData();
+            clearSelection();
+            showMessage('Data refreshed successfully.', 'success');
+        }
+
+        // Export accounts data
+        function exportAccountsData() {
+            if (filteredAccounts.length === 0) {
+                showMessage('No accounts to export.', 'error');
+                return;
+            }
+
+            const headers = [
+                'UID', 'Full Name', 'First Name', 'Last Name', 'Email', 'Role', 'Account Type', 'Is Blocked', 
+                'Block Reason', 'Blocked By', 'Blocked Date', 'Date Added', 'Last Login'
+            ];
+            
+            const csvContent = [
+                headers.join(','),
+                ...filteredAccounts.map(account => [
+                    `"${account.uid || ''}"`,
+                    `"${account.fullName || ''}"`,
+                    `"${account.firstName || ''}"`,
+                    `"${account.lastName || ''}"`,
+                    `"${account.email || ''}"`,
+                    `"${account.role || ''}"`,
+                    `"${account.accountType || ''}"`,
+                    `"${account.isBlocked ? 'Yes' : 'No'}"`,
+                    `"${account.blockReason || ''}"`,
+                    `"${account.blockedBy || ''}"`,
+                    `"${account.blockedDate || ''}"`,
+                    `"${account.dateAdded || ''}"`,
+                    `"${account.lastLogin || ''}"`
+                ].join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `account_management_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showMessage('Account data exported successfully!', 'success');
+        }
+
+        // Utility functions
+        function getInitials(name) {
+            if (!name) return '??';
+            return name.split(' ').map(word => word.charAt(0)).join('').substring(0, 2).toUpperCase();
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            } catch (error) {
+                return dateString;
+            }
+        }
+
+        function showMessage(message, type) {
+            const container = document.getElementById('messageContainer');
+            const bgColor = type === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 
+                          type === 'info' ? 'bg-blue-100 border-blue-400 text-blue-700' :
+                          'bg-red-100 border-red-400 text-red-700';
+            
+            container.innerHTML = `
+                <div class="${bgColor} px-4 py-3 rounded border">
+                    ${message}
+                </div>
+            `;
+            container.classList.remove('hidden');
+            
+            if (type === 'success' || type === 'info') {
+                setTimeout(() => {
+                    hideMessage();
+                }, 5000);
+            }
+        }
+
+        function hideMessage() {
+            document.getElementById('messageContainer').classList.add('hidden');
+        }
+
+        // Close modals when clicking outside
+        document.getElementById('blockModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeBlockModal();
+            }
+        });
+        
+        document.getElementById('unblockModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeUnblockModal();
+            }
+        });
+
+        // Make functions globally accessible for onclick handlers
+        window.toggleAccountSelection = toggleAccountSelection;
+        window.toggleSelectAll = toggleSelectAll;
+        window.showBlockModal = showBlockModal;
+        window.showUnblockModal = showUnblockModal;
+        window.closeBlockModal = closeBlockModal;
+        window.closeUnblockModal = closeUnblockModal;
+        window.confirmBlockAction = confirmBlockAction;
+        window.confirmUnblockAction = confirmUnblockAction;
+        window.bulkBlockAccounts = bulkBlockAccounts;
+        window.bulkUnblockAccounts = bulkUnblockAccounts;
+        window.clearSelection = clearSelection;
+        window.clearFilters = clearFilters;
+        window.refreshData = refreshData;
+        window.exportAccountsData = exportAccountsData;
+        window.goToPage = goToPage;
+        window.nextPage = nextPage;
+        window.prevPage = prevPage;
+    </script>
+</body>
+</html>
