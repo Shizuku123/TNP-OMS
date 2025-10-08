@@ -156,88 +156,98 @@
 
     <!-- HMP Modal -->
     <div id="hmpModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-        <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
+        <div class="relative top-4 mx-auto p-3 sm:p-5 border w-full max-w-full sm:w-11/12 sm:max-w-4xl shadow-lg rounded-none sm:rounded-md bg-white min-h-screen sm:min-h-0 sm:top-20">
             <div class="mt-3">
-                <h3 class="text-lg font-bold text-gray-900 mb-4">Add Health & Medical Profile Record</h3>
-                <form id="hmpForm" class="space-y-4">
+                <!-- Mobile Header with Close Button -->
+                <div class="flex items-center justify-between mb-4 pb-3 border-b sm:border-b-0 sm:pb-0">
+                    <h3 class="text-lg sm:text-xl font-bold text-gray-900">Add Health & Medical Profile Record</h3>
+                    <button type="button" onclick="closeHmpModal()" class="sm:hidden p-2 text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <form id="hmpForm" class="space-y-4 sm:space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Date of Check-up *</label>
-                            <input type="date" name="dateOfCheckUp" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <input type="date" name="dateOfCheckUp" required class="w-full px-3 py-2 text-base sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Created By *</label>
-                            <input type="text" name="createdBy" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <input type="text" name="createdBy" required class="w-full px-3 py-2 text-base sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
                         </div>
                     </div>
                     
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Diagnosis</label>
-                        <textarea name="diagnosis" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary"></textarea>
+                        <textarea name="diagnosis" rows="2" class="w-full px-3 py-2 text-base sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary resize-none"></textarea>
                     </div>
                     
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Prescribed Medications (one per line)</label>
-                        <textarea name="prescribedMedications" rows="3" placeholder="Enter each medication on a new line" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary"></textarea>
+                        <textarea name="prescribedMedications" rows="3" placeholder="Enter each medication on a new line" class="w-full px-3 py-2 text-base sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary resize-none"></textarea>
                     </div>
                     
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Immunizations</label>
                         <div id="immunizationsList" class="space-y-2">
-                            <div class="flex space-x-2">
-                                <input type="text" placeholder="Immunization name" class="flex-1 px-3 py-2 border border-gray-300 rounded-md immunization-name">
-                                <input type="date" class="px-3 py-2 border border-gray-300 rounded-md immunization-date">
-                                <button type="button" class="px-3 py-2 bg-red-primary text-white rounded-md hover:bg-red-700" onclick="addImmunization()">+</button>
+                            <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                                <input type="text" placeholder="Immunization name" class="flex-1 px-3 py-2 text-base sm:text-sm border border-gray-300 rounded-md immunization-name">
+                                <input type="date" class="px-3 py-2 text-base sm:text-sm border border-gray-300 rounded-md immunization-date">
+                                <button type="button" class="px-4 py-2 bg-red-primary text-white rounded-md hover:bg-red-700 text-sm font-medium" onclick="addImmunization()">Add</button>
                             </div>
                         </div>
                     </div>
                     
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Procedures Undergone (one per line)</label>
-                        <textarea name="proceduresUndergone" rows="2" placeholder="Enter each procedure on a new line" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary"></textarea>
+                        <textarea name="proceduresUndergone" rows="2" placeholder="Enter each procedure on a new line" class="w-full px-3 py-2 text-base sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary resize-none"></textarea>
                     </div>
                     
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Procedures to be Undertaken (one per line)</label>
-                        <textarea name="proceduresToBeUndertaken" rows="2" placeholder="Enter each procedure on a new line" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary"></textarea>
+                        <textarea name="proceduresToBeUndertaken" rows="2" placeholder="Enter each procedure on a new line" class="w-full px-3 py-2 text-base sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary resize-none"></textarea>
                     </div>
                     
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Laboratory Workups (one per line)</label>
-                        <textarea name="laboratoryWorkups" rows="2" placeholder="Enter each lab work on a new line" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary"></textarea>
+                        <textarea name="laboratoryWorkups" rows="2" placeholder="Enter each lab work on a new line" class="w-full px-3 py-2 text-base sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary resize-none"></textarea>
                     </div>
                     
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Laboratory Results</label>
                         <div id="labResultsList" class="space-y-2">
-                            <div class="flex space-x-2">
-                                <input type="text" placeholder="Test name" class="flex-1 px-3 py-2 border border-gray-300 rounded-md lab-test">
-                                <input type="text" placeholder="Result" class="flex-1 px-3 py-2 border border-gray-300 rounded-md lab-result">
-                                <button type="button" class="px-3 py-2 bg-red-primary text-white rounded-md hover:bg-red-700" onclick="addLabResult()">+</button>
+                            <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                                <input type="text" placeholder="Test name" class="flex-1 px-3 py-2 text-base sm:text-sm border border-gray-300 rounded-md lab-test">
+                                <input type="text" placeholder="Result" class="flex-1 px-3 py-2 text-base sm:text-sm border border-gray-300 rounded-md lab-result">
+                                <button type="button" class="px-4 py-2 bg-red-primary text-white rounded-md hover:bg-red-700 text-sm font-medium" onclick="addLabResult()">Add</button>
                             </div>
                         </div>
                     </div>
                     
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Doctor Remarks (one per line)</label>
-                        <textarea name="doctorRemarks" rows="3" placeholder="Enter each remark on a new line" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary"></textarea>
+                        <textarea name="doctorRemarks" rows="3" placeholder="Enter each remark on a new line" class="w-full px-3 py-2 text-base sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary resize-none"></textarea>
                     </div>
                     
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Follow-up Check-up Date</label>
-                        <input type="date" name="followUpCheckUpDate" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        <input type="date" name="followUpCheckUpDate" class="w-full px-3 py-2 text-base sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
                     </div>
                     
                     <!-- Document Upload Option -->
                     <div class="border-t pt-4">
                         <h4 class="font-medium text-gray-900 mb-2">Alternative: Upload Scanned Document</h4>
                         <p class="text-sm text-gray-600 mb-2">You can scan and upload the medical document instead of filling out the form above.</p>
-                        <input type="file" name="scannedDocument" accept="image/*,.pdf" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        <input type="file" name="scannedDocument" accept="image/*,.pdf" class="w-full px-3 py-2 text-base sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
                     </div>
                     
-                    <div class="flex justify-end space-x-2 pt-4">
-                        <button type="button" onclick="closeHmpModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">Cancel</button>
-                        <button type="submit" class="px-4 py-2 bg-red-primary text-white rounded-md hover:bg-red-700">Save Record</button>
+                    <!-- Mobile-friendly Action Buttons -->
+                    <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 pt-4 mt-6 border-t sm:border-t-0">
+                        <button type="button" onclick="closeHmpModal()" class="w-full sm:w-auto px-4 py-3 sm:py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 font-medium">Cancel</button>
+                        <button type="submit" class="w-full sm:w-auto px-4 py-3 sm:py-2 bg-red-primary text-white rounded-md hover:bg-red-700 font-medium">Save Record</button>
                     </div>
                 </form>
             </div>
@@ -1195,11 +1205,11 @@
                 if (record.immunizations && record.immunizations.length > 0) {
                     record.immunizations.forEach(imm => {
                         const div = document.createElement('div');
-                        div.className = 'flex space-x-2';
+                        div.className = 'flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2';
                         div.innerHTML = `
-                            <input type="text" placeholder="Immunization name" class="flex-1 px-3 py-2 border border-gray-300 rounded-md immunization-name" value="${imm.name || ''}">
-                            <input type="date" class="px-3 py-2 border border-gray-300 rounded-md immunization-date" value="${imm.dateGiven || ''}">
-                            <button type="button" class="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700" onclick="this.parentElement.remove()">-</button>
+                            <input type="text" placeholder="Immunization name" class="flex-1 px-3 py-2 text-base sm:text-sm border border-gray-300 rounded-md immunization-name" value="${imm.name || ''}">
+                            <input type="date" class="px-3 py-2 text-base sm:text-sm border border-gray-300 rounded-md immunization-date" value="${imm.dateGiven || ''}">
+                            <button type="button" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm font-medium" onclick="this.parentElement.remove()">Remove</button>
                         `;
                         immunizationsList.appendChild(div);
                     });
@@ -1215,11 +1225,11 @@
                 if (record.laboratoryResults && record.laboratoryResults.length > 0) {
                     record.laboratoryResults.forEach(lab => {
                         const div = document.createElement('div');
-                        div.className = 'flex space-x-2';
+                        div.className = 'flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2';
                         div.innerHTML = `
-                            <input type="text" placeholder="Test name" class="flex-1 px-3 py-2 border border-gray-300 rounded-md lab-test" value="${lab.test || ''}">
-                            <input type="text" placeholder="Result" class="flex-1 px-3 py-2 border border-gray-300 rounded-md lab-result" value="${lab.result || ''}">
-                            <button type="button" class="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700" onclick="this.parentElement.remove()">-</button>
+                            <input type="text" placeholder="Test name" class="flex-1 px-3 py-2 text-base sm:text-sm border border-gray-300 rounded-md lab-test" value="${lab.test || ''}">
+                            <input type="text" placeholder="Result" class="flex-1 px-3 py-2 text-base sm:text-sm border border-gray-300 rounded-md lab-result" value="${lab.result || ''}">
+                            <button type="button" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm font-medium" onclick="this.parentElement.remove()">Remove</button>
                         `;
                         labResultsList.appendChild(div);
                     });
@@ -1883,11 +1893,11 @@
         window.addImmunization = function() {
             const container = document.getElementById('immunizationsList');
             const div = document.createElement('div');
-            div.className = 'flex space-x-2';
+            div.className = 'flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2';
             div.innerHTML = `
-                <input type="text" placeholder="Immunization name" class="flex-1 px-3 py-2 border border-gray-300 rounded-md immunization-name">
-                <input type="date" class="px-3 py-2 border border-gray-300 rounded-md immunization-date">
-                <button type="button" class="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700" onclick="this.parentElement.remove()">-</button>
+                <input type="text" placeholder="Immunization name" class="flex-1 px-3 py-2 text-base sm:text-sm border border-gray-300 rounded-md immunization-name">
+                <input type="date" class="px-3 py-2 text-base sm:text-sm border border-gray-300 rounded-md immunization-date">
+                <button type="button" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm font-medium" onclick="this.parentElement.remove()">Remove</button>
             `;
             container.appendChild(div);
         }
@@ -1895,11 +1905,11 @@
         window.addLabResult = function() {
             const container = document.getElementById('labResultsList');
             const div = document.createElement('div');
-            div.className = 'flex space-x-2';
+            div.className = 'flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2';
             div.innerHTML = `
-                <input type="text" placeholder="Test name" class="flex-1 px-3 py-2 border border-gray-300 rounded-md lab-test">
-                <input type="text" placeholder="Result" class="flex-1 px-3 py-2 border border-gray-300 rounded-md lab-result">
-                <button type="button" class="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700" onclick="this.parentElement.remove()">-</button>
+                <input type="text" placeholder="Test name" class="flex-1 px-3 py-2 text-base sm:text-sm border border-gray-300 rounded-md lab-test">
+                <input type="text" placeholder="Result" class="flex-1 px-3 py-2 text-base sm:text-sm border border-gray-300 rounded-md lab-result">
+                <button type="button" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm font-medium" onclick="this.parentElement.remove()">Remove</button>
             `;
             container.appendChild(div);
         }
