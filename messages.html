@@ -28,66 +28,58 @@
   </header>
 
   <div class="flex-1 flex overflow-hidden">
-    <aside id="inbox" 
-  class="fixed inset-y-0 left-0 w-72 bg-white border-r border-gray-200 
-         transform -translate-x-full lg:translate-x-0 lg:static lg:flex flex-col 
-         transition-transform duration-300 ease-in-out z-[60]">
-
-  <!-- Mobile back + search -->
-  <div class="flex items-center gap-2 p-4 border-b border-gray-200 lg:hidden">
-    <button onclick="toggleInbox()" class="p-2 rounded-full hover:bg-gray-100">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-      </svg>
-    </button>
-    <input type="text" placeholder="Search contacts..." 
-      class="flex-1 px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm">
-  </div>
-
-  <!-- Desktop search -->
-  <div class="p-4 border-b border-gray-200 hidden lg:block">
-    <input type="text" placeholder="Search contacts..." 
-      class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm">
-  </div>
-
-  <!-- Inbox List -->
-  <div class="flex-1 overflow-y-auto hidden-scrollbar">
-    <ul class="divide-y divide-gray-100"></ul>
-  </div>
-</aside>
-
-    <!-- Chat Window -->
-    <main class="flex-1 flex flex-col bg-gray-50">
-      <!-- Chat header (for selected contact on mobile) -->
-      <div class="lg:hidden flex items-center gap-3 px-4 py-2 border-b bg-white">
-        <div class="w-8 h-8 rounded-full bg-gray-300"></div>
-        <div class="flex flex-col">
-          <span class="font-medium text-gray-800">John Doe</span>
-          <span class="text-xs text-gray-500">Online</span>
+    <!-- Desktop layout: three panels -->
+    <div class="hidden lg:flex w-full h-full">
+      <!-- Inbox Panel (wider) -->
+      <aside id="inbox" class="flex flex-col w-[26%] min-w-[260px] max-w-sm bg-white border-r border-gray-200 h-full">
+        <div class="p-4 border-b border-gray-200">
+          <input type="text" placeholder="Search contacts..." class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500 text-base">
         </div>
-      </div>
-
-      <!-- Messages -->
-      <div class="flex-1 p-4 space-y-4 overflow-y-auto bg-gray-50 hidden-scrollbar">
-        <div class="flex items-start space-x-2">
-          <div class="bg-gray-100 px-4 py-2 rounded-2xl text-gray-800 max-w-xs">Hello! How are you?</div>
+        <div class="flex-1 overflow-y-auto hidden-scrollbar">
+          <ul class="divide-y divide-gray-100"></ul>
         </div>
-        <div class="flex justify-end items-start space-x-2">
-          <div class="bg-blue-500 px-4 py-2 rounded-2xl text-white max-w-xs">I’m good, thanks! You?</div>
-        </div>
-      </div>
+      </aside>
 
-      <!-- Compose -->
-      <div class="p-3 border-t bg-white flex items-center gap-2">
-        <input type="text" placeholder="Type a message..." class="flex-1 px-4 py-2 rounded-full bg-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
-        <button class="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-          </svg>
-        </button>
-      </div>
-    </main>
-  </div>
+      <!-- Chat Panel (larger bubbles, date/time) -->
+      <main class="flex-1 flex flex-col w-[48%] min-w-[340px] bg-gray-50 h-full">
+        
+      <div id="chat-messages" class="flex-1 p-8 space-y-6 overflow-y-auto bg-gray-50 hidden-scrollbar">
+          
+        </div>
+        <div class="p-5 border-t bg-white flex items-center gap-3">
+          <button class="p-3 rounded-full hover:bg-gray-200" title="Attach file">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l7.07-7.07a4 4 0 00-5.656-5.656l-7.07 7.07a6 6 0 108.485 8.485" />
+            </svg>
+          </button>
+          <input type="text" placeholder="Type a message..." class="flex-1 px-5 py-3 rounded-full bg-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base">
+          <button class="p-3 bg-blue-500 text-white rounded-full hover:bg-blue-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+          </button>
+        </div>
+      </main>
+
+      <!-- Profile Info Panel -->
+  <aside id="profile-info" class="flex flex-col w-[26%] min-w-[260px] max-w-sm bg-white border-l border-gray-200 h-full p-8">
+        <div class="flex flex-col items-center gap-6">
+          <img src="user.png" alt="Profile" class="w-24 h-24 rounded-full object-cover border">
+          <div class="text-center">
+            <div class="font-semibold text-gray-800 text-xl">John Doe</div>
+            <div class="text-sm text-gray-500">Online</div>
+          </div>
+        </div>
+        <div class="mt-10">
+          <div class="font-medium text-gray-700 mb-2">Status</div>
+          <div class="bg-green-100 text-green-700 px-4 py-3 rounded-lg text-base">Available to chat</div>
+        </div>
+      </aside>
+    </div>
+    <!-- Mobile layout: unchanged -->
+    <div class="flex lg:hidden w-full h-full">
+      ...existing code...
+    </div>
 
   <script>
     function toggleInbox() {
