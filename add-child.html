@@ -87,8 +87,14 @@
         <div class="bg-white rounded-lg p-6 sm:p-8 max-w-md w-full mx-4">
             <div class="text-center">
                 <div class="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-b-2 border-red-primary mx-auto"></div>
-                <h3 class="mt-4 text-base sm:text-lg font-medium text-gray-900">Saving Child Record</h3>
-                <p class="mt-2 text-sm text-gray-500">Please wait while we save the child information...</p>
+                <h3 id="loadingTitle" class="mt-4 text-base sm:text-lg font-medium text-gray-900">Uploading Child Record</h3>
+                <p id="loadingMessage" class="mt-2 text-sm text-gray-500">Please wait while we upload the child information to the database...</p>
+                <div class="mt-4">
+                    <div class="bg-gray-200 rounded-full h-2">
+                        <div class="bg-red-primary h-2 rounded-full animate-pulse" style="width: 60%"></div>
+                    </div>
+                    <p class="mt-2 text-xs text-gray-400">Uploading data and attachments...</p>
+                </div>
             </div>
         </div>
     </div>
@@ -219,6 +225,177 @@
                 <div id="cameraError" class="text-center text-sm text-red-600 hidden">
                     <p></p>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Preview Modal -->
+    <div id="previewModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-semibold text-gray-900">Review Child Information</h3>
+                <button id="closePreviewModal" class="text-gray-400 hover:text-gray-600 p-1">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="space-y-6">
+                <!-- Photo Preview Section -->
+                <div id="previewPhotoSection" class="text-center">
+                    <img id="previewPhotoImg" class="h-32 w-32 object-cover rounded-full mx-auto border-4 border-gray-200" src="user.png" alt="Child photo">
+                    <p class="mt-2 text-sm text-gray-600">Child Photo</p>
+                </div>
+                
+                <!-- Basic Information -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="text-lg font-medium text-gray-900 mb-4">Basic Information</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">First Name:</span>
+                            <p id="previewFirstName" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Middle Name:</span>
+                            <p id="previewMiddleName" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Last Name:</span>
+                            <p id="previewLastName" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Gender:</span>
+                            <p id="previewGender" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Date of Birth:</span>
+                            <p id="previewDateOfBirth" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Place of Birth:</span>
+                            <p id="previewPlaceOfBirth" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Nationality:</span>
+                            <p id="previewNationality" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Religion:</span>
+                            <p id="previewReligion" class="text-gray-900 mt-1"></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Background Information -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="text-lg font-medium text-gray-900 mb-4">Background Information</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Entry Date:</span>
+                            <p id="previewEntryDate" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Entry Age:</span>
+                            <p id="previewEntryAge" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Reason for Admission:</span>
+                            <p id="previewReasonForAdmission" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div class="sm:col-span-2 lg:col-span-3">
+                            <span class="text-sm font-medium text-gray-700">Current Status:</span>
+                            <p id="previewCurrentStatus" class="text-gray-900 mt-1"></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Family Information -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="text-lg font-medium text-gray-900 mb-4">Family Information</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Father's Name:</span>
+                            <p id="previewFatherName" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Mother's Name:</span>
+                            <p id="previewMotherName" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Parental Status:</span>
+                            <p id="previewParentalStatus" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Siblings in Orphanage:</span>
+                            <p id="previewSiblingsInOrphanage" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div id="previewSiblingsNamesSection" class="sm:col-span-2 hidden">
+                            <span class="text-sm font-medium text-gray-700">Siblings Names:</span>
+                            <p id="previewSiblingsNames" class="text-gray-900 mt-1"></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Health Information -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="text-lg font-medium text-gray-900 mb-4">Health Information</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Blood Type:</span>
+                            <p id="previewBloodType" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <span class="text-sm font-medium text-gray-700">Allergies:</span>
+                            <p id="previewAllergies" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div class="sm:col-span-2 lg:col-span-3">
+                            <span class="text-sm font-medium text-gray-700">Medical Conditions:</span>
+                            <p id="previewMedicalConditions" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Last Checkup Date:</span>
+                            <p id="previewLastCheckupDate" class="text-gray-900 mt-1"></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Additional Information -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="text-lg font-medium text-gray-900 mb-4">Additional Information</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Case Category:</span>
+                            <p id="previewCaseCategory" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Guardian:</span>
+                            <p id="previewGuardian" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Social Worker:</span>
+                            <p id="previewSocialWorker" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div class="sm:col-span-2 lg:col-span-3">
+                            <span class="text-sm font-medium text-gray-700">Notes:</span>
+                            <p id="previewNotes" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div id="previewAttachmentsSection" class="sm:col-span-2 lg:col-span-3 hidden">
+                            <span class="text-sm font-medium text-gray-700">Attachments:</span>
+                            <p id="previewAttachments" class="text-gray-900 mt-1"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Modal Actions -->
+            <div class="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 mt-6 pt-6 border-t">
+                <button id="editInformationBtn" class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                    Edit Information
+                </button>
+                <button id="confirmSubmitBtn" class="px-6 py-2 bg-red-primary text-white rounded-md hover:bg-red-700 transition-colors">
+                    Confirm & Save Child Record
+                </button>
             </div>
         </div>
     </div>
@@ -610,7 +787,9 @@
         }
 
         // Modal functions
-        function showLoadingScreen() {
+        function showLoadingScreen(title = 'Uploading Child Record', message = 'Please wait while we upload the child information to the database...') {
+            document.getElementById('loadingTitle').textContent = title;
+            document.getElementById('loadingMessage').textContent = message;
             document.getElementById('loadingScreen').classList.remove('hidden');
         }
 
@@ -847,7 +1026,13 @@
 
         async function saveChildRecord(data, isSync = false) {
             try {
-                if (!isSync) showLoadingScreen();
+                if (!isSync) {
+                    const fullName = `${data.firstName} ${data.lastName}`.trim();
+                    showLoadingScreen(
+                        'Uploading Child Record', 
+                        `Uploading record for ${fullName} to the database...`
+                    );
+                }
                 
                 // Check if online for new records (not for sync operations)
                 if (!isSync && !isOnline()) {
@@ -1180,6 +1365,7 @@
                         else if (visibleModal.id === 'successModal') hideSuccessModal();
                         else if (visibleModal.id === 'errorModal') hideErrorModal();
                         else if (visibleModal.id === 'offlineSuccessModal') hideOfflineSuccessModal();
+                        else if (visibleModal.id === 'previewModal') hidePreviewModal();
                     }
                 }
             });
@@ -1236,6 +1422,21 @@
             document.getElementById('syncAllOffline').addEventListener('click', function() {
                 syncAllOfflineRecords();
             });
+
+            // Preview modal buttons
+            document.getElementById('closePreviewModal').addEventListener('click', function() {
+                hidePreviewModal();
+            });
+
+            document.getElementById('editInformationBtn').addEventListener('click', function() {
+                hidePreviewModal();
+                // Focus on the first input field
+                document.getElementById('firstName').focus();
+            });
+
+            document.getElementById('confirmSubmitBtn').addEventListener('click', function() {
+                confirmAndSaveChildRecord();
+            });
         }
 
         function calculateEntryAge() {
@@ -1252,7 +1453,7 @@
             }
         }
 
-        // Form submit: save to Firestore as stringified object (including photo as base64 string)
+        // Form submit: show preview modal first
         async function handleSubmit(e) {
             e.preventDefault();
 
@@ -1310,8 +1511,80 @@
             data.dateAdded = new Date().toISOString().split('T')[0];
             data.childId = await generateChildId();
 
-            // Save the record
-            await saveChildRecord(data);
+            // Store data temporarily and show preview modal
+            window.pendingChildData = data;
+            showPreviewModal(data);
+        }
+
+        // Preview modal functions
+        function showPreviewModal(data) {
+            // Populate preview fields
+            document.getElementById('previewFirstName').textContent = data.firstName || 'Not specified';
+            document.getElementById('previewMiddleName').textContent = data.middleName || 'Not specified';
+            document.getElementById('previewLastName').textContent = data.lastName || 'Not specified';
+            document.getElementById('previewGender').textContent = data.gender || 'Not specified';
+            document.getElementById('previewDateOfBirth').textContent = data.dateOfBirth || 'Not specified';
+            document.getElementById('previewPlaceOfBirth').textContent = data.placeOfBirth || 'Not specified';
+            document.getElementById('previewNationality').textContent = data.nationality || 'Not specified';
+            document.getElementById('previewReligion').textContent = data.religion || 'Not specified';
+            
+            document.getElementById('previewEntryDate').textContent = data.entryDate || 'Not specified';
+            document.getElementById('previewEntryAge').textContent = data.entryAge || 'Not specified';
+            document.getElementById('previewReasonForAdmission').textContent = data.reasonForAdmission || 'Not specified';
+            document.getElementById('previewCurrentStatus').textContent = data.currentStatus || 'Not specified';
+            
+            document.getElementById('previewFatherName').textContent = data.fatherName || 'Not specified';
+            document.getElementById('previewMotherName').textContent = data.motherName || 'Not specified';
+            document.getElementById('previewParentalStatus').textContent = data.parentalStatus || 'Not specified';
+            document.getElementById('previewSiblingsInOrphanage').textContent = data.siblingsInOrphanage || 'Not specified';
+            
+            // Handle siblings names
+            if (data.siblingsInOrphanage === 'Yes' && data.siblingsNamesList) {
+                document.getElementById('previewSiblingsNamesSection').classList.remove('hidden');
+                document.getElementById('previewSiblingsNames').textContent = data.siblingsNamesList;
+            } else {
+                document.getElementById('previewSiblingsNamesSection').classList.add('hidden');
+            }
+            
+            document.getElementById('previewBloodType').textContent = data.bloodType || 'Not specified';
+            document.getElementById('previewAllergies').textContent = data.allergies || 'Not specified';
+            document.getElementById('previewMedicalConditions').textContent = data.medicalConditions || 'Not specified';
+            document.getElementById('previewLastCheckupDate').textContent = data.lastCheckupDate || 'Not specified';
+            
+            document.getElementById('previewCaseCategory').textContent = data.caseCategory || 'Not specified';
+            document.getElementById('previewGuardian').textContent = data.guardian || 'Not specified';
+            document.getElementById('previewSocialWorker').textContent = data.socialWorker || 'Not specified';
+            document.getElementById('previewNotes').textContent = data.notes || 'Not specified';
+            
+            // Handle photo preview
+            if (data.photoString) {
+                document.getElementById('previewPhotoImg').src = data.photoString;
+            } else {
+                document.getElementById('previewPhotoImg').src = 'user.png';
+            }
+            
+            // Handle attachments
+            if (data.attachments && data.attachments.length > 0) {
+                document.getElementById('previewAttachmentsSection').classList.remove('hidden');
+                document.getElementById('previewAttachments').textContent = `${data.attachments.length} file(s) attached`;
+            } else {
+                document.getElementById('previewAttachmentsSection').classList.add('hidden');
+            }
+            
+            // Show the modal
+            document.getElementById('previewModal').classList.remove('hidden');
+        }
+
+        function hidePreviewModal() {
+            document.getElementById('previewModal').classList.add('hidden');
+        }
+
+        async function confirmAndSaveChildRecord() {
+            if (window.pendingChildData) {
+                hidePreviewModal();
+                await saveChildRecord(window.pendingChildData);
+                window.pendingChildData = null;
+            }
         }
 
         function showMessage(message, type) {

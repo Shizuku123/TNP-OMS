@@ -161,6 +161,373 @@
         </div>
     </div>
 
+    <!-- Camera Capture Modal -->
+    <div id="cameraModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Take Photo</h3>
+                <button id="closeCameraModal" class="text-gray-400 hover:text-gray-600 p-1">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                <!-- Camera preview -->
+                <div class="relative bg-gray-100 rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+                    <video id="cameraPreview" class="w-full h-full object-cover" autoplay muted playsinline></video>
+                    <canvas id="photoCanvas" class="hidden"></canvas>
+                </div>
+                
+                <!-- Camera controls -->
+                <div class="flex flex-col sm:flex-row justify-center gap-3">
+                    <button id="switchCameraBtn" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors text-sm">
+                        <svg class="h-4 w-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                        </svg>
+                        Switch Camera
+                    </button>
+                    <button id="capturePhotoBtn" class="px-6 py-2 bg-red-primary text-white rounded-md hover:bg-red-700 transition-colors text-sm">
+                        <svg class="h-4 w-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0118.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        Capture Photo
+                    </button>
+                    <button id="cancelCameraBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-sm">
+                        Cancel
+                    </button>
+                </div>
+                
+                <!-- Camera status -->
+                <div id="cameraStatus" class="text-center text-sm text-gray-500 hidden">
+                    <p>Initializing camera...</p>
+                </div>
+                
+                <!-- Camera error -->
+                <div id="cameraError" class="text-center text-sm text-red-600 hidden">
+                    <p></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Money Donation Preview Modal -->
+    <div id="moneyPreviewModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] flex flex-col">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-6 border-b bg-gradient-to-r from-green-500 to-green-600 text-white rounded-t-lg">
+                <div class="flex items-center">
+                    <svg class="h-8 w-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                    </svg>
+                    <div>
+                        <h3 class="text-xl font-semibold">Money Donation Preview</h3>
+                        <p class="text-green-100 text-sm">Please review the donation information before saving</p>
+                    </div>
+                </div>
+                <button id="closeMoneyPreviewModal" class="text-white hover:text-green-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-colors">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Modal Content -->
+            <div class="flex-1 overflow-y-auto p-6">
+                <div class="space-y-6">
+                    <!-- Donation Summary Section -->
+                    <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-6 border-l-4 border-green-500">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-xl font-bold text-gray-900">Donation Summary</h4>
+                            <div class="text-right">
+                                <div class="text-sm text-gray-600">Donation ID</div>
+                                <div class="text-lg font-bold text-green-600" id="previewMoneyDonationId">DN000</div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="flex items-center text-gray-600">
+                                <svg class="h-5 w-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                                </svg>
+                                <span><strong>Amount:</strong> <span class="text-2xl font-bold text-green-600" id="previewMoneyAmount">₱0.00</span></span>
+                            </div>
+                            <div class="flex items-center text-gray-600">
+                                <svg class="h-5 w-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 9l6-6m0 0l6 6m-6-6v12"></path>
+                                </svg>
+                                <span><strong>Date:</strong> <span id="previewMoneyDate">N/A</span></span>
+                            </div>
+                            <div class="flex items-center text-gray-600">
+                                <svg class="h-5 w-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                                </svg>
+                                <span><strong>Payment Method:</strong> <span id="previewMoneyPaymentMethod">N/A</span></span>
+                            </div>
+                            <div class="flex items-center text-gray-600">
+                                <svg class="h-5 w-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                                <span><strong>Donor:</strong> <span id="previewMoneyDonor">N/A</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Donor Information Section -->
+                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                        <div class="bg-gray-50 px-6 py-3 border-b border-gray-200 rounded-t-lg">
+                            <h5 class="text-lg font-semibold text-gray-900 flex items-center">
+                                <svg class="h-5 w-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                                Donor Information
+                            </h5>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <span class="font-medium text-gray-700">Contact Number:</span>
+                                    <span class="text-gray-600 ml-2" id="previewMoneyContact">-</span>
+                                </div>
+                                <div>
+                                    <span class="font-medium text-gray-700">Email Address:</span>
+                                    <span class="text-gray-600 ml-2" id="previewMoneyEmail">-</span>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <span class="font-medium text-gray-700">Address:</span>
+                                    <span class="text-gray-600 ml-2" id="previewMoneyAddress">-</span>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <span class="font-medium text-gray-700">TIN:</span>
+                                    <span class="text-gray-600 ml-2" id="previewMoneyTIN">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Details Section -->
+                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                        <div class="bg-gray-50 px-6 py-3 border-b border-gray-200 rounded-t-lg">
+                            <h5 class="text-lg font-semibold text-gray-900 flex items-center">
+                                <svg class="h-5 w-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                                </svg>
+                                Payment Details
+                            </h5>
+                        </div>
+                        <div class="p-6">
+                            <div id="previewMoneyPaymentDetails" class="text-sm">
+                                <!-- Payment details will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Purpose Section -->
+                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                        <div class="bg-gray-50 px-6 py-3 border-b border-gray-200 rounded-t-lg">
+                            <h5 class="text-lg font-semibold text-gray-900 flex items-center">
+                                <svg class="h-5 w-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                Purpose
+                            </h5>
+                        </div>
+                        <div class="p-6">
+                            <div class="text-sm">
+                                <span class="text-gray-600" id="previewMoneyPurpose">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 p-6 border-t bg-gray-50 rounded-b-lg">
+                <button id="editMoneyDonationBtn" class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center">
+                    <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                    Edit Information
+                </button>
+                <button id="confirmSaveMoneyBtn" class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center justify-center">
+                    <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Confirm & Save Donation
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- In-Kind Donation Preview Modal -->
+    <div id="inKindPreviewModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] flex flex-col">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-6 border-b bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
+                <div class="flex items-center">
+                    <svg class="h-8 w-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                    </svg>
+                    <div>
+                        <h3 class="text-xl font-semibold">In-Kind Donation Preview</h3>
+                        <p class="text-blue-100 text-sm">Please review the donation information before saving</p>
+                    </div>
+                </div>
+                <button id="closeInKindPreviewModal" class="text-white hover:text-blue-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-colors">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Modal Content -->
+            <div class="flex-1 overflow-y-auto p-6">
+                <div class="space-y-6">
+                    <!-- Donation Summary Section -->
+                    <div class="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-6 border-l-4 border-blue-500">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-xl font-bold text-gray-900">Donation Summary</h4>
+                            <div class="text-right">
+                                <div class="text-sm text-gray-600">Donation ID</div>
+                                <div class="text-lg font-bold text-blue-600" id="previewInKindDonationId">DN000</div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="flex items-center text-gray-600">
+                                <svg class="h-5 w-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                </svg>
+                                <span><strong>Category:</strong> <span class="text-lg font-bold text-blue-600" id="previewInKindCategory">N/A</span></span>
+                            </div>
+                            <div class="flex items-center text-gray-600">
+                                <svg class="h-5 w-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 9l6-6m0 0l6 6m-6-6v12"></path>
+                                </svg>
+                                <span><strong>Date:</strong> <span id="previewInKindDate">N/A</span></span>
+                            </div>
+                            <div class="flex items-center text-gray-600">
+                                <svg class="h-5 w-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
+                                </svg>
+                                <span><strong>Quantity:</strong> <span class="text-lg font-bold text-blue-600" id="previewInKindQuantity">0</span></span>
+                            </div>
+                            <div class="flex items-center text-gray-600">
+                                <svg class="h-5 w-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                                <span><strong>Donor:</strong> <span id="previewInKindDonor">N/A</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Item Information Section -->
+                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                        <div class="bg-gray-50 px-6 py-3 border-b border-gray-200 rounded-t-lg">
+                            <h5 class="text-lg font-semibold text-gray-900 flex items-center">
+                                <svg class="h-5 w-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                </svg>
+                                Item Information
+                            </h5>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <span class="font-medium text-gray-700">Description:</span>
+                                    <span class="text-gray-600 ml-2" id="previewInKindDescription">-</span>
+                                </div>
+                                <div>
+                                    <span class="font-medium text-gray-700">Unit:</span>
+                                    <span class="text-gray-600 ml-2" id="previewInKindUnit">-</span>
+                                </div>
+                                <div>
+                                    <span class="font-medium text-gray-700">Condition:</span>
+                                    <span class="text-gray-600 ml-2" id="previewInKindCondition">-</span>
+                                </div>
+                                <div id="previewInKindExpiryContainer" class="hidden">
+                                    <span class="font-medium text-gray-700">Expiry Date:</span>
+                                    <span class="text-gray-600 ml-2" id="previewInKindExpiry">-</span>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <span class="font-medium text-gray-700">Receiver:</span>
+                                    <span class="text-gray-600 ml-2" id="previewInKindReceiver">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Photo Section -->
+                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                        <div class="bg-gray-50 px-6 py-3 border-b border-gray-200 rounded-t-lg">
+                            <h5 class="text-lg font-semibold text-gray-900 flex items-center">
+                                <svg class="h-5 w-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                Item Photo
+                            </h5>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-center justify-center">
+                                <img id="previewInKindPhoto" class="max-w-xs max-h-48 object-cover rounded-lg border" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgdmlld0JveD0iMCAwIDIwMCAxNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTUwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMDAgNzVMMTIwIDk1SDE2MFY1NUgxMjBMMTAwIDc1WiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K" alt="No photo uploaded">
+                                <div id="previewInKindNoPhoto" class="text-center text-gray-500">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <p>No photo uploaded</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Donor Information Section -->
+                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                        <div class="bg-gray-50 px-6 py-3 border-b border-gray-200 rounded-t-lg">
+                            <h5 class="text-lg font-semibold text-gray-900 flex items-center">
+                                <svg class="h-5 w-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                                Donor Information
+                            </h5>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <span class="font-medium text-gray-700">Contact Number:</span>
+                                    <span class="text-gray-600 ml-2" id="previewInKindContact">-</span>
+                                </div>
+                                <div>
+                                    <span class="font-medium text-gray-700">Email Address:</span>
+                                    <span class="text-gray-600 ml-2" id="previewInKindEmail">-</span>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <span class="font-medium text-gray-700">Address:</span>
+                                    <span class="text-gray-600 ml-2" id="previewInKindAddress">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 p-6 border-t bg-gray-50 rounded-b-lg">
+                <button id="editInKindDonationBtn" class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center">
+                    <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                    Edit Information
+                </button>
+                <button id="confirmSaveInKindBtn" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center">
+                    <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Confirm & Save Donation
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Success/Error Messages -->
     <div id="messageContainer" class="fixed top-20 right-4 z-50 max-w-sm hidden"></div>
 
@@ -448,7 +815,22 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Photo of Donated Items</label>
-                                    <input type="file" name="photo" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
+                                    <div class="space-y-3">
+                                        <input type="file" name="photo" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
+                                        <div class="flex flex-col gap-2">
+                                            <button type="button" id="captureItemPhotoBtn" class="w-full px-3 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium">
+                                                <svg class="h-5 w-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0118.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                </svg>
+                                                Take Photo
+                                            </button>
+                                            <button type="button" id="removeItemPhotoBtn" class="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors hidden">
+                                                Remove Photo
+                                            </button>
+                                        </div>
+                                        <p class="text-sm text-gray-500">Take photo with camera or upload from device</p>
+                                    </div>
                                 </div>
                             </div>
 
@@ -564,6 +946,43 @@
             
             // Update offline indicator on page load
             updateOfflineIndicator();
+            
+            // Preview modal event listeners
+            document.getElementById('closeMoneyPreviewModal').addEventListener('click', hideMoneyPreviewModal);
+            document.getElementById('editMoneyDonationBtn').addEventListener('click', hideMoneyPreviewModal);
+            document.getElementById('confirmSaveMoneyBtn').addEventListener('click', confirmAndSaveMoneyDonation);
+            
+            document.getElementById('closeInKindPreviewModal').addEventListener('click', hideInKindPreviewModal);
+            document.getElementById('editInKindDonationBtn').addEventListener('click', hideInKindPreviewModal);
+            document.getElementById('confirmSaveInKindBtn').addEventListener('click', confirmAndSaveInKindDonation);
+            
+            // Keyboard support for preview modals
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    const moneyModal = document.getElementById('moneyPreviewModal');
+                    const inKindModal = document.getElementById('inKindPreviewModal');
+                    
+                    if (!moneyModal.classList.contains('hidden')) {
+                        hideMoneyPreviewModal();
+                    } else if (!inKindModal.classList.contains('hidden')) {
+                        hideInKindPreviewModal();
+                    }
+                } else if (e.key === 'Enter') {
+                    const moneyModal = document.getElementById('moneyPreviewModal');
+                    const inKindModal = document.getElementById('inKindPreviewModal');
+                    
+                    if (!moneyModal.classList.contains('hidden')) {
+                        e.preventDefault();
+                        confirmAndSaveMoneyDonation();
+                    } else if (!inKindModal.classList.contains('hidden')) {
+                        e.preventDefault();
+                        confirmAndSaveInKindDonation();
+                    }
+                }
+            });
+            
+            // Setup camera functionality
+            setupCameraFunctionality();
         }
 
         // ========== OFFLINE STORAGE FUNCTIONS FOR MONEY DONATIONS ==========
@@ -1229,6 +1648,175 @@
             }
         }
 
+        // ========== PREVIEW MODAL FUNCTIONS ==========
+        
+        function showMoneyPreviewModal() {
+            const form = document.getElementById('moneyDonationForm');
+            const formData = new FormData(form);
+            const isAnonymous = formData.get('anonymous') === 'on';
+            const paymentType = formData.get('typeOfDonation');
+
+            // Generate temporary donation ID for preview
+            const tempDonationId = 'DN' + String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+            
+            // Populate preview modal with form data
+            document.getElementById('previewMoneyDonationId').textContent = tempDonationId;
+            
+            const amount = parseFloat(formData.get('amount')) || 0;
+            document.getElementById('previewMoneyAmount').textContent = '₱' + amount.toLocaleString('en-US', {minimumFractionDigits: 2});
+            
+            document.getElementById('previewMoneyDate').textContent = formData.get('dateOfDonation') || 'N/A';
+            document.getElementById('previewMoneyPaymentMethod').textContent = paymentType || 'N/A';
+            document.getElementById('previewMoneyDonor').textContent = isAnonymous ? 'Anonymous' : (formData.get('donorName') || 'N/A');
+            
+            // Donor Information
+            document.getElementById('previewMoneyContact').textContent = formData.get('contactNumber') || 'Not provided';
+            document.getElementById('previewMoneyEmail').textContent = isAnonymous ? 'Anonymous' : (formData.get('emailAddress') || 'Not provided');
+            document.getElementById('previewMoneyAddress').textContent = formData.get('address') || 'Not provided';
+            document.getElementById('previewMoneyTIN').textContent = formData.get('tin') || 'Not provided';
+            
+            // Payment Details
+            const paymentDetailsContainer = document.getElementById('previewMoneyPaymentDetails');
+            let paymentDetailsHTML = '';
+            
+            if (paymentType === 'Bank Transfer') {
+                paymentDetailsHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div><span class="font-medium text-gray-700">Bank Name:</span> <span class="text-gray-600 ml-2">${formData.get('bankName') || 'N/A'}</span></div>
+                        <div><span class="font-medium text-gray-700">Account Info:</span> <span class="text-gray-600 ml-2">${formData.get('accountInfo') || 'N/A'}</span></div>
+                        <div class="md:col-span-2"><span class="font-medium text-gray-700">Transaction Reference:</span> <span class="text-gray-600 ml-2">${formData.get('transactionRef') || 'N/A'}</span></div>
+                    </div>
+                `;
+            } else if (paymentType === 'Check') {
+                paymentDetailsHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div><span class="font-medium text-gray-700">Check Number:</span> <span class="text-gray-600 ml-2">${formData.get('checkNumber') || 'N/A'}</span></div>
+                        <div><span class="font-medium text-gray-700">Bank Name:</span> <span class="text-gray-600 ml-2">${formData.get('checkBankName') || 'N/A'}</span></div>
+                        <div><span class="font-medium text-gray-700">Check Date:</span> <span class="text-gray-600 ml-2">${formData.get('checkDate') || 'N/A'}</span></div>
+                        <div><span class="font-medium text-gray-700">Payee Name:</span> <span class="text-gray-600 ml-2">${formData.get('payeeName') || 'N/A'}</span></div>
+                    </div>
+                `;
+            } else if (paymentType === 'Online Payment') {
+                paymentDetailsHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div><span class="font-medium text-gray-700">Payment Method:</span> <span class="text-gray-600 ml-2">${formData.get('onlinePaymentMethod') || 'N/A'}</span></div>
+                        <div><span class="font-medium text-gray-700">Transaction Reference:</span> <span class="text-gray-600 ml-2">${formData.get('onlineTransactionRef') || 'N/A'}</span></div>
+                    </div>
+                `;
+            } else {
+                paymentDetailsHTML = '<span class="text-gray-600">Cash donation - no additional details</span>';
+            }
+            
+            paymentDetailsContainer.innerHTML = paymentDetailsHTML;
+            
+            // Purpose
+            document.getElementById('previewMoneyPurpose').textContent = formData.get('purpose') || 'General donation';
+            
+            // Show the modal
+            document.getElementById('moneyPreviewModal').classList.remove('hidden');
+        }
+        
+        function hideMoneyPreviewModal() {
+            document.getElementById('moneyPreviewModal').classList.add('hidden');
+        }
+        
+        function showInKindPreviewModal() {
+            const form = document.getElementById('inKindDonationForm');
+            const formData = new FormData(form);
+            const isAnonymous = formData.get('anonymous') === 'on';
+
+            // Generate temporary donation ID for preview
+            const tempDonationId = 'DN' + String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+            
+            // Populate preview modal with form data
+            document.getElementById('previewInKindDonationId').textContent = tempDonationId;
+            document.getElementById('previewInKindCategory').textContent = formData.get('itemCategory') || 'N/A';
+            document.getElementById('previewInKindDate').textContent = formData.get('dateOfDonation') || 'N/A';
+            
+            const quantity = parseInt(formData.get('quantity')) || 0;
+            const unit = formData.get('unit') || '';
+            document.getElementById('previewInKindQuantity').textContent = `${quantity} ${unit}`.trim();
+            
+            document.getElementById('previewInKindDonor').textContent = isAnonymous ? 'Anonymous' : (formData.get('donorName') || 'N/A');
+            
+            // Item Information
+            document.getElementById('previewInKindDescription').textContent = formData.get('itemDescription') || 'Not specified';
+            document.getElementById('previewInKindUnit').textContent = unit || 'Not specified';
+            document.getElementById('previewInKindCondition').textContent = formData.get('conditionOfItems') || 'Not specified';
+            document.getElementById('previewInKindReceiver').textContent = formData.get('receiverName') || 'Not specified';
+            
+            // Handle expiry date for food items
+            const expiryContainer = document.getElementById('previewInKindExpiryContainer');
+            if (formData.get('itemCategory') === 'Food' && formData.get('expiryDate')) {
+                expiryContainer.classList.remove('hidden');
+                document.getElementById('previewInKindExpiry').textContent = formData.get('expiryDate');
+            } else {
+                expiryContainer.classList.add('hidden');
+            }
+            
+            // Handle photo
+            const photoInput = form.querySelector('input[name="photo"]');
+            const previewPhoto = document.getElementById('previewInKindPhoto');
+            const noPhotoDiv = document.getElementById('previewInKindNoPhoto');
+            
+            if (photoInput.files && photoInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewPhoto.src = e.target.result;
+                    previewPhoto.classList.remove('hidden');
+                    noPhotoDiv.classList.add('hidden');
+                };
+                reader.readAsDataURL(photoInput.files[0]);
+            } else {
+                previewPhoto.classList.add('hidden');
+                noPhotoDiv.classList.remove('hidden');
+            }
+            
+            // Donor Information
+            document.getElementById('previewInKindContact').textContent = formData.get('contactNumber') || 'Not provided';
+            document.getElementById('previewInKindEmail').textContent = isAnonymous ? 'Anonymous' : (formData.get('emailAddress') || 'Not provided');
+            document.getElementById('previewInKindAddress').textContent = formData.get('address') || 'Not provided';
+            
+            // Show the modal
+            document.getElementById('inKindPreviewModal').classList.remove('hidden');
+        }
+        
+        function hideInKindPreviewModal() {
+            document.getElementById('inKindPreviewModal').classList.add('hidden');
+        }
+        
+        function confirmAndSaveMoneyDonation() {
+            hideMoneyPreviewModal();
+            
+            // Mark form as confirmed and trigger submission
+            const form = document.getElementById('moneyDonationForm');
+            form.dataset.confirmed = 'true';
+            
+            // Trigger the actual save process
+            form.dispatchEvent(new Event('submit', { bubbles: true }));
+            
+            // Reset confirmation flag after submission
+            setTimeout(() => {
+                form.dataset.confirmed = 'false';
+            }, 100);
+        }
+        
+        function confirmAndSaveInKindDonation() {
+            hideInKindPreviewModal();
+            
+            // Mark form as confirmed and trigger submission
+            const form = document.getElementById('inKindDonationForm');
+            form.dataset.confirmed = 'true';
+            
+            // Trigger the actual save process
+            form.dispatchEvent(new Event('submit', { bubbles: true }));
+            
+            // Reset confirmation flag after submission
+            setTimeout(() => {
+                form.dataset.confirmed = 'false';
+            }, 100);
+        }
+
         // ========== MODAL MANAGEMENT FUNCTIONS ==========
         
         function showLoadingScreen(message = 'Saving Donation Record...') {
@@ -1283,6 +1871,49 @@
         async function handleMoneyDonationSubmit(e) {
             e.preventDefault();
             const form = e.target;
+            
+            // Check if this is the initial submission (show preview) or confirmation (save record)
+            if (form.dataset.confirmed !== 'true') {
+                // Validate required fields before showing preview
+                const formData = new FormData(form);
+                const isAnonymous = formData.get('anonymous') === 'on';
+                const paymentType = formData.get('typeOfDonation');
+                
+                // Basic validation
+                if (!formData.get('dateOfDonation') || !paymentType || !formData.get('amount')) {
+                    showErrorModal('Please fill in all required fields (date, payment type, and amount).');
+                    return;
+                }
+                
+                if (!isAnonymous && (!formData.get('donorName') || !formData.get('emailAddress'))) {
+                    showErrorModal('Please fill in donor name and email address, or check anonymous donation.');
+                    return;
+                }
+                
+                // Payment-specific validation
+                if (paymentType === 'Bank Transfer') {
+                    if (!formData.get('bankName') || !formData.get('accountInfo') || !formData.get('transactionRef')) {
+                        showErrorModal('Please fill in all bank transfer details.');
+                        return;
+                    }
+                } else if (paymentType === 'Check') {
+                    if (!formData.get('checkNumber') || !formData.get('checkBankName') || !formData.get('checkDate') || !formData.get('payeeName')) {
+                        showErrorModal('Please fill in all check details.');
+                        return;
+                    }
+                } else if (paymentType === 'Online Payment') {
+                    if (!formData.get('onlinePaymentMethod') || !formData.get('onlineTransactionRef')) {
+                        showErrorModal('Please fill in all online payment details.');
+                        return;
+                    }
+                }
+                
+                // Show preview modal instead of saving directly
+                showMoneyPreviewModal();
+                return;
+            }
+            
+            // If we reach here, it's a confirmed submission - proceed with saving
             const formData = new FormData(form);
             const isAnonymous = formData.get('anonymous') === 'on';
             const paymentType = formData.get('typeOfDonation');
@@ -1326,56 +1957,37 @@
                 };
             }
 
-            // Validate required fields
-            if (!donationData.dateOfDonation || !donationData.typeOfDonation || isNaN(donationData.amount)) {
-                showErrorModal('Please fill in all required fields.');
-                return;
-            }
-            
-            if (paymentType === 'Bank Transfer' && donationData.paymentDetails) {
-                if (!donationData.paymentDetails.bankName || !donationData.paymentDetails.accountInfo || !donationData.paymentDetails.transactionRef) {
-                    showErrorModal('Please fill in all required bank transfer details.');
-                    return;
-                }
-            } else if (paymentType === 'Check' && donationData.paymentDetails) {
-                if (!donationData.paymentDetails.checkNumber || !donationData.paymentDetails.bankName || !donationData.paymentDetails.checkDate || !donationData.paymentDetails.payeeName) {
-                    showErrorModal('Please fill in all required check details.');
-                    return;
-                }
-            } else if (paymentType === 'Online Payment' && donationData.paymentDetails) {
-                if (!donationData.paymentDetails.paymentMethod || !donationData.paymentDetails.transactionRef) {
-                    showErrorModal('Please fill in all required online payment details.');
-                    return;
-                }
-            }
+            // Show enhanced loading screen with donation details
+            const donorName = donationData.donorName;
+            const amount = donationData.amount.toLocaleString('en-US', {minimumFractionDigits: 2});
+            showLoadingScreen(`Saving money donation from ${donorName} (₱${amount})...`);
 
             // Check if online
             if (navigator.onLine) {
                 // Try to save online first
                 try {
-                    showLoadingScreen('Saving money donation...');
                     await saveDonationToFirestore(donationData);
                     hideLoadingScreen();
-                    showSuccessModal('Money donation saved successfully!', donationData.donationId);
+                    showSuccessModal(`Money donation of ₱${amount} from ${donorName} saved successfully!`, donationData.donationId);
                     resetMoneyForm();
                 } catch (error) {
-                    console.error('Online save failed:', error);
                     hideLoadingScreen();
-                    
-                    // If online save fails, save offline
+                    console.error('Error saving money donation:', error);
+                    // Try to save offline as fallback
                     const savedOffline = saveMoneyDonationOffline(donationData);
                     if (savedOffline) {
-                        showOfflineSuccessModal('Money donation saved offline due to connection issues.', 'money');
+                        showOfflineSuccessModal(`Money donation of ₱${amount} from ${donorName} saved offline.`, 'money');
                         resetMoneyForm();
                     } else {
                         showErrorModal('Failed to save donation. Please try again.');
                     }
                 }
             } else {
+                hideLoadingScreen();
                 // Save offline when no internet connection
                 const savedOffline = saveMoneyDonationOffline(donationData);
                 if (savedOffline) {
-                    showOfflineSuccessModal('Money donation saved offline. No internet connection detected.', 'money');
+                    showOfflineSuccessModal(`Money donation of ₱${amount} from ${donorName} saved offline.`, 'money');
                     resetMoneyForm();
                 } else {
                     showErrorModal('Failed to save donation offline. Please try again.');
@@ -1386,6 +1998,31 @@
         async function handleInKindDonationSubmit(e) {
             e.preventDefault();
             const form = e.target;
+            
+            // Check if this is the initial submission (show preview) or confirmation (save record)
+            if (form.dataset.confirmed !== 'true') {
+                // Validate required fields before showing preview
+                const formData = new FormData(form);
+                const isAnonymous = formData.get('anonymous') === 'on';
+                
+                // Basic validation
+                if (!formData.get('dateOfDonation') || !formData.get('itemCategory') || !formData.get('itemDescription') || 
+                    !formData.get('quantity') || !formData.get('conditionOfItems')) {
+                    showErrorModal('Please fill in all required fields (date, category, description, quantity, and condition).');
+                    return;
+                }
+                
+                if (!isAnonymous && (!formData.get('donorName') || !formData.get('emailAddress'))) {
+                    showErrorModal('Please fill in donor name and email address, or check anonymous donation.');
+                    return;
+                }
+                
+                // Show preview modal instead of saving directly
+                showInKindPreviewModal();
+                return;
+            }
+            
+            // If we reach here, it's a confirmed submission - proceed with saving
             const formData = new FormData(form);
             const isAnonymous = formData.get('anonymous') === 'on';
 
@@ -1426,40 +2063,39 @@
                 donationData.photoString = '';
             }
 
-            // Validate required fields
-            if (!donationData.dateOfDonation || !donationData.itemCategory || !donationData.itemDescription || 
-                isNaN(donationData.quantity) || !donationData.conditionOfItems) {
-                showErrorModal('Please fill in all required fields.');
-                return;
-            }
+            // Show enhanced loading screen with donation details
+            const donorName = donationData.donorName;
+            const itemDescription = donationData.itemDescription;
+            const quantity = donationData.quantity;
+            const unit = donationData.unit || '';
+            showLoadingScreen(`Saving in-kind donation from ${donorName} (${quantity} ${unit} ${itemDescription})...`);
 
             // Check if online
             if (navigator.onLine) {
                 // Try to save online first
                 try {
-                    showLoadingScreen('Saving in-kind donation...');
                     await saveDonationToFirestore(donationData);
                     hideLoadingScreen();
-                    showSuccessModal('In-kind donation saved successfully!', donationData.donationId);
+                    showSuccessModal(`In-kind donation of ${quantity} ${unit} ${itemDescription} from ${donorName} saved successfully!`, donationData.donationId);
                     resetInKindForm();
                 } catch (error) {
-                    console.error('Online save failed:', error);
                     hideLoadingScreen();
-                    
-                    // If online save fails, save offline
+                    console.error('Error saving in-kind donation:', error);
+                    // Try to save offline as fallback
                     const savedOffline = saveInKindDonationOffline(donationData);
                     if (savedOffline) {
-                        showOfflineSuccessModal('In-kind donation saved offline due to connection issues.', 'in-kind');
+                        showOfflineSuccessModal(`In-kind donation of ${quantity} ${unit} ${itemDescription} from ${donorName} saved offline.`, 'in-kind');
                         resetInKindForm();
                     } else {
                         showErrorModal('Failed to save donation. Please try again.');
                     }
                 }
             } else {
+                hideLoadingScreen();
                 // Save offline when no internet connection
                 const savedOffline = saveInKindDonationOffline(donationData);
                 if (savedOffline) {
-                    showOfflineSuccessModal('In-kind donation saved offline. No internet connection detected.', 'in-kind');
+                    showOfflineSuccessModal(`In-kind donation of ${quantity} ${unit} ${itemDescription} from ${donorName} saved offline.`, 'in-kind');
                     resetInKindForm();
                 } else {
                     showErrorModal('Failed to save donation offline. Please try again.');
@@ -1623,6 +2259,175 @@
             setTimeout(() => {
                 container.classList.add('hidden');
             }, 5000);
+        }
+
+        // ========== CAMERA FUNCTIONALITY ==========
+        
+        let currentStream = null;
+        let currentFacingMode = 'user'; // 'user' for front camera, 'environment' for back camera
+
+        function setupCameraFunctionality() {
+            const captureItemPhotoBtn = document.getElementById('captureItemPhotoBtn');
+            const cameraModal = document.getElementById('cameraModal');
+            const closeCameraModal = document.getElementById('closeCameraModal');
+            const cancelCameraBtn = document.getElementById('cancelCameraBtn');
+            const switchCameraBtn = document.getElementById('switchCameraBtn');
+            const capturePhotoBtn = document.getElementById('capturePhotoBtn');
+            const removeItemPhotoBtn = document.getElementById('removeItemPhotoBtn');
+
+            if (captureItemPhotoBtn) {
+                captureItemPhotoBtn.addEventListener('click', openCamera);
+            }
+            if (closeCameraModal) {
+                closeCameraModal.addEventListener('click', closeCamera);
+            }
+            if (cancelCameraBtn) {
+                cancelCameraBtn.addEventListener('click', closeCamera);
+            }
+            if (switchCameraBtn) {
+                switchCameraBtn.addEventListener('click', switchCamera);
+            }
+            if (capturePhotoBtn) {
+                capturePhotoBtn.addEventListener('click', capturePhoto);
+            }
+            if (removeItemPhotoBtn) {
+                removeItemPhotoBtn.addEventListener('click', removeItemPhoto);
+            }
+
+            // Setup photo file input change handler
+            const photoInput = document.querySelector('#in-kind-donation-form input[name="photo"]');
+            if (photoInput) {
+                photoInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        updatePhotoButtons(true);
+                    } else {
+                        updatePhotoButtons(false);
+                    }
+                });
+            }
+        }
+
+        async function openCamera() {
+            const cameraModal = document.getElementById('cameraModal');
+            const cameraStatus = document.getElementById('cameraStatus');
+            const cameraError = document.getElementById('cameraError');
+            
+            cameraModal.classList.remove('hidden');
+            cameraStatus.classList.remove('hidden');
+            cameraError.classList.add('hidden');
+            
+            try {
+                await startCamera();
+                cameraStatus.classList.add('hidden');
+            } catch (error) {
+                console.error('Error accessing camera:', error);
+                cameraStatus.classList.add('hidden');
+                cameraError.classList.remove('hidden');
+                document.querySelector('#cameraError p').textContent = 'Unable to access camera. Please check permissions or try uploading a file instead.';
+            }
+        }
+
+        async function startCamera() {
+            try {
+                // Stop any existing stream
+                if (currentStream) {
+                    currentStream.getTracks().forEach(track => track.stop());
+                }
+
+                const constraints = {
+                    video: {
+                        facingMode: currentFacingMode,
+                        width: { ideal: 1280 },
+                        height: { ideal: 960 }
+                    }
+                };
+
+                currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+                const video = document.getElementById('cameraPreview');
+                video.srcObject = currentStream;
+                
+                return new Promise((resolve) => {
+                    video.onloadedmetadata = () => {
+                        video.play();
+                        resolve();
+                    };
+                });
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        async function switchCamera() {
+            currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+            
+            try {
+                await startCamera();
+            } catch (error) {
+                console.error('Error switching camera:', error);
+                // Revert to previous facing mode if switch fails
+                currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+                showErrorModal('Unable to switch camera. This device may only have one camera.');
+            }
+        }
+
+        function capturePhoto() {
+            const video = document.getElementById('cameraPreview');
+            const canvas = document.getElementById('photoCanvas');
+            const context = canvas.getContext('2d');
+            
+            // Set canvas dimensions to match video
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            // Draw the video frame to canvas
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Convert to blob and update photo input
+            canvas.toBlob(function(blob) {
+                // Create a File object from the blob to simulate file input
+                const file = new File([blob], 'donation-photo.jpg', { type: 'image/jpeg' });
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                const photoInput = document.querySelector('#in-kind-donation-form input[name="photo"]');
+                if (photoInput) {
+                    photoInput.files = dataTransfer.files;
+                }
+                
+                updatePhotoButtons(true);
+                closeCamera();
+                showMessage('Photo captured successfully!', 'success');
+            }, 'image/jpeg', 0.8);
+        }
+
+        function closeCamera() {
+            const cameraModal = document.getElementById('cameraModal');
+            
+            // Stop camera stream
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                currentStream = null;
+            }
+            
+            cameraModal.classList.add('hidden');
+        }
+
+        function updatePhotoButtons(hasPhoto) {
+            const removeBtn = document.getElementById('removeItemPhotoBtn');
+            if (hasPhoto) {
+                removeBtn.classList.remove('hidden');
+            } else {
+                removeBtn.classList.add('hidden');
+            }
+        }
+
+        function removeItemPhoto() {
+            const photoInput = document.querySelector('#in-kind-donation-form input[name="photo"]');
+            if (photoInput) {
+                photoInput.value = '';
+            }
+            updatePhotoButtons(false);
+            showMessage('Photo removed', 'success');
         }
 
         window.selectDonationType = selectDonationType;

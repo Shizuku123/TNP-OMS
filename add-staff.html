@@ -87,8 +87,14 @@
         <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
             <div class="text-center">
                 <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-red-primary mx-auto"></div>
-                <h3 class="mt-4 text-lg font-medium text-gray-900">Saving Staff Record</h3>
-                <p class="mt-2 text-sm text-gray-500">Please wait while we save the staff information and upload documents...</p>
+                <h3 id="loadingTitle" class="mt-4 text-lg font-medium text-gray-900">Uploading Staff Record</h3>
+                <p id="loadingMessage" class="mt-2 text-sm text-gray-500">Please wait while we upload the staff information to the database...</p>
+                <div class="mt-4">
+                    <div class="bg-gray-200 rounded-full h-2">
+                        <div class="bg-red-primary h-2 rounded-full animate-pulse" style="width: 70%"></div>
+                    </div>
+                    <p class="mt-2 text-xs text-gray-400">Processing staff data and documents...</p>
+                </div>
             </div>
         </div>
     </div>
@@ -421,6 +427,238 @@
                         <li>• <strong>DSWD Administrative Order No. 16, s. 2012</strong> – Standards for Residential-Based Child Caring and Placing Agencies</li>
                     </ul>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Staff Input Preview Modal -->
+    <div id="staffPreviewModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white rounded-lg p-6 max-w-5xl w-full mx-4 max-h-[95vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-semibold text-gray-900">Review Staff Information</h3>
+                <button id="closeStaffPreviewModal" class="text-gray-400 hover:text-gray-600 p-1">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="space-y-6">
+                <!-- Photo and Basic Info Header -->
+                <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 bg-gray-50 rounded-lg p-6">
+                    <div class="shrink-0">
+                        <img id="previewStaffPhoto" class="h-24 w-24 sm:h-32 sm:w-32 object-cover rounded-full border-4 border-gray-200" src="user.png" alt="Staff photo">
+                    </div>
+                    <div class="flex-1 text-center sm:text-left">
+                        <h4 class="text-2xl font-bold text-gray-900" id="previewStaffFullName">Staff Name</h4>
+                        <p class="text-lg text-gray-600" id="previewStaffPosition">Position</p>
+                        <p class="text-sm text-gray-500" id="previewStaffId">Staff ID</p>
+                        <div class="mt-2 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium" id="previewEmploymentStatus">
+                            <span class="w-2 h-2 rounded-full mr-2"></span>
+                            <span>Employment Status</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Personal Information -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="text-lg font-medium text-gray-900 mb-4">Personal Information</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">First Name:</span>
+                            <p id="previewStaffFirstName" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Middle Name:</span>
+                            <p id="previewStaffMiddleName" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Last Name:</span>
+                            <p id="previewStaffLastName" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Gender:</span>
+                            <p id="previewStaffGender" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Date of Birth:</span>
+                            <p id="previewStaffDateOfBirth" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Place of Birth:</span>
+                            <p id="previewStaffPlaceOfBirth" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Civil Status:</span>
+                            <p id="previewStaffCivilStatus" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Nationality:</span>
+                            <p id="previewStaffNationality" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Religion:</span>
+                            <p id="previewStaffReligion" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div class="sm:col-span-2 lg:col-span-3">
+                            <span class="text-sm font-medium text-gray-700">Current Address:</span>
+                            <p id="previewStaffCurrentAddress" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Contact Number:</span>
+                            <p id="previewStaffContactNumber" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Email Address:</span>
+                            <p id="previewStaffEmailAddress" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Educational Background:</span>
+                            <p id="previewStaffEducationalBackground" class="text-gray-900 mt-1"></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Employment Information -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="text-lg font-medium text-gray-900 mb-4">Employment Information</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Position:</span>
+                            <p id="previewStaffPositionDetail" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Department:</span>
+                            <p id="previewStaffDepartment" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Employment Status:</span>
+                            <p id="previewStaffEmploymentStatusDetail" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Date Hired:</span>
+                            <p id="previewStaffDateHired" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Assigned Schedule:</span>
+                            <p id="previewStaffAssignedSchedule" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Supervisor:</span>
+                            <p id="previewStaffSupervisor" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Valid ID Type:</span>
+                            <p id="previewStaffValidIdType" class="text-gray-900 mt-1"></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Employment Documents -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="text-lg font-medium text-gray-900 mb-4">Employment Documents</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <h5 class="font-medium text-gray-800 mb-2">Basic Employment Requirements:</h5>
+                            <div class="space-y-1 text-sm">
+                                <div id="previewResumeDoc" class="flex items-center">
+                                    <span class="w-2 h-2 rounded-full mr-2"></span>
+                                    <span>Resume/CV</span>
+                                </div>
+                                <div id="previewValidIdFrontDoc" class="flex items-center">
+                                    <span class="w-2 h-2 rounded-full mr-2"></span>
+                                    <span>Valid ID (Front)</span>
+                                </div>
+                                <div id="previewValidIdBackDoc" class="flex items-center">
+                                    <span class="w-2 h-2 rounded-full mr-2"></span>
+                                    <span>Valid ID (Back)</span>
+                                </div>
+                                <div id="previewNbiClearanceDoc" class="flex items-center">
+                                    <span class="w-2 h-2 rounded-full mr-2"></span>
+                                    <span>NBI Clearance</span>
+                                </div>
+                                <div id="previewBarangayClearanceDoc" class="flex items-center">
+                                    <span class="w-2 h-2 rounded-full mr-2"></span>
+                                    <span>Barangay Clearance</span>
+                                </div>
+                                <div id="previewPoliceClearanceDoc" class="flex items-center">
+                                    <span class="w-2 h-2 rounded-full mr-2"></span>
+                                    <span>Police Clearance</span>
+                                </div>
+                                <div id="previewBirthCertificateDoc" class="flex items-center">
+                                    <span class="w-2 h-2 rounded-full mr-2"></span>
+                                    <span>Birth Certificate</span>
+                                </div>
+                                <div id="previewMedicalCertificateDoc" class="flex items-center">
+                                    <span class="w-2 h-2 rounded-full mr-2"></span>
+                                    <span>Medical Certificate</span>
+                                </div>
+                                <div id="previewSssIdDoc" class="flex items-center">
+                                    <span class="w-2 h-2 rounded-full mr-2"></span>
+                                    <span>SSS ID</span>
+                                </div>
+                                <div id="previewDiplomaDoc" class="flex items-center">
+                                    <span class="w-2 h-2 rounded-full mr-2"></span>
+                                    <span>Transcript of Records</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h5 class="font-medium text-gray-800 mb-2">Special Requirements:</h5>
+                            <div class="space-y-1 text-sm">
+                                <div id="previewDswdClearanceDoc" class="flex items-center">
+                                    <span class="w-2 h-2 rounded-full mr-2"></span>
+                                    <span>DSWD Clearance</span>
+                                </div>
+                                <div id="previewMoralCharacterCertDoc" class="flex items-center">
+                                    <span class="w-2 h-2 rounded-full mr-2"></span>
+                                    <span>Certificate of Good Moral Character</span>
+                                </div>
+                                <div id="previewPsychologicalEvaluationDoc" class="flex items-center">
+                                    <span class="w-2 h-2 rounded-full mr-2"></span>
+                                    <span>Psychological Evaluation</span>
+                                </div>
+                                <div id="previewChildProtectionTrainingDoc" class="flex items-center">
+                                    <span class="w-2 h-2 rounded-full mr-2"></span>
+                                    <span>Child Protection Training Certificate</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Features Granted -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="text-lg font-medium text-gray-900 mb-4">Features Granted</h4>
+                    <div id="previewFeaturesGranted" class="flex flex-wrap gap-2">
+                        <!-- Features will be populated here as badges -->
+                    </div>
+                </div>
+                
+                <!-- Account Information -->
+                <div id="previewAccountSection" class="bg-gray-50 rounded-lg p-4 hidden">
+                    <h4 class="text-lg font-medium text-gray-900 mb-4">Account Information</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Create System Account:</span>
+                            <p id="previewCreateAccount" class="text-gray-900 mt-1"></p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-700">Username:</span>
+                            <p id="previewUsername" class="text-gray-900 mt-1"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Modal Actions -->
+            <div class="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 mt-6 pt-6 border-t">
+                <button id="editStaffInformationBtn" class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                    Edit Information
+                </button>
+                <button id="confirmStaffSubmitBtn" class="px-6 py-2 bg-red-primary text-white rounded-md hover:bg-red-700 transition-colors">
+                    Confirm & Save Staff Record
+                </button>
             </div>
         </div>
     </div>
@@ -1277,6 +1515,8 @@
                         hideDocumentInfoModal('special');
                     } else if (!document.getElementById('cameraModal').classList.contains('hidden')) {
                         closeCamera();
+                    } else if (!document.getElementById('staffPreviewModal').classList.contains('hidden')) {
+                        hideStaffPreviewModal();
                     }
                     if (!document.getElementById('loadingScreen').classList.contains('hidden')) {
                         // Don't allow closing loading screen with ESC
@@ -1380,6 +1620,21 @@
             window.addEventListener('offline', function() {
                 console.log('Connection lost');
             });
+
+            // Staff Preview modal buttons
+            document.getElementById('closeStaffPreviewModal').addEventListener('click', function() {
+                hideStaffPreviewModal();
+            });
+
+            document.getElementById('editStaffInformationBtn').addEventListener('click', function() {
+                hideStaffPreviewModal();
+                // Focus on the first input field
+                document.getElementById('firstName').focus();
+            });
+
+            document.getElementById('confirmStaffSubmitBtn').addEventListener('click', function() {
+                confirmAndSaveStaffRecord();
+            });
         }
 
         function updateAccountToggle() {
@@ -1417,7 +1672,9 @@
             }
         }
 
-        function showLoadingScreen() {
+        function showLoadingScreen(title = 'Uploading Staff Record', message = 'Please wait while we upload the staff information to the database...') {
+            document.getElementById('loadingTitle').textContent = title;
+            document.getElementById('loadingMessage').textContent = message;
             document.getElementById('loadingScreen').classList.remove('hidden');
         }
 
@@ -1465,6 +1722,136 @@
             
             // Generate new staff ID for the fresh form
             generateAndDisplayStaffId();
+        }
+
+        // Staff Preview Modal Functions
+        function showStaffPreviewModal(data) {
+            // Populate header information
+            const fullName = `${data.firstName || ''} ${data.middleName || ''} ${data.lastName || ''}`.trim();
+            document.getElementById('previewStaffFullName').textContent = fullName || 'Not specified';
+            document.getElementById('previewStaffPosition').textContent = data.position || 'Not specified';
+            document.getElementById('previewStaffId').textContent = data.staffId || 'Not specified';
+            
+            // Update employment status badge
+            const statusElement = document.getElementById('previewEmploymentStatus');
+            const statusText = data.employmentStatus || 'Not specified';
+            statusElement.innerHTML = `<span class="w-2 h-2 rounded-full mr-2 ${getStatusColor(statusText)}"></span><span>${statusText}</span>`;
+            statusElement.className = `mt-2 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusBgColor(statusText)}`;
+            
+            // Handle photo preview
+            if (data.photoString) {
+                document.getElementById('previewStaffPhoto').src = data.photoString;
+            } else {
+                document.getElementById('previewStaffPhoto').src = 'user.png';
+            }
+            
+            // Populate personal information
+            document.getElementById('previewStaffFirstName').textContent = data.firstName || 'Not specified';
+            document.getElementById('previewStaffMiddleName').textContent = data.middleName || 'Not specified';
+            document.getElementById('previewStaffLastName').textContent = data.lastName || 'Not specified';
+            document.getElementById('previewStaffGender').textContent = data.gender || 'Not specified';
+            document.getElementById('previewStaffDateOfBirth').textContent = data.dateOfBirth || 'Not specified';
+            document.getElementById('previewStaffPlaceOfBirth').textContent = data.placeOfBirth || 'Not specified';
+            document.getElementById('previewStaffCivilStatus').textContent = data.civilStatus || 'Not specified';
+            document.getElementById('previewStaffNationality').textContent = data.nationality || 'Not specified';
+            document.getElementById('previewStaffReligion').textContent = data.religion || 'Not specified';
+            document.getElementById('previewStaffCurrentAddress').textContent = data.currentAddress || 'Not specified';
+            document.getElementById('previewStaffContactNumber').textContent = data.contactNumber || 'Not specified';
+            document.getElementById('previewStaffEmailAddress').textContent = data.emailAddress || 'Not specified';
+            document.getElementById('previewStaffEducationalBackground').textContent = data.educationalBackground || 'Not specified';
+            
+            // Populate employment information
+            document.getElementById('previewStaffPositionDetail').textContent = data.position || 'Not specified';
+            document.getElementById('previewStaffDepartment').textContent = data.department || 'Not specified';
+            document.getElementById('previewStaffEmploymentStatusDetail').textContent = data.employmentStatus || 'Not specified';
+            document.getElementById('previewStaffDateHired').textContent = data.dateHired || 'Not specified';
+            document.getElementById('previewStaffAssignedSchedule').textContent = data.assignedSchedule || 'Not specified';
+            document.getElementById('previewStaffSupervisor').textContent = data.supervisor || 'Not specified';
+            document.getElementById('previewStaffValidIdType').textContent = data.validIdType || 'Not specified';
+            
+            // Populate document status
+            const documentFields = [
+                'resume', 'validIdFront', 'validIdBack', 'nbiClearance', 'barangayClearance', 'policeClearance',
+                'birthCertificate', 'medicalCertificate', 'sssId', 'diploma', 'dswdClearance', 'moralCharacterCert',
+                'psychologicalEvaluation', 'childProtectionTraining'
+            ];
+            
+            documentFields.forEach(fieldName => {
+                const fileInput = document.getElementById(fieldName);
+                const hasFile = fileInput && fileInput.files[0];
+                const previewElement = document.getElementById(`preview${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}Doc`);
+                
+                if (previewElement) {
+                    const circle = previewElement.querySelector('.w-2.h-2');
+                    if (hasFile) {
+                        circle.className = 'w-2 h-2 rounded-full mr-2 bg-green-500';
+                        previewElement.classList.remove('text-gray-400');
+                        previewElement.classList.add('text-green-600');
+                    } else {
+                        circle.className = 'w-2 h-2 rounded-full mr-2 bg-gray-300';
+                        previewElement.classList.remove('text-green-600');
+                        previewElement.classList.add('text-gray-400');
+                    }
+                }
+            });
+            
+            // Populate features granted
+            const featuresContainer = document.getElementById('previewFeaturesGranted');
+            if (data.featureGranted && data.featureGranted.length > 0) {
+                featuresContainer.innerHTML = data.featureGranted.map(feature => 
+                    `<span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">${feature}</span>`
+                ).join('');
+            } else {
+                featuresContainer.innerHTML = '<span class="text-gray-500 text-sm">No features granted</span>';
+            }
+            
+            // Handle account information
+            if (data.createAccount === '1') {
+                document.getElementById('previewAccountSection').classList.remove('hidden');
+                document.getElementById('previewCreateAccount').textContent = 'Yes';
+                document.getElementById('previewUsername').textContent = data.username || 'Not specified';
+            } else {
+                document.getElementById('previewAccountSection').classList.add('hidden');
+            }
+            
+            // Show the modal
+            document.getElementById('staffPreviewModal').classList.remove('hidden');
+        }
+
+        function hideStaffPreviewModal() {
+            document.getElementById('staffPreviewModal').classList.add('hidden');
+        }
+
+        function getStatusColor(status) {
+            switch(status.toLowerCase()) {
+                case 'active': return 'bg-green-500';
+                case 'regular': return 'bg-green-500';
+                case 'probationary': return 'bg-yellow-500';
+                case 'contractual': return 'bg-blue-500';
+                case 'inactive': return 'bg-red-500';
+                case 'terminated': return 'bg-red-500';
+                default: return 'bg-gray-400';
+            }
+        }
+
+        function getStatusBgColor(status) {
+            switch(status.toLowerCase()) {
+                case 'active': return 'bg-green-100 text-green-800';
+                case 'regular': return 'bg-green-100 text-green-800';
+                case 'probationary': return 'bg-yellow-100 text-yellow-800';
+                case 'contractual': return 'bg-blue-100 text-blue-800';
+                case 'inactive': return 'bg-red-100 text-red-800';
+                case 'terminated': return 'bg-red-100 text-red-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        async function confirmAndSaveStaffRecord() {
+            if (window.pendingStaffData) {
+                hideStaffPreviewModal();
+                await saveStaffRecordWithBatchUpload(window.pendingStaffData);
+                window.pendingStaffData = null;
+            }
         }
 
         // Camera functionality
@@ -1934,8 +2321,9 @@
             console.log(`Account creation enabled: ${createAccountEnabled}`);
             console.log('=============================');
 
-            // Save staff record and handle documents separately
-            saveStaffRecordWithBatchUpload(data);
+            // Store data temporarily and show preview modal
+            window.pendingStaffData = data;
+            showStaffPreviewModal(data);
         }
 
         // Helper function to check if a field is a document field
@@ -2314,8 +2702,14 @@
                 console.log('Is sync operation:', isSync);
                 console.log('Is online:', navigator.onLine);
                 
-                // Show loading screen
-                if (!isSync) showLoadingScreen();
+                // Show loading screen with personalized message
+                if (!isSync) {
+                    const fullName = `${data.firstName || ''} ${data.lastName || ''}`.trim();
+                    showLoadingScreen(
+                        'Uploading Staff Record', 
+                        `Uploading record for ${fullName} to the database...`
+                    );
+                }
                 
                 // Check if online for new records (not for sync operations)
                 if (!isSync && !isOnline()) {

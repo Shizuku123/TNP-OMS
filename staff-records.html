@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Staff Records - Tahanan ng Pagmamahal OMS</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module" src="firebase.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -18,104 +20,670 @@
             }
         }
     </script>
+    <style>
+        /* Chart interactivity styles */
+        .chart-container {
+            position: relative;
+            transition: transform 0.2s ease;
+        }
+        
+        .chart-container:hover {
+            transform: scale(1.02);
+        }
+        
+        /* Month filter indicator animation */
+        #monthFilterIndicator {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Tooltip for charts */
+        .chart-tooltip {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        /* Print styles */
+        @media print {
+            body * { visibility: hidden; }
+            .print-content, .print-content * { visibility: visible; }
+            .print-content { 
+                position: absolute; 
+                left: 0; 
+                top: 0; 
+                width: 100%; 
+                height: auto;
+                overflow: visible;
+            }
+            @page { 
+                margin: 0.5in;
+                size: A4;
+            }
+            /* Avoid page breaks inside important elements */
+            .print-content table,
+            .print-content .signature-section {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
     <!-- Header -->
     <header class="bg-white shadow-sm border-b">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex items-center">
+        <div class="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+            <div class="flex items-center justify-between h-14 sm:h-16">
+                <div class="flex items-center flex-shrink-0">
                     <a href="index.html" class="flex items-center text-gray-600 hover:text-red-primary transition-colors">
-                        <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="h-5 w-5 sm:h-6 sm:w-6 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                         </svg>
-                       
+                        <span class="text-xs sm:text-sm hidden xs:inline">Back</span>
                     </a>
                 </div>
-                <h1 class="text-xl font-semibold text-gray-900">Staff Records</h1>
-                <div class="flex items-center space-x-4">
-                    <span class="text-sm text-gray-600 hidden" id="userInfo"></span>
-                    <button onclick="logout()" class="text-red-600 hover:text-red-800 transition-colors hidden">Logout</button>
-                </div>
+                <h1 class="text-base sm:text-xl font-semibold text-gray-900 text-center flex-1 mx-2 sm:mx-4">Staff Records</h1>
+                <div class="flex-shrink-0 w-16"></div> <!-- Spacer to keep title centered -->
             </div>
         </div>
     </header>
 
     <!-- Main Content -->
-    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto py-3 sm:py-6 px-2 sm:px-4 lg:px-8">
         <!-- Success/Error Messages -->
         <div id="messageContainer" class="mb-4 hidden"></div>
 
         <!-- Search and Filter -->
-        <div class="mb-6 bg-white rounded-lg shadow p-4 sm:p-6">
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 lg:space-x-4">
-                <div class="flex-1 max-w-lg">
-                    <div class="relative">
-                        <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                        <input type="text" id="searchInput" name="search-staff" placeholder="Search by name, ID, position, or department..." 
-                               autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" autofill="off"
-                               data-form-type="other" readonly onfocus="this.removeAttribute('readonly');"
-                               class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
-                    </div>
+        <div class="mb-4 sm:mb-6 bg-white rounded-lg shadow p-3 sm:p-4 lg:p-6">
+            <!-- Search Box (Full Width on Mobile) -->
+            <div class="mb-3 sm:mb-4">
+                <div class="relative">
+                    <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <input type="text" id="searchInput" placeholder="Search by name, department, or position..."
+                           autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" autofill="off"
+                           data-form-type="other" readonly onfocus="this.removeAttribute('readonly');"
+                           class="w-full pl-10 pr-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
                 </div>
-                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
-                    <select id="departmentFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
-                        <option value="">All Departments</option>
-                        <option value="Administration">Administration</option>
-                        <option value="Child Care">Child Care</option>
-                        <option value="Education">Education</option>
-                        <option value="Health Services">Health Services</option>
-                        <option value="Social Services">Social Services</option>
-                        <option value="Kitchen">Kitchen</option>
-                        <option value="Maintenance">Maintenance</option>
-                        <option value="Security">Security</option>
-                    </select>
-                    <select id="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
-                        <option value="">All Status</option>
-                        <option value="Regular">Regular</option>
-                        <option value="Contractual">Contractual</option>
-                        <option value="Part-time">Part-time</option>
-                        <option value="Probationary">Probationary</option>
-                    </select>
-                    <button onclick="exportToCSV()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-center">
-                        Export CSV
+            </div>
+            
+            <!-- Filters Row -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-3 sm:mb-4">
+                <select id="departmentFilter" class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    <option value="">All Departments</option>
+                    <option value="Administration">Administration</option>
+                    <option value="Child Care">Child Care</option>
+                    <option value="Education">Education</option>
+                    <option value="Health Services">Health Services</option>
+                    <option value="Social Services">Social Services</option>
+                    <option value="Kitchen">Kitchen</option>
+                    <option value="Maintenance">Maintenance</option>
+                    <option value="Security">Security</option>
+                </select>
+                <select id="statusFilter" class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    <option value="">All Status</option>
+                    <option value="Regular">Regular</option>
+                    <option value="Contractual">Contractual</option>
+                    <option value="Part-time">Part-time</option>
+                    <option value="Probationary">Probationary</option>
+                </select>
+                
+                <button onclick="openAdvancedFilter()" id="advancedFilterBtn" class="px-3 py-2 bg-gray-600 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors text-center flex items-center justify-center">
+                    <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"></path>
+                    </svg>
+                    Advanced
+                </button>
+                
+                <!-- Mobile: Show Add Staff here, Desktop: Show in action row -->
+                <a href="add-staff.html" class="px-3 py-2 bg-red-primary text-white text-sm rounded-lg hover:bg-red-700 transition-colors text-center lg:hidden flex items-center justify-center">
+                    <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Add Staff
+                </a>
+            </div>
+
+            <!-- Action Buttons (Desktop Only) -->
+            <div class="hidden lg:flex lg:flex-wrap lg:justify-center lg:gap-3">
+                <a href="add-staff.html" class="px-4 py-2 bg-red-primary text-white text-sm rounded-lg hover:bg-red-700 transition-colors text-center inline-flex items-center">
+                    <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Add Staff
+                </a>
+                
+                <button onclick="openPrintModal()" class="px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition-colors text-center flex items-center">
+                    <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                    </svg>
+                    Print Records
+                </button>
+                
+                <button onclick="openSoloPrintModal()" class="px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition-colors text-center flex items-center">
+                    <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    Solo Print
+                </button>
+            </div>
+
+            <!-- Mobile Action Buttons -->
+            <div class="grid grid-cols-2 gap-2 lg:hidden">
+                <button onclick="openPrintModal()" class="px-3 py-2 bg-purple-600 text-white text-xs rounded-lg hover:bg-purple-700 transition-colors text-center flex items-center justify-center">
+                    <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                    </svg>
+                    Print
+                </button>
+                
+                <button onclick="openSoloPrintModal()" class="px-3 py-2 bg-indigo-600 text-white text-xs rounded-lg hover:bg-indigo-700 transition-colors text-center flex items-center justify-center">
+                    <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    Solo Print
+                </button>
+            </div>
+        </div>
+
+        <!-- Staff Trends Section -->
+        <div class="mb-4 sm:mb-6 bg-white rounded-lg shadow">
+            <div class="p-3 sm:p-4 lg:p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg sm:text-xl font-semibold text-gray-900 flex items-center">
+                        <svg class="h-5 w-5 sm:h-6 sm:w-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                        Staff Trends
+                    </h2>
+                    <button onclick="toggleTrendsSection()" class="p-1 hover:bg-gray-100 rounded-full transition-colors">
+                        <svg id="trendsToggleIcon" class="h-5 w-5 text-gray-500 transform transition-transform duration-200" style="transform: rotate(180deg);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
                     </button>
-                    <a href="account-management.html" class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-center inline-block">
-                        Account Management
-                    </a>
-                    <a href="add-staff.html" class="px-4 py-2 bg-red-primary text-white rounded-lg hover:bg-red-700 transition-colors text-center inline-block">
-                        Add Staff
-                    </a>
+                </div>
+                
+                <div id="trendsContent" style="display: block;">
+                    <!-- Charts Skeleton Loading -->
+                    <div id="chartsSkeleton" class="hidden">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-4">
+                            <div class="bg-gray-200 animate-pulse rounded-lg h-48"></div>
+                            <div class="bg-gray-200 animate-pulse rounded-lg h-48"></div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Container -->
+                    <div id="chartsContainer" class="hidden">
+                        <!-- Year Filter and Statistics -->
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 space-y-2 sm:space-y-0">
+                            <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                                <select id="chartYearFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm">
+                                    <option value="">All Years</option>
+                                </select>
+                                <div id="monthFilterIndicator"></div>
+                                <button id="clearChartFiltersBtn" onclick="clearAllChartFilters()" class="hidden px-3 py-1 bg-red-100 text-red-700 border border-red-300 rounded-lg hover:bg-red-200 transition-colors text-sm flex items-center">
+                                    <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                    Clear Filters
+                                </button>
+                            </div>
+                            <div class="flex flex-col sm:flex-row text-sm text-gray-600 space-y-1 sm:space-y-0 sm:space-x-4">
+                                <span id="totalStaffCount" class="font-medium">Total: 0 staff</span>
+                                <span id="activeStaffCount" class="text-green-600">Active: 0</span>
+                                <span id="inactiveStaffCount" class="text-gray-500">Inactive: 0</span>
+                            </div>
+                        </div>
+
+                        <!-- Charts Grid -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                            <!-- Department Distribution Chart -->
+                            <div class="chart-container bg-gray-50 p-3 sm:p-4 rounded-lg">
+                                <h3 class="text-sm sm:text-base font-medium text-gray-900 mb-3 text-center">Staff by Department</h3>
+                                <div class="relative h-32 sm:h-40">
+                                    <canvas id="departmentChart"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Employment Status Chart -->
+                            <div class="chart-container bg-gray-50 p-3 sm:p-4 rounded-lg">
+                                <h3 class="text-sm sm:text-base font-medium text-gray-900 mb-3 text-center">Employment Status Distribution</h3>
+                                <div class="relative h-32 sm:h-40">
+                                    <canvas id="statusChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Monthly Hiring Trends -->
+                        <div class="mt-4 sm:mt-6">
+                            <div class="chart-container bg-gray-50 p-3 sm:p-4 rounded-lg">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h3 class="text-sm sm:text-base font-medium text-gray-900">Monthly Hiring Trends</h3>
+                                    <button onclick="toggleMonthlyChart()" class="p-1 hover:bg-gray-200 rounded-full transition-colors">
+                                        <svg id="monthlyToggleIcon" class="h-4 w-4 text-gray-500 transition-transform" style="transform: rotate(-90deg);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div id="monthlyChartContainer" class="relative h-32 sm:h-40" style="display: none;">
+                                    <canvas id="monthlyChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Staff Records Grid -->
-        <div id="recordsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+        <div id="recordsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
             <!-- Records will be populated by JavaScript -->
         </div>
 
         <!-- Skeleton Loading -->
-        <div id="skeletonGrid" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+        <div id="skeletonGrid" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
             <!-- Skeleton items will be populated by JavaScript -->
         </div>
 
         <!-- No Records Message -->
-        <div id="noRecords" class="hidden text-center py-12">
-            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div id="noRecords" class="hidden text-center py-8 sm:py-12">
+            <svg class="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
             </svg>
-            <h3 class="mt-2 text-sm font-medium text-gray-900">No staff records found</h3>
-            <p class="mt-1 text-sm text-gray-500">Get started by adding a new staff record.</p>
-            <div class="mt-6">
-                <a href="add-staff.html" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-primary hover:bg-red-700">
-                    <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <h3 class="mt-2 text-sm sm:text-base font-medium text-gray-900">No staff records found</h3>
+            <p class="mt-1 text-xs sm:text-sm text-gray-500">Get started by adding a new staff record.</p>
+            <div class="mt-4 sm:mt-6">
+                <a href="add-staff.html" class="inline-flex items-center px-3 py-2 sm:px-4 sm:py-2 border border-transparent shadow-sm text-xs sm:text-sm font-medium rounded-md text-white bg-red-primary hover:bg-red-700">
+                    <svg class="-ml-1 mr-2 h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                     </svg>
                     Add Staff Record
                 </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Filter Modal -->
+    <div id="advancedFilterModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-60 hidden p-2 sm:p-4">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-xs sm:max-w-2xl lg:max-w-4xl max-h-[95vh] sm:max-h-[90vh] mx-2 sm:mx-4 flex flex-col">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-3 sm:p-4 lg:p-6 border-b border-gray-200 flex-shrink-0">
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900">Advanced Filters</h3>
+                <button onclick="closeAdvancedFilter()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Modal Content -->
+            <div class="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+                    <!-- Age Range -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Age Range</label>
+                        <div class="flex items-center space-x-2">
+                            <input type="number" id="minAge" placeholder="Min" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm">
+                            <span class="text-gray-500 text-sm">to</span>
+                            <input type="number" id="maxAge" placeholder="Max" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm">
+                        </div>
+                    </div>
+
+                    <!-- Position -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Position</label>
+                        <input type="text" id="advancedPosition" placeholder="Enter position..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm">
+                    </div>
+
+                    <!-- Department -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Department</label>
+                        <select id="advancedDepartment" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm">
+                            <option value="">All Departments</option>
+                            <option value="Administration">Administration</option>
+                            <option value="Child Care">Child Care</option>
+                            <option value="Education">Education</option>
+                            <option value="Health Services">Health Services</option>
+                            <option value="Social Services">Social Services</option>
+                            <option value="Kitchen">Kitchen</option>
+                            <option value="Maintenance">Maintenance</option>
+                            <option value="Security">Security</option>
+                        </select>
+                    </div>
+
+                    <!-- Employment Status -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Employment Status</label>
+                        <select id="advancedEmploymentStatus" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm">
+                            <option value="">All Status</option>
+                            <option value="Regular">Regular</option>
+                            <option value="Contractual">Contractual</option>
+                            <option value="Part-time">Part-time</option>
+                            <option value="Probationary">Probationary</option>
+                        </select>
+                    </div>
+
+                    <!-- Hire Date Range -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Hire Date Range</label>
+                        <div class="space-y-2">
+                            <input type="date" id="hireDateFrom" placeholder="From" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm">
+                            <input type="date" id="hireDateTo" placeholder="To" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm">
+                        </div>
+                    </div>
+
+                    <!-- Contact Number -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Contact Number</label>
+                        <input type="text" id="advancedContactNumber" placeholder="Enter contact number..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm">
+                    </div>
+
+                    <!-- Email -->
+                    <div class="space-y-2 sm:col-span-2 lg:col-span-1">
+                        <label class="block text-sm font-medium text-gray-700">Email</label>
+                        <input type="email" id="advancedEmail" placeholder="Enter email..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm">
+                    </div>
+
+                    <!-- Years of Service -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Years of Service</label>
+                        <div class="flex items-center space-x-2">
+                            <input type="number" id="minYearsService" placeholder="Min" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm">
+                            <span class="text-gray-500">to</span>
+                            <input type="number" id="maxYearsService" placeholder="Max" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm">
+                        </div>
+                    </div>
+
+                    <!-- Staff ID -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Staff ID</label>
+                        <input type="text" id="advancedStaffId" placeholder="Enter staff ID..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 p-3 sm:p-4 lg:p-6 border-t border-gray-200">
+                <button onclick="clearAdvancedFilters()" class="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-primary transition-colors">
+                    Clear All
+                </button>
+                <button onclick="closeAdvancedFilter()" class="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-primary transition-colors">
+                    Cancel
+                </button>
+                <button onclick="applyAdvancedFilters()" class="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-red-primary border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-primary transition-colors">
+                    Apply Filters
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Preview Modal -->
+    <div id="printModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-2 sm:p-4">
+        <div class="relative mx-auto border w-full max-w-7xl shadow-lg rounded-md bg-white flex flex-col" style="margin-top: 10px; margin-bottom: 10px; height: calc(100vh - 20px); max-height: 95vh;">
+            <!-- Modal Header -->
+            <div class="p-3 sm:p-4 lg:p-6 border-b border-gray-200 flex-shrink-0">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-base sm:text-lg lg:text-xl font-medium text-gray-900">Print Staff Records</h3>
+                    <button onclick="closePrintModal()" class="text-gray-400 hover:text-gray-600 text-xl sm:text-2xl">&times;</button>
+                </div>
+            </div>
+            
+            <!-- Modal Content -->
+            <div class="flex-1 overflow-hidden">
+                <!-- Two Column Layout -->
+                <div class="flex flex-col lg:flex-row gap-3 sm:gap-4 lg:gap-6 h-full">
+                    
+                    <!-- Left Column: Print Filters (Static/Non-scrollable) -->
+                    <div class="w-full lg:w-96 flex-shrink-0 p-3 sm:p-4 lg:p-6">
+                        <div class="bg-gray-50 p-3 sm:p-4 rounded-lg h-full overflow-y-auto">
+                            <h4 class="text-sm sm:text-md font-medium text-gray-700 mb-2 sm:mb-3">Filter Options</h4>
+                            
+                            <!-- Department Filter -->
+                            <div class="mb-4">
+                                <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Department</label>
+                                <select id="printDepartmentFilter" onchange="applyPrintFilters()" class="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                                    <option value="">All Departments</option>
+                                    <option value="Administration">Administration</option>
+                                    <option value="Child Care">Child Care</option>
+                                    <option value="Education">Education</option>
+                                    <option value="Health Services">Health Services</option>
+                                    <option value="Social Services">Social Services</option>
+                                    <option value="Kitchen">Kitchen</option>
+                                    <option value="Maintenance">Maintenance</option>
+                                    <option value="Security">Security</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Employment Status Filter -->
+                            <div class="mb-4">
+                                <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Employment Status</label>
+                                <select id="printStatusFilter" onchange="applyPrintFilters()" class="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                                    <option value="">All Status</option>
+                                    <option value="Regular">Regular</option>
+                                    <option value="Contractual">Contractual</option>
+                                    <option value="Part-time">Part-time</option>
+                                    <option value="Probationary">Probationary</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Date Hired From/To -->
+                            <div class="mb-4">
+                                <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Date Hired Range</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-xs text-gray-600 mb-1">From</label>
+                                        <input type="date" id="printHireDateFrom" onchange="applyPrintFilters()" class="w-full px-2 py-1.5 border border-gray-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs text-gray-600 mb-1">To</label>
+                                        <input type="date" id="printHireDateTo" onchange="applyPrintFilters()" class="w-full px-2 py-1.5 border border-gray-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Gender Filter -->
+                            <div class="mb-4">
+                                <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Gender</label>
+                                <div class="space-y-2">
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="printGenderMale" onchange="applyPrintFilters()" class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                        <span class="ml-2 text-xs sm:text-sm text-gray-700">Male</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="printGenderFemale" onchange="applyPrintFilters()" class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                        <span class="ml-2 text-xs sm:text-sm text-gray-700">Female</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Sort Order -->
+                            <div class="mb-4">
+                                <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Sort By</label>
+                                <select id="printSortOrder" onchange="applyPrintFilters()" class="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                                    <option value="name">Name (A-Z)</option>
+                                    <option value="staffId">Staff ID</option>
+                                    <option value="department">Department</option>
+                                    <option value="dateHired">Date Hired</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Column: Print Preview (Scrollable) -->
+                    <div class="flex-1 lg:flex-2 flex flex-col min-w-0 p-3 sm:p-4 lg:p-6 pl-0">
+                        <div class="bg-white border border-gray-300 rounded-lg flex flex-col h-full">
+                            <div class="bg-gray-50 px-3 sm:px-4 py-2 sm:py-3 border-b border-gray-300 rounded-t-lg flex-shrink-0">
+                                <div class="flex flex-col space-y-1 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
+                                    <h4 class="text-sm sm:text-md font-medium text-gray-700">Print Preview</h4>
+                                    <span id="previewRecordCount" class="text-xs sm:text-sm text-gray-600">0 records will be printed</span>
+                                </div>
+                            </div>
+                            
+                            <div id="printPreview" class="p-2 sm:p-3 lg:p-4 flex-1 overflow-y-auto overflow-x-hidden bg-white max-h-full" style="max-height: calc(100vh - 300px);">
+                                <!-- Preview content will be generated here -->
+                                <div class="text-center text-gray-500 py-6 sm:py-8">
+                                    <p class="text-sm sm:text-base">Apply filters to see preview</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="border-t border-gray-200 bg-gray-50 px-3 sm:px-4 lg:px-6 py-3 sm:py-4 rounded-b-md flex-shrink-0">
+                <div class="flex flex-col space-y-3 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 sm:ml-auto">
+                        <button onclick="resetPrintFilters()" class="px-3 sm:px-4 py-2 bg-gray-500 text-white text-xs sm:text-sm rounded-md hover:bg-gray-600 transition-colors">
+                            <span class="hidden sm:inline">Reset Filters</span>
+                            <span class="sm:hidden">Reset</span>
+                        </button>
+                        <button onclick="openSoloPrintModal()" class="px-3 sm:px-4 py-2 bg-purple-600 text-white text-xs sm:text-sm rounded-md hover:bg-purple-700 transition-colors">
+                            <span class="hidden sm:inline">Solo Print Staff Record</span>
+                            <span class="sm:hidden">Solo Print</span>
+                        </button>
+                        <button onclick="closePrintModal()" class="px-3 sm:px-4 py-2 border border-gray-300 rounded-md text-gray-700 text-xs sm:text-sm hover:bg-gray-50 transition-colors">
+                            Cancel
+                        </button>
+                        <button onclick="confirmPrint()" class="px-3 sm:px-4 py-2 bg-red-600 text-white text-xs sm:text-sm rounded-md hover:bg-red-700 transition-colors">
+                            <span class="hidden sm:inline">Print Records</span>
+                            <span class="sm:hidden">Print</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Solo Print Modal -->
+    <div id="soloPrintModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-2 sm:p-4">
+        <div class="relative mx-auto border w-full max-w-7xl shadow-lg rounded-md bg-white flex flex-col" style="margin-top: 10px; margin-bottom: 10px; height: calc(100vh - 20px); max-height: 95vh;">
+            <!-- Modal Header -->
+            <div class="p-3 sm:p-4 lg:p-6 border-b border-gray-200 flex-shrink-0">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-medium text-gray-900">Solo Print Staff Record</h3>
+                    <button onclick="closeSoloPrintModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Modal Content -->
+            <div class="flex-1 overflow-hidden">
+                <div class="flex h-full">
+                    <!-- Left Column: Filters and Staff List -->
+                    <div class="w-1/3 border-r border-gray-200 bg-gray-50 overflow-hidden flex flex-col">
+                        <div class="p-4 space-y-4 flex-shrink-0">
+                            <div class="space-y-3">
+                                <!-- Search -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Search Staff</label>
+                                    <input type="text" id="soloSearchInput" placeholder="Search by name or ID..." oninput="applySoloFilters()" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                                </div>
+                                
+                                <!-- Department Filter -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                                    <select id="soloDepartmentFilter" onchange="applySoloFilters()" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                                        <option value="">All Departments</option>
+                                        <option value="Administration">Administration</option>
+                                        <option value="Child Care">Child Care</option>
+                                        <option value="Education">Education</option>
+                                        <option value="Health Services">Health Services</option>
+                                        <option value="Social Services">Social Services</option>
+                                        <option value="Kitchen">Kitchen</option>
+                                        <option value="Maintenance">Maintenance</option>
+                                        <option value="Security">Security</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Status Filter -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Employment Status</label>
+                                    <select id="soloStatusFilter" onchange="applySoloFilters()" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                                        <option value="">All Status</option>
+                                        <option value="Regular">Regular</option>
+                                        <option value="Contractual">Contractual</option>
+                                        <option value="Part-time">Part-time</option>
+                                        <option value="Probationary">Probationary</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Include Photo Option -->
+                                <div>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="soloIncludePhoto" checked onchange="updateSoloPreview()" class="mr-2 rounded border-gray-300 text-red-primary focus:ring-red-primary">
+                                        <span class="text-sm text-gray-700">Include Photo</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Staff List -->
+                        <div class="flex-1 overflow-y-auto p-4 pt-0">
+                            <div class="bg-white border border-gray-300 rounded-md">
+                                <div class="p-3 border-b border-gray-200 bg-gray-50">
+                                    <h4 class="text-sm font-medium text-gray-900">Select Staff Member</h4>
+                                </div>
+                                <div id="soloStaffList" class="divide-y divide-gray-200 max-h-96 overflow-y-auto">
+                                    <!-- Staff list will be populated here -->
+                                </div>
+                                <div id="soloStaffSkeleton" class="hidden p-3">
+                                    <div class="space-y-2">
+                                        <div class="animate-pulse flex space-x-3">
+                                            <div class="rounded-full bg-gray-300 h-8 w-8"></div>
+                                            <div class="flex-1 space-y-1">
+                                                <div class="h-3 bg-gray-300 rounded w-3/4"></div>
+                                                <div class="h-2 bg-gray-300 rounded w-1/2"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Column: Print Preview -->
+                    <div class="flex-1 overflow-y-auto bg-white">
+                        <div id="soloPrintPreview" class="p-6">
+                            <div class="text-center text-gray-500 py-12">
+                                <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                                <p class="mt-4 text-lg">Select a staff member to preview their record</p>
+                                <p class="mt-2 text-sm text-gray-400">Choose from the staff list on the left</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="border-t border-gray-200 bg-gray-50 px-3 sm:px-4 lg:px-6 py-3 sm:py-4 rounded-b-md flex-shrink-0">
+                <div class="flex justify-end">
+                    <button onclick="printSoloRecord()" id="soloPrintBtn" class="px-4 py-2 bg-red-primary text-white rounded-lg hover:bg-red-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center" disabled>
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                        </svg>
+                        Print Record
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -295,6 +863,12 @@
         let currentDeleteId = null;
         let currentEditId = null;
         let currentUser = null;
+        let departmentChart = null;
+        let statusChart = null;
+        let monthlyChart = null;
+        let activeAdvancedFilters = {};
+        let activeMonthFilter = null;
+        let activeMonthName = null;
 
         const sessionManager = {
             getCurrentUser: function() {
@@ -317,19 +891,596 @@
         };
 
         document.addEventListener('DOMContentLoaded', async function() {
-            if (!sessionManager.requireLogin()) {
+            // Skip authentication check for now
+            // if (!sessionManager.requireLogin()) {
+            //     return;
+            // }
+
+            currentUser = sessionManager.getCurrentUser();
+            // Skip userInfo display since element was removed
+            // document.getElementById('userInfo').textContent = `${currentUser.name} (${currentUser.role})`;
+
+            // Clear search input to prevent autofill
+            if (document.getElementById('searchInput')) {
+                document.getElementById('searchInput').value = '';
+            }
+
+            // Setup search and filters
+            setupSearchAndFilters();
+
+            // Setup event listeners first
+            setupEventListeners();
+            populateYearDropdown();
+            
+            // Load records and initialize charts after DOM is ready
+            await loadRecordsFromFirestore();
+            
+            // Initialize charts after a small delay to ensure DOM is fully rendered
+            setTimeout(() => {
+                initializeCharts();
+                updateCharts(allRecords);
+                updateStatistics();
+            }, 100);
+        });
+
+        // Chart functions
+        function initializeCharts() {
+            console.log('Initializing staff charts...');
+            try {
+                // Make sure chart containers are visible
+                hideChartsSkeleton();
+                
+                const departmentCtx = document.getElementById('departmentChart').getContext('2d');
+                const statusCtx = document.getElementById('statusChart').getContext('2d');
+                const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+
+                departmentChart = new Chart(departmentCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            data: [],
+                            backgroundColor: [
+                                '#dc2626', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6',
+                                '#f97316', '#06b6d4', '#84cc16', '#ec4899', '#6b7280'
+                            ],
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 15,
+                                    font: { size: 11 }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.parsed;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return `${label}: ${value} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        onClick: (event, elements) => {
+                            if (elements.length > 0) {
+                                const index = elements[0].index;
+                                const department = departmentChart.data.labels[index];
+                                filterByDepartment(department);
+                            }
+                        }
+                    }
+                });
+
+                statusChart = new Chart(statusCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            data: [],
+                            backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6'],
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 15,
+                                    font: { size: 11 }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.parsed;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return `${label}: ${value} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        onClick: (event, elements) => {
+                            if (elements.length > 0) {
+                                const index = elements[0].index;
+                                const status = statusChart.data.labels[index];
+                                filterByStatus(status);
+                            }
+                        }
+                    }
+                });
+
+                monthlyChart = new Chart(monthlyCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                        datasets: [{
+                            label: 'Staff Hired',
+                            data: new Array(12).fill(0),
+                            backgroundColor: '#dc2626',
+                            borderColor: '#b91c1c',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    title: function(context) {
+                                        return context[0].label;
+                                    },
+                                    label: function(context) {
+                                        return `Staff Hired: ${context.parsed.y}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { display: false }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        },
+                        onClick: (event, elements) => {
+                            if (elements.length > 0) {
+                                const index = elements[0].index;
+                                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                                                 'July', 'August', 'September', 'October', 'November', 'December'];
+                                filterByMonth(index, monthNames[index]);
+                            }
+                        }
+                    }
+                });
+
+                console.log('Staff charts initialized successfully');
+            } catch (error) {
+                console.error('Error initializing charts:', error);
+            }
+        }
+
+        function showChartsSkeleton() {
+            document.getElementById('chartsContainer').classList.add('hidden');
+            document.getElementById('chartsSkeleton').classList.remove('hidden');
+        }
+
+        function hideChartsSkeleton() {
+            document.getElementById('chartsSkeleton').classList.add('hidden');
+            document.getElementById('chartsContainer').classList.remove('hidden');
+        }
+
+        function populateYearDropdown() {
+            const yearSelect = document.getElementById('chartYearFilter');
+            if (!yearSelect) return;
+            
+            const currentYear = new Date().getFullYear();
+            
+            // Clear existing options except "All Years"
+            yearSelect.innerHTML = '<option value="">All Years</option>';
+            
+            // Add years from 2000 to current year
+            for (let year = currentYear; year >= 2000; year--) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                yearSelect.appendChild(option);
+            }
+        }
+
+        function updateCharts(records, selectedYear) {
+            if (!departmentChart || !statusChart || !monthlyChart) {
+                console.log('Charts not initialized yet');
                 return;
             }
 
-            currentUser = sessionManager.getCurrentUser();
-            document.getElementById('userInfo').textContent = `${currentUser.name} (${currentUser.role})`;
+            const { departmentData, statusData, monthlyData } = processStaffChartData(records, selectedYear);
 
-            // Clear search input to prevent autofill
-            document.getElementById('searchInput').value = '';
+            // Update department chart
+            departmentChart.data.labels = Object.keys(departmentData);
+            departmentChart.data.datasets[0].data = Object.values(departmentData);
+            departmentChart.update();
 
-            await loadRecordsFromFirestore();
-            setupEventListeners();
-        });
+            // Update status chart
+            statusChart.data.labels = Object.keys(statusData);
+            statusChart.data.datasets[0].data = Object.values(statusData);
+            statusChart.update();
+
+            // Update monthly chart
+            monthlyChart.data.datasets[0].data = monthlyData;
+            monthlyChart.update();
+        }
+
+        function processStaffChartData(records, selectedYear) {
+            const departmentData = {};
+            const statusData = {};
+            const monthlyData = new Array(12).fill(0);
+
+            records.forEach(record => {
+                // Process department data
+                const department = record.department || 'Unassigned';
+                departmentData[department] = (departmentData[department] || 0) + 1;
+
+                // Process status data
+                const status = record.employmentStatus || 'Unknown';
+                statusData[status] = (statusData[status] || 0) + 1;
+
+                // Process monthly hiring data
+                if (record.dateHired) {
+                    const hireDate = new Date(record.dateHired);
+                    const year = hireDate.getFullYear();
+                    const month = hireDate.getMonth();
+                    
+                    // Filter by year if specified
+                    if (!selectedYear || year === parseInt(selectedYear)) {
+                        monthlyData[month]++;
+                    }
+                }
+            });
+
+            return { departmentData, statusData, monthlyData };
+        }
+
+        // Month filtering functions
+        function filterByMonth(monthIndex, monthName) {
+            console.log(`Filtering by month: ${monthName} (${monthIndex})`);
+            
+            // Toggle month filter - if same month clicked, clear filter
+            if (activeMonthFilter === monthIndex) {
+                clearMonthFilter();
+                return;
+            }
+            
+            // Set new month filter
+            activeMonthFilter = monthIndex;
+            activeMonthName = monthName;
+            
+            // Update visual indicators
+            updateMonthFilterDisplay();
+            updateClearFiltersButton();
+            
+            // Apply the filter
+            applyMonthFilter();
+        }
+
+        function clearMonthFilter() {
+            console.log('Clearing month filter');
+            activeMonthFilter = null;
+            activeMonthName = null;
+            
+            // Update visual indicators
+            updateMonthFilterDisplay();
+            updateClearFiltersButton();
+            
+            // Re-apply existing filters without month restriction
+            filterRecords();
+        }
+
+        function updateMonthFilterDisplay() {
+            // Update the chart year filter section to show active month filter
+            const yearFilterContainer = document.getElementById('chartYearFilter') ? document.getElementById('chartYearFilter').parentElement : null;
+            let monthIndicator = document.getElementById('monthFilterIndicator');
+            
+            if (activeMonthFilter !== null && yearFilterContainer) {
+                if (!monthIndicator) {
+                    monthIndicator = document.createElement('div');
+                    monthIndicator.id = 'monthFilterIndicator';
+                    yearFilterContainer.appendChild(monthIndicator);
+                }
+                monthIndicator.innerHTML = `
+                    <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">
+                        Month: ${activeMonthName}
+                        <button onclick="clearMonthFilter()" class="ml-1 text-red-600 hover:text-red-800">×</button>
+                    </span>
+                `;
+            } else if (monthIndicator) {
+                monthIndicator.remove();
+            }
+        }
+
+        function applyMonthFilter() {
+            if (activeMonthFilter === null) {
+                filterRecords();
+                return;
+            }
+            
+            const selectedYear = document.getElementById('chartYearFilter') ? document.getElementById('chartYearFilter').value : '';
+            
+            // Apply month filter - filter by hire month
+            const monthFilteredRecords = allRecords.filter(record => {
+                if (!record.dateHired) return false;
+                const hireDate = new Date(record.dateHired);
+                const month = hireDate.getMonth();
+                const year = hireDate.getFullYear();
+                
+                const matchesMonth = month === activeMonthFilter;
+                const matchesYear = !selectedYear || year === parseInt(selectedYear);
+                
+                return matchesMonth && matchesYear;
+            });
+            
+            console.log(`Month filter applied: ${monthFilteredRecords.length} records for ${activeMonthName}`);
+            
+            // Apply advanced filters
+            const advancedFilteredRecords = applyAdvancedFiltersToRecords(monthFilteredRecords);
+            
+            // Apply search and status filters
+            const searchTerm = getSearchTerm();
+            const departmentFilter = getDepartmentFilter();
+            const statusFilter = getStatusFilter();
+            
+            const finalRecords = advancedFilteredRecords.filter(record => {
+                const fullName = `${record.firstName || ''} ${record.middleName || ''} ${record.lastName || ''}`.toLowerCase();
+                const matchesSearch = !searchTerm || fullName.includes(searchTerm) || 
+                                    (record.staffId || '').toLowerCase().includes(searchTerm) || 
+                                    (record.position || '').toLowerCase().includes(searchTerm) ||
+                                    (record.department || '').toLowerCase().includes(searchTerm);
+                const matchesDepartment = !departmentFilter || record.department === departmentFilter;
+                const matchesStatus = !statusFilter || record.employmentStatus === statusFilter;
+                
+                return matchesSearch && matchesDepartment && matchesStatus;
+            });
+            
+            displayRecords(finalRecords);
+            updateStatistics();
+        }
+
+        function filterByDepartment(department) {
+            const departmentFilter = document.getElementById('departmentFilter');
+            
+            if (departmentFilter) departmentFilter.value = department;
+            
+            updateClearFiltersButton();
+            filterRecords();
+        }
+
+        function filterByStatus(status) {
+            const statusFilter = document.getElementById('statusFilter');
+            
+            if (statusFilter) statusFilter.value = status;
+            
+            updateClearFiltersButton();
+            filterRecords();
+        }
+
+        function toggleTrendsSection() {
+            const trendsContent = document.getElementById('trendsContent');
+            const toggleIcon = document.getElementById('trendsToggleIcon');
+            
+            if (trendsContent.style.display === 'none' || trendsContent.style.display === '') {
+                trendsContent.style.display = 'block';
+                toggleIcon.style.transform = 'rotate(180deg)';
+                
+                // Initialize charts if not already done
+                if (!departmentChart || !statusChart || !monthlyChart) {
+                    setTimeout(() => {
+                        initializeCharts();
+                        updateCharts(allRecords, document.getElementById('chartYearFilter') ? document.getElementById('chartYearFilter').value : '');
+                    }, 100);
+                } else {
+                    updateCharts(allRecords, document.getElementById('chartYearFilter') ? document.getElementById('chartYearFilter').value : '');
+                }
+            } else {
+                trendsContent.style.display = 'none';
+                toggleIcon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        function updateStatistics() {
+            // Get currently filtered records
+            const searchTerm = getSearchTerm();
+            const departmentFilter = getDepartmentFilter();
+            const statusFilter = getStatusFilter();
+            const selectedYear = document.getElementById('chartYearFilter') ? document.getElementById('chartYearFilter').value : '';
+            
+            let filteredRecords = allRecords;
+            
+            // Apply year filter
+            if (selectedYear) {
+                filteredRecords = filteredRecords.filter(record => {
+                    if (!record.dateHired) return false;
+                    const year = new Date(record.dateHired).getFullYear();
+                    return year === parseInt(selectedYear);
+                });
+            }
+            
+            // Apply month filter if active
+            if (activeMonthFilter !== null) {
+                filteredRecords = filteredRecords.filter(record => {
+                    if (!record.dateHired) return false;
+                    const month = new Date(record.dateHired).getMonth();
+                    return month === activeMonthFilter;
+                });
+            }
+            
+            // Apply advanced filters
+            filteredRecords = applyAdvancedFiltersToRecords(filteredRecords);
+            
+            // Apply search and other filters
+            filteredRecords = filteredRecords.filter(record => {
+                const fullName = `${record.firstName || ''} ${record.middleName || ''} ${record.lastName || ''}`.toLowerCase();
+                const matchesSearch = !searchTerm || fullName.includes(searchTerm) || 
+                                    (record.staffId || '').toLowerCase().includes(searchTerm) || 
+                                    (record.position || '').toLowerCase().includes(searchTerm) ||
+                                    (record.department || '').toLowerCase().includes(searchTerm);
+                const matchesDepartment = !departmentFilter || record.department === departmentFilter;
+                const matchesStatus = !statusFilter || record.employmentStatus === statusFilter;
+                
+                return matchesSearch && matchesDepartment && matchesStatus;
+            });
+            
+            // Update statistics in the trends section
+            const totalStaffCount = document.getElementById('totalStaffCount');
+            const activeStaffCount = document.getElementById('activeStaffCount');
+            const inactiveStaffCount = document.getElementById('inactiveStaffCount');
+            
+            if (totalStaffCount) {
+                totalStaffCount.textContent = `Total: ${filteredRecords.length} staff`;
+            }
+            
+            if (activeStaffCount && inactiveStaffCount) {
+                const activeCount = filteredRecords.filter(r => r.employmentStatus === 'Regular' || r.employmentStatus === 'Contractual').length;
+                const inactiveCount = filteredRecords.length - activeCount;
+                
+                activeStaffCount.textContent = `Active: ${activeCount}`;
+                inactiveStaffCount.textContent = `Others: ${inactiveCount}`;
+            }
+        }
+
+        // Helper functions
+        function getSearchTerm() {
+            const searchInput = document.getElementById('searchInput');
+            return searchInput ? searchInput.value.toLowerCase() : '';
+        }
+
+        function getDepartmentFilter() {
+            const departmentFilter = document.getElementById('departmentFilter');
+            return departmentFilter ? departmentFilter.value : '';
+        }
+
+        function getStatusFilter() {
+            const statusFilter = document.getElementById('statusFilter');
+            return statusFilter ? statusFilter.value : '';
+        }
+
+        function setupSearchAndFilters() {
+            const searchInput = document.getElementById('searchInput');
+            const departmentFilter = document.getElementById('departmentFilter');
+            const statusFilter = document.getElementById('statusFilter');
+
+            // Setup search input
+            if (searchInput) {
+                searchInput.addEventListener('input', filterRecords);
+            }
+
+            // Setup department filter
+            if (departmentFilter) {
+                departmentFilter.addEventListener('change', () => {
+                    updateClearFiltersButton();
+                    filterRecords();
+                });
+            }
+
+            // Setup status filter  
+            if (statusFilter) {
+                statusFilter.addEventListener('change', () => {
+                    updateClearFiltersButton();
+                    filterRecords();
+                });
+            }
+        }
+
+        // Monthly chart toggle function
+        function toggleMonthlyChart() {
+            const monthlyContainer = document.getElementById('monthlyChartContainer');
+            const toggleIcon = document.getElementById('monthlyToggleIcon');
+            
+            if (monthlyContainer.style.display === 'none') {
+                monthlyContainer.style.display = 'block';
+                toggleIcon.style.transform = 'rotate(0deg)';
+            } else {
+                monthlyContainer.style.display = 'none';
+                toggleIcon.style.transform = 'rotate(-90deg)';
+            }
+        }
+
+        // Clear all chart filters function
+        function clearAllChartFilters() {
+            // Clear year filter
+            const yearFilter = document.getElementById('chartYearFilter');
+            if (yearFilter) {
+                yearFilter.value = '';
+            }
+            
+            // Clear month filter
+            clearMonthFilter();
+            
+            // Clear department and status filters if they were set by chart clicks
+            const departmentFilter = document.getElementById('departmentFilter');
+            const statusFilter = document.getElementById('statusFilter');
+            
+            if (departmentFilter) departmentFilter.value = '';
+            if (statusFilter) statusFilter.value = '';
+            
+            // Hide the clear button
+            updateClearFiltersButton();
+            
+            // Update charts and records
+            updateCharts(allRecords);
+            filterRecords();
+            updateStatistics();
+        }
+        
+        function updateClearFiltersButton() {
+            const clearBtn = document.getElementById('clearChartFiltersBtn');
+            const yearFilter = document.getElementById('chartYearFilter');
+            const departmentFilter = document.getElementById('departmentFilter');
+            const statusFilter = document.getElementById('statusFilter');
+            
+            const hasActiveFilters = 
+                (yearFilter && yearFilter.value) ||
+                (departmentFilter && departmentFilter.value) ||
+                (statusFilter && statusFilter.value) ||
+                activeMonthFilter !== null;
+            
+            if (clearBtn) {
+                if (hasActiveFilters) {
+                    clearBtn.classList.remove('hidden');
+                } else {
+                    clearBtn.classList.add('hidden');
+                }
+            }
+        }
+
+        // Make functions globally available
+        window.toggleTrendsSection = toggleTrendsSection;
+        window.toggleMonthlyChart = toggleMonthlyChart;
+        window.clearMonthFilter = clearMonthFilter;
+        window.clearAllChartFilters = clearAllChartFilters;
 
         // Additional safeguard to clear search input after all browser autofill attempts
         window.addEventListener('load', function() {
@@ -341,6 +1492,7 @@
         async function loadRecordsFromFirestore() {
             try {
                 showSkeletonLoading();
+                showChartsSkeleton();
                 
                 const usersCol = collection(db, 'users');
                 const snapshot = await getDocs(usersCol);
@@ -384,9 +1536,12 @@
                 
                 hideSkeletonLoading();
                 displayRecords(allRecords);
+                
+                // Charts will be initialized separately after DOM is ready
             } catch (error) {
                 console.error('Failed to load staff records from Firestore:', error);
                 hideSkeletonLoading();
+                hideChartsSkeleton();
                 displayRecords([]);
             }
         }
@@ -499,56 +1654,111 @@
         }
 
         function setupEventListeners() {
-            document.getElementById('searchInput').addEventListener('input', filterRecords);
-            document.getElementById('departmentFilter').addEventListener('change', filterRecords);
-            document.getElementById('statusFilter').addEventListener('change', filterRecords);
+            const searchInput = document.getElementById('searchInput');
+            const departmentFilter = document.getElementById('departmentFilter');
+            const statusFilter = document.getElementById('statusFilter');
+            const chartYearFilter = document.getElementById('chartYearFilter');
 
-            document.getElementById('staffModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeModal();
-                }
-            });
+            if (searchInput) searchInput.addEventListener('input', filterRecords);
+            if (departmentFilter) departmentFilter.addEventListener('change', filterRecords);
+            if (statusFilter) statusFilter.addEventListener('change', filterRecords);
+            if (chartYearFilter) chartYearFilter.addEventListener('change', handleYearFilterChange);
 
-            document.getElementById('deleteModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeDeleteModal();
-                }
-            });
+            // Modal event listeners
+            const staffModal = document.getElementById('staffModal');
+            const deleteModal = document.getElementById('deleteModal');
+            const warningModal = document.getElementById('warningModal');
+            const successDeleteModal = document.getElementById('successDeleteModal');
+            const editPasswordModal = document.getElementById('editPasswordModal');
+            const messageModal = document.getElementById('messageModal');
 
-            document.getElementById('warningModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeWarningModal();
-                }
-            });
+            if (staffModal) {
+                staffModal.addEventListener('click', function(e) {
+                    if (e.target === this) closeModal();
+                });
+            }
 
-            document.getElementById('successDeleteModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeSuccessDeleteModal();
-                }
-            });
+            if (deleteModal) {
+                deleteModal.addEventListener('click', function(e) {
+                    if (e.target === this) closeDeleteModal();
+                });
+            }
 
-            document.getElementById('editPasswordModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeEditPasswordModal();
-                }
-            });
+            if (warningModal) {
+                warningModal.addEventListener('click', function(e) {
+                    if (e.target === this) closeWarningModal();
+                });
+            }
 
-            document.getElementById('messageModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeMessageModal();
-                }
-            });
+            if (successDeleteModal) {
+                successDeleteModal.addEventListener('click', function(e) {
+                    if (e.target === this) closeSuccessDeleteModal();
+                });
+            }
+
+            if (editPasswordModal) {
+                editPasswordModal.addEventListener('click', function(e) {
+                    if (e.target === this) closeEditPasswordModal();
+                });
+            }
+
+            if (messageModal) {
+                messageModal.addEventListener('click', function(e) {
+                    if (e.target === this) closeMessageModal();
+                });
+            }
+        }
+
+        function handleYearFilterChange() {
+            const selectedYear = document.getElementById('chartYearFilter').value;
+            
+            // Update clear button visibility
+            updateClearFiltersButton();
+            
+            // Update charts with selected year
+            updateCharts(allRecords, selectedYear);
+            
+            // Filter and display records for selected year
+            filterRecords();
+            
+            // Update statistics
+            updateStatistics();
         }
 
         function filterRecords() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const departmentFilter = document.getElementById('departmentFilter').value;
-            const statusFilter = document.getElementById('statusFilter').value;
+            const searchTerm = getSearchTerm();
+            const departmentFilter = getDepartmentFilter();
+            const statusFilter = getStatusFilter();
+            const selectedYear = document.getElementById('chartYearFilter') ? document.getElementById('chartYearFilter').value : '';
 
-            const filteredRecords = allRecords.filter(record => {
+            let filteredRecords = allRecords;
+
+            // Apply year filter
+            if (selectedYear) {
+                filteredRecords = filteredRecords.filter(record => {
+                    if (!record.dateHired) return false;
+                    const year = new Date(record.dateHired).getFullYear();
+                    return year === parseInt(selectedYear);
+                });
+            }
+
+            // Apply month filter if active
+            if (activeMonthFilter !== null) {
+                filteredRecords = filteredRecords.filter(record => {
+                    if (!record.dateHired) return false;
+                    const month = new Date(record.dateHired).getMonth();
+                    return month === activeMonthFilter;
+                });
+            }
+
+            // Apply advanced filters
+            filteredRecords = applyAdvancedFiltersToRecords(filteredRecords);
+
+            // Apply search and basic filters
+            filteredRecords = filteredRecords.filter(record => {
                 const fullName = `${record.firstName || ''} ${record.middleName || ''} ${record.lastName || ''}`.toLowerCase();
-                const matchesSearch = fullName.includes(searchTerm) || 
-                                    record.staffId.toLowerCase().includes(searchTerm) || 
+                const matchesSearch = !searchTerm || fullName.includes(searchTerm) || 
+                                    (record.staffId || '').toLowerCase().includes(searchTerm) || 
                                     (record.position || '').toLowerCase().includes(searchTerm) ||
                                     (record.department || '').toLowerCase().includes(searchTerm);
                 const matchesDepartment = !departmentFilter || record.department === departmentFilter;
@@ -558,6 +1768,113 @@
             });
 
             displayRecords(filteredRecords);
+            updateStatistics();
+        }
+
+        // Advanced Filter Functions (placeholders for now)
+        function applyAdvancedFiltersToRecords(records) {
+            if (!checkIfAdvancedFiltersActive()) {
+                return records;
+            }
+
+            return records.filter(record => {
+                // Age range filter
+                if (activeAdvancedFilters.minAge || activeAdvancedFilters.maxAge) {
+                    const age = calculateStaffAge(record.dateOfBirth);
+                    if (age !== null) {
+                        if (activeAdvancedFilters.minAge && age < parseInt(activeAdvancedFilters.minAge)) return false;
+                        if (activeAdvancedFilters.maxAge && age > parseInt(activeAdvancedFilters.maxAge)) return false;
+                    }
+                }
+
+                // Position filter
+                if (activeAdvancedFilters.position) {
+                    const position = (record.position || '').toLowerCase();
+                    if (!position.includes(activeAdvancedFilters.position.toLowerCase())) return false;
+                }
+
+                // Department filter
+                if (activeAdvancedFilters.department) {
+                    if (record.department !== activeAdvancedFilters.department) return false;
+                }
+
+                // Employment status filter
+                if (activeAdvancedFilters.employmentStatus) {
+                    if (record.employmentStatus !== activeAdvancedFilters.employmentStatus) return false;
+                }
+
+                // Hire date range filter
+                if (activeAdvancedFilters.hireDateFrom || activeAdvancedFilters.hireDateTo) {
+                    const hireDate = record.dateHired ? new Date(record.dateHired) : null;
+                    if (hireDate) {
+                        if (activeAdvancedFilters.hireDateFrom) {
+                            const fromDate = new Date(activeAdvancedFilters.hireDateFrom);
+                            if (hireDate < fromDate) return false;
+                        }
+                        if (activeAdvancedFilters.hireDateTo) {
+                            const toDate = new Date(activeAdvancedFilters.hireDateTo);
+                            if (hireDate > toDate) return false;
+                        }
+                    }
+                }
+
+                // Contact number filter
+                if (activeAdvancedFilters.contactNumber) {
+                    const contactNumber = (record.contactNumber || '').toLowerCase();
+                    if (!contactNumber.includes(activeAdvancedFilters.contactNumber.toLowerCase())) return false;
+                }
+
+                // Email filter
+                if (activeAdvancedFilters.email) {
+                    const email = (record.emailAddress || '').toLowerCase();
+                    if (!email.includes(activeAdvancedFilters.email.toLowerCase())) return false;
+                }
+
+                // Years of service filter
+                if (activeAdvancedFilters.minYearsService || activeAdvancedFilters.maxYearsService) {
+                    const yearsOfService = calculateYearsOfService(record.dateHired);
+                    if (yearsOfService !== null) {
+                        if (activeAdvancedFilters.minYearsService && yearsOfService < parseInt(activeAdvancedFilters.minYearsService)) return false;
+                        if (activeAdvancedFilters.maxYearsService && yearsOfService > parseInt(activeAdvancedFilters.maxYearsService)) return false;
+                    }
+                }
+
+                // Staff ID filter
+                if (activeAdvancedFilters.staffId) {
+                    const staffId = (record.staffId || '').toLowerCase();
+                    if (!staffId.includes(activeAdvancedFilters.staffId.toLowerCase())) return false;
+                }
+
+                return true;
+            });
+        }
+
+        function checkIfAdvancedFiltersActive() {
+            return Object.keys(activeAdvancedFilters).length > 0;
+        }
+
+        function calculateStaffAge(birthDateString) {
+            if (!birthDateString) return null;
+            const today = new Date();
+            const birthDate = new Date(birthDateString);
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            return age;
+        }
+
+        function calculateYearsOfService(hireDateString) {
+            if (!hireDateString) return null;
+            const today = new Date();
+            const hireDate = new Date(hireDateString);
+            let years = today.getFullYear() - hireDate.getFullYear();
+            const monthDiff = today.getMonth() - hireDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < hireDate.getDate())) {
+                years--;
+            }
+            return Math.max(0, years);
         }
 
         // showStaffDetail function removed
@@ -815,32 +2132,7 @@
             document.getElementById('staffModal').classList.add('hidden');
         };
 
-        window.exportToCSV = function() {
-            const headers = ['Staff ID', 'First Name', 'Middle Name', 'Last Name', 'Position', 'Department', 'Contact Number', 'Email', 'Employment Status', 'Date Hired'];
-            const csvContent = [
-                headers.join(','),
-                ...allRecords.map(staff => [
-                    staff.staffId,
-                    staff.firstName || '',
-                    staff.middleName || '',
-                    staff.lastName || '',
-                    staff.position || '',
-                    staff.department || '',
-                    staff.contactNumber || '',
-                    staff.emailAddress || '',
-                    staff.employmentStatus || '',
-                    staff.dateHired || ''
-                ].map(field => `"${field}"`).join(','))
-            ].join('\n');
 
-            const blob = new Blob([csvContent], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `staff-records-${new Date().toISOString().split('T')[0]}.csv`;
-            a.click();
-            window.URL.revokeObjectURL(url);
-        };
 
         function formatDate(dateString) {
             if (!dateString) return 'Not specified';
@@ -920,6 +2212,515 @@
         window.closeMessageModal = function() {
             document.getElementById('messageModal').classList.add('hidden');
         };
+
+        // Advanced Filter Modal Functions
+        window.openAdvancedFilter = function() {
+            document.getElementById('advancedFilterModal').classList.remove('hidden');
+        };
+
+        window.closeAdvancedFilter = function() {
+            document.getElementById('advancedFilterModal').classList.add('hidden');
+        };
+
+        window.applyAdvancedFilters = function() {
+            // Collect filter values
+            activeAdvancedFilters = {};
+            
+            const minAge = document.getElementById('minAge').value;
+            const maxAge = document.getElementById('maxAge').value;
+            const position = document.getElementById('advancedPosition').value;
+            const department = document.getElementById('advancedDepartment').value;
+            const employmentStatus = document.getElementById('advancedEmploymentStatus').value;
+            const hireDateFrom = document.getElementById('hireDateFrom').value;
+            const hireDateTo = document.getElementById('hireDateTo').value;
+            const contactNumber = document.getElementById('advancedContactNumber').value;
+            const email = document.getElementById('advancedEmail').value;
+            const minYearsService = document.getElementById('minYearsService').value;
+            const maxYearsService = document.getElementById('maxYearsService').value;
+            const staffId = document.getElementById('advancedStaffId').value;
+
+            if (minAge) activeAdvancedFilters.minAge = parseInt(minAge);
+            if (maxAge) activeAdvancedFilters.maxAge = parseInt(maxAge);
+            if (position) activeAdvancedFilters.position = position;
+            if (department) activeAdvancedFilters.department = department;
+            if (employmentStatus) activeAdvancedFilters.employmentStatus = employmentStatus;
+            if (hireDateFrom) activeAdvancedFilters.hireDateFrom = hireDateFrom;
+            if (hireDateTo) activeAdvancedFilters.hireDateTo = hireDateTo;
+            if (contactNumber) activeAdvancedFilters.contactNumber = contactNumber;
+            if (email) activeAdvancedFilters.email = email;
+            if (minYearsService) activeAdvancedFilters.minYearsService = parseInt(minYearsService);
+            if (maxYearsService) activeAdvancedFilters.maxYearsService = parseInt(maxYearsService);
+            if (staffId) activeAdvancedFilters.staffId = staffId;
+
+            filterRecords();
+            closeAdvancedFilter();
+            
+            // Update button appearance to show active filters
+            updateAdvancedFilterButton();
+        };
+
+        window.clearAdvancedFilters = function() {
+            activeAdvancedFilters = {};
+            
+            // Clear all form inputs
+            document.getElementById('minAge').value = '';
+            document.getElementById('maxAge').value = '';
+            document.getElementById('advancedPosition').value = '';
+            document.getElementById('advancedDepartment').value = '';
+            document.getElementById('advancedEmploymentStatus').value = '';
+            document.getElementById('hireDateFrom').value = '';
+            document.getElementById('hireDateTo').value = '';
+            document.getElementById('advancedContactNumber').value = '';
+            document.getElementById('advancedEmail').value = '';
+            document.getElementById('minYearsService').value = '';
+            document.getElementById('maxYearsService').value = '';
+            document.getElementById('advancedStaffId').value = '';
+
+            filterRecords();
+            updateAdvancedFilterButton();
+        };
+
+        function updateAdvancedFilterButton() {
+            const hasActiveFilters = Object.keys(activeAdvancedFilters).length > 0;
+            const button = document.getElementById('advancedFilterBtn');
+            
+            if (button) {
+                if (hasActiveFilters) {
+                    button.classList.remove('bg-gray-600', 'hover:bg-gray-700');
+                    button.classList.add('bg-orange-600', 'hover:bg-orange-700');
+                } else {
+                    button.classList.remove('bg-orange-600', 'hover:bg-orange-700');
+                    button.classList.add('bg-gray-600', 'hover:bg-gray-700');
+                }
+            }
+        }
+
+        // Print Modal Functions
+        window.openPrintModal = function() {
+            document.getElementById('printModal').classList.remove('hidden');
+            generatePrintPreview();
+        };
+
+        window.closePrintModal = function() {
+            document.getElementById('printModal').classList.add('hidden');
+        };
+
+        window.applyPrintFilters = function() {
+            generatePrintPreview();
+        };
+
+        window.resetPrintFilters = function() {
+            document.getElementById('printDepartmentFilter').value = '';
+            document.getElementById('printStatusFilter').value = '';
+            document.getElementById('printSortOrder').value = 'name';
+            document.getElementById('printHireDateFrom').value = '';
+            document.getElementById('printHireDateTo').value = '';
+            document.getElementById('printGenderMale').checked = false;
+            document.getElementById('printGenderFemale').checked = false;
+            generatePrintPreview();
+        };
+
+        window.toggleReceivedByField = function() {
+            const checkbox = document.getElementById('printReceivedByCheck');
+            const field = document.getElementById('receivedByField');
+            if (checkbox.checked) {
+                field.classList.remove('hidden');
+            } else {
+                field.classList.add('hidden');
+                document.getElementById('printReceivedBy').value = '';
+            }
+            generatePrintPreview();
+        };
+
+        window.updatePrintPreview = function() {
+            generatePrintPreview();
+        };
+
+        window.confirmPrint = function() {
+            window.print();
+        };
+
+        function generatePrintContent() {
+            // Get filter values
+            const departmentFilter = document.getElementById('printDepartmentFilter').value;
+            const statusFilter = document.getElementById('printStatusFilter').value;
+            const sortOrder = document.getElementById('printSortOrder').value;
+            const hireDateFrom = document.getElementById('printHireDateFrom').value;
+            const hireDateTo = document.getElementById('printHireDateTo').value;
+            const genderMale = document.getElementById('printGenderMale').checked;
+            const genderFemale = document.getElementById('printGenderFemale').checked;
+            
+            // Apply filters to records
+            let filteredRecords = allRecords.filter(record => {
+                // Department filter
+                const matchesDepartment = !departmentFilter || record.department === departmentFilter;
+                
+                // Status filter
+                const matchesStatus = !statusFilter || record.employmentStatus === statusFilter;
+                
+                // Date hired range filter
+                let matchesDateRange = true;
+                if (hireDateFrom || hireDateTo) {
+                    const recordDate = record.dateHired ? new Date(record.dateHired) : null;
+                    if (recordDate) {
+                        if (hireDateFrom) {
+                            const fromDate = new Date(hireDateFrom);
+                            matchesDateRange = matchesDateRange && recordDate >= fromDate;
+                        }
+                        if (hireDateTo) {
+                            const toDate = new Date(hireDateTo);
+                            matchesDateRange = matchesDateRange && recordDate <= toDate;
+                        }
+                    } else {
+                        matchesDateRange = false; // If no hire date and date filter is active
+                    }
+                }
+                
+                // Gender filter
+                let matchesGender = true;
+                if (genderMale || genderFemale) {
+                    if (genderMale && genderFemale) {
+                        // Both selected, show all
+                        matchesGender = true;
+                    } else if (genderMale) {
+                        matchesGender = record.gender === 'Male';
+                    } else if (genderFemale) {
+                        matchesGender = record.gender === 'Female';
+                    }
+                }
+                
+                return matchesDepartment && matchesStatus && matchesDateRange && matchesGender;
+            });
+            
+            // Sort records
+            filteredRecords.sort((a, b) => {
+                switch(sortOrder) {
+                    case 'name':
+                        const nameA = `${a.lastName || ''}, ${a.firstName || ''}`;
+                        const nameB = `${b.lastName || ''}, ${b.firstName || ''}`;
+                        return nameA.localeCompare(nameB);
+                    case 'staffId':
+                        return (a.staffId || '').localeCompare(b.staffId || '');
+                    case 'department':
+                        return (a.department || '').localeCompare(b.department || '');
+                    case 'dateHired':
+                        return new Date(a.dateHired || 0) - new Date(b.dateHired || 0);
+                    default:
+                        return 0;
+                }
+            });
+            
+            // Generate current date
+            const currentDate = new Date().toLocaleDateString();
+            
+            // Generate HTML content with table layout like in the image
+            let html = `
+                <div class="print-content">
+                    <!-- Header -->
+                    <div class="text-center mb-6">
+                        <img src="${window.location.origin}${window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'))}/tahanan-logo.png" alt="Tahanan ng Pagmamahal Logo" style="height: 80px; margin: 0 auto 10px auto; display: block;" onerror="this.style.display='none'">
+                        <div class="flex items-center justify-center mb-2">
+                        </div>
+                        <p class="text-xs text-gray-600 mb-1">45 Dr. Pilapil St., Brgy. Sagad, Pasig Metro Manila, Philippines</p>
+                        <p class="text-xs text-gray-600 mb-1">Contact: (+63) 917 525 7168 Tel: +632 8631 7188</p>
+                        <p class="text-xs text-gray-600 mb-4">Email: tahanannoch@gmail.com</p>
+                        
+                        <p class="text-sm text-gray-600">Generated on ${currentDate}</p>
+                    </div>
+                    
+                    <!-- Table -->
+                    <table class="w-full border-collapse border border-gray-300 text-sm">
+                        <thead>
+                            <tr class="bg-red-600 text-white">
+                                <th class="border border-gray-300 px-2 py-2 text-left">ID</th>
+                                <th class="border border-gray-300 px-2 py-2 text-left">Full Name</th>
+                                <th class="border border-gray-300 px-2 py-2 text-left">Position</th>
+                                <th class="border border-gray-300 px-2 py-2 text-left">Department</th>
+                                <th class="border border-gray-300 px-2 py-2 text-left">Status</th>
+                                <th class="border border-gray-300 px-2 py-2 text-left">Date Hired</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            filteredRecords.forEach((staff, index) => {
+                const fullName = `${staff.firstName || ''} ${staff.middleName || ''} ${staff.lastName || ''}`.trim();
+                const dateHired = staff.dateHired ? formatDate(staff.dateHired) : 'N/A';
+                const rowClass = index % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+                
+                html += `
+                    <tr class="${rowClass}">
+                        <td class="border border-gray-300 px-2 py-2">${staff.staffId || 'N/A'}</td>
+                        <td class="border border-gray-300 px-2 py-2">${fullName}</td>
+                        <td class="border border-gray-300 px-2 py-2">${staff.position || 'N/A'}</td>
+                        <td class="border border-gray-300 px-2 py-2">${staff.department || 'N/A'}</td>
+                        <td class="border border-gray-300 px-2 py-2">${staff.employmentStatus || 'N/A'}</td>
+                        <td class="border border-gray-300 px-2 py-2">${dateHired}</td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                        </tbody>
+                    </table>
+                    
+                    <div class="mt-4 text-xs text-gray-600">
+                        ... and ${filteredRecords.length > 8 ? (filteredRecords.length - 8) : 0} more records will be included in the full print
+                    </div>
+                    
+                    <!-- Summary -->
+                    <div class="mt-6 border-t-2 border-red-600 pt-4">
+                        <h3 class="text-center text-lg font-bold text-red-600 mb-4">SUMMARY</h3>
+                        <div class="text-center text-sm">
+                            <span class="font-medium">Total: <span class="text-red-600 font-bold">${filteredRecords.length}</span></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div class="mt-8 flex justify-end">
+                        <div class="text-right text-xs">
+                            <p class="mb-1">Prepared By:</p>
+                            <p class="font-bold">Admin User</p>
+                            <p class="text-gray-600">Generated on: ${currentDate}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            return html;
+        }
+
+        function generatePrintPreview() {
+            const printPreview = document.getElementById('printPreview');
+            const recordCount = document.getElementById('previewRecordCount');
+            
+            if (printPreview) {
+                const content = generatePrintContent();
+                printPreview.innerHTML = content;
+                
+                // Update record count
+                if (recordCount) {
+                    // Get filter values to count records
+                    const departmentFilter = document.getElementById('printDepartmentFilter').value;
+                    const statusFilter = document.getElementById('printStatusFilter').value;
+                    
+                    // Apply filters to count records
+                    let filteredRecords = allRecords.filter(record => {
+                        const matchesDepartment = !departmentFilter || record.department === departmentFilter;
+                        const matchesStatus = !statusFilter || record.employmentStatus === statusFilter;
+                        return matchesDepartment && matchesStatus;
+                    });
+                    
+                    recordCount.textContent = `${filteredRecords.length} records will be printed`;
+                }
+            }
+        }
+
+        // Solo Print Modal Functions
+        window.openSoloPrintModal = function() {
+            document.getElementById('soloPrintModal').classList.remove('hidden');
+            populateStaffList();
+        };
+
+        window.closeSoloPrintModal = function() {
+            document.getElementById('soloPrintModal').classList.add('hidden');
+        };
+
+        window.selectStaffForSoloPrint = function(staffId) {
+            const staff = allRecords.find(record => record.docId === staffId || record.staffId === staffId);
+            if (staff) {
+                selectedStaffForSolo = staff;
+                generateSoloPrintPreview(staff);
+                applySoloFilters(); // Refresh list to show selection
+                
+                // Enable print button
+                const printBtn = document.getElementById('soloPrintBtn');
+                if (printBtn) {
+                    printBtn.disabled = false;
+                }
+            }
+        };
+
+        window.updateSoloPreview = function() {
+            if (selectedStaffForSolo) {
+                generateSoloPrintPreview(selectedStaffForSolo);
+            }
+        };
+
+        window.printSoloRecord = function() {
+            if (selectedStaffForSolo) {
+                window.print();
+            }
+        };
+
+        // Update solo print preview when photo checkbox changes
+        document.addEventListener('DOMContentLoaded', function() {
+            const soloIncludePhoto = document.getElementById('soloIncludePhoto');
+            if (soloIncludePhoto) {
+                soloIncludePhoto.addEventListener('change', updateSoloPreview);
+            }
+        });
+
+        let selectedStaffForSolo = null;
+        let filteredSoloStaff = [];
+
+        function populateStaffList() {
+            filteredSoloStaff = [...allRecords];
+            applySoloFilters();
+        }
+
+        window.applySoloFilters = function() {
+            const searchTerm = document.getElementById('soloSearchInput').value.toLowerCase();
+            const department = document.getElementById('soloDepartmentFilter').value;
+            const status = document.getElementById('soloStatusFilter').value;
+
+            filteredSoloStaff = allRecords.filter(staff => {
+                const fullName = `${staff.firstName || ''} ${staff.middleName || ''} ${staff.lastName || ''}`.toLowerCase();
+                const matchesSearch = !searchTerm || fullName.includes(searchTerm) || 
+                                    (staff.staffId || '').toLowerCase().includes(searchTerm) ||
+                                    (staff.position || '').toLowerCase().includes(searchTerm);
+                const matchesDepartment = !department || staff.department === department;
+                const matchesStatus = !status || staff.employmentStatus === status;
+                
+                return matchesSearch && matchesDepartment && matchesStatus;
+            });
+
+            const soloStaffList = document.getElementById('soloStaffList');
+            if (soloStaffList) {
+                soloStaffList.innerHTML = filteredSoloStaff.map(staff => {
+                    const fullName = `${staff.firstName || ''} ${staff.middleName || ''} ${staff.lastName || ''}`.trim();
+                    const isSelected = selectedStaffForSolo && selectedStaffForSolo.docId === staff.docId;
+                    return `
+                        <div onclick="selectStaffForSoloPrint('${staff.docId}')" class="p-3 hover:bg-gray-50 cursor-pointer border-b ${isSelected ? 'bg-blue-50 border-blue-200' : ''}">
+                            <div class="font-medium ${isSelected ? 'text-blue-900' : ''}">${fullName}</div>
+                            <div class="text-sm ${isSelected ? 'text-blue-600' : 'text-gray-500'}">${staff.staffId || 'N/A'} - ${staff.position || 'N/A'} - ${staff.department || 'N/A'}</div>
+                        </div>
+                    `;
+                }).join('');
+
+                if (filteredSoloStaff.length === 0) {
+                    soloStaffList.innerHTML = `
+                        <div class="p-4 text-center text-gray-500">
+                            <p class="text-sm">No staff members found matching the criteria</p>
+                        </div>
+                    `;
+                }
+            }
+        };
+
+        function generateSoloPrintPreview(staff) {
+            const soloPrintPreview = document.getElementById('soloPrintPreview');
+            if (soloPrintPreview) {
+                const fullName = `${staff.firstName || ''} ${staff.middleName || ''} ${staff.lastName || ''}`.trim();
+                const includePhoto = document.getElementById('soloIncludePhoto').checked;
+                const photoSrc = staff.photoData || (staff.gender === 'Female' ? 'female.png' : 'male.png');
+                const currentDate = new Date().toLocaleDateString();
+                
+                soloPrintPreview.innerHTML = `
+                    <div class="print-content">
+                        <!-- Header with Logo -->
+                        <div class="text-center mb-6">
+                            <img src="tahanan-logo.png" alt="Tahanan ng Pagmamahal Logo" class="mx-auto h-16 w-auto mb-3">
+                            <p class="text-xs text-gray-600 mb-1">45 Dr. Pilapil St., Brgy. Sagad, Pasig Metro Manila, Philippines</p>
+                            <p class="text-xs text-gray-600 mb-1">Contact: (+63) 917 525 7168 Tel: +632 8631 7188</p>
+                            <p class="text-xs text-gray-600 mb-4">Email: tahanannoch@gmail.com</p>  
+                            <p class="text-xs text-gray-500 mt-2">Generated on ${currentDate}</p>
+                        </div>
+                        
+                        <!-- Staff Information Table -->
+                        <div class="bg-white border border-gray-300">
+                            <!-- Title Row -->
+                            <div class="bg-gray-100 px-4 py-3 border-b border-gray-300">
+                                <h2 class="text-lg font-semibold text-center text-gray-800">STAFF INFORMATION RECORD</h2>
+                            </div>
+                            
+                            <!-- Staff Details -->
+                            <div class="p-4">
+                                ${includePhoto ? `
+                                    <div class="flex mb-6">
+                                        <div class="flex-shrink-0 mr-6">
+                                            <img src="${photoSrc}" alt="Staff Photo" class="w-24 h-24 object-cover border border-gray-300">
+                                        </div>
+                                        <div class="flex-1">
+                                            <h3 class="text-lg font-bold mb-4 text-gray-800">${fullName}</h3>
+                                            <div class="text-sm text-gray-600">
+                                                <p><strong>Staff ID:</strong> ${staff.staffId || 'N/A'}</p>
+                                                <p><strong>Position:</strong> ${staff.position || 'N/A'}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ` : `
+                                    <div class="mb-6">
+                                        <h3 class="text-lg font-bold mb-2 text-gray-800">${fullName}</h3>
+                                        <div class="text-sm text-gray-600">
+                                            <p><strong>Staff ID:</strong> ${staff.staffId || 'N/A'}</p>
+                                            <p><strong>Position:</strong> ${staff.position || 'N/A'}</p>
+                                        </div>
+                                    </div>
+                                `}
+                                
+                                <!-- Information Table -->
+                                <table class="w-full border-collapse border border-gray-300 text-sm">
+                                    <tbody>
+                                        <tr>
+                                            <td class="border border-gray-300 px-3 py-2 bg-gray-50 font-semibold w-1/4">Department</td>
+                                            <td class="border border-gray-300 px-3 py-2">${staff.department || 'N/A'}</td>
+                                            <td class="border border-gray-300 px-3 py-2 bg-gray-50 font-semibold w-1/4">Employment Status</td>
+                                            <td class="border border-gray-300 px-3 py-2">${staff.employmentStatus || 'N/A'}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="border border-gray-300 px-3 py-2 bg-gray-50 font-semibold">Date Hired</td>
+                                            <td class="border border-gray-300 px-3 py-2">${staff.dateHired ? formatDate(staff.dateHired) : 'N/A'}</td>
+                                            <td class="border border-gray-300 px-3 py-2 bg-gray-50 font-semibold">Gender</td>
+                                            <td class="border border-gray-300 px-3 py-2">${staff.gender || 'N/A'}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="border border-gray-300 px-3 py-2 bg-gray-50 font-semibold">Date of Birth</td>
+                                            <td class="border border-gray-300 px-3 py-2">${staff.dateOfBirth ? formatDate(staff.dateOfBirth) : 'N/A'}</td>
+                                            <td class="border border-gray-300 px-3 py-2 bg-gray-50 font-semibold">Contact Number</td>
+                                            <td class="border border-gray-300 px-3 py-2">${staff.contactNumber || 'N/A'}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="border border-gray-300 px-3 py-2 bg-gray-50 font-semibold">Email Address</td>
+                                            <td class="border border-gray-300 px-3 py-2" colspan="3">${staff.emailAddress || 'N/A'}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="border border-gray-300 px-3 py-2 bg-gray-50 font-semibold">Address</td>
+                                            <td class="border border-gray-300 px-3 py-2" colspan="3">${staff.address || 'N/A'}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="border border-gray-300 px-3 py-2 bg-gray-50 font-semibold">Years of Service</td>
+                                            <td class="border border-gray-300 px-3 py-2">${staff.dateHired ? calculateYearsOfService(staff.dateHired) : 'N/A'} years</td>
+                                            <td class="border border-gray-300 px-3 py-2 bg-gray-50 font-semibold">Emergency Contact</td>
+                                            <td class="border border-gray-300 px-3 py-2">${staff.emergencyContact || 'N/A'}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                
+                                <!-- Signature Section -->
+                                <div class="signature-section mt-8 pt-4">
+                                    <div class="grid grid-cols-2 gap-8">
+                                        <div class="text-center">
+                                            <div class="border-b border-black mb-2 h-12"></div>
+                                            <p class="text-sm font-medium">Staff Signature</p>
+                                            <p class="text-xs text-gray-600">Date: ___________</p>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="border-b border-black mb-2 h-12"></div>
+                                            <p class="text-sm font-medium">HR Representative</p>
+                                            <p class="text-xs text-gray-600">Date: ___________</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Enable print button
+                document.getElementById('soloPrintBtn').disabled = false;
+            }
+        }
 
         window.logout = function() {
             sessionManager.logout();

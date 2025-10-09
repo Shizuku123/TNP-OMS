@@ -74,17 +74,17 @@
 <body class="bg-gray-50 min-h-screen">
     <!-- Header -->
     <header class="bg-white shadow-sm border-b">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
+        <div class="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+            <div class="flex items-center justify-between h-14 sm:h-16">
                 <div class="flex items-center">
                     <a href="index.html" class="flex items-center text-gray-600 hover:text-red-primary transition-colors">
-                        <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="h-5 w-5 sm:h-6 sm:w-6 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                         </svg>
                     </a>
                 </div>
-                <h1 class="text-xl font-semibold text-gray-900">Child Records</h1>
-                <div class="flex items-center space-x-2">
+                <h1 class="text-lg sm:text-xl font-semibold text-gray-900">Child Records</h1>
+                <div class="flex items-center space-x-1 sm:space-x-2">
                     
                 </div>
             </div>
@@ -92,41 +92,25 @@
     </header>
 
     <!-- Main Content -->
-    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto py-3 sm:py-6 px-2 sm:px-4 lg:px-8">
         <!-- Search and Filter -->
-        <div class="mb-6 bg-white rounded-lg shadow p-4 sm:p-6">
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 lg:space-x-4">
-                <div class="flex-1 max-w-lg">
+        <div class="mb-4 sm:mb-6 bg-white rounded-lg shadow p-3 sm:p-4 lg:p-6">
+            <!-- First Line: Search Box (Full Width on Mobile) -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+                <!-- Search Box -->
+                <div class="flex-1 max-w-full sm:max-w-lg">
                     <div class="relative">
                         <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
                         <input type="text" id="searchInput" placeholder="Search by name, ID, or status..."
-                               class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                               class="w-full pl-10 pr-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
                     </div>
-                    
-                    <!-- In Care/Discharged Toggle -->
-                    <div class="flex items-center justify-center space-x-3 px-3 py-2 bg-gray-100 rounded-lg mt-3">
-                        <span class="text-sm font-medium text-gray-700">In Care</span>
-                        <button id="careToggle" class="relative inline-flex h-6 w-11 items-center rounded-full bg-red-primary transition-colors focus:outline-none focus:ring-2 focus:ring-red-primary focus:ring-offset-2">
-                            <span id="toggleSlider" class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-6"></span>
-                        </button>
-                        <span class="text-sm font-medium text-gray-700">Discharged</span>
-                    </div>
-                    
-                    <!-- Show All Records Button -->
-                    <div class="flex justify-center mt-3">
-                        <button id="showAllRecordsBtn" class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors">
-                            <svg class="inline h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
-                            </svg>
-                            Show All Records
-                        </button>
-                    </div>
-                    
                 </div>
-                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
-                    <select id="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                
+                <!-- Dropdown and Advanced Filter (Side by side on desktop) -->
+                <div class="flex gap-2 sm:gap-3 flex-shrink-0">
+                    <select id="statusFilter" class="flex-1 sm:flex-none px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
                         <option value="">All Status</option>
                         <option value="Adoptable">Adoptable</option>
                         <option value="Under legal custody">Under legal custody</option>
@@ -134,108 +118,152 @@
                         <option value="Awaiting placement">Awaiting placement</option>
                         <option value="Discharged">Discharged</option>
                     </select>
-                    <button id="advancedFilterBtn" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-center">
-                        <svg class="inline h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    
+                    <button id="advancedFilterBtn" class="px-3 sm:px-4 py-2 bg-gray-600 text-white text-sm sm:text-base rounded-lg hover:bg-gray-700 transition-colors text-center">
+                        <svg class="inline h-4 w-4 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"></path>
                         </svg>
-                        Advanced Filter
-                    </button>
-                    <button id="exportBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-center">
-                        Export CSV
-                    </button>
-                    <button id="printBtn" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-center">
-                        <svg class="inline h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
-                        </svg>
-                        Print
-                    </button>
-                    <a href="add-child.html" class="px-4 py-2 bg-red-primary text-white rounded-lg hover:bg-red-700 transition-colors text-center inline-block">
-                        Add Child
-                    </a>
-                    <button id="deletedRecordsBtn" class="hidden px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm">
-                        <svg class="inline h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                        </svg>
-                        Archived Records
+                        <span class="hidden sm:inline">Advanced Filter</span>
+                        <span class="sm:hidden">Filter</span>
                     </button>
                 </div>
+            </div>
+
+            <!-- Toggle Section (Mobile: Full Width, Desktop: Centered) -->
+            <div class="mb-3 sm:mb-4">
+                <div class="flex items-center justify-center space-x-3 px-3 py-2 bg-gray-100 rounded-lg w-full sm:w-auto sm:mx-auto">
+                    <span class="text-xs sm:text-sm font-medium text-gray-700">In Care</span>
+                    <button id="careToggle" class="relative inline-flex h-5 w-9 sm:h-6 sm:w-11 items-center rounded-full bg-red-primary transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-primary focus:ring-offset-2">
+                        <span id="toggleSlider" class="inline-block h-3 w-3 sm:h-4 sm:w-4 transform rounded-full bg-white transition-all duration-300 ease-in-out translate-x-1 sm:translate-x-1"></span>
+                    </button>
+                    <span class="text-xs sm:text-sm font-medium text-gray-700">Discharged</span>
+                </div>
+            </div>
+
+            <!-- Action Buttons (Mobile: Grid 2x2, Desktop: Centered Row) -->
+            <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:justify-center sm:gap-3">
+                <button id="showAllRecordsBtn" class="px-2 sm:px-4 py-2 bg-blue-600 text-white text-xs sm:text-base rounded-lg hover:bg-blue-700 transition-colors text-center">
+                    <svg class="inline h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                    </svg>
+                    <span class="hidden sm:inline">Show All</span>
+                    <span class="sm:hidden">Show All</span>
+                </button>
+                
+                <a href="add-child.html" class="px-2 sm:px-4 py-2 bg-red-primary text-white text-xs sm:text-base rounded-lg hover:bg-red-700 transition-colors text-center inline-block">
+                    <span class="hidden sm:inline">Add</span>
+                    <span class="sm:hidden">Add</span>
+                </a>
+                
+                <button id="printBtn" class="px-2 sm:px-4 py-2 bg-purple-600 text-white text-xs sm:text-base rounded-lg hover:bg-purple-700 transition-colors text-center">
+                    <svg class="inline h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                    </svg>
+                    <span class="sm:hidden">Print</span>
+                    <span class="hidden sm:inline">Print</span>
+                </button>
+                
+                <button id="deletedRecordsBtn" class="hidden sm:block px-2 sm:px-4 py-2 bg-orange-600 text-white text-xs sm:text-base rounded-lg hover:bg-orange-700 transition-colors">
+                    <svg class="inline h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                    <span class="hidden lg:inline">Archived</span>
+                    <span class="lg:hidden sm:inline">Archived</span>
+                </button>
             </div>
         </div>
 
         <!-- Child Trends Section -->
-        <div class="mb-6 bg-white rounded-lg shadow p-4 sm:p-6">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Child Entry Trends</h3>
-                    <p class="text-sm text-gray-600">Monthly breakdown of children by gender</p>
-                </div>
-                
-                <!-- Statistics Display -->
-                <div id="statisticsContainer" class="flex items-center space-x-6 mt-4 sm:mt-0">
-                    <!-- Default Statistics (for In Care and Discharged modes) -->
-                    <div id="defaultStats" class="flex items-center space-x-6">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
-                            <span class="text-sm text-gray-700">Male: <span id="maleCount" class="font-semibold">0</span></span>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <div class="w-3 h-3 bg-pink-500 rounded-full"></div>
-                            <span class="text-sm text-gray-700">Female: <span id="femaleCount" class="font-semibold">0</span></span>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <div class="w-3 h-3 bg-gray-500 rounded-full"></div>
-                            <span class="text-sm text-gray-700">Total: <span id="totalCount" class="font-semibold">0</span></span>
+        <div class="mb-4 sm:mb-6 bg-white rounded-lg shadow">
+            <!-- Collapsible Header -->
+            <div class="p-3 sm:p-4 lg:p-6 border-b border-gray-200 cursor-pointer" id="trendsToggleHeader">
+                <div class="flex flex-col space-y-3 md:space-y-0 md:flex-row md:items-center md:justify-between">
+                    <div class="flex items-center">
+                        <div>
+                            <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-1 sm:mb-2">Child Entry Trends</h3>
+                            <p class="text-xs sm:text-sm text-gray-600">Monthly breakdown of children by gender</p>
                         </div>
                     </div>
-                    
-                    <!-- Breakdown Statistics (for Show All Records mode) -->
-                    <div id="breakdownStats" class="hidden flex-wrap items-center gap-4">
-                        <!-- In Care Section -->
-                        <div class="flex items-center space-x-4 bg-blue-50 px-3 py-2 rounded-lg">
-                            <div class="text-xs font-medium text-blue-700">In Care:</div>
-                            <div class="flex items-center space-x-2">
-                                <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                <span class="text-xs text-blue-700">M: <span id="inCareMaleCount" class="font-semibold">0</span></span>
+                    <div class="flex flex-col space-y-3 md:space-y-0 md:flex-row md:items-center md:space-x-4">
+                        <!-- Statistics Display -->
+                        <div id="statisticsContainer" class="flex flex-wrap items-center gap-2 sm:gap-4 lg:gap-6">
+                            <!-- Default Statistics (for In Care and Discharged modes) -->
+                            <div id="defaultStats" class="flex flex-wrap items-center gap-2 sm:gap-4 lg:gap-6">
+                                <div class="flex items-center space-x-1 sm:space-x-2">
+                                    <div class="w-2 h-2 sm:w-3 sm:h-3 bg-blue-500 rounded-full"></div>
+                                    <span class="text-xs sm:text-sm text-gray-700">Male: <span id="maleCount" class="font-semibold">0</span></span>
+                                </div>
+                                <div class="flex items-center space-x-1 sm:space-x-2">
+                                    <div class="w-2 h-2 sm:w-3 sm:h-3 bg-pink-500 rounded-full"></div>
+                                    <span class="text-xs sm:text-sm text-gray-700">Female: <span id="femaleCount" class="font-semibold">0</span></span>
+                                </div>
+                                <div class="flex items-center space-x-1 sm:space-x-2">
+                                    <div class="w-2 h-2 sm:w-3 sm:h-3 bg-gray-500 rounded-full"></div>
+                                    <span class="text-xs sm:text-sm text-gray-700">Total: <span id="totalCount" class="font-semibold">0</span></span>
+                                </div>
                             </div>
-                            <div class="flex items-center space-x-2">
-                                <div class="w-2 h-2 bg-pink-500 rounded-full"></div>
-                                <span class="text-xs text-blue-700">F: <span id="inCareFemaleCount" class="font-semibold">0</span></span>
+                            
+                            <!-- Breakdown Statistics (for Show All Records mode) -->
+                            <div id="breakdownStats" class="hidden flex-wrap items-center gap-2 sm:gap-4">
+                                <!-- In Care Section -->
+                                <div class="flex items-center space-x-2 sm:space-x-4 bg-blue-50 px-2 sm:px-3 py-1 sm:py-2 rounded-lg">
+                                    <div class="text-xs font-medium text-blue-700">In Care:</div>
+                                    <div class="flex items-center space-x-1 sm:space-x-2">
+                                        <div class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-blue-500 rounded-full"></div>
+                                        <span class="text-xs text-blue-700">M: <span id="inCareMaleCount" class="font-semibold">0</span></span>
+                                    </div>
+                                    <div class="flex items-center space-x-1 sm:space-x-2">
+                                        <div class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-pink-500 rounded-full"></div>
+                                        <span class="text-xs text-blue-700">F: <span id="inCareFemaleCount" class="font-semibold">0</span></span>
+                                    </div>
+                                    <span class="text-xs text-blue-700 font-semibold">(<span id="inCareTotal" class="font-bold">0</span>)</span>
+                                </div>
+                                
+                                <!-- Discharged Section -->
+                                <div class="flex items-center space-x-2 sm:space-x-4 bg-gray-50 px-2 sm:px-3 py-1 sm:py-2 rounded-lg">
+                                    <div class="text-xs font-medium text-gray-600">Discharged:</div>
+                                    <div class="flex items-center space-x-1 sm:space-x-2">
+                                        <div class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-blue-300 rounded-full"></div>
+                                        <span class="text-xs text-gray-600">M: <span id="dischargedMaleCount" class="font-semibold">0</span></span>
+                                    </div>
+                                    <div class="flex items-center space-x-1 sm:space-x-2">
+                                        <div class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-pink-300 rounded-full"></div>
+                                        <span class="text-xs text-gray-600">F: <span id="dischargedFemaleCount" class="font-semibold">0</span></span>
+                                    </div>
+                                    <span class="text-xs text-gray-600 font-semibold">(<span id="dischargedTotal" class="font-bold">0</span>)</span>
+                                </div>
+                                
+                                <!-- Grand Total -->
+                                <div class="flex items-center space-x-1 sm:space-x-2 bg-green-50 px-2 sm:px-3 py-1 sm:py-2 rounded-lg">
+                                    <div class="w-2 h-2 sm:w-3 sm:h-3 bg-green-500 rounded-full"></div>
+                                    <span class="text-xs sm:text-sm text-green-700 font-medium">Total: <span id="grandTotal" class="font-bold">0</span></span>
+                                </div>
                             </div>
-                            <span class="text-xs text-blue-700 font-semibold">(<span id="inCareTotal" class="font-bold">0</span>)</span>
                         </div>
                         
-                        <!-- Discharged Section -->
-                        <div class="flex items-center space-x-4 bg-gray-50 px-3 py-2 rounded-lg">
-                            <div class="text-xs font-medium text-gray-600">Discharged:</div>
-                            <div class="flex items-center space-x-2">
-                                <div class="w-2 h-2 bg-blue-300 rounded-full"></div>
-                                <span class="text-xs text-gray-600">M: <span id="dischargedMaleCount" class="font-semibold">0</span></span>
+                        <div class="flex items-center space-x-3">
+                            <div>
+                                <select id="chartYearFilter" class="px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                                    <option value="">All Years</option>
+                                    <!-- Years will be populated by JavaScript -->
+                                </select>
                             </div>
-                            <div class="flex items-center space-x-2">
-                                <div class="w-2 h-2 bg-pink-300 rounded-full"></div>
-                                <span class="text-xs text-gray-600">F: <span id="dischargedFemaleCount" class="font-semibold">0</span></span>
-                            </div>
-                            <span class="text-xs text-gray-600 font-semibold">(<span id="dischargedTotal" class="font-bold">0</span>)</span>
-                        </div>
-                        
-                        <!-- Grand Total -->
-                        <div class="flex items-center space-x-2 bg-green-50 px-3 py-2 rounded-lg">
-                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-                            <span class="text-sm text-green-700 font-medium">Total: <span id="grandTotal" class="font-bold">0</span></span>
+                            
+                            <!-- Toggle Arrow -->
+                            <button id="trendsToggleBtn" class="p-1 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                                <svg id="trendsToggleIcon" class="h-4 w-4 sm:h-5 sm:w-5 text-gray-500 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
                         </div>
                     </div>
-                </div>
-                
-                <div class="mt-4 sm:mt-0">
-                    <select id="chartYearFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
-                        <option value="">All Years</option>
-                        <!-- Years will be populated by JavaScript -->
-                    </select>
                 </div>
             </div>
             
-            <!-- Charts Container -->
-            <div id="chartsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Collapsible Content -->
+            <div id="trendsContent" class="p-3 sm:p-4 lg:p-6 transition-all duration-300 ease-in-out">
+                <!-- Charts Container -->
+                <div id="chartsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 <!-- Male Children Chart -->
                 <div class="bg-gray-50 rounded-lg p-4">
                     <div class="flex items-center justify-center mb-4">
@@ -285,12 +313,12 @@
         </div>
 
         <!-- Records Grid -->
-        <div id="recordsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+        <div id="recordsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-6">
             <!-- Records will be populated by JavaScript -->
         </div>
 
         <!-- Skeleton Loading -->
-        <div id="skeletonGrid" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+        <div id="skeletonGrid" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-6">
             <!-- Skeleton items will be populated by JavaScript -->
         </div>
 
@@ -313,42 +341,42 @@
     </div>
 
     <!-- Advanced Filter Modal -->
-    <div id="advancedFilterModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-60 hidden">
-        <div class="bg-white rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] mx-4 flex flex-col">
-            <div class="sticky top-0 bg-white flex items-center justify-between p-4 border-b rounded-t-lg z-10">
-                <h3 class="text-lg font-semibold text-gray-900">Advanced Filter</h3>
+    <div id="advancedFilterModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-60 hidden p-2 sm:p-4">
+        <div class="bg-white rounded-lg shadow-lg max-w-xs sm:max-w-2xl lg:max-w-4xl w-full max-h-[95vh] sm:max-h-[90vh] mx-2 sm:mx-4 flex flex-col">
+            <div class="sticky top-0 bg-white flex items-center justify-between p-3 sm:p-4 lg:p-6 border-b rounded-t-lg z-10">
+                <h3 class="text-base sm:text-lg font-semibold text-gray-900">Advanced Filter</h3>
                 <button id="closeAdvancedFilterModal" class="text-gray-400 hover:text-gray-600">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
             </div>
             
-            <div class="flex-1 overflow-y-auto p-6 space-y-6">
+            <div class="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
                 <!-- Personal Information Section -->
-                <div class="border rounded-lg p-4">
-                    <h4 class="text-md font-medium text-gray-900 mb-4 flex items-center">
-                        <svg class="h-5 w-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="border rounded-lg p-3 sm:p-4">
+                    <h4 class="text-sm sm:text-md font-medium text-gray-900 mb-3 sm:mb-4 flex items-center">
+                        <svg class="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                         </svg>
                         Personal Information
                     </h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Name</label>
-                            <input type="text" id="filterName" placeholder="Enter child's name..." class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Name</label>
+                            <input type="text" id="filterName" placeholder="Enter child's name..." class="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Gender</label>
-                            <select id="filterGender" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Gender</label>
+                            <select id="filterGender" class="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
                                 <option value="">All Genders</option>
                                 <option value="Male">Male</option>
                                 <option value="Female">Female</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Blood Type</label>
-                            <select id="filterBloodType" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Blood Type</label>
+                            <select id="filterBloodType" class="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
                                 <option value="">All Blood Types</option>
                                 <option value="A+">A+</option>
                                 <option value="A-">A-</option>
@@ -361,50 +389,50 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Age Range</label>
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Age Range</label>
                             <div class="flex space-x-2">
-                                <input type="number" id="filterAgeMin" placeholder="Min" min="0" max="18" class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
-                                <input type="number" id="filterAgeMax" placeholder="Max" min="0" max="18" class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                                <input type="number" id="filterAgeMin" placeholder="Min" min="0" max="18" class="flex-1 px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                                <input type="number" id="filterAgeMax" placeholder="Max" min="0" max="18" class="flex-1 px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
                             </div>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Date of Birth From</label>
-                            <input type="date" id="filterDobFrom" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Date of Birth From</label>
+                            <input type="date" id="filterDobFrom" class="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Date of Birth To</label>
-                            <input type="date" id="filterDobTo" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Date of Birth To</label>
+                            <input type="date" id="filterDobTo" class="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
                         </div>
                     </div>
                 </div>
 
                 <!-- Admission Information Section -->
-                <div class="border rounded-lg p-4">
-                    <h4 class="text-md font-medium text-gray-900 mb-4 flex items-center">
-                        <svg class="h-5 w-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="border rounded-lg p-3 sm:p-4">
+                    <h4 class="text-sm sm:text-md font-medium text-gray-900 mb-3 sm:mb-4 flex items-center">
+                        <svg class="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 0V6a2 2 0 012-2h4a2 2 0 012 2v1m-6 0h8m-8 0H6a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2h-2"></path>
                         </svg>
                         Admission Information
                     </h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Date Admitted From</label>
-                            <input type="date" id="filterAdmissionFrom" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Date Admitted From</label>
+                            <input type="date" id="filterAdmissionFrom" class="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Date Admitted To</label>
-                            <input type="date" id="filterAdmissionTo" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Date Admitted To</label>
+                            <input type="date" id="filterAdmissionTo" class="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Entry Age Range</label>
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Entry Age Range</label>
                             <div class="flex space-x-2">
-                                <input type="number" id="filterEntryAgeMin" placeholder="Min" min="0" max="18" class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
-                                <input type="number" id="filterEntryAgeMax" placeholder="Max" min="0" max="18" class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                                <input type="number" id="filterEntryAgeMin" placeholder="Min" min="0" max="18" class="flex-1 px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                                <input type="number" id="filterEntryAgeMax" placeholder="Max" min="0" max="18" class="flex-1 px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
                             </div>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Referring Agency</label>
-                            <select id="filterReferringAgency" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Referring Agency</label>
+                            <select id="filterReferringAgency" class="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
                                 <option value="">All Agencies</option>
                                 <option value="DSWD">DSWD</option>
                                 <option value="Police">Police</option>
@@ -418,17 +446,17 @@
                 </div>
 
                 <!-- Current Status Section -->
-                <div class="border rounded-lg p-4">
-                    <h4 class="text-md font-medium text-gray-900 mb-4 flex items-center">
-                        <svg class="h-5 w-5 mr-2 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="border rounded-lg p-3 sm:p-4">
+                    <h4 class="text-sm sm:text-md font-medium text-gray-900 mb-3 sm:mb-4 flex items-center">
+                        <svg class="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                         Current Status
                     </h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Current Status</label>
-                            <select id="filterCurrentStatus" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Current Status</label>
+                            <select id="filterCurrentStatus" class="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
                                 <option value="">All Statuses</option>
                                 <option value="In Care">In Care</option>
                                 <option value="Temporary Shelter">Temporary Shelter</option>
@@ -442,8 +470,8 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Educational Status</label>
-                            <select id="filterEducationalStatus" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Educational Status</label>
+                            <select id="filterEducationalStatus" class="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
                                 <option value="">All Educational Status</option>
                                 <option value="In School">In School</option>
                                 <option value="Not in School">Not in School</option>
@@ -453,8 +481,8 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Health Status</label>
-                            <select id="filterHealthStatus" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Health Status</label>
+                            <select id="filterHealthStatus" class="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
                                 <option value="">All Health Status</option>
                                 <option value="Healthy">Healthy</option>
                                 <option value="Medical Condition">Medical Condition</option>
@@ -466,22 +494,22 @@
                 </div>
 
                 <!-- Location / Demographics Section -->
-                <div class="border rounded-lg p-4">
-                    <h4 class="text-md font-medium text-gray-900 mb-4 flex items-center">
-                        <svg class="h-5 w-5 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="border rounded-lg p-3 sm:p-4">
+                    <h4 class="text-sm sm:text-md font-medium text-gray-900 mb-3 sm:mb-4 flex items-center">
+                        <svg class="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         </svg>
                         Location / Demographics
                     </h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Hometown / Province</label>
-                            <input type="text" id="filterHometown" placeholder="Enter hometown or province..." class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Hometown / Province</label>
+                            <input type="text" id="filterHometown" placeholder="Enter hometown or province..." class="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Nationality</label>
-                            <select id="filterNationality" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Nationality</label>
+                            <select id="filterNationality" class="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
                                 <option value="">All Nationalities</option>
                                 <option value="Filipino">Filipino</option>
                                 <option value="American">American</option>
@@ -493,33 +521,33 @@
                 </div>
             </div>
             
-            <div class="sticky bottom-0 bg-gray-50 border-t rounded-b-lg p-4 z-10">
-                <div class="flex justify-end space-x-3">
-                    <button id="clearAdvancedFiltersBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">Clear All</button>
-                    <button id="cancelAdvancedFilterBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                    <button id="applyAdvancedFiltersBtn" class="px-6 py-2 bg-red-primary text-white rounded-md hover:bg-red-700 transition-colors">Apply Filters</button>
+            <div class="sticky bottom-0 bg-gray-50 border-t rounded-b-lg p-3 sm:p-4 z-10">
+                <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+                    <button id="clearAdvancedFiltersBtn" class="px-3 sm:px-4 py-2 border border-gray-300 rounded-md text-gray-700 text-sm sm:text-base hover:bg-gray-50 transition-colors">Clear All</button>
+                    <button id="cancelAdvancedFilterBtn" class="px-3 sm:px-4 py-2 border border-gray-300 rounded-md text-gray-700 text-sm sm:text-base hover:bg-gray-50 transition-colors">Cancel</button>
+                    <button id="applyAdvancedFiltersBtn" class="px-4 sm:px-6 py-2 bg-red-primary text-white text-sm sm:text-base rounded-md hover:bg-red-700 transition-colors">Apply Filters</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Show All Records Confirmation Modal -->
-    <div id="showAllModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-60 hidden">
-        <div class="bg-white rounded-lg shadow-lg max-w-md w-full mx-4 p-6">
-            <div class="flex items-center mb-4">
-                <svg class="h-6 w-6 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div id="showAllModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-60 hidden p-4">
+        <div class="bg-white rounded-lg shadow-lg max-w-xs sm:max-w-md w-full mx-4 p-4 sm:p-6">
+            <div class="flex items-center mb-3 sm:mb-4">
+                <svg class="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mr-2 sm:mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
-                <h3 class="text-lg font-medium text-gray-900">Show All Records</h3>
+                <h3 class="text-base sm:text-lg font-medium text-gray-900">Show All Records</h3>
             </div>
-            <p class="text-sm text-gray-600 mb-6">
+            <p class="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6">
                 Show all records will display all the children records - both In Care and Discharged children in a combined view.
             </p>
-            <div class="flex justify-end space-x-3">
-                <button id="cancelShowAllBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+            <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+                <button id="cancelShowAllBtn" class="px-3 sm:px-4 py-2 border border-gray-300 rounded-md text-gray-700 text-sm sm:text-base hover:bg-gray-50 transition-colors">
                     Cancel
                 </button>
-                <button id="confirmShowAllBtn" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                <button id="confirmShowAllBtn" class="px-4 sm:px-6 py-2 bg-blue-600 text-white text-sm sm:text-base rounded-md hover:bg-blue-700 transition-colors">
                     Confirm
                 </button>
             </div>
@@ -527,60 +555,60 @@
     </div>
 
     <!-- Delete Modal -->
-    <div id="deleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-60 hidden">
-        <div class="bg-white rounded-lg shadow-lg max-w-sm w-full p-6 relative">
+    <div id="deleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-60 hidden p-4">
+        <div class="bg-white rounded-lg shadow-lg max-w-xs sm:max-w-sm w-full p-4 sm:p-6 relative">
             <button id="closeDeleteModal" class="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
-                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
-            <h3 class="text-lg font-medium text-gray-900 mb-4">Delete Child Record</h3>
-            <div class="mb-2 text-sm text-gray-700" id="deleteModalDetails"></div>
+            <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Delete Child Record</h3>
+            <div class="mb-2 text-xs sm:text-sm text-gray-700" id="deleteModalDetails"></div>
             <form id="deleteForm" autocomplete="off">
-                <label for="adminPassword" class="block text-sm font-medium text-gray-700 mb-2">Admin Password</label>
-                <input type="password" id="adminPassword" name="adminPassword" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary mb-4">
-                <div class="flex justify-end space-x-2">
-                    <button type="button" id="cancelDeleteBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Cancel</button>
-                    <button type="submit" id="confirmDeleteBtn" class="px-4 py-2 bg-red-primary text-white rounded-md hover:bg-red-700">Delete</button>
+                <label for="adminPassword" class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Admin Password</label>
+                <input type="password" id="adminPassword" name="adminPassword" required class="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary mb-3 sm:mb-4">
+                <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2">
+                    <button type="button" id="cancelDeleteBtn" class="px-3 sm:px-4 py-2 border border-gray-300 rounded-md text-gray-700 text-sm hover:bg-gray-50">Cancel</button>
+                    <button type="submit" id="confirmDeleteBtn" class="px-3 sm:px-4 py-2 bg-red-primary text-white text-sm rounded-md hover:bg-red-700">Delete</button>
                 </div>
             </form>
-            <div id="deleteModalMessage" class="mt-2 text-sm"></div>
+            <div id="deleteModalMessage" class="mt-2 text-xs sm:text-sm"></div>
         </div>
     </div>
 
     <!-- Solo Print Modal -->
-    <div id="soloPrintModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-        <div class="relative mx-auto border w-11/12 max-w-7xl shadow-lg rounded-md bg-white flex flex-col" style="margin-top: 10px; margin-bottom: 10px; height: 90vh;">
+    <div id="soloPrintModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-1 sm:p-2 lg:p-4">
+        <div class="relative mx-auto border w-full max-w-7xl shadow-lg rounded-md bg-white flex flex-col" style="margin-top: 5px; margin-bottom: 5px; height: calc(100vh - 10px); max-height: 98vh;">
             <!-- Modal Header -->
-            <div class="p-6 border-b border-gray-200 flex-shrink-0">
+            <div class="p-2 sm:p-3 lg:p-4 border-b border-gray-200 flex-shrink-0">
                 <div class="flex justify-between items-center">
-                    <h3 class="text-xl font-medium text-gray-900">Solo Print Child Record</h3>
-                    <button id="closeSoloPrintModal" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+                    <h3 class="text-sm sm:text-base lg:text-lg font-medium text-gray-900">Solo Print Child Record</h3>
+                    <button id="closeSoloPrintModal" class="text-gray-400 hover:text-gray-600 text-lg sm:text-xl lg:text-2xl p-1">&times;</button>
                 </div>
             </div>
             
             <!-- Modal Content -->
-            <div class="flex-1 p-6 overflow-hidden">
+            <div class="flex-1 p-2 sm:p-3 lg:p-4 overflow-hidden">
                 <!-- Two Column Layout -->
-                <div class="flex gap-6 h-full">
+                <div class="flex flex-col lg:flex-row gap-2 sm:gap-3 lg:gap-4 h-full">
                     
                     <!-- Left Column: Child List and Filters -->
-                    <div class="w-96 flex-shrink-0 flex flex-col h-full">
+                    <div class="w-full lg:w-80 xl:w-96 flex-shrink-0 flex flex-col h-full max-h-96 lg:max-h-full">
                         <!-- Filters Section -->
-                        <div class="bg-gray-50 p-4 rounded-lg mb-4">
-                            <h4 class="text-md font-medium text-gray-700 mb-3">Filter Children</h4>
+                        <div class="bg-gray-50 p-2 sm:p-3 rounded-lg mb-2 sm:mb-3">
+                            <h4 class="text-xs sm:text-sm font-medium text-gray-700 mb-2">Filter Children</h4>
                             
                             <!-- Search -->
-                            <div class="mb-3">
+                            <div class="mb-2">
                                 <input type="text" id="soloSearchInput" placeholder="Search by name or ID..." 
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm">
+                                       class="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-xs sm:text-sm">
                             </div>
                             
                             <!-- Filter Row -->
-                            <div class="grid grid-cols-2 gap-2 mb-3">
+                            <div class="grid grid-cols-2 gap-2 mb-2">
                                 <!-- Record Type -->
                                 <div>
-                                    <select id="soloRecordTypeFilter" class="w-full px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm">
+                                    <select id="soloRecordTypeFilter" class="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-xs sm:text-sm">
                                         <option value="all">All Records</option>
                                         <option value="incare">In Care</option>
                                         <option value="discharged">Discharged</option>
@@ -589,7 +617,7 @@
                                 
                                 <!-- Gender -->
                                 <div>
-                                    <select id="soloGenderFilter" class="w-full px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm">
+                                    <select id="soloGenderFilter" class="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-xs sm:text-sm">
                                         <option value="">All Genders</option>
                                         <option value="male">Male</option>
                                         <option value="female">Female</option>
@@ -598,8 +626,8 @@
                             </div>
                             
                             <!-- Status Filter -->
-                            <div class="mb-3">
-                                <select id="soloStatusFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm">
+                            <div class="mb-2">
+                                <select id="soloStatusFilter" class="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-xs sm:text-sm">
                                     <option value="">All Statuses</option>
                                     <option value="Adoptable">Adoptable</option>
                                     <option value="Under legal custody">Under legal custody</option>
@@ -610,13 +638,15 @@
                         </div>
                         
                         <!-- Child List -->
-                        <div class="flex-1 border border-gray-300 rounded-lg overflow-hidden flex flex-col">
-                            <div class="bg-gray-50 px-4 py-3 border-b border-gray-300 flex-shrink-0">
-                                <h4 class="text-md font-medium text-gray-700">Select Child</h4>
-                                <span id="soloChildCount" class="text-sm text-gray-600">0 children found</span>
+                        <div class="flex-1 border border-gray-300 rounded-lg overflow-hidden flex flex-col min-h-32">
+                            <div class="bg-gray-50 px-2 sm:px-3 py-2 border-b border-gray-300 flex-shrink-0">
+                                <div class="flex flex-col space-y-1 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
+                                    <h4 class="text-xs sm:text-sm font-medium text-gray-700">Select Child</h4>
+                                    <span id="soloChildCount" class="text-xs text-gray-600">0 children found</span>
+                                </div>
                             </div>
                             
-                            <div id="soloChildList" class="flex-1 overflow-y-auto p-2 space-y-2">
+                            <div id="soloChildList" class="flex-1 overflow-y-auto p-1 sm:p-2 space-y-1">
                                 <!-- Child items will be populated here -->
                             </div>
                         </div>
@@ -625,24 +655,28 @@
                     <!-- Right Column: Print Preview -->
                     <div class="flex-1 flex flex-col min-w-0 h-full">
                         <div class="bg-white border border-gray-300 rounded-lg flex flex-col h-full">
-                            <div class="bg-gray-50 px-4 py-3 border-b border-gray-300 rounded-t-lg flex-shrink-0">
-                                <div class="flex items-center justify-between">
-                                    <h4 class="text-md font-medium text-gray-700">Print Preview</h4>
-                                    <div class="flex items-center space-x-2">
-                                        <button id="soloPrintBtn" class="disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm" disabled>
-                                            Print Record
+                            <div class="bg-gray-50 px-3 sm:px-4 py-2 sm:py-3 border-b border-gray-300 rounded-t-lg flex-shrink-0">
+                                <div class="flex flex-col space-y-2 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
+                                    <h4 class="text-sm sm:text-md font-medium text-gray-700">Print Preview</h4>
+                                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                                        <button id="soloPrintBtn" class="disabled:opacity-50 disabled:cursor-not-allowed px-3 sm:px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-xs sm:text-sm w-full sm:w-auto" disabled>
+                                            <svg class="inline h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                                            </svg>
+                                            <span class="hidden sm:inline">Print Record</span>
+                                            <span class="sm:hidden">Print</span>
                                         </button>
                                     </div>
                                 </div>
                             </div>
                             
-                            <div id="soloPrintPreview" class="flex-1 overflow-y-auto p-6 bg-white">
+                            <div id="soloPrintPreview" class="flex-1 overflow-y-auto p-2 sm:p-3 lg:p-4 bg-white">
                                 <!-- Preview content will be generated here -->
-                                <div class="text-center text-gray-500 py-12">
-                                    <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="text-center text-gray-500 py-6 sm:py-8">
+                                    <svg class="mx-auto h-6 w-6 sm:h-8 sm:w-8 lg:h-12 lg:w-12 text-gray-400 mb-2 sm:mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m0 0v6m0-6h6m-6 0H6m0 0v6m0-6V6"></path>
                                     </svg>
-                                    <p class="text-lg">Select a child to preview their record</p>
+                                    <p class="text-xs sm:text-sm lg:text-base">Select a child to preview their record</p>
                                 </div>
                             </div>
                         </div>
@@ -654,32 +688,32 @@
     </div>
 
     <!-- Print Preview Modal -->
-    <div id="printModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-        <div class="relative mx-auto border w-11/12 max-w-7xl shadow-lg rounded-md bg-white flex flex-col" style="margin-top: 10px; margin-bottom: 10px; height: 90vh;">
+    <div id="printModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-2 sm:p-4">
+        <div class="relative mx-auto border w-full max-w-7xl shadow-lg rounded-md bg-white flex flex-col" style="margin-top: 10px; margin-bottom: 10px; height: calc(100vh - 20px); max-height: 95vh;">
             <!-- Modal Header -->
-            <div class="p-6 border-b border-gray-200 flex-shrink-0">
+            <div class="p-3 sm:p-4 lg:p-6 border-b border-gray-200 flex-shrink-0">
                 <div class="flex justify-between items-center">
-                    <h3 class="text-xl font-medium text-gray-900">Print Child Records</h3>
-                    <button id="closePrintModal" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+                    <h3 class="text-base sm:text-lg lg:text-xl font-medium text-gray-900">Print Child Records</h3>
+                    <button id="closePrintModal" class="text-gray-400 hover:text-gray-600 text-xl sm:text-2xl">&times;</button>
                 </div>
             </div>
             
             <!-- Modal Content -->
-            <div class="flex-1 p-6 overflow-y-auto">
+            <div class="flex-1 p-3 sm:p-4 lg:p-6 overflow-y-auto">
                 <!-- Two Column Layout -->
-                <div class="flex flex-col lg:flex-row gap-6 min-h-full">
+                <div class="flex flex-col lg:flex-row gap-3 sm:gap-4 lg:gap-6 min-h-full">
                     
                     <!-- Left Column: Print Filters -->
                     <div class="w-full lg:w-96 flex-shrink-0">
-                        <div class="bg-gray-50 p-4 rounded-lg h-full">
-                            <h4 class="text-md font-medium text-gray-700 mb-3">Filter Options</h4>
+                        <div class="bg-gray-50 p-3 sm:p-4 rounded-lg h-full">
+                            <h4 class="text-sm sm:text-md font-medium text-gray-700 mb-2 sm:mb-3">Filter Options</h4>
                             
                             <!-- First Row -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 mb-3 sm:mb-4">
                                 <!-- Record Type Filter -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Record Type</label>
-                                    <select id="printRecordType" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Record Type</label>
+                                    <select id="printRecordType" class="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
                                         <option value="all">All Records</option>
                                         <option value="incare">In Care</option>
                                         <option value="discharged">Discharged</option>
@@ -805,18 +839,18 @@
                     
                     <!-- Right Column: Print Preview -->
                     <div class="flex-1 lg:flex-2 flex flex-col min-w-0">
-                        <div class="bg-white border border-gray-300 rounded-lg flex flex-col h-full min-h-96">
-                            <div class="bg-gray-50 px-4 py-3 border-b border-gray-300 rounded-t-lg flex-shrink-0">
-                                <div class="flex items-center justify-between">
-                                    <h4 class="text-md font-medium text-gray-700">Print Preview</h4>
-                                    <span id="previewRecordCount" class="text-sm text-gray-600">0 records will be printed</span>
+                        <div class="bg-white border border-gray-300 rounded-lg flex flex-col h-full min-h-64 sm:min-h-80 lg:min-h-96">
+                            <div class="bg-gray-50 px-3 sm:px-4 py-2 sm:py-3 border-b border-gray-300 rounded-t-lg flex-shrink-0">
+                                <div class="flex flex-col space-y-1 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
+                                    <h4 class="text-sm sm:text-md font-medium text-gray-700">Print Preview</h4>
+                                    <span id="previewRecordCount" class="text-xs sm:text-sm text-gray-600">0 records will be printed</span>
                                 </div>
                             </div>
                             
-                            <div id="printPreviewContent" class="p-4 flex-1 overflow-y-auto bg-white min-h-96">
+                            <div id="printPreviewContent" class="p-2 sm:p-3 lg:p-4 flex-1 overflow-y-auto bg-white min-h-64 sm:min-h-80 lg:min-h-96">
                                 <!-- Preview content will be generated here -->
-                                <div class="text-center text-gray-500 py-8">
-                                    Apply filters to see preview
+                                <div class="text-center text-gray-500 py-6 sm:py-8">
+                                    <p class="text-sm sm:text-base">Apply filters to see preview</p>
                                 </div>
                             </div>
                         </div>
@@ -826,12 +860,12 @@
             </div>
             
             <!-- Modal Footer -->
-            <div class="border-t border-gray-200 bg-gray-50 px-6 py-4 rounded-b-md flex-shrink-0">
-                <div class="flex items-center justify-between">
+            <div class="border-t border-gray-200 bg-gray-50 px-3 sm:px-4 lg:px-6 py-3 sm:py-4 rounded-b-md flex-shrink-0">
+                <div class="flex flex-col space-y-3 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
                     <!-- Export Format Selection -->
-                    <div class="flex items-center space-x-4">
-                        <span class="text-sm font-medium text-gray-700">Export Format:</span>
-                        <select id="exportFormatSelect" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                    <div class="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                        <span class="text-xs sm:text-sm font-medium text-gray-700">Export Format:</span>
+                        <select id="exportFormatSelect" class="px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
                             <option value="print">Print/PDF</option>
                             <option value="excel">Excel (.xlsx)</option>
                             <option value="csv">CSV (.csv)</option>
@@ -839,18 +873,21 @@
                     </div>
                     
                     <!-- Action Buttons -->
-                    <div class="flex space-x-3">
-                        <button id="resetPrintFilters" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
-                            Reset Filters
+                    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+                        <button id="resetPrintFilters" class="px-3 sm:px-4 py-2 bg-gray-500 text-white text-xs sm:text-sm rounded-md hover:bg-gray-600 transition-colors">
+                            <span class="hidden sm:inline">Reset Filters</span>
+                            <span class="sm:hidden">Reset</span>
                         </button>
-                        <button id="printSoloRecord" class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors">
-                            Solo Print Child Record
+                        <button id="printSoloRecord" class="px-3 sm:px-4 py-2 bg-purple-600 text-white text-xs sm:text-sm rounded-md hover:bg-purple-700 transition-colors">
+                            <span class="hidden sm:inline">Solo Print Child Record</span>
+                            <span class="sm:hidden">Solo Print</span>
                         </button>
-                        <button id="cancelPrintBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                        <button id="cancelPrintBtn" class="px-3 sm:px-4 py-2 border border-gray-300 rounded-md text-gray-700 text-xs sm:text-sm hover:bg-gray-50 transition-colors">
                             Cancel
                         </button>
-                        <button id="confirmPrintBtn" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
-                            Export Records
+                        <button id="confirmPrintBtn" class="px-3 sm:px-4 py-2 bg-red-600 text-white text-xs sm:text-sm rounded-md hover:bg-red-700 transition-colors">
+                            <span class="hidden sm:inline">Export Records</span>
+                            <span class="sm:hidden">Export</span>
                         </button>
                     </div>
                 </div>
@@ -1496,22 +1533,37 @@
         filterRecords();
     }
 
+    function toggleTrendsSection() {
+        const trendsContent = document.getElementById('trendsContent');
+        const toggleIcon = document.getElementById('trendsToggleIcon');
+        
+        if (trendsContent.style.display === 'none') {
+            // Show the trends section
+            trendsContent.style.display = 'block';
+            toggleIcon.style.transform = 'rotate(0deg)';
+        } else {
+            // Hide the trends section
+            trendsContent.style.display = 'none';
+            toggleIcon.style.transform = 'rotate(-180deg)';
+        }
+    }
+
     function updateToggleUI() {
         const toggleButton = document.getElementById('careToggle');
         const toggleSlider = document.getElementById('toggleSlider');
         
         if (viewMode === 'incare') {
-            // In Care mode - toggle on left (red)
+            // In Care mode - toggle on left (red), slider stays left
             toggleButton.classList.remove('bg-gray-400');
             toggleButton.classList.add('bg-red-primary');
-            toggleSlider.classList.remove('translate-x-1');
-            toggleSlider.classList.add('translate-x-6');
+            toggleSlider.classList.remove('translate-x-5', 'sm:translate-x-6', 'translate-x-6');
+            toggleSlider.classList.add('translate-x-1', 'sm:translate-x-1');
         } else if (viewMode === 'discharged') {
-            // Discharged mode - toggle on right (gray)
+            // Discharged mode - toggle on right (gray), slider moves right
             toggleButton.classList.remove('bg-red-primary');
             toggleButton.classList.add('bg-gray-400');
-            toggleSlider.classList.remove('translate-x-6');
-            toggleSlider.classList.add('translate-x-1');
+            toggleSlider.classList.remove('translate-x-1', 'sm:translate-x-1');
+            toggleSlider.classList.add('translate-x-5', 'sm:translate-x-6');
         }
         // Note: 'all' mode doesn't use the toggle, it's controlled by the separate button
     }
@@ -1888,10 +1940,16 @@
             document.getElementById('searchInput').addEventListener('input', filterRecords);
             document.getElementById('statusFilter').addEventListener('change', filterRecords);
             document.getElementById('chartYearFilter').addEventListener('change', handleYearFilterChange);
-            document.getElementById('exportBtn').addEventListener('click', exportToCSV);
             document.getElementById('printBtn').addEventListener('click', openPrintModal);
             document.getElementById('deletedRecordsBtn').addEventListener('click', function() {
                 window.location.href = 'deleted-records-viewer.html';
+            });
+
+            // Trends Section Toggle Event Listeners
+            document.getElementById('trendsToggleHeader').addEventListener('click', toggleTrendsSection);
+            document.getElementById('trendsToggleBtn').addEventListener('click', function(e) {
+                e.stopPropagation(); // Prevent header click when clicking the button
+                toggleTrendsSection();
             });
 
             // Advanced Filter Event Listeners
@@ -3061,32 +3119,112 @@
             return;
         }
 
-        const printContent = document.querySelector('.print-content').innerHTML;
+        // Get the print content from the solo print preview
+        const printContent = document.getElementById('soloPrintPreview').innerHTML;
+        
+        // Check if there's actual content to print (not just the placeholder)
+        if (printContent.includes('Select a child to preview')) {
+            alert('Please wait for the record to load completely');
+            return;
+        }
+
         const printWindow = window.open('', '_blank');
+        
+        // Get child info for the title
+        const childName = `${selectedSoloChild.firstName || ''} ${selectedSoloChild.lastName || ''}`.trim();
         
         printWindow.document.write(`
             <!DOCTYPE html>
             <html>
             <head>
-                <title>Child Record - ${selectedSoloChild.firstName} ${selectedSoloChild.lastName}</title>
+                <title>Child Record - ${childName}</title>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <style>
-                    * { box-sizing: border-box; }
+                    * { 
+                        box-sizing: border-box; 
+                        margin: 0; 
+                        padding: 0; 
+                    }
                     body { 
                         margin: 0; 
-                        padding: 20mm; 
+                        padding: 10mm; 
                         font-family: Arial, sans-serif; 
                         font-size: 12px;
                         line-height: 1.4;
                         background: white;
                         color: black;
                     }
-                    table { border-collapse: collapse; }
-                    h1, h2, h3 { margin: 0; padding: 0; }
-                    p { margin: 0; padding: 0; }
-                    img { max-width: 100%; height: auto; }
+                    table { 
+                        border-collapse: collapse; 
+                        width: 100%;
+                        margin-bottom: 10px;
+                    }
+                    table, th, td {
+                        border: 1px solid #333;
+                    }
+                    th, td {
+                        padding: 5px 8px;
+                        text-align: left;
+                        vertical-align: top;
+                    }
+                    th {
+                        background-color: #f5f5f5;
+                        font-weight: bold;
+                    }
+                    h1, h2, h3 { 
+                        margin: 10px 0; 
+                        color: #333;
+                    }
+                    h1 { font-size: 18px; }
+                    h2 { font-size: 16px; }
+                    h3 { font-size: 14px; }
+                    p { 
+                        margin: 5px 0; 
+                    }
+                    img { 
+                        max-width: 120px; 
+                        height: auto; 
+                        border: 1px solid #ddd;
+                    }
+                    .text-center { text-align: center; }
+                    .text-right { text-align: right; }
+                    .font-bold { font-weight: bold; }
+                    .mb-4 { margin-bottom: 15px; }
+                    .mb-2 { margin-bottom: 8px; }
+                    .grid { display: table; width: 100%; }
+                    .grid > div { display: table-cell; padding: 5px; }
+                    
+                    /* Hide elements that shouldn't be printed */
+                    button, .no-print { display: none !important; }
+                    
                     @media print {
-                        body { margin: 0; padding: 15mm; }
-                        @page { margin: 15mm; }
+                        body { 
+                            margin: 0; 
+                            padding: 15mm; 
+                            font-size: 11px;
+                        }
+                        @page { 
+                            margin: 10mm; 
+                            size: A4;
+                        }
+                        .page-break {
+                            page-break-before: always;
+                        }
+                    }
+                    
+                    /* Mobile responsive for small screens */
+                    @media screen and (max-width: 768px) {
+                        body {
+                            padding: 5mm;
+                            font-size: 11px;
+                        }
+                        table {
+                            font-size: 10px;
+                        }
+                        th, td {
+                            padding: 3px 5px;
+                        }
                     }
                 </style>
             </head>
