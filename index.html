@@ -261,63 +261,63 @@
     <div id="main-content" class="lg:ml-64 bg-gray-50 min-h-screen">
         <!-- Top Header -->
         <header class="bg-white shadow-sm border-b flex-shrink-0">
-            <div class="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between px-2 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4">
                 <!-- Dashboard Title -->
                 <div class="flex items-center">
-                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 hidden sm:block">Dashboard</h1>
+                    <h1 class="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900 hidden xs:block">Dashboard</h1>
                 </div>
                 
                 <!-- Header Actions -->
-                <div id="headerActions" class="flex items-center space-x-2 sm:space-x-4">
+                <div id="headerActions" class="flex items-center space-x-1 sm:space-x-2 md:space-x-4">
                     <!-- Info Button -->
-                    <button id="info-btn" class="p-2 sm:p-3 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Information">
-                        <div class="h-5 w-5 sm:h-6 sm:w-6 rounded-full border-2 border-current flex items-center justify-center">
+                    <button id="info-btn" class="p-1.5 sm:p-2 md:p-3 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Information">
+                        <div class="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 rounded-full border-2 border-current flex items-center justify-center">
                             <span class="text-xs font-bold">i</span>
                         </div>
                     </button>
 
                     <!-- Create Button (Admin Only) -->
                     <div id="adminCreateButton" class="relative hidden">
-                        <button id="create-btn" class="flex items-center px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base">
-                            <svg class="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button id="create-btn" class="flex items-center px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm md:text-base">
+                            <svg class="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                             </svg>
                             <span class="hidden sm:inline">Create</span>
                         </button>
                         
-                        <div id="create-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 border">
+                        <div id="create-dropdown" class="hidden absolute right-0 mt-2 w-40 sm:w-48 bg-white rounded-md shadow-lg z-50 border">
                             <div class="py-1">
-                                <button onclick="showAnnouncementModal()" class="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">Create Announcement</button>
-                                <button onclick="showTaskModal()" class="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">Create Task</button>
+                                <button onclick="showAnnouncementModal()" class="block w-full text-left px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-700 hover:bg-gray-100">Create Announcement</button>
+                                <button onclick="showTaskModal()" class="block w-full text-left px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-700 hover:bg-gray-100">Create Task</button>
                             </div>
                         </div>
                     </div>
 
                     <!-- Messages Button -->
-                    <button id="messages-btn" class="p-2 sm:p-3 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                        <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button id="messages-btn" class="p-1.5 sm:p-2 md:p-3 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                        <svg class="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                         </svg>
                     </button>
 
                     <!-- History Button -->
-                    <button id="history-btn" class="p-2 sm:p-3 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors">
-                        <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button id="history-btn" class="p-1.5 sm:p-2 md:p-3 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors">
+                        <svg class="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                     </button>
 
                     <!-- Notifications -->
                     <div class="relative">
-                        <button id="notifications-btn" class="relative p-2 sm:p-3 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                            <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="currentColor" viewBox="0 0 24 24">
+                        <button id="notifications-btn" class="relative p-1.5 sm:p-2 md:p-3 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                            <svg class="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
                             </svg>
-                            <span id="notificationBadge" class="hidden absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center">3</span>
+                            <span id="notificationBadge" class="hidden absolute -top-0.5 -right-0.5 h-4 w-4 sm:h-5 sm:w-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center">3</span>
                         </button>
 
                         <!-- Notifications Dropdown -->
-                        <div id="notifications-dropdown" class="hidden absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-md shadow-lg z-50 max-h-96 overflow-y-auto border">
+                        <div id="notifications-dropdown" class="hidden absolute right-0 mt-2 w-72 sm:w-80 md:w-96 bg-white rounded-md shadow-lg z-50 max-h-80 sm:max-h-96 overflow-y-auto border">
                             <div class="py-1">
                                 <div class="px-4 py-2 border-b border-gray-200">
                                     <h3 class="text-sm font-medium text-gray-900">Notifications</h3>
@@ -359,20 +359,20 @@
         </header>
 
         <!-- Dashboard Content -->
-        <div class="p-4 sm:p-6 lg:p-5">
+        <div class="p-2 sm:p-4 md:p-6 lg:p-5">
             <!-- Greeting Section -->
-            <div class="mb-6">
-                <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+            <div class="mb-4 sm:mb-6">
+                <div class="bg-white rounded-lg shadow-sm p-3 sm:p-4 md:p-6">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                         <!-- Greeting content on the left side -->
                         <div class="flex-1 sm:mr-6">
-                            <h2 id="greeting" class="text-xl sm:text-5xl font-semibold text-gray-900 mb-2">Hello!</h2>
-                            <p id="greetingSubtext" class="text-gray-600 text-sm sm:text-3xl">Good Morning, Administrator</p>
+                            <h2 id="greeting" class="text-lg sm:text-xl md:text-3xl lg:text-5xl font-semibold text-gray-900 mb-1 sm:mb-2">Hello!</h2>
+                            <p id="greetingSubtext" class="text-gray-600 text-sm sm:text-base md:text-xl lg:text-3xl">Good Morning, Administrator</p>
                         </div>
                         
                         <!-- Date/time on the right side -->
-                        <div class="flex-1 text-left sm:text-right mt-4 sm:mt-0">
-                            <p id="currentDateTime" class="text-gray-500 text-xl sm:text-xl"></p>
+                        <div class="flex-1 text-left sm:text-right mt-3 sm:mt-0">
+                            <p id="currentDateTime" class="text-gray-500 text-sm sm:text-base md:text-lg lg:text-xl"></p>
                         </div>
                     </div>
                     <script>
@@ -393,48 +393,57 @@
                             const optionsDate = { year: 'numeric', month: 'long', day: 'numeric' };
                             const optionsTime = { hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true };
 
-                            document.getElementById('currentDateTime').innerHTML =
-                                '<p class="font-semibold ">Today is ' + now.toLocaleDateString('en-US', optionsDay) + '</p>' +
-                                '<p class="font-bold text-4xl text-black">' + now.toLocaleDateString('en-US', optionsDate) + '</p>' +
-                                '<p>' + now.toLocaleTimeString('en-US', optionsTime) + '</p>';
-                                                    }
-                                                    updateCurrentDateTime();
-                                                    setInterval(updateCurrentDateTime, 1000);
-                                                </script>
-                                            </div>
+                            // Responsive font sizes for date display
+                            const isSmallScreen = window.innerWidth < 640;
+                            const isMediumScreen = window.innerWidth < 1024;
+                            
+                            let dayClass = isSmallScreen ? 'font-medium text-xs' : isMediumScreen ? 'font-semibold text-sm' : 'font-semibold';
+                            let dateClass = isSmallScreen ? 'font-bold text-lg text-black' : isMediumScreen ? 'font-bold text-2xl text-black' : 'font-bold text-4xl text-black';
+                            let timeClass = isSmallScreen ? 'text-xs' : isMediumScreen ? 'text-sm' : '';
 
-                                            </div>
+                            document.getElementById('currentDateTime').innerHTML =
+                                '<p class="' + dayClass + '">Today is ' + now.toLocaleDateString('en-US', optionsDay) + '</p>' +
+                                '<p class="' + dateClass + '">' + now.toLocaleDateString('en-US', optionsDate) + '</p>' +
+                                '<p class="' + timeClass + '">' + now.toLocaleTimeString('en-US', optionsTime) + '</p>';
+                        }
+                        updateCurrentDateTime();
+                        setInterval(updateCurrentDateTime, 1000);
+                        // Update on window resize
+                        window.addEventListener('resize', updateCurrentDateTime);
+                    </script>
+                </div>
+            </div>
 
             <!-- Main Dashboard Grid -->
             <div class="grid grid-cols-1 gap-4">
             <!-- Stats Cards Row - Full Width -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 w-full">
                 <!-- Total Children Card -->
                 <a href="child-records.html" class="w-full">
-                    <div class="bg-white rounded-lg shadow-sm p-6 sm:p-8 hover:bg-gray-100 transition-colors duration-200 cursor-pointer h-full">
-                        <div class="flex items-center justify-between mb-4">
-                           <div class="space-y-2">
-                            <p class="text-xl sm:text-l text-gray-600 mb-1 font-bold">Total Children In Care</p>
+                    <div class="bg-white rounded-lg shadow-sm p-3 sm:p-4 md:p-6 lg:p-8 hover:bg-gray-100 transition-colors duration-200 cursor-pointer h-full">
+                        <div class="flex items-center justify-between mb-3 sm:mb-4">
+                           <div class="space-y-1 sm:space-y-2 flex-1">
+                            <p class="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 mb-1 font-bold">Total Children In Care</p>
 
-                            <div class="flex items-center space-x-4">
+                            <div class="flex items-center space-x-2 sm:space-x-4">
                                 <!-- Male -->
                                 <div class="flex items-center space-x-1 text-blue-500">
                                 <!-- Male Icon -->
-                                <img src="male.png" alt="Male Icon" class="h-10 w-10 inline" />
-                                <span class="text-xs sm:text-base"><span id="maleCount" class="text-4xl font-bold">0</span></span>
+                                <img src="male.png" alt="Male Icon" class="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 inline" />
+                                <span class="text-xs sm:text-sm md:text-base"><span id="maleCount" class="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold">0</span></span>
                                 </div>
 
                                 <!-- Female -->
                                 <div class="flex items-center space-x-1 text-pink-500">
                                 <!-- Female Icon -->
-                                <img src="female.png" alt="Female Icon" class="h-10 w-10 inline" />
-                                <span class="text-xs sm:text-base"><span id="femaleCount" class="text-4xl font-bold">0</span></span>
+                                <img src="female.png" alt="Female Icon" class="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 inline" />
+                                <span class="text-xs sm:text-sm md:text-base"><span id="femaleCount" class="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold">0</span></span>
                                 </div>
                             </div>
                             </div>
-                            <div class="text-right">
-                                <div class="text-5xl sm:text-6xl font-bold text-gray-900" id="childrenCount">
-                                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto" id="childrenLoader"></div>
+                            <div class="text-right flex-shrink-0">
+                                <div class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900" id="childrenCount">
+                                    <div class="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-gray-900 mx-auto" id="childrenLoader"></div>
                                 </div>
 
                                 
@@ -456,7 +465,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="flex items-center text-sm sm:text-base">
+                        <div class="flex items-center text-xs sm:text-sm md:text-base">
                             <span class="text-green-600 font-medium" id="childrenWeekly">+0 Child added this week</span>
                         </div>
                     </div>
@@ -464,34 +473,34 @@
 
                 <!-- Total Staff Card -->
                 <a href="staff-records.html" class="w-full">
-                    <div class="bg-white rounded-lg shadow-sm p-6 sm:p-8 hover:bg-gray-100 transition-colors duration-200 cursor-pointer h-full">
-                        <div class="flex items-center justify-between mb-4">
-                           <div class="space-y-2">
-                            <p class="text-xl sm:text-l text-gray-600 mb-1 font-bold">Total Staff</p>
+                    <div class="bg-white rounded-lg shadow-sm p-3 sm:p-4 md:p-6 lg:p-8 hover:bg-gray-100 transition-colors duration-200 cursor-pointer h-full">
+                        <div class="flex items-center justify-between mb-3 sm:mb-4">
+                           <div class="space-y-1 sm:space-y-2 flex-1">
+                            <p class="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 mb-1 font-bold">Total Staff</p>
 
-                            <div class="flex items-center space-x-4">
+                            <div class="flex items-center space-x-2 sm:space-x-4">
                                 <!-- Male -->
                                 <div class="flex items-center space-x-1 text-blue-500">
                                 <!-- Male Icon -->
-                                <img src="male.png" alt="Male Icon" class="h-10 w-10 inline" />
-                                <span class="text-xs sm:text-base"><span id="maleStaffCount" class="text-4xl font-bold">0</span></span>
+                                <img src="male.png" alt="Male Icon" class="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 inline" />
+                                <span class="text-xs sm:text-sm md:text-base"><span id="maleStaffCount" class="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold">0</span></span>
                                 </div>
 
                                 <!-- Female -->
                                 <div class="flex items-center space-x-1 text-pink-500">
                                 <!-- Female Icon -->
-                                <img src="female.png" alt="Female Icon" class="h-10 w-10 inline" />
-                                <span class="text-xs sm:text-base"><span id="femaleStaffCount" class="text-4xl font-bold">0</span></span>
+                                <img src="female.png" alt="Female Icon" class="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 inline" />
+                                <span class="text-xs sm:text-sm md:text-base"><span id="femaleStaffCount" class="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold">0</span></span>
                                 </div>
                             </div>
                             </div>
-                            <div class="text-right">
-                                <div class="text-5xl sm:text-6xl font-bold text-gray-900" id="staffCount">
-                                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto" id="staffLoader"></div>
+                            <div class="text-right flex-shrink-0">
+                                <div class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900" id="staffCount">
+                                    <div class="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-gray-900 mx-auto" id="staffLoader"></div>
                                 </div>
                             </div>
                         </div>
-                        <div class="flex items-center text-sm sm:text-base">
+                        <div class="flex items-center text-xs sm:text-sm md:text-base">
                             <span class="text-green-600 font-medium" id="staffWeekly">+0 Staff added this week</span>
                         </div>
                     </div>
@@ -499,34 +508,34 @@
 
                 <!-- Total Volunteers Card -->
                 <a href="volunteer-records.html" class="w-full">
-                    <div class="bg-white rounded-lg shadow-sm p-6 sm:p-8 hover:bg-gray-100 transition-colors duration-200 cursor-pointer h-full">
-                        <div class="flex items-center justify-between mb-4">
-                           <div class="space-y-2">
-                            <p class="text-xl sm:text-l text-gray-600 mb-1 font-bold">Total Volunteers</p>
+                    <div class="bg-white rounded-lg shadow-sm p-3 sm:p-4 md:p-6 lg:p-8 hover:bg-gray-100 transition-colors duration-200 cursor-pointer h-full">
+                        <div class="flex items-center justify-between mb-3 sm:mb-4">
+                           <div class="space-y-1 sm:space-y-2 flex-1">
+                            <p class="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 mb-1 font-bold">Total Volunteers</p>
 
-                            <div class="flex items-center space-x-4">
+                            <div class="flex items-center space-x-2 sm:space-x-4">
                                 <!-- Male -->
                                 <div class="flex items-center space-x-1 text-blue-500">
                                 <!-- Male Icon -->
-                                <img src="male.png" alt="Male Icon" class="h-10 w-10 inline" />
-                                <span class="text-xs sm:text-base"><span id="maleVolunteerCount" class="text-4xl font-bold">0</span></span>
+                                <img src="male.png" alt="Male Icon" class="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 inline" />
+                                <span class="text-xs sm:text-sm md:text-base"><span id="maleVolunteerCount" class="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold">0</span></span>
                                 </div>
 
                                 <!-- Female -->
                                 <div class="flex items-center space-x-1 text-pink-500">
                                 <!-- Female Icon -->
-                                <img src="female.png" alt="Female Icon" class="h-10 w-10 inline" />
-                                <span class="text-xs sm:text-base"><span id="femaleVolunteerCount" class="text-4xl font-bold">0</span></span>
+                                <img src="female.png" alt="Female Icon" class="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 inline" />
+                                <span class="text-xs sm:text-sm md:text-base"><span id="femaleVolunteerCount" class="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold">0</span></span>
                                 </div>
                             </div>
                             </div>
-                            <div class="text-right">
-                                <div class="text-5xl sm:text-6xl font-bold text-gray-900" id="volunteersCount">
-                                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto" id="volunteersLoader"></div>
+                            <div class="text-right flex-shrink-0">
+                                <div class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900" id="volunteersCount">
+                                    <div class="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-gray-900 mx-auto" id="volunteersLoader"></div>
                                 </div>
                             </div>
                         </div>
-                        <div class="flex items-center text-sm sm:text-base">
+                        <div class="flex items-center text-xs sm:text-sm md:text-base">
                             <span class="text-green-600 font-medium" id="volunteersWeekly">+0 Volunteer added this week</span>
                         </div>
                     </div>
@@ -534,18 +543,18 @@
 
                 <!-- Total Donors Card -->
                 <a href="donors-records.html" class="w-full">
-                    <div class="bg-white rounded-lg shadow-sm p-6 sm:p-8 hover:bg-gray-100 transition-colors duration-200 cursor-pointer h-full">
-                        <div class="flex items-center justify-between mb-4">
-                            <div>
-                                <p class="text-xl sm:text-l text-gray-600 mb-1 font-bold">Total Donors<br><br><br></p>
+                    <div class="bg-white rounded-lg shadow-sm p-3 sm:p-4 md:p-6 lg:p-8 hover:bg-gray-100 transition-colors duration-200 cursor-pointer h-full">
+                        <div class="flex items-center justify-between mb-3 sm:mb-4">
+                            <div class="flex-1">
+                                <p class="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 mb-1 font-bold">Total Donors<br class="hidden sm:block"><br class="hidden md:block"><br class="hidden lg:block"></p>
                             </div>
-                            <div class="text-right">
-                                <div class="text-5xl sm:text-6xl font-bold text-gray-900" id="donorsCount">
-                                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto" id="donorsLoader"></div>
+                            <div class="text-right flex-shrink-0">
+                                <div class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900" id="donorsCount">
+                                    <div class="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-gray-900 mx-auto" id="donorsLoader"></div>
                                 </div>
                             </div>
                         </div>
-                        <div class="flex items-center text-sm sm:text-base">
+                        <div class="flex items-center text-xs sm:text-sm md:text-base">
                             <span class="text-green-600 font-medium" id="donorsWeekly">+0 Donors this week</span>
                         </div>
                     </div>
@@ -553,7 +562,7 @@
             </div>
 
             <!-- Second Row: Total Donation and Staff Attendance -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 w-full">
                 <!-- Total Donation Card -->
                 <!-- <a href="transaction.html" class="w-full"> -->
                     <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6  transition-colors duration-200 cursor-pointer h-full">
@@ -822,9 +831,9 @@
 
     
     <!-- Staff Attendance Floating Button (Only for Staff) -->
-    <div id="attendanceButton" class="fixed bottom-6 right-6 z-50 hidden">
-        <button id="attendance-btn" class="bg-red-primary hover:bg-red-700 text-white rounded-full p-4 shadow-lg transition-all duration-300 transform hover:scale-110">
-            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div id="attendanceButton" class="fixed bottom-16 sm:bottom-6 right-3 sm:right-6 z-50 hidden">
+        <button id="attendance-btn" class="bg-red-primary hover:bg-red-700 text-white rounded-full p-2 sm:p-3 md:p-4 shadow-lg transition-all duration-300 transform hover:scale-110">
+            <svg class="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
             </svg>
         </button>
@@ -834,31 +843,31 @@
     <div id="overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"></div>
 
     <!-- Announcement/Task Detail Modal - Centered -->
-    <div id="detailModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
-        <div class="relative bg-white border w-full max-w-2xl shadow-lg rounded-md">
-            <div class="p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 id="detailModalTitle" class="text-lg font-medium text-gray-900">Details</h3>
-                    <button onclick="closeDetailModal()" class="text-gray-400 hover:text-gray-600">
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div id="detailModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="relative bg-white border w-full max-w-xs sm:max-w-lg md:max-w-2xl shadow-lg rounded-md max-h-[90vh] overflow-y-auto">
+            <div class="p-3 sm:p-4 md:p-6">
+                <div class="flex items-center justify-between mb-3 sm:mb-4">
+                    <h3 id="detailModalTitle" class="text-base sm:text-lg font-medium text-gray-900">Details</h3>
+                    <button onclick="closeDetailModal()" class="text-gray-400 hover:text-gray-600 p-1">
+                        <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </button>
                 </div>
-                <div id="detailModalContent" class="space-y-4">
+                <div id="detailModalContent" class="space-y-3 sm:space-y-4 text-sm sm:text-base">
                     <!-- Content will be populated by JavaScript -->
                 </div>
                 <!-- Admin Edit/Delete Actions -->
-                <div id="detailModalActions" class="hidden mt-6 pt-4 border-t border-gray-200 flex justify-end space-x-3">
-                    <button id="editItemBtn" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm">
+                <div id="detailModalActions" class="hidden mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-gray-200 flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+                    <button id="editItemBtn" class="w-full sm:w-auto px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-xs sm:text-sm">
                         Edit
                     </button>
-                    <button id="deleteItemBtn" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm">
+                    <button id="deleteItemBtn" class="w-full sm:w-auto px-3 sm:px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-xs sm:text-sm">
                         Delete
                     </button>
                 </div>
                 <!-- Staff/Volunteer Accept Button -->
-                <div id="taskAcceptActions" class="hidden mt-6 pt-4 border-t border-gray-200 flex justify-end">
+                <div id="taskAcceptActions" class="hidden mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-gray-200 flex justify-end">
                     <button id="acceptTaskBtn" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm">
                         Accept Task
                     </button>
@@ -870,39 +879,39 @@
    
 
     <!-- Edit Announcement Modal (Admin Only) - Centered -->
-    <div id="editAnnouncementModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
-        <div class="relative bg-white border w-full max-w-md shadow-lg rounded-md">
-            <div class="p-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Edit Announcement</h3>
+    <div id="editAnnouncementModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="relative bg-white border w-full max-w-xs sm:max-w-sm md:max-w-md shadow-lg rounded-md max-h-[90vh] overflow-y-auto">
+            <div class="p-3 sm:p-4 md:p-6">
+                <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Edit Announcement</h3>
                 <form id="editAnnouncementForm">
                     <input type="hidden" id="editAnnouncementId">
-                    <div class="mb-4">
-                        <label for="editAnnouncementTitle" class="block text-sm font-medium text-gray-700 mb-2">Title *</label>
+                    <div class="mb-3 sm:mb-4">
+                        <label for="editAnnouncementTitle" class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Title *</label>
                         <input type="text" id="editAnnouncementTitle" required
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                               class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     
-                    <div class="mb-4">
-                        <label for="editAnnouncementContent" class="block text-sm font-medium text-gray-700 mb-2">Content *</label>
-                        <textarea id="editAnnouncementContent" rows="4" required
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    <div class="mb-3 sm:mb-4">
+                        <label for="editAnnouncementContent" class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Content *</label>
+                        <textarea id="editAnnouncementContent" rows="3" required
+                                  class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
                     </div>
                     
-                    <div class="mb-6">
-                        <label for="editAnnouncementPriority" class="block text-sm font-medium text-gray-700 mb-2">Priority</label>
+                    <div class="mb-4 sm:mb-6">
+                        <label for="editAnnouncementPriority" class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Priority</label>
                         <select id="editAnnouncementPriority"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                             <option value="normal">Normal</option>
                             <option value="important">Important</option>
                             <option value="urgent">Urgent</option>
                         </select>
                     </div>
                     
-                    <div class="flex justify-end space-x-3">
-                        <button type="button" onclick="closeEditAnnouncementModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                    <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+                        <button type="button" onclick="closeEditAnnouncementModal()" class="w-full sm:w-auto px-3 sm:px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 text-xs sm:text-sm">
                             Cancel
                         </button>
-                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                        <button type="submit" class="w-full sm:w-auto px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-xs sm:text-sm">
                             Update Announcement
                         </button>
                     </div>
@@ -912,8 +921,8 @@
     </div>
 
     <!-- Edit Task Modal (Admin Only) - Centered -->
-    <div id="editTaskModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
-        <div class="relative bg-white border w-full max-w-md shadow-lg rounded-md">
+    <div id="editTaskModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="relative bg-white border w-full max-w-md shadow-lg rounded-md max-h-[90vh] overflow-y-auto">
             <div class="p-6">
                 <h3 class="text-lg font-medium text-gray-900 mb-4">Edit Task</h3>
                 <form id="editTaskForm">
@@ -970,38 +979,38 @@
     </div>
 
     <!-- Create Announcement Modal (Admin Only) - Centered -->
-    <div id="announcementModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
-        <div class="relative bg-white border w-full max-w-md shadow-lg rounded-md">
-            <div class="p-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Create Announcement</h3>
+    <div id="announcementModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="relative bg-white border w-full max-w-xs sm:max-w-sm md:max-w-md shadow-lg rounded-md max-h-[90vh] overflow-y-auto m-4">
+            <div class="p-3 sm:p-4 md:p-6">
+                <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Create Announcement</h3>
                 <form id="announcementForm" onsubmit="event.preventDefault(); createAnnouncement();">
-                    <div class="mb-4">
-                        <label for="announcementTitle" class="block text-sm font-medium text-gray-700 mb-2">Title *</label>
+                    <div class="mb-3 sm:mb-4">
+                        <label for="announcementTitle" class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Title *</label>
                         <input type="text" id="announcementTitle" required
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                               class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     
-                    <div class="mb-4">
-                        <label for="announcementContent" class="block text-sm font-medium text-gray-700 mb-2">Content *</label>
-                        <textarea id="announcementContent" rows="4" required
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    <div class="mb-3 sm:mb-4">
+                        <label for="announcementContent" class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Content *</label>
+                        <textarea id="announcementContent" rows="3" required
+                                  class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
                     </div>
                     
-                    <div class="mb-6">
-                        <label for="announcementPriority" class="block text-sm font-medium text-gray-700 mb-2">Priority</label>
+                    <div class="mb-4 sm:mb-6">
+                        <label for="announcementPriority" class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Priority</label>
                         <select id="announcementPriority"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                             <option value="normal">Normal</option>
                             <option value="important">Important</option>
                             <option value="urgent">Urgent</option>
                         </select>
                     </div>
                     
-                    <div class="flex justify-end space-x-3">
-                        <button type="button" onclick="closeAnnouncementModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                    <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+                        <button type="button" onclick="closeAnnouncementModal()" class="w-full sm:w-auto px-3 sm:px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 text-xs sm:text-sm">
                             Cancel
                         </button>
-                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                        <button type="submit" class="w-full sm:w-auto px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-xs sm:text-sm">
                             Create Announcement
                         </button>
                     </div>
@@ -1011,60 +1020,60 @@
     </div>
 
     <!-- Create Task Modal (Admin Only) - Centered -->
-    <div id="taskModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
-        <div class="relative bg-white border w-full max-w-md shadow-lg rounded-md">
-            <div class="p-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Create Task</h3>
+    <div id="taskModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="relative bg-white border w-full max-w-xs sm:max-w-sm md:max-w-md shadow-lg rounded-md max-h-[90vh] overflow-y-auto m-4">
+            <div class="p-3 sm:p-4 md:p-6">
+                <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Create Task</h3>
                 <form id="taskForm" onsubmit="event.preventDefault(); createTask();">
-                    <div class="mb-4">
-                        <label for="taskTitle" class="block text-sm font-medium text-gray-700 mb-2">Task Title *</label>
+                    <div class="mb-3 sm:mb-4">
+                        <label for="taskTitle" class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Task Title *</label>
                         <input type="text" id="taskTitle" required
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                               class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     
-                    <div class="mb-4">
-                        <label for="taskDescription" class="block text-sm font-medium text-gray-700 mb-2">Description *</label>
+                    <div class="mb-3 sm:mb-4">
+                        <label for="taskDescription" class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Description *</label>
                         <textarea id="taskDescription" rows="3" required
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                                  class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
                     </div>
                     
-                    <div class="mb-4">
-                        <label for="taskAssignedTo" class="block text-sm font-medium text-gray-700 mb-2">Assign To</label>
+                    <div class="mb-3 sm:mb-4">
+                        <label for="taskAssignedTo" class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Assign To</label>
                         <select id="taskAssignedTo"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                             <option value="all">All</option>
                             <option value="staff">Staff</option>
                             <option value="volunteer">Volunteers</option>
                         </select>
                     </div>
                     
-                    <div class="mb-4">
-                        <label for="taskDueDate" class="block text-sm font-medium text-gray-700 mb-2">Due Date</label>
+                    <div class="mb-3 sm:mb-4">
+                        <label for="taskDueDate" class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Due Date</label>
                         <input type="date" id="taskDueDate"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                               class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     
-                    <div class="mb-4">
-                        <label for="taskPriority" class="block text-sm font-medium text-gray-700 mb-2">Priority</label>
+                    <div class="mb-3 sm:mb-4">
+                        <label for="taskPriority" class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Priority</label>
                         <select id="taskPriority"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                             <option value="low">Low</option>
                             <option value="medium">Medium</option>
                             <option value="high">High</option>
                         </select>
                     </div>
                     
-                    <div class="mb-6">
-                        <label for="taskPeopleNeeded" class="block text-sm font-medium text-gray-700 mb-2">People Needed</label>
+                    <div class="mb-4 sm:mb-6">
+                        <label for="taskPeopleNeeded" class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">People Needed</label>
                         <input type="number" id="taskPeopleNeeded" min="1" value="1"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                               class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     
-                    <div class="flex justify-end space-x-3">
-                        <button type="button" onclick="closeTaskModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                    <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+                        <button type="button" onclick="closeTaskModal()" class="w-full sm:w-auto px-3 sm:px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 text-xs sm:text-sm">
                             Cancel
                         </button>
-                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                        <button type="submit" class="w-full sm:w-auto px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-xs sm:text-sm">
                             Create Task
                         </button>
                     </div>
@@ -1074,8 +1083,8 @@
     </div>
 
     <!-- Confirmation Modal -->
-    <div id="confirmationModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
-        <div class="relative bg-white border w-full max-w-md shadow-lg rounded-md">
+    <div id="confirmationModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="relative bg-white border w-full max-w-md shadow-lg rounded-md max-h-[90vh] overflow-y-auto">
             <div class="p-6">
                 <div class="flex items-center mb-4">
                     <div class="flex-shrink-0">
@@ -3157,7 +3166,21 @@ async function loadDonorsData() {
             const title = document.getElementById('announcementTitle').value.trim();
             const content = document.getElementById('announcementContent').value.trim();
             const priority = document.getElementById('announcementPriority').value;
-            const author = currentUser ? currentUser.name : 'Unknown';
+            
+            // Properly construct author name from user data
+            let author = 'Unknown';
+            if (currentUser) {
+                if (currentUser.firstName && currentUser.lastName) {
+                    author = `${currentUser.firstName} ${currentUser.lastName}`;
+                } else if (currentUser.name) {
+                    author = currentUser.name;
+                } else if (currentUser.firstName) {
+                    author = currentUser.firstName;
+                } else if (currentUser.lastName) {
+                    author = currentUser.lastName;
+                }
+            }
+            
             const authorRole = currentUser ? currentUser.role : 'unknown';
             const createdAt = new Date().toISOString();
 
@@ -3199,6 +3222,11 @@ async function loadDonorsData() {
                             showMessage('Announcement created successfully!', 'success');
                             closeAnnouncementModal();
                             loadAnnouncementsAndTasks(); // Reload data
+                            
+                            // Clear form
+                            document.getElementById('announcementTitle').value = '';
+                            document.getElementById('announcementContent').value = '';
+                            document.getElementById('announcementPriority').value = 'normal';
                         })
                         .catch((error) => {
                             console.error('Error saving announcement:', error);
@@ -3218,12 +3246,26 @@ async function loadDonorsData() {
             const dueDate = document.getElementById('taskDueDate').value;
             const priority = document.getElementById('taskPriority').value;
             const peopleNeeded = parseInt(document.getElementById('taskPeopleNeeded').value, 10);
-            const author = currentUser ? currentUser.name : 'Unknown';
+            
+            // Properly construct author name from user data
+            let author = 'Unknown';
+            if (currentUser) {
+                if (currentUser.firstName && currentUser.lastName) {
+                    author = `${currentUser.firstName} ${currentUser.lastName}`;
+                } else if (currentUser.name) {
+                    author = currentUser.name;
+                } else if (currentUser.firstName) {
+                    author = currentUser.firstName;
+                } else if (currentUser.lastName) {
+                    author = currentUser.lastName;
+                }
+            }
+            
             const authorRole = currentUser ? currentUser.role : 'unknown';
             const createdAt = new Date().toISOString();
 
             // Client-side validation
-            if (!title || !description || !assignedTo || !dueDate || !priority || !author || !authorRole) {
+            if (!title || !description || !assignedTo || !dueDate || !priority) {
                 showMessage('All fields are required.', 'error');
                 return;
             }
@@ -3268,6 +3310,14 @@ async function loadDonorsData() {
                             showMessage('Task created successfully!', 'success');
                             closeTaskModal();
                             loadAnnouncementsAndTasks();
+                            
+                            // Clear form
+                            document.getElementById('taskTitle').value = '';
+                            document.getElementById('taskDescription').value = '';
+                            document.getElementById('taskAssignedTo').value = 'all';
+                            document.getElementById('taskDueDate').value = '';
+                            document.getElementById('taskPriority').value = 'low';
+                            document.getElementById('taskPeopleNeeded').value = '1';
                         })
                         .catch((error) => {
                             console.error('Error saving task:', error);
@@ -4429,10 +4479,11 @@ async function loadDonorsData() {
     <button 
         id="floatingTaskButton"
         onclick="scrollToTasksAnnouncements()" 
-        class="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl z-50"
+        class="fixed bottom-3 sm:bottom-6 right-3 sm:right-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-3 sm:py-3 sm:px-4 md:px-6 rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl z-50 text-xs sm:text-sm md:text-base"
         title="Go to Task and Announcement section"
     >
-        Task and Announcement
+        <span class="hidden sm:inline">Task and Announcement</span>
+        <span class="sm:hidden">Tasks</span>
     </button>
 </body>
 </html>
