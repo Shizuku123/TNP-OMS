@@ -8,12 +8,54 @@
   <style>
     .hidden-scrollbar::-webkit-scrollbar { display: none; }
     .hidden-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    /* Skeleton Loading Animation */
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+    }
+    
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    
+    .skeleton-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+    
+    .skeleton-text {
+      height: 16px;
+      border-radius: 4px;
+      margin: 4px 0;
+    }
+    
+    .skeleton-text-sm {
+      height: 12px;
+      border-radius: 4px;
+      margin: 2px 0;
+    }
+    
+    .skeleton-bubble {
+      height: 40px;
+      border-radius: 18px;
+      width: 200px;
+    }
+    
+    .skeleton-profile {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+    }
   </style>
 </head>
 <body class="bg-gray-50 flex flex-col h-screen">
   <!-- Top Bar with Logo and Back Button -->
   <header class="bg-white border-b flex items-center gap-3 px-4 py-2 sticky top-0 z-50">
-    <button onclick="toggleInbox()" class="p-2 rounded-full hover:bg-gray-100 lg:hidden">
+  <button id="mobileBurgerBtn" class="p-2 rounded-full hover:bg-gray-100 lg:hidden" type="button">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
       </svg>
@@ -28,73 +70,218 @@
   </header>
 
   <div class="flex-1 flex overflow-hidden">
-    <aside id="inbox" 
-  class="fixed inset-y-0 left-0 w-72 bg-white border-r border-gray-200 
-         transform -translate-x-full lg:translate-x-0 lg:static lg:flex flex-col 
-         transition-transform duration-300 ease-in-out z-[60]">
+    <!-- Desktop layout: three panels -->
+  <div class="hidden lg:flex w-full h-full">
+      <!-- Inbox Panel (wider) -->
+      <aside id="inbox" class="flex flex-col w-[26%] min-w-[260px] max-w-sm bg-white border-r border-gray-200 h-full">
+        <div class="p-4 border-b border-gray-200">
+          <input type="text" placeholder="Search contacts..." class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500 text-base">
+        </div>
+        <div class="flex-1 overflow-y-auto hidden-scrollbar">
+          <ul class="divide-y divide-gray-100" id="inbox-list"></ul>
+          <!-- Skeleton Loading for Inbox -->
+          <div id="inbox-skeleton" class="p-4 space-y-4">
+            <div class="flex items-center gap-3 p-4">
+              <div class="skeleton skeleton-avatar"></div>
+              <div class="flex-1">
+                <div class="skeleton skeleton-text" style="width: 60%;"></div>
+                <div class="skeleton skeleton-text-sm" style="width: 80%;"></div>
+                <div class="skeleton skeleton-text-sm" style="width: 40%;"></div>
+              </div>
+            </div>
+            <div class="flex items-center gap-3 p-4">
+              <div class="skeleton skeleton-avatar"></div>
+              <div class="flex-1">
+                <div class="skeleton skeleton-text" style="width: 70%;"></div>
+                <div class="skeleton skeleton-text-sm" style="width: 90%;"></div>
+                <div class="skeleton skeleton-text-sm" style="width: 35%;"></div>
+              </div>
+            </div>
+            <div class="flex items-center gap-3 p-4">
+              <div class="skeleton skeleton-avatar"></div>
+              <div class="flex-1">
+                <div class="skeleton skeleton-text" style="width: 55%;"></div>
+                <div class="skeleton skeleton-text-sm" style="width: 75%;"></div>
+                <div class="skeleton skeleton-text-sm" style="width: 45%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
 
-  <!-- Mobile back + search -->
-  <div class="flex items-center gap-2 p-4 border-b border-gray-200 lg:hidden">
-    <button onclick="toggleInbox()" class="p-2 rounded-full hover:bg-gray-100">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-      </svg>
-    </button>
-    <input type="text" placeholder="Search contacts..." 
-      class="flex-1 px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm">
-  </div>
-
-  <!-- Desktop search -->
-  <div class="p-4 border-b border-gray-200 hidden lg:block">
-    <input type="text" placeholder="Search contacts..." 
-      class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm">
-  </div>
-
-  <!-- Inbox List -->
-  <div class="flex-1 overflow-y-auto hidden-scrollbar">
-    <ul class="divide-y divide-gray-100"></ul>
-  </div>
-</aside>
-
-    <!-- Chat Window -->
-    <main class="flex-1 flex flex-col bg-gray-50">
-      <!-- Chat header (for selected contact on mobile) -->
-      <div class="lg:hidden flex items-center gap-3 px-4 py-2 border-b bg-white">
-        <div class="w-8 h-8 rounded-full bg-gray-300"></div>
-        <div class="flex flex-col">
-          <span class="font-medium text-gray-800">John Doe</span>
-          <span class="text-xs text-gray-500">Online</span>
+      <!-- Chat Panel (larger bubbles, date/time) -->
+      <main class="flex-1 flex flex-col w-[48%] min-w-[340px] bg-gray-50 h-full">
+        
+      <div id="chat-messages" class="flex-1 p-8 space-y-6 overflow-y-auto bg-gray-50 hidden-scrollbar">
+        <!-- Skeleton Loading for Chat -->
+        <div id="chat-skeleton" class="space-y-6">
+          <div class="flex items-start space-x-2">
+            <div class="skeleton skeleton-avatar"></div>
+            <div class="skeleton skeleton-bubble"></div>
+          </div>
+          <div class="flex justify-end items-start space-x-2">
+            <div class="skeleton skeleton-bubble" style="width: 150px;"></div>
+          </div>
+          <div class="flex items-start space-x-2">
+            <div class="skeleton skeleton-avatar"></div>
+            <div class="skeleton skeleton-bubble" style="width: 180px;"></div>
+          </div>
+          <div class="flex justify-end items-start space-x-2">
+            <div class="skeleton skeleton-bubble" style="width: 120px;"></div>
+          </div>
         </div>
       </div>
-
-      <!-- Messages -->
-      <div class="flex-1 p-4 space-y-4 overflow-y-auto bg-gray-50 hidden-scrollbar">
-        <div class="flex items-start space-x-2">
-          <div class="bg-gray-100 px-4 py-2 rounded-2xl text-gray-800 max-w-xs">Hello! How are you?</div>
+        <div class="p-5 border-t bg-white flex items-center gap-3">
+          <input type="text" placeholder="Type a message..." class="flex-1 px-5 py-3 rounded-full bg-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base">
+          <button class="p-3 bg-blue-500 text-white rounded-full hover:bg-blue-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+          </button>
         </div>
-        <div class="flex justify-end items-start space-x-2">
-          <div class="bg-blue-500 px-4 py-2 rounded-2xl text-white max-w-xs">I’m good, thanks! You?</div>
+      </main>
+
+      <!-- Profile Info Panel -->
+  <aside id="profile-info" class="flex flex-col w-[26%] min-w-[260px] max-w-sm bg-white border-l border-gray-200 h-full p-8">
+        <!-- Skeleton Loading for Profile -->
+        <div id="profile-skeleton" class="flex flex-col items-center gap-6">
+          <div class="skeleton skeleton-profile"></div>
+          <div class="text-center w-full">
+            <div class="skeleton skeleton-text" style="width: 80%; margin: 0 auto 8px;"></div>
+            <div class="skeleton skeleton-text-sm" style="width: 40%; margin: 0 auto;"></div>
+          </div>
+        </div>
+        <div class="mt-10 w-full">
+          <div class="skeleton skeleton-text-sm" style="width: 30%; margin-bottom: 8px;"></div>
+          <div class="skeleton skeleton-text" style="width: 100%; height: 48px; border-radius: 8px;"></div>
+        </div>
+      </aside>
+    </div>
+    <!-- Mobile Inbox Overlay -->
+    <div id="mobileInboxOverlay" class="fixed inset-0 z-50 bg-white hidden lg:hidden">
+      <aside class="w-full h-full flex flex-col bg-white">
+        <div class="flex items-center justify-between p-4 border-b border-gray-200">
+          <span class="font-semibold text-gray-800">Inbox</span>
+          <button id="closeMobileInboxBtn" class="p-2 rounded-full hover:bg-gray-100">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+        <div class="p-4 border-b border-gray-200">
+          <input type="text" placeholder="Search contacts..." class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500 text-base">
+        </div>
+        <div class="flex-1 overflow-y-auto hidden-scrollbar">
+          <ul class="divide-y divide-gray-100" id="mobileInboxList"></ul>
+        </div>
+      </aside>
+    </div>
+    <!-- Mobile layout: full working chat UI -->
+    <div class="flex lg:hidden w-full h-full">
+      <div class="flex flex-col w-full h-full">
+        <!-- Chat Header with Back Button -->
+        <div id="mobileChatHeader" class="p-4 border-b">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-semibold text-sm" id="mobileChatUserAvatar">U</div>
+            <div>
+              <h3 class="font-semibold" id="mobileChatUserName">User Name</h3>
+              <p class="text-sm text-gray-500" id="mobileChatUsername">@username</p>
+            </div>
+          </div>
+        </div>
+        <!-- Chat Content -->
+  <div class="flex flex-col flex-1 min-h-0">
+          <!-- Messages Area -->
+          <div id="mobileMessagesContainer" class="flex-1 p-4 overflow-y-auto bg-white" style="z-index:1; touch-action:manipulation;">
+            <div id="mobileMessagesLoading" class="flex items-center justify-center h-32">
+              <div class="text-gray-500">Loading messages...</div>
+            </div>
+            <div id="mobileMessagesEmpty" class="hidden md:flex items-center justify-center h-32">
+              <div class="text-center text-gray-500">
+                <p>No messages yet. Start the conversation!</p>
+              </div>
+            </div>
+            <div id="mobileMessagesList" class="hidden space-y-4"></div>
+          </div>
+          <!-- Message Input -->
+          <div class="border-t p-4 bg-white" style="z-index:2; touch-action:manipulation;">
+            <div class="flex gap-2">
+              <input type="text" id="mobileMessageInput" autocomplete="off" placeholder="Type your message..." class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+              <button id="mobileSendMessageBtn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed" type="button">Send</button>
+            </div>
+          </div>
         </div>
       </div>
-
-      <!-- Compose -->
-      <div class="p-3 border-t bg-white flex items-center gap-2">
-        <input type="text" placeholder="Type a message..." class="flex-1 px-4 py-2 rounded-full bg-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
-        <button class="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-          </svg>
-        </button>
-      </div>
-    </main>
-  </div>
+    </div>
 
   <script>
-    function toggleInbox() {
-    const inbox = document.getElementById('inbox');
-    inbox.classList.toggle('-translate-x-full');
-  }
+    // Mobile burger menu logic and mobile inbox sync
+    document.addEventListener('DOMContentLoaded', function() {
+      const burger = document.getElementById('mobileBurgerBtn');
+      const overlay = document.getElementById('mobileInboxOverlay');
+      const closeBtn = document.getElementById('closeMobileInboxBtn');
+      const bg = document.getElementById('mobileInboxOverlayBg');
+      const desktopInboxList = document.querySelector('#inbox ul');
+      const mobileInboxList = document.getElementById('mobileInboxList');
+
+      // Show/hide overlay
+      if (burger && overlay) {
+        burger.addEventListener('click', function(e) {
+          overlay.classList.remove('hidden');
+        });
+      }
+      if (closeBtn && overlay) {
+        closeBtn.addEventListener('click', function() {
+          overlay.classList.add('hidden');
+        });
+      }
+      if (bg && overlay) {
+        bg.addEventListener('click', function() {
+          overlay.classList.add('hidden');
+        });
+      }
+
+      // Function to sync desktop inbox to mobile inbox, with working event handlers
+      function syncMobileInbox() {
+        if (!desktopInboxList || !mobileInboxList) return;
+        mobileInboxList.innerHTML = '';
+        Array.from(desktopInboxList.children).forEach((desktopLi) => {
+          const li = desktopLi.cloneNode(true);
+          li.onclick = null;
+          li.addEventListener('click', function(e) {
+            const userId = desktopLi.getAttribute('data-uid');
+            if (typeof window.allContacts !== 'undefined' && Array.isArray(window.allContacts)) {
+              const user = window.allContacts.find(u => u.uid === userId);
+              if (user && typeof window.selectContact === 'function') {
+                window.selectContact(user.uid, user.fullName, user.photo, user.role);
+                overlay.classList.add('hidden');
+              }
+            }
+          });
+          mobileInboxList.appendChild(li);
+        });
+      }
+
+      // Observe changes to desktop inbox and sync
+      if (desktopInboxList && mobileInboxList) {
+        const observer = new MutationObserver(syncMobileInbox);
+        observer.observe(desktopInboxList, { childList: true, subtree: true });
+        // Initial sync
+        syncMobileInbox();
+      }
+    });
   </script>
   <script type="module" src="chat.js"></script>
+  <script>
+    // Remove any overlays that might block mobile interaction
+    document.addEventListener('DOMContentLoaded', function() {
+      // Remove overlays if present
+      const overlays = document.querySelectorAll('.unsend-modal-overlay');
+      overlays.forEach(o => o.remove());
+      // Enable mobile send button and input
+      const sendBtn = document.getElementById('mobileSendMessageBtn');
+      const input = document.getElementById('mobileMessageInput');
+      if (sendBtn) sendBtn.disabled = false;
+      if (input) input.disabled = false;
+    });
+  </script>
 </body>
 </html>
