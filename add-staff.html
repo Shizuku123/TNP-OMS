@@ -93,6 +93,58 @@
         </div>
     </div>
 
+    <!-- Batch Upload Progress Modal -->
+    <div id="batchProgressModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-8 max-w-lg w-full mx-4">
+            <div class="text-center">
+                <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-red-primary mx-auto"></div>
+                <h3 class="mt-4 text-lg font-medium text-gray-900">Uploading Staff Documents</h3>
+                <p id="batchProgressMessage" class="mt-2 text-sm text-gray-500">Preparing documents for upload...</p>
+                
+                <!-- Progress Bar -->
+                <div class="mt-6 w-full bg-gray-200 rounded-full h-2">
+                    <div id="batchProgressBar" class="bg-red-primary h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+                <p id="batchProgressPercent" class="mt-2 text-xs text-gray-400">0% Complete</p>
+                
+                <!-- Batch Status -->
+                <div class="mt-6 space-y-2 text-left">
+                    <div id="batch1Status" class="flex items-center text-sm">
+                        <div class="w-4 h-4 rounded-full border-2 border-gray-300 mr-3 flex items-center justify-center">
+                            <div class="w-2 h-2 rounded-full bg-gray-300 hidden"></div>
+                        </div>
+                        <span class="text-gray-500">Basic Employment Documents</span>
+                    </div>
+                    <div id="batch2Status" class="flex items-center text-sm">
+                        <div class="w-4 h-4 rounded-full border-2 border-gray-300 mr-3 flex items-center justify-center">
+                            <div class="w-2 h-2 rounded-full bg-gray-300 hidden"></div>
+                        </div>
+                        <span class="text-gray-500">Clearances</span>
+                    </div>
+                    <div id="batch3Status" class="flex items-center text-sm">
+                        <div class="w-4 h-4 rounded-full border-2 border-gray-300 mr-3 flex items-center justify-center">
+                            <div class="w-2 h-2 rounded-full bg-gray-300 hidden"></div>
+                        </div>
+                        <span class="text-gray-500">Certificates</span>
+                    </div>
+                    <div id="batch4Status" class="flex items-center text-sm">
+                        <div class="w-4 h-4 rounded-full border-2 border-gray-300 mr-3 flex items-center justify-center">
+                            <div class="w-2 h-2 rounded-full bg-gray-300 hidden"></div>
+                        </div>
+                        <span class="text-gray-500">Special Requirements</span>
+                    </div>
+                </div>
+                
+                <!-- Cancel Button -->
+                <div class="mt-6">
+                    <button id="cancelBatchUpload" class="px-4 py-2 text-gray-600 hover:text-gray-800 text-sm">
+                        Cancel Upload
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Success Modal -->
     <div id="successModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
@@ -591,12 +643,19 @@
                                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                             </svg>
                         </div>
-                        <div class="ml-3">
-                            <h3 class="text-sm font-medium text-blue-800">File Upload Requirements</h3>
-                            <div class="mt-1 text-sm text-blue-700">
-                                <p>• Maximum file size: <span class="font-semibold">1MB per file</span> (Firebase Storage limit)</p>
-                                <p>• Accepted formats: PDF for documents, PNG/JPG for images</p>
-                                <p>• Tip: Use PDF compression tools if your files exceed the size limit</p>
+                        <div class="ml-3 flex-1">
+                            <h3 class="text-sm font-medium text-blue-800">Smart Batch Upload System</h3>
+                            <div class="mt-2 text-sm text-blue-700">
+                                <ul class="list-disc pl-5 space-y-1">
+                                    <li><strong>Individual file limit:</strong> 1MB (1,024 KB) per file maximum</li>
+                                    <li><strong>Smart batching:</strong> Documents uploaded in 4 separate batches to avoid size limits</li>
+                                    <li><strong>Batch 1:</strong> Resume, Valid ID Front & Back (up to 3 files)</li>
+                                    <li><strong>Batch 2:</strong> NBI, Barangay, Police Clearances (up to 3 files)</li>
+                                    <li><strong>Batch 3:</strong> Birth Certificate, Medical Certificate, SSS ID, Transcript of Records (up to 4 files)</li>
+                                    <li><strong>Batch 4:</strong> DSWD, Good Moral, Psychological Eval, Child Protection (up to 4 files)</li>
+                                    <li><strong>Recommended formats:</strong> JPG/PNG for images, PDF for documents</li>
+                                </ul>
+                                <p class="mt-2 text-xs"><strong>Advantage:</strong> No more total size restrictions! Each batch is uploaded separately with automatic compression and 2-second delays between batches for optimal performance.</p>
                             </div>
                         </div>
                     </div>
@@ -690,13 +749,7 @@
                         </div>
                         
                         <div>
-                            <label for="philHealthId" class="block text-sm font-medium text-gray-700 mb-2">PhilHealth ID <span class="text-blue-600 text-xs font-normal">(PNG, JPG, Max 1MB)</span></label>
-                            <input type="file" id="philHealthId" name="philHealthId" accept=".png,.jpg,.jpeg" required
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
-                        </div>
-                        
-                        <div>
-                            <label for="diploma" class="block text-sm font-medium text-gray-700 mb-2">Highest Educational Attainment Diploma <span class="text-blue-600 text-xs font-normal">(PDF, Max 1MB)</span></label>
+                            <label for="diploma" class="block text-sm font-medium text-gray-700 mb-2">Transcript of Records <span class="text-blue-600 text-xs font-normal">(PDF, Max 1MB)</span></label>
                             <input type="file" id="diploma" name="diploma" accept=".pdf" required
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                         </div>
@@ -863,23 +916,11 @@
             auth
         } from './firebase.js';
         import { createUserWithEmailAndPassword, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
         import { logActivity } from './activity-logger.js';
 
         let createAccountEnabled = false;
         const OFFLINE_STORAGE_KEY = 'tnp_offline_staff_records';
         const OFFLINE_EXPIRY_DAYS = 7;
-        const storage = getStorage();
-        
-        // Test Firebase Storage connection on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🔥 Firebase Storage initialized:', storage);
-            console.log('📦 Storage bucket:', storage._bucket);
-            console.log('🌐 Current origin:', window.location.origin);
-            
-            // Test storage access
-            console.log('🧪 Testing Firebase Storage access...');
-        });
 
         // Offline storage functions
         function saveOfflineRecord(data) {
@@ -986,83 +1027,142 @@
             return navigator.onLine;
         }
 
-        // Upload file to Firebase Storage with error handling
-        async function uploadFileToStorage(file, filePath) {
-            try {
-                console.log('Attempting to upload file to:', filePath);
-                const storageRef = ref(storage, filePath);
-                const snapshot = await uploadBytes(storageRef, file);
-                const downloadURL = await getDownloadURL(snapshot.ref);
-                console.log('File uploaded successfully:', downloadURL);
-                return downloadURL;
-            } catch (error) {
-                console.error('Error uploading file to Firebase Storage:', error);
-                console.error('Error code:', error.code);
-                console.error('Error message:', error.message);
+        // Compress image to reduce file size with adaptive quality
+        async function compressImage(file, maxWidth = 800, quality = 0.7) {
+            return new Promise((resolve) => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
                 
-                // Check if it's a CORS or network issue
-                if (error.code === 'storage/unknown' || error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
-                    console.warn('Firebase Storage upload failed, likely due to CORS or network issues');
-                    throw new Error('Firebase Storage is not accessible. This may be due to CORS configuration or network issues.');
-                }
-                
-                throw error;
-            }
-        }
-
-        // Convert base64 data to File object
-        function base64ToFile(base64String, filename) {
-            const arr = base64String.split(',');
-            const mime = arr[0].match(/:(.*?);/)[1];
-            const bstr = atob(arr[1]);
-            let n = bstr.length;
-            const u8arr = new Uint8Array(n);
-            while (n--) {
-                u8arr[n] = bstr.charCodeAt(n);
-            }
-            return new File([u8arr], filename, { type: mime });
-        }
-
-        // Convert offline record to online format (base64 to Firebase Storage URLs)
-        async function convertOfflineRecordToOnline(offlineData) {
-            const onlineData = { ...offlineData };
-            
-            // Convert photo from base64 to Firebase Storage
-            if (offlineData.photoString) {
-                try {
-                    const photoFile = base64ToFile(offlineData.photoString, `photo_${offlineData.staffId}.jpg`);
-                    const photoPath = `staff-photos/${offlineData.staffId}_${Date.now()}_photo.jpg`;
-                    const photoURL = await uploadFileToStorage(photoFile, photoPath);
-                    onlineData.photoURL = photoURL;
-                    delete onlineData.photoString; // Remove base64 data
-                } catch (error) {
-                    console.error('Error converting photo to storage:', error);
-                }
-            }
-            
-            // Convert documents from base64 to Firebase Storage
-            if (offlineData.employmentDocuments) {
-                onlineData.employmentDocuments = {};
-                for (const [fieldName, docData] of Object.entries(offlineData.employmentDocuments)) {
-                    if (docData.fileData) {
-                        try {
-                            const file = base64ToFile(docData.fileData, docData.fileName);
-                            const filePath = `staff-documents/${offlineData.staffId}/${fieldName}_${Date.now()}_${docData.fileName}`;
-                            const downloadURL = await uploadFileToStorage(file, filePath);
-                            onlineData.employmentDocuments[fieldName] = {
-                                url: downloadURL,
-                                name: docData.fileName,
-                                size: file.size,
-                                type: docData.fileType
-                            };
-                        } catch (error) {
-                            console.error(`Error converting ${fieldName} to storage:`, error);
-                        }
+                img.onload = () => {
+                    // Calculate new dimensions
+                    let { width, height } = img;
+                    
+                    if (width > maxWidth) {
+                        height = (height * maxWidth) / width;
+                        width = maxWidth;
                     }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    
+                    // Draw and compress
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // Try initial compression
+                    let compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+                    
+                    // If still too large, reduce quality progressively
+                    let attempts = 0;
+                    const maxAttempts = 5;
+                    while (compressedDataUrl.length > 600000 && attempts < maxAttempts && quality > 0.1) { // ~450KB limit for individual files
+                        quality -= 0.1;
+                        compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+                        attempts++;
+                        console.log(`Compression attempt ${attempts}: quality ${quality.toFixed(1)}, size ${(compressedDataUrl.length * 0.75 / 1024).toFixed(2)} KB`);
+                    }
+                    
+                    // If still too large, reduce dimensions
+                    if (compressedDataUrl.length > 600000 && width > 200) {
+                        const newWidth = Math.max(200, width * 0.8);
+                        const newHeight = height * (newWidth / width);
+                        
+                        canvas.width = newWidth;
+                        canvas.height = newHeight;
+                        ctx.drawImage(img, 0, 0, newWidth, newHeight);
+                        compressedDataUrl = canvas.toDataURL('image/jpeg', Math.max(0.3, quality));
+                        
+                        console.log(`Reduced dimensions to ${newWidth}x${newHeight}, final size: ${(compressedDataUrl.length * 0.75 / 1024).toFixed(2)} KB`);
+                    }
+                    
+                    resolve(compressedDataUrl);
+                };
+                
+                img.src = URL.createObjectURL(file);
+            });
+        }
+
+        // Convert file to base64 with size checking and compression
+        async function fileToBase64(file, compress = false) {
+            return new Promise(async (resolve, reject) => {
+                try {
+                    let dataUrl;
+                    
+                    // Compress images if they're too large
+                    if (compress && file.type.startsWith('image/')) {
+                        dataUrl = await compressImage(file);
+                    } else {
+                        // Regular file reading
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(file);
+                        return;
+                    }
+                    
+                    resolve(dataUrl);
+                } catch (error) {
+                    reject(error);
                 }
+            });
+        }
+
+        // Check if base64 string is too large for Firestore (approximation)
+        function isBase64TooLarge(base64String) {
+            // Firestore has a 1MB document limit
+            // Base64 is ~33% larger than original, so rough estimate
+            const sizeInBytes = base64String.length * 0.75;
+            return sizeInBytes > 900000; // Leave some margin (900KB)
+        }
+
+        // Enhanced file validation with detailed checking
+        function validateFileBeforeProcessing(file, fieldName) {
+            const maxSize = 1048576; // 1MB
+            const allowedTypes = {
+                image: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'],
+                document: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+            };
+            
+            // Check file size
+            if (file.size > maxSize) {
+                const sizeMB = (file.size / 1048576).toFixed(2);
+                throw new Error(`${fieldName}: File "${file.name}" is ${sizeMB}MB, which exceeds the 1MB limit. Please compress the file before uploading.`);
             }
             
-            return onlineData;
+            // Check file type for specific fields
+            if (fieldName === 'photo' && !allowedTypes.image.includes(file.type)) {
+                throw new Error(`${fieldName}: Only image files (JPG, PNG, GIF) are allowed for photos.`);
+            }
+            
+            // Warn about large files that might need compression
+            if (file.size > 524288) { // 512KB
+                console.warn(`${fieldName}: File "${file.name}" is large (${(file.size/1024).toFixed(0)}KB). Consider compressing for better performance.`);
+            }
+            
+            return true;
+        }
+
+        // Get optimal compression settings based on file type and current total size
+        function getCompressionSettings(file, currentTotalSize) {
+            const isNearLimit = currentTotalSize > 300000; // 300KB threshold
+            
+            if (file.type.startsWith('image/')) {
+                return {
+                    maxWidth: isNearLimit ? 400 : 600,
+                    quality: isNearLimit ? 0.5 : 0.7,
+                    format: 'image/jpeg' // Force JPEG for better compression
+                };
+            }
+            
+            return null; // No compression for non-images
+        }
+
+        // Function to convert offline record for online sync
+        async function convertOfflineRecordToOnline(record) {
+            // Since we're using Firestore only with base64, no conversion needed
+            // Just return the record as-is for Firestore storage
+            console.log('Offline record ready for Firestore sync - base64 format maintained');
+            return { ...record };
         }
 
         // Check if email already exists in Firebase Auth or Firestore
@@ -1767,95 +1867,448 @@
             data.dateAdded = new Date().toISOString().split('T')[0];
             data.createAccount = createAccountEnabled ? '1' : '0';
 
-            // Handle photo upload with fallback to base64
-            let photoURL = "";
+            // Handle photo with strict size validation and compression
             const photoFile = document.getElementById('photo').files[0];
             if (photoFile) {
                 try {
-                    const photoPath = `staff-photos/${data.staffId}_${Date.now()}_${photoFile.name}`;
-                    photoURL = await uploadFileToStorage(photoFile, photoPath);
-                    data.photoURL = photoURL;
-                    console.log('Photo uploaded to Firebase Storage successfully');
+                    console.log('Processing photo:', photoFile.name, 'Size:', (photoFile.size / 1024).toFixed(2), 'KB');
+                    
+                    // Validate photo file before processing
+                    validateFileBeforeProcessing(photoFile, 'photo');
+                    
+                    // Compress image with aggressive settings to ensure small size
+                    if (photoFile.type.startsWith('image/')) {
+                        const compressionSettings = getCompressionSettings(photoFile, 0);
+                        data.photoString = await compressImage(photoFile, compressionSettings.maxWidth, compressionSettings.quality);
+                        console.log('Photo compressed and converted to base64');
+                    } else {
+                        showErrorModal('Photo must be an image file (JPG, PNG, etc.). Please select a valid image file.');
+                        return;
+                    }
+                    
+                    // Check if compressed photo is still too large
+                    if (isBase64TooLarge(data.photoString)) {
+                        console.warn('Photo is still too large after compression');
+                        showErrorModal('Photo file is still too large even after maximum compression. Please use a smaller image with lower resolution.');
+                        return;
+                    }
+                    
+                    const photoSizeKB = (data.photoString.length * 0.75 / 1024).toFixed(2);
+                    console.log('Photo processed successfully. Final size:', photoSizeKB, 'KB');
+                    
                 } catch (error) {
-                    console.warn('Firebase Storage upload failed, falling back to base64:', error.message);
-                    // Fallback to base64 storage in Firestore
-                    data.photoString = await new Promise((resolve, reject) => {
-                        const reader = new FileReader();
-                        reader.onload = () => resolve(reader.result);
-                        reader.onerror = reject;
-                        reader.readAsDataURL(photoFile);
-                    });
-                    console.log('Photo stored as base64 fallback');
+                    console.error('Error processing photo:', error);
+                    showErrorModal(error.message || 'Error processing photo. Please try a different image file.');
+                    return;
                 }
+            } else {
+                data.photoString = "";
             }
 
-            // Handle employment documents upload with fallback to base64
-            data.employmentDocuments = {};
+            // Handle employment documents with batch upload system
+            // Note: Documents will be uploaded in separate batches to avoid Firestore size limits
+            
+            // Add validIdType (text field) to basic data - this is not a file
+            data.validIdType = document.getElementById('validIdType').value || '';
+            
+            // Check if there are any documents to upload
             const documentFields = [
                 'resume', 'validIdFront', 'validIdBack', 'nbiClearance', 'barangayClearance', 'policeClearance', 
-                'birthCertificate', 'medicalCertificate', 'sssId', 'philHealthId', 'diploma', 'dswdClearance', 'moralCharacterCert', 'psychologicalEvaluation', 
+                'birthCertificate', 'medicalCertificate', 'sssId', 'diploma', 'dswdClearance', 'moralCharacterCert', 'psychologicalEvaluation', 
                 'childProtectionTraining'
             ];
-
-            let storageFailedCount = 0;
-            for (const fieldName of documentFields) {
-                const fileInput = document.getElementById(fieldName);
-                if (fileInput && fileInput.files[0]) {
-                    try {
-                        const file = fileInput.files[0];
-                        const filePath = `staff-documents/${data.staffId}/${fieldName}_${Date.now()}_${file.name}`;
-                        const downloadURL = await uploadFileToStorage(file, filePath);
-                        data.employmentDocuments[fieldName] = {
-                            url: downloadURL,
-                            name: file.name,
-                            size: file.size,
-                            type: file.type
-                        };
-                        console.log(`${fieldName} uploaded to Firebase Storage successfully`);
-                    } catch (error) {
-                        console.warn(`Firebase Storage upload failed for ${fieldName}, falling back to base64:`, error.message);
-                        storageFailedCount++;
-                        
-                        // Fallback to base64 storage in Firestore
-                        const file = fileInput.files[0];
-                        data.employmentDocuments[fieldName] = await new Promise((resolve, reject) => {
-                            const reader = new FileReader();
-                            reader.onload = () => resolve({
-                                fileName: file.name,
-                                fileType: file.type,
-                                fileData: reader.result,
-                                size: file.size,
-                                storedAs: 'base64' // Flag to indicate storage method
-                            });
-                            reader.onerror = reject;
-                            reader.readAsDataURL(file);
-                        });
-                        console.log(`${fieldName} stored as base64 fallback`);
-                    }
-                }
-            }
             
-            // Show warning if some files couldn't be uploaded to Firebase Storage
-            if (storageFailedCount > 0) {
-                console.warn(`${storageFailedCount} files were stored as base64 due to Firebase Storage issues`);
-                // You could show a user notification here if desired
-                // showErrorModal(`Note: ${storageFailedCount} files were stored differently due to connection issues, but your data was saved successfully.`);
-            }
+            const hasDocuments = documentFields.some(fieldName => {
+                const fileInput = document.getElementById(fieldName);
+                return fileInput && fileInput.files[0];
+            });
+            
+            // Prepare staff record data (without documents)
+            data.employmentDocuments = {}; // Initialize empty - documents will be stored separately
+            data.hasDocuments = hasDocuments;
+            data.documentsUploadedInBatches = hasDocuments; // Flag to indicate batch upload system used
+            
+            console.log('=== Staff Record Summary ===');
+            console.log(`Staff ID: ${data.staffId}`);
+            console.log(`Has documents to upload: ${hasDocuments}`);
+            console.log(`Account creation enabled: ${createAccountEnabled}`);
+            console.log('=============================');
 
-            saveStaffRecord(data);
+            // Save staff record and handle documents separately
+            saveStaffRecordWithBatchUpload(data);
         }
 
         // Helper function to check if a field is a document field
         function isDocumentField(fieldName) {
             const documentFields = [
                 'resume', 'validIdFront', 'validIdBack', 'nbiClearance', 'barangayClearance', 'policeClearance', 
-                'birthCertificate', 'medicalCertificate', 'sssId', 'philHealthId', 'diploma', 'dswdClearance', 'moralCharacterCert', 'psychologicalEvaluation', 
+                'birthCertificate', 'medicalCertificate', 'sssId', 'diploma', 'dswdClearance', 'moralCharacterCert', 'psychologicalEvaluation', 
                 'childProtectionTraining'
             ];
             return documentFields.includes(fieldName);
         }
 
-        async function saveStaffRecord(data, isSync = false) {
+        // Batch Upload System
+        let batchUploadCancelled = false;
+
+        // Define document batches according to user requirements
+        const DOCUMENT_BATCHES = {
+            batch1: {
+                name: 'Basic Employment Documents',
+                fields: ['resume', 'validIdFront', 'validIdBack'], // Note: validIdType is text, handled separately
+                delay: 2000 // 2 seconds delay after this batch
+            },
+            batch2: {
+                name: 'Clearances',
+                fields: ['nbiClearance', 'barangayClearance', 'policeClearance'],
+                delay: 2000
+            },
+            batch3: {
+                name: 'Certificates',
+                fields: ['birthCertificate', 'medicalCertificate', 'sssId', 'diploma'], // diploma = transcript of records
+                delay: 2000
+            },
+            batch4: {
+                name: 'Special Requirements',
+                fields: ['dswdClearance', 'moralCharacterCert', 'psychologicalEvaluation', 'childProtectionTraining'],
+                delay: 1000 // Final batch, shorter delay
+            }
+        };
+
+        function showBatchProgressModal() {
+            document.getElementById('batchProgressModal').classList.remove('hidden');
+            resetBatchProgress();
+        }
+
+        function hideBatchProgressModal() {
+            document.getElementById('batchProgressModal').classList.add('hidden');
+        }
+
+        function resetBatchProgress() {
+            batchUploadCancelled = false;
+            document.getElementById('batchProgressBar').style.width = '0%';
+            document.getElementById('batchProgressPercent').textContent = '0% Complete';
+            document.getElementById('batchProgressMessage').textContent = 'Preparing documents for upload...';
+            
+            // Reset all batch status indicators
+            for (let i = 1; i <= 4; i++) {
+                const statusElement = document.getElementById(`batch${i}Status`);
+                const circle = statusElement.querySelector('.w-4.h-4');
+                const dot = statusElement.querySelector('.w-2.h-2');
+                const text = statusElement.querySelector('span');
+                
+                circle.classList.remove('border-green-500', 'border-red-500', 'border-blue-500');
+                circle.classList.add('border-gray-300');
+                dot.classList.add('hidden');
+                dot.classList.remove('bg-green-500', 'bg-red-500', 'bg-blue-500');
+                text.classList.remove('text-green-600', 'text-red-600', 'text-blue-600');
+                text.classList.add('text-gray-500');
+            }
+        }
+
+        function updateBatchProgress(batchNumber, status, overallProgress, message) {
+            // Update overall progress
+            document.getElementById('batchProgressBar').style.width = `${overallProgress}%`;
+            document.getElementById('batchProgressPercent').textContent = `${overallProgress}% Complete`;
+            document.getElementById('batchProgressMessage').textContent = message;
+            
+            // Update specific batch status
+            const statusElement = document.getElementById(`batch${batchNumber}Status`);
+            const circle = statusElement.querySelector('.w-4.h-4');
+            const dot = statusElement.querySelector('.w-2.h-2');
+            const text = statusElement.querySelector('span');
+            
+            // Reset classes
+            circle.classList.remove('border-gray-300', 'border-green-500', 'border-red-500', 'border-blue-500');
+            dot.classList.remove('hidden', 'bg-green-500', 'bg-red-500', 'bg-blue-500');
+            text.classList.remove('text-gray-500', 'text-green-600', 'text-red-600', 'text-blue-600');
+            
+            switch(status) {
+                case 'processing':
+                    circle.classList.add('border-blue-500');
+                    dot.classList.add('bg-blue-500');
+                    text.classList.add('text-blue-600');
+                    break;
+                case 'completed':
+                    circle.classList.add('border-green-500');
+                    dot.classList.add('bg-green-500');
+                    text.classList.add('text-green-600');
+                    break;
+                case 'error':
+                    circle.classList.add('border-red-500');
+                    dot.classList.add('bg-red-500');
+                    text.classList.add('text-red-600');
+                    break;
+                default:
+                    circle.classList.add('border-gray-300');
+                    dot.classList.add('hidden');
+                    text.classList.add('text-gray-500');
+            }
+        }
+
+        async function processBatch(batchKey, staffId, batchNumber, totalBatches) {
+            const batch = DOCUMENT_BATCHES[batchKey];
+            const batchDocuments = {};
+            let batchSize = 0;
+            let processedFiles = 0;
+            
+            // Update UI to show processing
+            const progressPerBatch = 100 / totalBatches;
+            const currentProgress = ((batchNumber - 1) * progressPerBatch);
+            updateBatchProgress(batchNumber, 'processing', currentProgress, `Processing ${batch.name}...`);
+            
+            console.log(`Starting batch ${batchNumber}: ${batch.name}`);
+            
+            for (const fieldName of batch.fields) {
+                if (batchUploadCancelled) {
+                    throw new Error('Upload cancelled by user');
+                }
+                
+                const fileInput = document.getElementById(fieldName);
+                if (fileInput && fileInput.files[0]) {
+                    const file = fileInput.files[0];
+                    
+                    try {
+                        // Validate file before processing
+                        validateFileBeforeProcessing(file, fieldName);
+                        
+                        // Process file with compression if needed
+                        let base64Data;
+                        if (file.type.startsWith('image/')) {
+                            base64Data = await compressImage(file, 600, 0.7);
+                        } else {
+                            base64Data = await fileToBase64(file);
+                        }
+                        
+                        // Check if individual file is too large
+                        if (base64Data.length > 600000) { // ~450KB limit
+                            console.warn(`${fieldName}: File compressed but still large (${(base64Data.length * 0.75 / 1024).toFixed(2)} KB)`);
+                        }
+                        
+                        batchDocuments[fieldName] = base64Data;
+                        batchSize += base64Data.length;
+                        processedFiles++;
+                        
+                        console.log(`Processed ${fieldName}: ${(base64Data.length * 0.75 / 1024).toFixed(2)} KB`);
+                        
+                        // Update progress within batch
+                        const batchProgress = (processedFiles / batch.fields.length) * progressPerBatch;
+                        updateBatchProgress(batchNumber, 'processing', currentProgress + batchProgress, 
+                            `Processing ${batch.name}: ${processedFiles}/${batch.fields.length} files`);
+                        
+                    } catch (error) {
+                        console.error(`Error processing ${fieldName}:`, error);
+                        updateBatchProgress(batchNumber, 'error', currentProgress, `Error in ${batch.name}: ${error.message}`);
+                        throw error;
+                    }
+                }
+            }
+            
+            // Upload batch to Firestore
+            if (Object.keys(batchDocuments).length > 0) {
+                try {
+                    console.log(`Uploading batch ${batchNumber} to Firestore...`);
+                    updateBatchProgress(batchNumber, 'processing', currentProgress + (progressPerBatch * 0.8), 
+                        `Uploading ${batch.name} to database...`);
+                    
+                    // Create batch document reference
+                    const batchRef = doc(collection(db, 'staff_documents', staffId, 'batches'), `batch_${batchNumber}`);
+                    
+                    // Save batch to Firestore
+                    await setDoc(batchRef, {
+                        batchNumber: batchNumber,
+                        batchName: batch.name,
+                        documents: batchDocuments,
+                        uploadedAt: new Date().toISOString(),
+                        totalSize: batchSize,
+                        documentCount: Object.keys(batchDocuments).length
+                    });
+                    
+                    console.log(`Batch ${batchNumber} uploaded successfully. Size: ${(batchSize * 0.75 / 1024).toFixed(2)} KB`);
+                    
+                    // Mark batch as completed
+                    updateBatchProgress(batchNumber, 'completed', (batchNumber * progressPerBatch), 
+                        `${batch.name} uploaded successfully`);
+                    
+                    // Delay before next batch (except for the last batch)
+                    if (batchNumber < totalBatches && batch.delay > 0) {
+                        console.log(`Waiting ${batch.delay}ms before next batch...`);
+                        await new Promise(resolve => setTimeout(resolve, batch.delay));
+                    }
+                    
+                } catch (error) {
+                    console.error(`Error uploading batch ${batchNumber}:`, error);
+                    updateBatchProgress(batchNumber, 'error', currentProgress, `Upload failed: ${error.message}`);
+                    throw error;
+                }
+            } else {
+                console.log(`Batch ${batchNumber} is empty, skipping...`);
+                updateBatchProgress(batchNumber, 'completed', (batchNumber * progressPerBatch), 
+                    `${batch.name} - No documents to upload`);
+            }
+            
+            return batchDocuments;
+        }
+
+        async function uploadDocumentsInBatches(staffId) {
+            const batchKeys = Object.keys(DOCUMENT_BATCHES);
+            const totalBatches = batchKeys.length;
+            let allDocuments = {};
+            
+            console.log('=== Starting Batch Upload Process ===');
+            console.log(`Total batches: ${totalBatches}`);
+            console.log(`Staff ID: ${staffId}`);
+            
+            showBatchProgressModal();
+            
+            try {
+                for (let i = 0; i < batchKeys.length; i++) {
+                    if (batchUploadCancelled) {
+                        throw new Error('Upload cancelled by user');
+                    }
+                    
+                    const batchKey = batchKeys[i];
+                    const batchNumber = i + 1;
+                    
+                    console.log(`Processing batch ${batchNumber}/${totalBatches}: ${batchKey}`);
+                    
+                    const batchDocuments = await processBatch(batchKey, staffId, batchNumber, totalBatches);
+                    
+                    // Merge batch documents for return
+                    allDocuments = { ...allDocuments, ...batchDocuments };
+                }
+                
+                // All batches completed successfully
+                updateBatchProgress(4, 'completed', 100, 'All documents uploaded successfully!');
+                
+                console.log('=== Batch Upload Process Completed ===');
+                console.log(`Total documents uploaded: ${Object.keys(allDocuments).length}`);
+                
+                // Hide progress modal after a brief delay
+                setTimeout(() => {
+                    hideBatchProgressModal();
+                }, 1500);
+                
+                return allDocuments;
+                
+            } catch (error) {
+                console.error('Batch upload process failed:', error);
+                
+                // Show error in progress modal
+                document.getElementById('batchProgressMessage').textContent = `Upload failed: ${error.message}`;
+                
+                // Hide modal after delay to show error
+                setTimeout(() => {
+                    hideBatchProgressModal();
+                }, 3000);
+                
+                throw error;
+            }
+        }
+
+        // Event listener for cancel batch upload
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('cancelBatchUpload').addEventListener('click', function() {
+                batchUploadCancelled = true;
+                hideBatchProgressModal();
+                hideLoadingScreen();
+                showErrorModal('Document upload cancelled by user.');
+            });
+        });
+
+        // New function that handles staff record creation with batch document upload
+        async function saveStaffRecordWithBatchUpload(data) {
+            try {
+                console.log('Starting staff record creation with batch upload system');
+                showLoadingScreen();
+                
+                // First, save the staff record (without documents)
+                const staffRecord = await saveStaffRecord(data, false, true); // New parameter to skip document processing
+                
+                if (!staffRecord || !staffRecord.success) {
+                    throw new Error('Failed to create staff record');
+                }
+                
+                const staffId = staffRecord.staffId;
+                console.log('Staff record created successfully with ID:', staffId);
+                
+                // If there are documents, upload them in batches
+                if (data.hasDocuments) {
+                    console.log('Starting batch document upload process...');
+                    hideLoadingScreen(); // Hide basic loading, show batch progress instead
+                    
+                    try {
+                        const uploadedDocuments = await uploadDocumentsInBatches(staffId);
+                        console.log('All documents uploaded successfully:', Object.keys(uploadedDocuments));
+                        
+                        // Update staff record with document reference
+                        const staffRef = doc(collection(db, 'users'), staffRecord.userId);
+                        await setDoc(staffRef, {
+                            documentBatchesCount: Object.keys(DOCUMENT_BATCHES).length,
+                            documentsUploadedAt: new Date().toISOString(),
+                            documentsStatus: 'completed'
+                        }, { merge: true });
+                        
+                        // Show success modal
+                        const fullName = `${data.firstName} ${data.lastName}`;
+                        showSuccessModal(fullName, staffId);
+                        
+                    } catch (uploadError) {
+                        console.error('Document upload failed:', uploadError);
+                        
+                        // Documents failed but staff record was created
+                        // Update staff record to indicate partial success
+                        try {
+                            const staffRef = doc(collection(db, 'users'), staffRecord.userId);
+                            await setDoc(staffRef, {
+                                documentsStatus: 'failed',
+                                documentsError: uploadError.message,
+                                documentsFailedAt: new Date().toISOString()
+                            }, { merge: true });
+                        } catch (updateError) {
+                            console.error('Failed to update staff record with document status:', updateError);
+                        }
+                        
+                        // Show partial success message
+                        showErrorModal(`Staff record created successfully, but document upload failed: ${uploadError.message}. You can retry uploading documents later by editing the staff record.`);
+                    }
+                } else {
+                    console.log('No documents to upload, staff record creation complete');
+                    hideLoadingScreen();
+                    const fullName = `${data.firstName} ${data.lastName}`;
+                    showSuccessModal(fullName, staffId);
+                }
+                
+            } catch (error) {
+                console.error('Staff record creation failed:', error);
+                hideLoadingScreen();
+                hideBatchProgressModal();
+                
+                let errorMessage = 'Failed to create staff record. Please try again.';
+                if (error.code) {
+                    switch (error.code) {
+                        case 'auth/email-already-in-use':
+                            errorMessage = 'Email address is already registered. Please use a different email or check if the staff member already has an account.';
+                            break;
+                        case 'auth/weak-password':
+                            errorMessage = 'Password is too weak. Please use a stronger password with at least 6 characters.';
+                            break;
+                        case 'auth/invalid-email':
+                            errorMessage = 'Invalid email address format. Please check the email address and try again.';
+                            break;
+                        case 'permission-denied':
+                            errorMessage = 'Permission denied. You may not have the required permissions to create staff records.';
+                            break;
+                        default:
+                            errorMessage = `Error: ${error.message}`;
+                    }
+                }
+                
+                showErrorModal(errorMessage);
+            }
+        }
+
+        async function saveStaffRecord(data, isSync = false, skipDocuments = false) {
             try {
                 console.log('Starting saveStaffRecord with data:', data);
                 console.log('Is sync operation:', isSync);
@@ -1886,7 +2339,7 @@
                     // Convert documents to base64 for offline storage
                     const documentFields = [
                         'resume', 'validIdFront', 'validIdBack', 'nbiClearance', 'barangayClearance', 'policeClearance', 
-                        'birthCertificate', 'medicalCertificate', 'sssId', 'philHealthId', 'diploma', 'dswdClearance', 'moralCharacterCert', 'psychologicalEvaluation', 
+                        'birthCertificate', 'medicalCertificate', 'sssId', 'diploma', 'dswdClearance', 'moralCharacterCert', 'psychologicalEvaluation', 
                         'childProtectionTraining'
                     ];
                     
@@ -1968,8 +2421,7 @@
                     { id: 'birthCertificate', name: 'Birth Certificate', type: 'PDF' },
                     { id: 'medicalCertificate', name: 'Medical Certificate', type: 'PDF' },
                     { id: 'sssId', name: 'SSS ID', type: 'Image (PNG/JPG)' },
-                    { id: 'philHealthId', name: 'PhilHealth ID', type: 'Image (PNG/JPG)' },
-                    { id: 'diploma', name: 'Educational Diploma', type: 'PDF' },
+                    { id: 'diploma', name: 'Transcript of Records', type: 'PDF' },
                     { id: 'dswdClearance', name: 'DSWD Clearance', type: 'PDF' },
                     { id: 'moralCharacterCert', name: 'Certificate of Good Moral Character', type: 'PDF' },
                     { id: 'psychologicalEvaluation', name: 'Psychological Evaluation', type: 'PDF' },
@@ -2144,12 +2596,22 @@
                     );
                 }
 
-                // Hide loading screen and show success modal (only for new records, not syncs)
-                if (!isSync) {
+                // Hide loading screen and show success modal (only for new records, not syncs, and not when using batch upload)
+                if (!isSync && !skipDocuments) {
                     hideLoadingScreen();
                     const fullName = `${data.firstName} ${data.middleName ? data.middleName + ' ' : ''}${data.lastName}`;
                     console.log('Showing success modal for:', fullName);
                     showSuccessModal(fullName, data.staffId);
+                }
+
+                // Return success data for batch upload system
+                if (skipDocuments) {
+                    return {
+                        success: true,
+                        userId: userId,
+                        staffId: data.staffId,
+                        message: 'Staff record created successfully'
+                    };
                 }
 
             } catch (error) {

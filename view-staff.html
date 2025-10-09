@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Staff Details - Tahanan ng Pagmamahal OMS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module" src="firebase.js"></script>
@@ -47,21 +47,152 @@
         </div>
     </header>
     <!-- Main Content -->
-    <div class="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
-        <div id="staffHeader" class="bg-white rounded-lg shadow mb-4 sm:mb-6 p-4 sm:p-6"></div>
+    <div class="max-w-7xl mx-auto py-2 sm:py-4 lg:py-6 px-2 sm:px-4 lg:px-8">
+        <div id="staffHeader" class="bg-white rounded-lg shadow mb-3 sm:mb-4 lg:mb-6 p-3 sm:p-4 lg:p-6"></div>
+        
+        <!-- Tabs -->
         <div class="bg-white rounded-lg shadow">
-            <div class="p-4 sm:p-6">
-                <div id="basicInfoContent"></div>
-                <!-- Features Granted Section will be inserted here -->
-                <div id="featuresGrantedSection" class="mt-10"></div>
+            <div class="border-b border-gray-200 overflow-x-auto">
+                <nav class="-mb-px flex space-x-2 sm:space-x-4 lg:space-x-8 px-2 sm:px-4 lg:px-6 min-w-max" aria-label="Tabs">
+                    <button class="tab-button whitespace-nowrap py-2 px-1 sm:px-2 border-b-2 font-medium text-xs sm:text-sm border-red-primary text-red-primary" data-tab="basicInfo">
+                        <span class="hidden sm:inline">Basic Information</span>
+                        <span class="sm:hidden">Basic Info</span>
+                    </button>
+                    <button class="tab-button whitespace-nowrap py-2 px-1 sm:px-2 border-b-2 font-medium text-xs sm:text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="basicDocs">
+                        <span class="hidden sm:inline">Basic Employment Documents</span>
+                        <span class="sm:hidden">Employment</span>
+                    </button>
+                    <button class="tab-button whitespace-nowrap py-2 px-1 sm:px-2 border-b-2 font-medium text-xs sm:text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="clearances">
+                        Clearances
+                    </button>
+                    <button class="tab-button whitespace-nowrap py-2 px-1 sm:px-2 border-b-2 font-medium text-xs sm:text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="certificates">
+                        Certificates
+                    </button>
+                    <button class="tab-button whitespace-nowrap py-2 px-1 sm:px-2 border-b-2 font-medium text-xs sm:text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="specialDocs">
+                        <span class="hidden sm:inline">Special Requirements</span>
+                        <span class="sm:hidden">Special</span>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="p-2 sm:p-4 lg:p-6">
+                <div id="basicInfoContent" class="tab-content"></div>
+                <div id="basicDocsContent" class="tab-content hidden">
+                    <div class="mb-4 sm:mb-6">
+                        <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-4">Basic Employment Requirements</h3>
+                        <div class="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
+                            These are the standard documents required for legal employment in the Philippines.
+                        </div>
+                        <div id="basicDocsList" class="space-y-3 sm:space-y-4">
+                            <div class="text-center py-8 sm:py-12 text-gray-500">
+                                <svg class="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-3 sm:mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                <p class="text-base sm:text-lg font-medium text-gray-600 mb-1 sm:mb-2">Click to load documents</p>
+                                <p class="text-xs sm:text-sm text-gray-500">Basic employment documents will be loaded when you click this tab</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="clearancesContent" class="tab-content hidden">
+                    <div class="mb-4 sm:mb-6">
+                        <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-4">Clearances</h3>
+                        <div class="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
+                            Various clearances required for legal employment and background verification.
+                        </div>
+                        <div id="clearancesList" class="space-y-3 sm:space-y-4">
+                            <div class="text-center py-8 sm:py-12 text-gray-500">
+                                <svg class="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-3 sm:mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <p class="text-base sm:text-lg font-medium text-gray-600 mb-1 sm:mb-2">Click to load clearances</p>
+                                <p class="text-xs sm:text-sm text-gray-500">Clearance documents will be loaded when you click this tab</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="certificatesContent" class="tab-content hidden">
+                    <div class="mb-4 sm:mb-6">
+                        <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-4">Certificates</h3>
+                        <div class="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
+                            Educational and professional certificates required for employment verification.
+                        </div>
+                        <div id="certificatesList" class="space-y-3 sm:space-y-4">
+                            <div class="text-center py-8 sm:py-12 text-gray-500">
+                                <svg class="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-3 sm:mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                                </svg>
+                                <p class="text-base sm:text-lg font-medium text-gray-600 mb-1 sm:mb-2">Click to load certificates</p>
+                                <p class="text-xs sm:text-sm text-gray-500">Certificate documents will be loaded when you click this tab</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="specialDocsContent" class="tab-content hidden">
+                    <div class="mb-4 sm:mb-6">
+                        <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-4">Special Requirements for Child-Caring Institution</h3>
+                        <div class="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
+                            Additional screening documents required for child protection and safety.
+                        </div>
+                        <div id="specialDocsList" class="space-y-3 sm:space-y-4">
+                            <div class="text-center py-8 sm:py-12 text-gray-500">
+                                <svg class="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-3 sm:mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                </svg>
+                                <p class="text-base sm:text-lg font-medium text-gray-600 mb-1 sm:mb-2">Click to load special requirements</p>
+                                <p class="text-xs sm:text-sm text-gray-500">Special requirement documents will be loaded when you click this tab</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- Image Viewer Modal -->
+    <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-75 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative min-h-screen flex items-center justify-center p-2 sm:p-4 lg:p-6">
+            <div class="relative bg-white rounded-lg w-full max-w-7xl min-h-[80vh] max-h-[95vh] overflow-auto mx-auto">
+                <div class="flex items-center justify-between p-3 sm:p-4 lg:p-6 border-b">
+                    <h3 id="imageModalTitle" class="text-base sm:text-lg lg:text-xl font-medium text-gray-900 truncate pr-4">Document Viewer</h3>
+                    <button onclick="closeImageModal()" class="text-gray-400 hover:text-gray-600 flex-shrink-0">
+                        <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="p-3 sm:p-4 lg:p-6 flex-1 min-h-0">
+                    <img id="modalImage" src="" alt="" class="max-w-full h-auto hidden mx-auto rounded-lg shadow-lg">
+                    <div id="pdfViewer" class="hidden h-full">
+                        <embed id="pdfEmbed" src="" type="application/pdf" width="100%" height="80vh" class="rounded-lg min-h-[70vh]">
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 p-3 sm:p-4 lg:p-6 border-t bg-gray-50">
+                    <button onclick="downloadDocument()" class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                        <svg class="h-4 w-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path>
+                        </svg>
+                        Download
+                    </button>
+                    <button onclick="closeImageModal()" class="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-md text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { db, collection, getDocs } from './firebase.js';
         let currentStaff = null;
         let currentStaffId = null;
         let currentUser = null;
+        
+        // Document viewer variables
+        let currentDocumentData = '';
+        let currentDocumentTitle = '';
+
         function getCurrentUser() {
             const user = localStorage.getItem('currentUser');
             return user ? JSON.parse(user) : null;
@@ -87,6 +218,7 @@
             }
             await loadStaffData();
             setupEventListeners();
+            setupTabs();
         });
         async function loadStaffData() {
             try {
@@ -98,6 +230,7 @@
                     if ((data.staffId === currentStaffId || data.uid === currentStaffId) && data.role === 'staff') {
                         currentStaff = data;
                         currentStaff.photoData = data.photoString || 'user.png';
+                        currentStaff.userId = docSnap.id; // Store the document ID for batch loading
                     }
                 });
                 if (!currentStaff) {
@@ -107,7 +240,7 @@
                 }
                 displayStaffHeader();
                 displayBasicInfo();
-                displayFeaturesGranted();
+                // Documents will be loaded lazily when tabs are clicked
             } catch (error) {
                 console.error('Error loading staff data:', error);
                 alert('Error loading staff data');
@@ -243,6 +376,12 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Features Granted Section -->
+                <div class="mt-8 pt-6 border-t">
+                    ${displayFeaturesGranted()}
+                </div>
+                
                 <div class="mt-8 pt-6 border-t">
                     <p class="text-xs text-gray-400">Record added on ${formatDate(currentStaff.dateAdded)}</p>
                 </div>
@@ -272,41 +411,435 @@
                 ]
             };
 
-            let html = `
-                <div class="bg-white rounded-lg shadow mt-8 p-4 sm:p-6">
-                    <h2 class="text-lg font-medium text-gray-900 mb-6">Features Granted</h2>
-                    <div class="mb-6">
-                        <h3 class="font-semibold text-gray-700 mb-2">Recording Sections</h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                            ${grouped["Recording Sections"].map(f => {
-                                const granted = featureList.includes(f);
-                                return `<span class="flex items-center space-x-2">
-                                    <span class="${granted ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'} px-2 py-1 rounded text-xs font-semibold">
-                                        ${granted ? '✔' : '✖'}
-                                    </span>
-                                    <span>${f}</span>
-                                </span>`;
-                            }).join('')}
-                        </div>
+            return `
+                <h2 class="text-lg font-medium text-gray-900 mb-6">Features Granted</h2>
+                <div class="mb-6">
+                    <h3 class="font-semibold text-gray-700 mb-2">Recording Sections</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                        ${grouped["Recording Sections"].map(f => {
+                            const granted = featureList.includes(f);
+                            return `<span class="flex items-center space-x-2">
+                                <span class="${granted ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'} px-2 py-1 rounded text-xs font-semibold">
+                                    ${granted ? '✔' : '✖'}
+                                </span>
+                                <span>${f}</span>
+                            </span>`;
+                        }).join('')}
                     </div>
-                    <div>
-                        <h3 class="font-semibold text-gray-700 mb-2">Record Viewing</h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                            ${grouped["Record Viewing"].map(f => {
-                                const granted = featureList.includes(f);
-                                return `<span class="flex items-center space-x-2">
-                                    <span class="${granted ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'} px-2 py-1 rounded text-xs font-semibold">
-                                        ${granted ? '✔' : '✖'}
-                                    </span>
-                                    <span>${f}</span>
-                                </span>`;
-                            }).join('')}
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-700 mb-2">Record Viewing</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                        ${grouped["Record Viewing"].map(f => {
+                            const granted = featureList.includes(f);
+                            return `<span class="flex items-center space-x-2">
+                                <span class="${granted ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'} px-2 py-1 rounded text-xs font-semibold">
+                                    ${granted ? '✔' : '✖'}
+                                </span>
+                                <span>${f}</span>
+                            </span>`;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        async function loadBasicDocuments() {
+            try {
+                console.log('Loading basic employment documents for staff ID:', currentStaff.staffId || currentStaff.uid);
+                
+                // Show skeleton loading
+                showSkeletonLoading('basicDocsList');
+                
+                // Always try batch system first, then fallback to legacy
+                const batchResult = await loadDocumentBatches(['batch_1'], 'basicDocsList');
+                
+                // If no batch documents found, try legacy system
+                if (!batchResult) {
+                    console.log('No batch documents found, trying legacy system...');
+                    loadLegacyDocuments('basic', 'basicDocsList');
+                }
+            } catch (error) {
+                console.error('Error loading basic documents:', error);
+                document.getElementById('basicDocsList').innerHTML = `
+                    <div class="text-center py-8 text-red-500">
+                        <svg class="h-12 w-12 mx-auto mb-4 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <p class="font-medium">Error loading employment documents</p>
+                        <p class="text-sm mt-1">Please try refreshing the page</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function loadSpecialDocuments() {
+            try {
+                console.log('Loading special requirement documents for staff ID:', currentStaff.staffId || currentStaff.uid);
+                
+                // Show skeleton loading
+                showSkeletonLoading('specialDocsList');
+                
+                // Always try batch system first, then fallback to legacy
+                const batchResult = await loadDocumentBatches(['batch_4'], 'specialDocsList');
+                
+                // If no batch documents found, try legacy system
+                if (!batchResult) {
+                    console.log('No batch documents found, trying legacy system...');
+                    loadLegacyDocuments('special', 'specialDocsList');
+                }
+            } catch (error) {
+                console.error('Error loading special documents:', error);
+                document.getElementById('specialDocsList').innerHTML = `
+                    <div class="text-center py-8 text-red-500">
+                        <svg class="h-12 w-12 mx-auto mb-4 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <p class="font-medium">Error loading special requirement documents</p>
+                        <p class="text-sm mt-1">Please try refreshing the page</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function loadClearances() {
+            try {
+                console.log('Loading clearances for staff ID:', currentStaff.staffId || currentStaff.uid);
+                
+                // Show skeleton loading
+                showSkeletonLoading('clearancesList');
+                
+                // Always try batch system first, then fallback to legacy
+                const batchResult = await loadDocumentBatches(['batch_2'], 'clearancesList');
+                
+                // If no batch documents found, try legacy system
+                if (!batchResult) {
+                    console.log('No batch documents found, trying legacy system...');
+                    loadLegacyDocuments('clearances', 'clearancesList');
+                }
+            } catch (error) {
+                console.error('Error loading clearances:', error);
+                document.getElementById('clearancesList').innerHTML = `
+                    <div class="text-center py-8 text-red-500">
+                        <svg class="h-12 w-12 mx-auto mb-4 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <p class="font-medium">Error loading clearances</p>
+                        <p class="text-sm mt-1">Please try refreshing the page</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function loadCertificates() {
+            try {
+                console.log('Loading certificates for staff ID:', currentStaff.staffId || currentStaff.uid);
+                
+                // Show skeleton loading
+                showSkeletonLoading('certificatesList');
+                
+                // Always try batch system first, then fallback to legacy
+                const batchResult = await loadDocumentBatches(['batch_3'], 'certificatesList');
+                
+                // If no batch documents found, try legacy system
+                if (!batchResult) {
+                    console.log('No batch documents found, trying legacy system...');
+                    loadLegacyDocuments('certificates', 'certificatesList');
+                }
+            } catch (error) {
+                console.error('Error loading certificates:', error);
+                document.getElementById('certificatesList').innerHTML = `
+                    <div class="text-center py-8 text-red-500">
+                        <svg class="h-12 w-12 mx-auto mb-4 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <p class="font-medium">Error loading certificates</p>
+                        <p class="text-sm mt-1">Please try refreshing the page</p>
+                    </div>
+                `;
+            }
+        }
+
+        function showSkeletonLoading(containerId) {
+            const container = document.getElementById(containerId);
+            
+            // Show loading indicator immediately
+            container.innerHTML = `
+                <div class="flex items-center justify-center py-6 sm:py-8 mb-4 sm:mb-6">
+                    <div class="flex items-center space-x-2 sm:space-x-3">
+                        <div class="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-red-primary"></div>
+                        <span class="text-gray-600 font-medium text-sm sm:text-base">Loading documents...</span>
+                    </div>
+                </div>
+                <div class="space-y-4 sm:space-y-6">
+                    <!-- Document Skeleton -->
+                    <div class="mb-4 sm:mb-6">
+                        <div class="flex items-center justify-between mb-3 sm:mb-4">
+                            <div class="h-5 sm:h-6 bg-gray-200 rounded w-32 sm:w-48 animate-pulse"></div>
+                            <div class="h-3 sm:h-4 bg-gray-200 rounded w-20 sm:w-32 animate-pulse"></div>
+                        </div>
+                        <div class="space-y-3 sm:space-y-4">
+                            ${generateDocumentSkeleton()}
+                            ${generateDocumentSkeleton()}
+                            ${generateDocumentSkeleton()}
+                            ${generateDocumentSkeleton()}
                         </div>
                     </div>
                 </div>
             `;
+        }
 
-            document.getElementById('featuresGrantedSection').innerHTML = html;
+        function generateDocumentSkeleton() {
+            return `
+                <div class="border border-gray-200 rounded-lg p-3 sm:p-4 bg-gray-50 animate-pulse">
+                    <div class="flex items-center space-x-3 sm:space-x-4">
+                        <div class="flex-shrink-0">
+                            <div class="h-8 w-8 sm:h-10 sm:w-10 bg-gray-300 rounded-lg"></div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="h-4 sm:h-5 bg-gray-300 rounded w-3/4 mb-1 sm:mb-2"></div>
+                            <div class="h-3 sm:h-4 bg-gray-200 rounded w-1/2"></div>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="h-5 w-5 sm:h-6 sm:w-6 bg-gray-300 rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function loadDocumentBatches(batchNumbers, containerId) {
+            const container = document.getElementById(containerId);
+            let batchGroups = [];
+
+            // Use staffId for document storage, fallback to uid if not available
+            const documentKey = currentStaff.staffId || currentStaff.uid;
+            console.log('Searching for documents with key:', documentKey, 'in batches:', batchNumbers);
+
+            // Add minimum loading time to show skeleton
+            const startTime = Date.now();
+            const minLoadingTime = 800; // 800ms minimum
+
+            for (const batchNumber of batchNumbers) {
+                try {
+                    const batchesCol = collection(db, 'staff_documents', documentKey, 'batches');
+                    console.log('Fetching from path: staff_documents/' + documentKey + '/batches');
+                    const snapshot = await getDocs(batchesCol);
+                    
+                    console.log('Found', snapshot.size, 'batch documents for', documentKey);
+                    
+                    snapshot.forEach(docSnap => {
+                        console.log('Checking batch document:', docSnap.id, 'looking for:', batchNumber);
+                        const batchData = docSnap.data();
+                        if (docSnap.id === batchNumber && batchData.documents) {
+                            console.log('Found matching batch:', batchNumber, 'with', Object.keys(batchData.documents).length, 'documents');
+                            const batchDocuments = [];
+                            Object.entries(batchData.documents).forEach(([fieldName, documentData]) => {
+                                batchDocuments.push({
+                                    fieldName,
+                                    data: documentData,
+                                    batchName: batchData.batchName,
+                                    uploadedAt: batchData.uploadedAt
+                                });
+                            });
+                            
+                            if (batchDocuments.length > 0) {
+                                batchGroups.push({
+                                    batchName: batchData.batchName,
+                                    batchNumber: batchData.batchNumber,
+                                    uploadedAt: batchData.uploadedAt,
+                                    documents: batchDocuments
+                                });
+                            }
+                        }
+                    });
+                } catch (error) {
+                    console.error(`Error loading batch ${batchNumber}:`, error);
+                }
+            }
+
+            // Ensure minimum loading time
+            const elapsedTime = Date.now() - startTime;
+            const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+            if (remainingTime > 0) {
+                await new Promise(resolve => setTimeout(resolve, remainingTime));
+            }
+
+            if (batchGroups.length === 0) {
+                console.log('No batch documents found for', documentKey);
+                // Don't display "no documents" message here, let calling function handle fallback
+                return false; // Return false to indicate no documents found
+            }
+
+            // Sort batches by batch number
+            batchGroups.sort((a, b) => a.batchNumber - b.batchNumber);
+
+            container.innerHTML = batchGroups.map(batch => {
+                const documentsHtml = batch.documents.map(doc => {
+                    const documentName = getDocumentDisplayName(doc.fieldName);
+                    const documentType = getDocumentType(doc.data);
+                    const icon = getDocumentIcon(documentType);
+                    
+                    return `
+                        <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer" onclick="showImageModal('${doc.data}', '${documentName}')">
+                            <div class="flex items-center space-x-3">
+                                <div class="flex-shrink-0">
+                                    ${icon}
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="text-sm font-medium text-gray-900">${documentName}</h4>
+                                    <p class="text-sm text-gray-500">Type: ${documentType}</p>
+                                </div>
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                return `
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-md font-medium text-gray-900">${batch.batchName}</h4>
+                            <span class="text-xs text-gray-500">Uploaded: ${formatDate(batch.uploadedAt)}</span>
+                        </div>
+                        <div class="space-y-3">
+                            ${documentsHtml}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            return true; // Return true to indicate documents were found and displayed
+        }
+
+        function loadLegacyDocuments(type, containerId) {
+            const container = document.getElementById(containerId);
+            const employmentDocs = currentStaff.employmentDocuments || {};
+            
+            console.log('Loading legacy documents for type:', type);
+            console.log('Available employment documents:', Object.keys(employmentDocs));
+            
+            // Add small delay to show skeleton loading
+            setTimeout(() => {
+                let relevantFields = [];
+                if (type === 'basic') {
+                    relevantFields = ['resume', 'validIdFront', 'validIdBack'];
+                } else if (type === 'clearances') {
+                    relevantFields = ['nbiClearance', 'barangayClearance', 'policeClearance'];
+                } else if (type === 'certificates') {
+                    relevantFields = ['birthCertificate', 'medicalCertificate', 'sssId', 'diploma'];
+                } else if (type === 'special') {
+                    relevantFields = ['dswdClearance', 'moralCharacterCert', 'psychologicalEvaluation', 'childProtectionTraining'];
+                }
+
+                console.log('Looking for fields:', relevantFields);
+
+                const documents = relevantFields
+                    .filter(field => employmentDocs[field])
+                    .map(field => ({
+                        fieldName: field,
+                        data: employmentDocs[field].fileData,
+                        fileName: employmentDocs[field].fileName,
+                        fileType: employmentDocs[field].fileType
+                    }));
+
+                console.log('Found legacy documents:', documents.length);
+
+                if (documents.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-8 text-gray-500">
+                            <svg class="h-12 w-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <p class="font-medium">No documents found</p>
+                            <p class="text-sm mt-1">No documents found in either batch system or legacy system</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = `
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-md font-medium text-gray-900">Legacy Documents</h4>
+                            <span class="text-xs text-gray-500">Uploaded via legacy system</span>
+                        </div>
+                        <div class="space-y-3">
+                            ${documents.map(doc => {
+                                const documentName = getDocumentDisplayName(doc.fieldName);
+                                const documentType = getDocumentType(doc.data);
+                                const icon = getDocumentIcon(documentType);
+                                
+                                return `
+                                    <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer" onclick="showImageModal('${doc.data}', '${documentName}')">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="flex-shrink-0">
+                                                ${icon}
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <h4 class="text-sm font-medium text-gray-900">${documentName}</h4>
+                                                <p class="text-sm text-gray-500">File: ${doc.fileName || 'Unknown'}</p>
+                                                <p class="text-sm text-gray-500">Type: ${documentType}</p>
+                                            </div>
+                                            <div class="flex-shrink-0">
+                                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }, 500); // 500ms delay for legacy documents
+        }
+
+        function getDocumentDisplayName(fieldName) {
+            const nameMap = {
+                'resume': 'Resume / Application Form',
+                'validIdFront': 'Valid ID - Front Side',
+                'validIdBack': 'Valid ID - Back Side',
+                'nbiClearance': 'NBI Clearance',
+                'barangayClearance': 'Barangay Clearance',
+                'policeClearance': 'Police Clearance',
+                'birthCertificate': 'Birth Certificate',
+                'medicalCertificate': 'Medical Certificate',
+                'sssId': 'SSS ID',
+                'diploma': 'Transcript of Records',
+                'dswdClearance': 'DSWD Clearance',
+                'moralCharacterCert': 'Certificate of Good Moral Character',
+                'psychologicalEvaluation': 'Psychological Evaluation',
+                'childProtectionTraining': 'Child Protection Training Certificate'
+            };
+            return nameMap[fieldName] || fieldName;
+        }
+
+        function getDocumentType(data) {
+            if (data.includes('data:application/pdf')) return 'PDF Document';
+            if (data.includes('data:image/jpeg') || data.includes('data:image/jpg')) return 'JPEG Image';
+            if (data.includes('data:image/png')) return 'PNG Image';
+            if (data.includes('data:image/gif')) return 'GIF Image';
+            return 'Document';
+        }
+
+        function getDocumentIcon(type) {
+            if (type.includes('PDF')) {
+                return `<svg class="h-6 w-6 sm:h-8 sm:w-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>`;
+            } else {
+                return `<svg class="h-6 w-6 sm:h-8 sm:w-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>`;
+            }
         }
 
         function formatDate(dateString) {
@@ -336,6 +869,136 @@
             document.getElementById('editBtn').addEventListener('click', function() {
                 window.location.href = `edit-staff.html?id=${currentStaff.staffId || currentStaff.uid}`;
             });
+        }
+
+        function setupTabs() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            // Track which tabs have been loaded
+            const loadedTabs = new Set(['basicInfo']); // Basic info is always loaded
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', async function() {
+                    const targetTab = this.getAttribute('data-tab');
+                    
+                    // Remove active classes from all tabs
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('border-red-primary', 'text-red-primary');
+                        btn.classList.add('border-transparent', 'text-gray-500');
+                    });
+                    
+                    // Add active classes to clicked tab
+                    this.classList.remove('border-transparent', 'text-gray-500');
+                    this.classList.add('border-red-primary', 'text-red-primary');
+                    
+                    // Hide all tab contents
+                    tabContents.forEach(content => {
+                        content.classList.add('hidden');
+                    });
+                    
+                    // Show target tab content
+                    const targetContent = document.getElementById(targetTab + 'Content');
+                    if (targetContent) {
+                        targetContent.classList.remove('hidden');
+                        
+                        // Lazy load documents for document tabs
+                        if (!loadedTabs.has(targetTab) && targetTab !== 'basicInfo') {
+                            loadedTabs.add(targetTab);
+                            
+                            try {
+                                // Load documents based on tab type
+                                switch(targetTab) {
+                                    case 'basicDocs':
+                                        await loadBasicDocuments();
+                                        break;
+                                    case 'clearances':
+                                        await loadClearances();
+                                        break;
+                                    case 'certificates':
+                                        await loadCertificates();
+                                        break;
+                                    case 'specialDocs':
+                                        await loadSpecialDocuments();
+                                        break;
+                                }
+                            } catch (error) {
+                                console.error(`Error loading ${targetTab}:`, error);
+                                // Remove from loaded tabs so user can try again
+                                loadedTabs.delete(targetTab);
+                            }
+                        }
+                    }
+                });
+            });
+        }
+
+        // Image Modal Functions
+        window.showImageModal = function(documentData, title) {
+            if (!documentData) return;
+            
+            currentDocumentData = documentData;
+            currentDocumentTitle = title;
+            
+            const modal = document.getElementById('imageModal');
+            const modalTitle = document.getElementById('imageModalTitle');
+            const modalImage = document.getElementById('modalImage');
+            const pdfViewer = document.getElementById('pdfViewer');
+            const pdfEmbed = document.getElementById('pdfEmbed');
+            
+            modalTitle.textContent = title;
+            
+            // Check if it's a PDF or image
+            if (documentData.includes('data:application/pdf')) {
+                modalImage.classList.add('hidden');
+                pdfViewer.classList.remove('hidden');
+                pdfEmbed.src = documentData;
+            } else {
+                pdfViewer.classList.add('hidden');
+                modalImage.classList.remove('hidden');
+                modalImage.src = documentData;
+            }
+            
+            modal.classList.remove('hidden');
+        }
+
+        window.closeImageModal = function() {
+            const modal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            const pdfEmbed = document.getElementById('pdfEmbed');
+            
+            modal.classList.add('hidden');
+            modalImage.src = '';
+            pdfEmbed.src = '';
+            currentDocumentData = '';
+            currentDocumentTitle = '';
+        }
+
+        window.downloadDocument = function() {
+            if (!currentDocumentData) return;
+            
+            // Create a temporary link to download the document
+            const link = document.createElement('a');
+            link.href = currentDocumentData;
+            
+            // Determine file extension based on data type
+            let extension = '.jpg';
+            if (currentDocumentData.includes('data:application/pdf')) {
+                extension = '.pdf';
+            } else if (currentDocumentData.includes('data:image/png')) {
+                extension = '.png';
+            } else if (currentDocumentData.includes('data:image/gif')) {
+                extension = '.gif';
+            }
+            
+            // Create filename from title
+            const filename = (currentDocumentTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'document') + extension;
+            link.download = filename;
+            
+            // Trigger download
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     </script>
 </body>
