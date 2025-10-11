@@ -54,6 +54,32 @@
             border-bottom: 3px solid #dc2626;
             background: #fef2f2;
         }
+        
+        /* Notification Badge Styles */
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #dc2626;
+            color: white;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 1023px) {
+            .notification-badge {
+                top: -4px;
+                right: 50%;
+                transform: translateX(8px);
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -77,11 +103,12 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="flex items-center px-4 py-3 text-base text-red-primary bg-red-light rounded-md font-medium">
+                            <a href="#" class="flex items-center px-4 py-3 text-base text-red-primary bg-red-light rounded-md font-medium relative">
                                 <svg class="h-7 w-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
                                 </svg>
                                 Tasks
+                                <span class="notification-badge tasks-badge" style="display: none">0</span>
                             </a>
                         </li>
                         <li>
@@ -107,9 +134,9 @@
     </div>
 
     <!-- Main Content -->
-    <div id="main-content" class="lg:ml-64 bg-gray-50 min-h-screen">
+    <div id="main-content" class="lg:ml-64 bg-gray-50 min-h-screen pt-[72px] pb-20 lg:pt-0 lg:pb-0">
         <!-- Top Header - Mobile Navigation -->
-        <header class="bg-white shadow-sm border-b flex-shrink-0 lg:hidden">
+        <header class="bg-white shadow-sm border-b flex-shrink-0 lg:hidden fixed top-0 left-0 right-0 z-50">
             <div class="flex items-center justify-between px-4 py-4">
                 <!-- Logo for Mobile -->
                 <div class="flex items-center">
@@ -265,12 +292,42 @@ const sessionManager = {
     }
 };
 
+// Notification handling functions
+function getLastViewedTime(type) {
+    const userId = currentUser?.id || currentUser?.username;
+    return localStorage.getItem(`last_viewed_${type}_${userId}`) || '2000-01-01T00:00:00Z';
+}
+
+function updateLastViewedTime(type) {
+    const userId = currentUser?.id || currentUser?.username;
+    localStorage.setItem(`last_viewed_${type}_${userId}`, new Date().toISOString());
+}
+
+function updateNotificationBadges() {
+    const lastViewedTasks = new Date(getLastViewedTime('tasks'));
+    const lastViewedAnnouncements = new Date(getLastViewedTime('announcements'));
+    
+    // Count new tasks
+    const newTasksCount = allTasks.filter(task => 
+        new Date(task.createdAt) > lastViewedTasks
+    ).length;
+    
+    // Update task badges
+    document.querySelectorAll('.tasks-badge').forEach(badge => {
+        badge.textContent = newTasksCount;
+        badge.style.display = newTasksCount > 0 ? 'flex' : 'none';
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     if (!sessionManager.requireLogin()) return;
     currentUser = sessionManager.getCurrentUser();
     initializePage();
     loadTasksData();
     setupEventListeners();
+    
+    // Update last viewed time for tasks when on tasks page
+    updateLastViewedTime('tasks');
 });
 
 function initializePage() {

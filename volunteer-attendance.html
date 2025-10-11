@@ -233,24 +233,21 @@
             if (!sessionManager.requireLogin()) return;
 
             currentUser = sessionManager.getCurrentUser();
+            
+            // Debug: Check current user and authentication
+            console.log('Current user:', currentUser);
+            console.log('User role:', currentUser?.role);
 
             if (currentUser.role !== 'staff' && currentUser.role !== 'volunteer') {
-                showMessage('Access denied. Only staff and volunteers can access this page.', 'error');
-                setTimeout(() => window.location.href = 'volunteer-dashboard.html', 2000);
+                window.location.href = 'index.html';
                 return;
             }
 
-            // REDIRECT IF ALREADY TIMED IN TODAY (Volunteers Only)
-            if (currentUser.role === 'volunteer') {
-                checkTimedInAndRedirect();
-            } else {
-                // For staff: just load as normal
-                initializePage();
-                loadTodayRecord();
-                getLocation();
-                updateCurrentTime();
-                setInterval(updateCurrentTime, 1000);
-            }
+            initializePage();
+            loadTodayRecord();
+            getLocation();
+            updateCurrentTime();
+            setInterval(updateCurrentTime, 1000);
         });
 
         // --- CHECK IF ALREADY TIMED IN AND REDIRECT ---
@@ -413,7 +410,6 @@
         function getLocation() {
             const locationStatus = document.getElementById('locationStatus');
             if (navigator.geolocation) {
-                locationStatus.textContent = 'Getting location...';
                 navigator.geolocation.getCurrentPosition(
                     function(position) {
                         userLocation = {
@@ -421,33 +417,29 @@
                             lon: position.coords.longitude,
                             accuracy: position.coords.accuracy
                         };
-                        locationStatus.innerHTML = '<span class="text-green-600">✓ Location verified</span>';
-                        const timeInBtnEl = document.getElementById('timeInBtn');
-                        if (timeInBtnEl) timeInBtnEl.disabled = false;
+                        if (locationStatus) {
+                            locationStatus.innerHTML = '<span class="text-green-600">✓ Location verified</span>';
+                        }
                     },
                     function(error) {
-                        userLocation = { verified: false, error: error.message };
-                        locationStatus.innerHTML = `
-                            <span class="text-red-600">✗ Location access denied.</span>
-                            <div class="text-sm text-red-500 mt-2">Please enable location services to proceed with Time In.</div>
-                        `;
-                        const timeInBtnEl = document.getElementById('timeInBtn');
-                        if (timeInBtnEl) timeInBtnEl.disabled = true;
+                        console.error('Error getting location:', error);
+                        if (locationStatus) {
+                            locationStatus.innerHTML = '<span class="text-red-600">✗ Location not available</span>';
+                        }
+                        userLocation = null;
                     },
                     {
                         enableHighAccuracy: true,
-                        timeout: 10000,
-                        maximumAge: 60000
+                        timeout: 5000,
+                        maximumAge: 0
                     }
                 );
             } else {
-                userLocation = { verified: false, error: 'Geolocation not supported' };
-                locationStatus.innerHTML = `
-                    <span class="text-red-600">✗ Geolocation not supported by your browser.</span>
-                    <div class="text-sm text-red-500 mt-2">Please use a compatible browser or device with location access.</div>
-                `;
-                const timeInBtnEl = document.getElementById('timeInBtn');
-                if (timeInBtnEl) timeInBtnEl.disabled = true;
+                console.error('Geolocation is not supported by this browser.');
+                if (locationStatus) {
+                    locationStatus.innerHTML = '<span class="text-red-600">✗ Location not supported</span>';
+                }
+                userLocation = null;
             }
         }
 
@@ -462,22 +454,19 @@
             const attendanceId = 'AT' + String(Date.now()).slice(-6);
 
             const attendanceData = {
-                attendanceId,
-                accountName: [
-                    currentUser.firstName || '',
-                    currentUser.middleName || '',
-                    currentUser.lastName || ''
-                ].filter(Boolean).join(' '),
-                accountId: currentUser.username,
-                accountType: currentUser.role,
+                id: attendanceId,
+                userId: currentUser.id,
+                name: currentUser.name,
+                role: currentUser.role,
                 date: today,
                 timeIn: currentTime,
-                location: userLocation && userLocation.lat ? 'Location verified' : 'Location not available',
-                locationVerified: userLocation && userLocation.lat ? true : false,
-                coordinates: userLocation && userLocation.lat ? `${userLocation.lat.toFixed(7)},${userLocation.lon.toFixed(7)}` : '',
-                locationAccuracy: userLocation && userLocation.accuracy ? `${userLocation.accuracy.toFixed(0)}m` : '',
+                timeOut: null,
+                totalHours: null,
+                location: userLocation,
                 status: calculateStatus(currentTime),
-                dateAdded: now.toISOString().replace('T', ' ').substring(0, 19)
+                remarks: '',
+                leaveType: null,
+                reason: null
             };
 
             // Add remarks for late arrival
@@ -490,24 +479,17 @@
 
             try {
                 await setDoc(doc(db, 'attendance', attendanceId), attendanceData);
-                showMessage('Successfully timed in!', 'success');
-                localStorage.setItem(`lastLogin_${currentUser.username}`, today);
+                showMessage('Time in recorded successfully!', 'success');
                 loadTodayRecord();
-                setTimeout(() => {
-                    // Only for volunteers, redirect after time in
-                    if (currentUser.role === 'volunteer') {
-                        window.location.href = 'volunteer-dashboard.html';
-                    }
-                }, 1000);
             } catch (error) {
-                console.error('Error saving attendance:', error);
-                showMessage('Error saving attendance. Please try again.', 'error');
+                console.error('Error recording time in:', error);
+                showMessage('Failed to record time in. Please try again.', 'error');
             }
 };
 
         window.timeOut = async function() {
             if (!todayRecord || !todayRecord.timeIn) {
-                showMessage('You must time in first before timing out.', 'error');
+                showMessage('You need to time in first.', 'error');
                 return;
             }
             if (todayRecord.timeOut) {
@@ -518,8 +500,10 @@
             const currentTime = now.toTimeString().substring(0, 5);
 
             try {
-                await updateDoc(doc(db, 'attendance', todayRecord.attendanceId), {
-                    timeOut: currentTime
+                const totalHours = calculateHours(todayRecord.timeIn, currentTime);
+                await updateDoc(doc(db, 'attendance', todayRecord.id), {
+                    timeOut: currentTime,
+                    totalHours: totalHours
                 });
                 showMessage('Successfully timed out!', 'success');
                 loadTodayRecord();
