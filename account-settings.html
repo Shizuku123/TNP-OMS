@@ -143,44 +143,29 @@
                 personalInfo: {
                     title: "Personal Information",
                     fields: [
-                        { name: "firstName", label: "First Name", type: "text", required: true },
-                        { name: "lastName", label: "Last Name", type: "text", required: true },
-                        { name: "dateOfBirth", label: "Date of Birth", type: "date", required: false },
-                        { name: "placeOfBirth", label: "Place of Birth", type: "text", required: false },
+                        { name: "firstName", label: "First Name", type: "text", required: true, readOnly: true },
+                        { name: "lastName", label: "Last Name", type: "text", required: true, readOnly: true },
+                        { name: "dateOfBirth", label: "Date of Birth", type: "date", required: false, readOnly: true },
+                        { name: "placeOfBirth", label: "Place of Birth", type: "text", required: false, readOnly: true },
                         { name: "civilStatus", label: "Civil Status", type: "select", options: ["Single", "Married", "Widowed", "Separated"], required: false },
-                        { name: "gender", label: "Gender", type: "select", options: ["Male", "Female", "Other"], required: true },
+                        { name: "gender", label: "Gender", type: "select", options: ["Male", "Female", "Other"], required: true, readOnly: true },
                         { name: "nationality", label: "Nationality", type: "text", required: false },
-                        { name: "religion", label: "Religion", type: "text", required: false },
+                        { name: "religion", label: "Religion", type: "text", required: false, readOnly: true },
                         { name: "contactNumber", label: "Contact Number", type: "tel", required: false },
-                        { name: "emailAddress", label: "Email Address", type: "email", required: true },
-                        { name: "currentAddress", label: "Current Address", type: "textarea", required: false },
-                        { name: "username", label: "Username", type: "text", required: true, readOnly: true }
+                        { name: "emailAddress", label: "Email Address", type: "email", required: true, readOnly: true },
+                        { name: "username", label: "Username", type: "text", required: true },
+                        { name: "currentAddress", label: "Current Address", type: "textarea", required: false }
                     ]
                 },
                 employmentInfo: {
                     title: "Employment Information",
                     fields: [
-                        { name: "dateHired", label: "Date Hired", type: "date", required: false },
-                        { name: "department", label: "Department", type: "text", required: false },
-                        { name: "position", label: "Position", type: "text", required: false },
-                        { name: "supervisor", label: "Supervisor", type: "text", required: false },
-                        { name: "assignedSchedule", label: "Assigned Schedule", type: "text", required: false },
-                        { name: "employmentStatus", label: "Employment Status", type: "select", options: ["Active", "Inactive", "Probationary"], required: false },
-                        { name: "restrictions", label: "Restrictions", type: "text", required: false }
-                    ]
-                },
-                systemInfo: {
-                    title: "System Information",
-                    viewOnly: true,
-                    fields: [
-                        { name: "uid", label: "UID", type: "text", required: true, readOnly: true },
-                        { name: "role", label: "Role", type: "text", required: true, readOnly: true },
-                        { name: "createAccount", label: "Create Account Method", type: "text", required: false, readOnly: true },
-                        { name: "dateAdded", label: "Date Added", type: "date", required: false, readOnly: true },
-                        { name: "firstTimeLogin", label: "First Time Login", type: "checkbox", required: false, disabled: true },
-                        { name: "isActive", label: "Is Active", type: "checkbox", required: false, disabled: true },
-                        { name: "isVerified", label: "Is Verified", type: "checkbox", required: false, disabled: true },
-                        { name: "isBlocked", label: "Is Blocked", type: "checkbox", required: false, disabled: true }
+                        { name: "dateHired", label: "Date Hired", type: "date", required: false, readOnly: true },
+                        { name: "department", label: "Department", type: "text", required: false, readOnly: true },
+                        { name: "position", label: "Position", type: "text", required: false, readOnly: true },
+                        { name: "supervisor", label: "Supervisor", type: "text", required: false, readOnly: true },
+                        { name: "assignedSchedule", label: "Assigned Schedule", type: "text", required: false, readOnly: true },
+                        { name: "employmentStatus", label: "Employment Status", type: "select", options: ["Active", "Inactive", "Probationary"], required: false, readOnly: true }
                     ]
                 }
             },
@@ -235,43 +220,30 @@
                 personalInfo: {
                     title: "Personal Information",
                     fields: [
-                        { name: "firstName", label: "First Name", type: "text", required: true },
-                        { name: "middleName", label: "Middle Name", type: "text", required: false },
-                        { name: "lastName", label: "Last Name", type: "text", required: true },
-                        { name: "dateOfBirth", label: "Date of Birth", type: "date", required: false },
-                        { name: "placeOfBirth", label: "Place of Birth", type: "text", required: false },
+                        { name: "firstName", label: "First Name", type: "text", required: true, readOnly: true },
+                        { name: "middleName", label: "Middle Name", type: "text", required: false, readOnly: true },
+                        { name: "lastName", label: "Last Name", type: "text", required: true, readOnly: true },
+                        { name: "dateOfBirth", label: "Date of Birth", type: "date", required: false, readOnly: true },
+                        { name: "placeOfBirth", label: "Place of Birth", type: "text", required: false, readOnly: true },
                         { name: "civilStatus", label: "Civil Status", type: "select", options: ["Single", "Married", "Widowed", "Separated"], required: false },
-                        { name: "gender", label: "Gender", type: "select", options: ["Male", "Female", "Other"], required: true },
-                        { name: "nationality", label: "Nationality", type: "text", required: false },
+                        { name: "gender", label: "Gender", type: "select", options: ["Male", "Female", "Other"], required: true, readOnly: true },
+                        { name: "nationality", label: "Nationality", type: "text", required: false, readOnly: true },
                         { name: "religion", label: "Religion", type: "text", required: false },
                         { name: "contactNumber", label: "Contact Number", type: "tel", required: false },
-                        { name: "emailAddress", label: "Email Address", type: "email", required: true },
-                        { name: "currentAddress", label: "Current Address", type: "textarea", required: false },
-                        { name: "username", label: "Username", type: "text", required: true, readOnly: true }
+                        { name: "emailAddress", label: "Email Address", type: "email", required: true, readOnly: true },
+                        { name: "username", label: "Username", type: "text", required: true },
+                        { name: "currentAddress", label: "Current Address", type: "textarea", required: false }
                     ]
                 },
                 employmentInfo: {
                     title: "Employment Information",
                     fields: [
-                        { name: "dateHired", label: "Date Hired", type: "date", required: false },
+                        { name: "dateHired", label: "Date Hired", type: "date", required: false, readOnly: true },
                         { name: "department", label: "Department", type: "text", required: false },
                         { name: "position", label: "Position", type: "text", required: false },
                         { name: "supervisor", label: "Supervisor", type: "text", required: false },
                         { name: "assignedSchedule", label: "Assigned Schedule", type: "text", required: false },
                         { name: "employmentStatus", label: "Employment Status", type: "select", options: ["Active", "Inactive", "Probationary"], required: false }
-                    ]
-                },
-                systemInfo: {
-                    title: "System Information",
-                    viewOnly: true,
-                    fields: [
-                        { name: "uid", label: "UID", type: "text", required: true, readOnly: true },
-                        { name: "role", label: "Role", type: "text", required: true, readOnly: true },
-                        { name: "createAccount", label: "Create Account Method", type: "text", required: false, readOnly: true },
-                        { name: "dateAdded", label: "Date Added", type: "date", required: false, readOnly: true },
-                        { name: "isActive", label: "Is Active", type: "checkbox", required: false, disabled: true },
-                        { name: "isVerified", label: "Is Verified", type: "checkbox", required: false, disabled: true },
-                        { name: "isBlocked", label: "Is Blocked", type: "checkbox", required: false, disabled: true }
                     ]
                 }
             }

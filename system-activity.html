@@ -18,6 +18,54 @@
             }
         }
     </script>
+    <style>
+        /* Table Scrolling */
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        /* Responsive Table */
+        @media (max-width: 768px) {
+            .responsive-table {
+                display: block;
+                width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .activity-cell {
+                min-width: 200px;
+            }
+            
+            .timestamp-cell {
+                min-width: 150px;
+            }
+            
+            .user-cell {
+                min-width: 180px;
+            }
+        }
+        
+        /* Pagination Styles */
+        .pagination-button {
+            padding: 0.5rem 1rem;
+            margin: 0 0.25rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            transition: all 0.15s ease-in-out;
+        }
+        
+        .pagination-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .pagination-active {
+            background-color: #dc2626;
+            color: white;
+        }
+    </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
      
@@ -131,21 +179,34 @@
             <div class="px-6 py-4 border-b border-gray-200">
                 <h2 class="text-lg font-medium text-gray-900">Recent System Activities (<span id="recordCount">0</span>)</h2>
             </div>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
+            <div class="table-container">
+                <table class="min-w-full divide-y divide-gray-200 responsive-table">
+                    <thead class="bg-gray-50 sticky top-0">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider user-cell">User</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider activity-cell">Details</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider timestamp-cell">Timestamp</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP Address</th>
                         </tr>
                     </thead>
                     <tbody id="activityTableBody" class="bg-white divide-y divide-gray-200">
-                         
+                        <!-- Activity data will be populated here -->
                     </tbody>
                 </table>
+            </div>
+            
+            <!-- Pagination Controls -->
+            <div class="flex justify-center items-center mt-4 p-4 border-t border-gray-200 space-x-2" id="paginationControls">
+                <button id="prevPage" class="pagination-button bg-gray-200 hover:bg-gray-300" disabled>
+                    Previous
+                </button>
+                <div id="pageNumbers" class="flex space-x-2">
+                    <!-- Page numbers will be populated here -->
+                </div>
+                <button id="nextPage" class="pagination-button bg-gray-200 hover:bg-gray-300" disabled>
+                    Next
+                </button>
             </div>
         </div>
     </div>
@@ -185,6 +246,9 @@
         let currentUser = null;
         let allActivities = [];
         let filteredActivities = [];
+        let currentPage = 1;
+        const rowsPerPage = 5;
+        const maxPageButtons = 3;
 
         // Session Manager
         const sessionManager = {
@@ -269,6 +333,90 @@
             document.getElementById('actionFilter').addEventListener('change', filterActivities);
             document.getElementById('userFilter').addEventListener('change', filterActivities);
             document.getElementById('dateFilter').addEventListener('change', filterActivities);
+            
+            // Pagination event listeners
+            document.getElementById('prevPage').addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    displayActivities();
+                }
+            });
+            
+            document.getElementById('nextPage').addEventListener('click', () => {
+                const totalPages = Math.ceil(filteredActivities.length / rowsPerPage);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    displayActivities();
+                }
+            });
+        }
+        
+        function updatePaginationControls(totalPages) {
+            const prevButton = document.getElementById('prevPage');
+            const nextButton = document.getElementById('nextPage');
+            const pageNumbersContainer = document.getElementById('pageNumbers');
+            
+            // Enable/disable prev/next buttons
+            prevButton.disabled = currentPage === 1;
+            nextButton.disabled = currentPage === totalPages;
+            
+            // Generate page number buttons
+            pageNumbersContainer.innerHTML = '';
+            
+            let startPage = Math.max(1, currentPage - Math.floor(maxPageButtons / 2));
+            let endPage = Math.min(totalPages, startPage + maxPageButtons - 1);
+            
+            // Adjust start if we're near the end
+            if (endPage - startPage + 1 < maxPageButtons) {
+                startPage = Math.max(1, endPage - maxPageButtons + 1);
+            }
+            
+            // Add first page button if needed
+            if (startPage > 1) {
+                pageNumbersContainer.appendChild(createPageButton(1));
+                if (startPage > 2) {
+                    pageNumbersContainer.appendChild(createEllipsis());
+                }
+            }
+            
+            // Add page number buttons
+            for (let i = startPage; i <= endPage; i++) {
+                pageNumbersContainer.appendChild(createPageButton(i));
+            }
+            
+            // Add last page button if needed
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    pageNumbersContainer.appendChild(createEllipsis());
+                }
+                pageNumbersContainer.appendChild(createPageButton(totalPages));
+            }
+        }
+        
+        function createPageButton(pageNum) {
+            const button = document.createElement('button');
+            button.textContent = pageNum;
+            button.classList.add('pagination-button');
+            
+            if (pageNum === currentPage) {
+                button.classList.add('pagination-active');
+            } else {
+                button.classList.add('bg-gray-200', 'hover:bg-gray-300');
+            }
+            
+            button.addEventListener('click', () => {
+                currentPage = pageNum;
+                displayActivities();
+            });
+            
+            return button;
+        }
+        
+        function createEllipsis() {
+            const span = document.createElement('span');
+            span.textContent = '...';
+            span.classList.add('px-2', 'py-1', 'text-gray-600');
+            return span;
         }
 
         function populateUserFilter() {
@@ -289,6 +437,9 @@
         }
 
         function filterActivities() {
+            // Reset to first page when filters change
+            currentPage = 1;
+            
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const actionFilter = document.getElementById('actionFilter').value.toLowerCase();
             const userFilter = document.getElementById('userFilter').value;
@@ -317,10 +468,15 @@
         function displayActivities() {
             const tbody = document.getElementById('activityTableBody');
             const recordCount = document.getElementById('recordCount');
+            const totalRecords = filteredActivities.length;
+            const totalPages = Math.ceil(totalRecords / rowsPerPage);
             
-            recordCount.textContent = filteredActivities.length;
+            recordCount.textContent = totalRecords;
+            
+            // Update pagination controls
+            updatePaginationControls(totalPages);
 
-            if (!filteredActivities || filteredActivities.length === 0) {
+            if (!filteredActivities || totalRecords === 0) {
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="5" class="px-6 py-4 text-center text-gray-500">
@@ -331,7 +487,12 @@
                 return;
             }
 
-            tbody.innerHTML = filteredActivities.map(activity => {
+            // Calculate the range of records to display
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = Math.min(startIndex + rowsPerPage, totalRecords);
+            const currentPageData = filteredActivities.slice(startIndex, endIndex);
+
+            tbody.innerHTML = currentPageData.map(activity => {
                 const username = activity.username ? activity.username : 'Unknown';
                 const userId = activity.userId ? activity.userId : '';
                 const action = activity.action ? activity.action : '';
