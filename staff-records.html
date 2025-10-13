@@ -94,7 +94,13 @@
                     </a>
                 </div>
                 <h1 class="text-base sm:text-xl font-semibold text-gray-900 text-center flex-1 mx-2 sm:mx-4">Staff Records</h1>
-                <div class="flex-shrink-0 w-16"></div> <!-- Spacer to keep title centered -->
+                <div class="flex items-center flex-shrink-0">
+                    <button id="tutorialBtn" class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-2 shadow-sm transition-all duration-300 transform hover:scale-110" title="Tutorial - How to Use Staff Records">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
     </header>
@@ -849,6 +855,105 @@
         </div>
     </div>
 
+    <!-- Tutorial Modal -->
+    <div id="tutorialModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden p-2 sm:p-4">
+        <div class="bg-white rounded-lg p-4 sm:p-6 max-w-xs sm:max-w-4xl w-full mx-2 sm:mx-4 max-h-[95vh] sm:max-h-[90vh] overflow-hidden flex flex-col">
+            <div class="flex items-center justify-between mb-3 sm:mb-4">
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900">Staff Records Tutorial</h3>
+                <button id="closeTutorialModal" class="text-gray-400 hover:text-gray-600 p-1">
+                    <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="mb-4 sm:mb-6">
+                <div class="flex justify-between text-xs sm:text-sm text-gray-600 mb-2">
+                    <span>Step <span id="currentStep">1</span> of <span id="totalSteps">6</span></span>
+                    <span id="progressPercentage">17%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div id="progressBar" class="bg-red-primary h-2 rounded-full transition-all duration-300" style="width: 17%"></div>
+                </div>
+            </div>
+            
+            <!-- Tutorial Content -->
+            <div class="flex-1 overflow-y-auto">
+                <div id="tutorialStep1" class="tutorial-step">
+                    <div class="text-center">
+                        <img src="Toturial/Staff Records/pic1.png" alt="Staff Trends Graph" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-3 sm:mb-4">
+                        <h4 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">Step 1: View Staff Analytics</h4>
+                        <p class="text-sm sm:text-base text-gray-600">Explore staff trends with interactive charts showing distribution by department and monthly hiring patterns. Click on chart segments to filter records, use the year selector to view historical data, and analyze staff composition across different departments.</p>
+                    </div>
+                </div>
+                
+                <div id="tutorialStep2" class="tutorial-step hidden">
+                    <div class="text-center">
+                        <img src="Toturial/Staff Records/pic2.png" alt="Quick Actions" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-3 sm:mb-4">
+                        <h4 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">Step 2: Quick Action Buttons</h4>
+                        <p class="text-sm sm:text-base text-gray-600">Use the quick action buttons for efficient staff management: "Add Staff" to register new employees, "Print" to generate comprehensive staff reports, and "Solo Print" to create individual staff records. These tools are optimized for both desktop and mobile use.</p>
+                    </div>
+                </div>
+                
+                <div id="tutorialStep3" class="tutorial-step hidden">
+                    <div class="text-center">
+                        <img src="Toturial/Staff Records/pic3.png" alt="Staff Records List" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-3 sm:mb-4">
+                        <h4 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">Step 3: Browse Staff Records</h4>
+                        <p class="text-sm sm:text-base text-gray-600">View all staff members in an organized card layout displaying photos, contact information, department, position, and employment status. Use the search bar to find specific staff by name, ID, or department. Filter by department and employment status for targeted results.</p>
+                    </div>
+                </div>
+                
+                <div id="tutorialStep4" class="tutorial-step hidden">
+                    <div class="text-center">
+                        <img src="Toturial/Staff Records/pic4.png" alt="Advanced Filter Modal" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-3 sm:mb-4">
+                        <h4 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">Step 4: Advanced Filtering Options</h4>
+                        <p class="text-sm sm:text-base text-gray-600">Access detailed filtering options including age range, position, employment status, hire date range, contact details, and years of service. Apply multiple filters simultaneously to find specific staff members quickly and efficiently for various administrative needs.</p>
+                    </div>
+                </div>
+                
+                <div id="tutorialStep5" class="tutorial-step hidden">
+                    <div class="text-center">
+                        <img src="Toturial/Staff Records/pic5.png" alt="Print Function" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-3 sm:mb-4">
+                        <h4 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">Step 5: Generate Staff Reports</h4>
+                        <p class="text-sm sm:text-base text-gray-600">Create comprehensive staff reports with customizable filters and sorting options. Filter by department, employment status, gender, and hire date range. Preview the report layout, add recipient information, and export in PDF format for official documentation and administrative purposes.</p>
+                    </div>
+                </div>
+                
+                <div id="tutorialStep6" class="tutorial-step hidden">
+                    <div class="text-center">
+                        <img src="Toturial/Staff Records/pic6.png" alt="Solo Print Function" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-3 sm:mb-4">
+                        <h4 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">Step 6: Individual Staff Reports</h4>
+                        <p class="text-sm sm:text-base text-gray-600">Generate detailed individual staff reports using the Solo Print feature. Select any staff member from the filtered list, preview their complete profile information, and create professional single-employee documentation for HR files, evaluations, or official records.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Navigation Buttons -->
+            <div class="flex justify-between items-center mt-4 sm:mt-6 pt-3 sm:pt-4 border-t">
+                <button id="prevTutorialBtn" class="px-3 sm:px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm" disabled>
+                    <svg class="h-4 w-4 sm:h-5 sm:w-5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    Previous
+                </button>
+                
+                <div class="flex space-x-2">
+                    <button id="skipTutorialBtn" class="px-3 sm:px-4 py-2 text-gray-500 hover:text-gray-700 transition-colors text-xs sm:text-sm">
+                        Skip Tutorial
+                    </button>
+                </div>
+                
+                <button id="nextTutorialBtn" class="px-3 sm:px-4 py-2 bg-red-primary text-white rounded-md hover:bg-red-700 transition-colors text-xs sm:text-sm">
+                    Next
+                    <svg class="h-4 w-4 sm:h-5 sm:w-5 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import {
             db,
@@ -910,6 +1015,10 @@
 
             // Setup event listeners first
             setupEventListeners();
+            
+            // Setup tutorial functionality
+            setupTutorialFunctionality();
+            
             populateYearDropdown();
             
             // Load records and initialize charts after DOM is ready
@@ -2731,6 +2840,123 @@
                 
                 // Enable print button
                 document.getElementById('soloPrintBtn').disabled = false;
+            }
+        }
+
+        // Tutorial functionality
+        let currentTutorialStep = 1;
+        const totalTutorialSteps = 6;
+
+        function setupTutorialFunctionality() {
+            const tutorialBtn = document.getElementById('tutorialBtn');
+            const tutorialModal = document.getElementById('tutorialModal');
+            const closeTutorialModal = document.getElementById('closeTutorialModal');
+            const prevTutorialBtn = document.getElementById('prevTutorialBtn');
+            const nextTutorialBtn = document.getElementById('nextTutorialBtn');
+            const skipTutorialBtn = document.getElementById('skipTutorialBtn');
+
+            if (tutorialBtn) tutorialBtn.addEventListener('click', showTutorialModal);
+            if (closeTutorialModal) closeTutorialModal.addEventListener('click', hideTutorialModal);
+            if (skipTutorialBtn) skipTutorialBtn.addEventListener('click', hideTutorialModal);
+            if (prevTutorialBtn) prevTutorialBtn.addEventListener('click', goToPreviousTutorialStep);
+            if (nextTutorialBtn) nextTutorialBtn.addEventListener('click', goToNextTutorialStep);
+
+            // Close tutorial on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && tutorialModal && !tutorialModal.classList.contains('hidden')) {
+                    hideTutorialModal();
+                }
+            });
+        }
+
+        function showTutorialModal() {
+            currentTutorialStep = 1;
+            const tutorialModal = document.getElementById('tutorialModal');
+            if (tutorialModal) {
+                tutorialModal.classList.remove('hidden');
+                updateTutorialStep();
+            }
+        }
+
+        function hideTutorialModal() {
+            const tutorialModal = document.getElementById('tutorialModal');
+            if (tutorialModal) {
+                tutorialModal.classList.add('hidden');
+            }
+        }
+
+        function goToNextTutorialStep() {
+            if (currentTutorialStep < totalTutorialSteps) {
+                currentTutorialStep++;
+                updateTutorialStep();
+            } else {
+                hideTutorialModal();
+            }
+        }
+
+        function goToPreviousTutorialStep() {
+            if (currentTutorialStep > 1) {
+                currentTutorialStep--;
+                updateTutorialStep();
+            }
+        }
+
+        function updateTutorialStep() {
+            // Hide all steps
+            for (let i = 1; i <= totalTutorialSteps; i++) {
+                const step = document.getElementById(`tutorialStep${i}`);
+                if (step) {
+                    step.classList.add('hidden');
+                }
+            }
+
+            // Show current step
+            const currentStepElement = document.getElementById(`tutorialStep${currentTutorialStep}`);
+            if (currentStepElement) {
+                currentStepElement.classList.remove('hidden');
+            }
+
+            // Update progress bar
+            const progressPercentage = Math.round((currentTutorialStep / totalTutorialSteps) * 100);
+            const progressBar = document.getElementById('progressBar');
+            const progressPercentageElement = document.getElementById('progressPercentage');
+            const currentStepTextElement = document.getElementById('currentStep');
+            const totalStepsElement = document.getElementById('totalSteps');
+
+            if (progressBar) progressBar.style.width = `${progressPercentage}%`;
+            if (progressPercentageElement) progressPercentageElement.textContent = `${progressPercentage}%`;
+            if (currentStepTextElement) currentStepTextElement.textContent = currentTutorialStep;
+            if (totalStepsElement) totalStepsElement.textContent = totalTutorialSteps;
+
+            // Update navigation buttons
+            const prevBtn = document.getElementById('prevTutorialBtn');
+            const nextBtn = document.getElementById('nextTutorialBtn');
+
+            if (prevBtn) {
+                prevBtn.disabled = currentTutorialStep === 1;
+                if (currentTutorialStep === 1) {
+                    prevBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                } else {
+                    prevBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            }
+
+            if (nextBtn) {
+                if (currentTutorialStep === totalTutorialSteps) {
+                    nextBtn.innerHTML = `
+                        Finish
+                        <svg class="h-4 w-4 sm:h-5 sm:w-5 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    `;
+                } else {
+                    nextBtn.innerHTML = `
+                        Next
+                        <svg class="h-4 w-4 sm:h-5 sm:w-5 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    `;
+                }
             }
         }
 

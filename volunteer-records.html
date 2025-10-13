@@ -6,6 +6,7 @@
     <title>Volunteer Records - Tahanan ng Pagmamahal OMS</title>
     <script type="module" src="firebase.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -19,6 +20,32 @@
             }
         }
     </script>
+    <style>
+        /* Print styles */
+        @media print {
+            body * { visibility: hidden; }
+            .print-content, .print-content * { visibility: visible; }
+            .print-content { 
+                position: absolute; 
+                left: 0; 
+                top: 0; 
+                width: 100%; 
+                height: auto;
+                overflow: visible;
+                padding: 20px;
+                font-family: Arial, sans-serif;
+            }
+            @page { 
+                margin: 0.5in;
+                size: A4;
+            }
+            /* Avoid page breaks inside important elements */
+            .print-content table,
+            .print-content .signature-section {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
     <!-- Header -->
@@ -34,6 +61,11 @@
                 </div>
                 <h1 class="text-xl font-semibold text-gray-900">Volunteer Records</h1>
                 <div class="flex items-center space-x-4">
+                    <button id="tutorialBtn" class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-2 shadow-sm transition-all duration-300 transform hover:scale-110" title="Tutorial - How to Use Volunteer Records">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </button>
                     <span class="text-sm text-gray-600 hidden" id="userInfo"></span>
                     <button onclick="logout()" class="text-red-600 hover:text-red-800 transition-colors hidden">Logout</button>
                 </div>
@@ -75,12 +107,82 @@
                         <option value="Inactive">Inactive</option>
                         <option value="On Leave">On Leave</option>
                     </select>
+                    <button id="advancedFilterBtn" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-center">
+                        Advanced Filter
+                    </button>
+                    <button id="printBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-center">
+                        Print Records
+                    </button>
+                    <button id="soloPrintBtn" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors text-center">
+                        Solo Print
+                    </button>
                     <button id="exportCSVBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-center">
                         Export CSV
                     </button>
                     <a href="add-volunteer.html" class="px-4 py-2 bg-red-primary text-white rounded-lg hover:bg-red-700 transition-colors text-center inline-block">
                         Add Volunteer
                     </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Volunteer Availability Trends -->
+        <div class="mb-6 bg-white rounded-lg shadow">
+            <div class="p-4 sm:p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Volunteer Availability Overview</h3>
+                        <p class="text-sm text-gray-600">Track volunteer availability patterns. Click on chart bars to filter volunteers by day.</p>
+                    </div>
+                    <div class="flex items-center space-x-6">
+                        <!-- Statistics -->
+                        <div class="flex items-center space-x-4">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                <span id="totalVolunteers" class="text-sm font-medium text-gray-700">Total: 0</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                <span id="activeVolunteers" class="text-sm font-medium text-gray-700">Active: 0</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                                <span id="availableToday" class="text-sm font-medium text-gray-700">Available Today: 0</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                                <span class="text-xs text-emerald-600 font-medium">Auto-updating</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Toggle Button -->
+                        <button onclick="toggleTrendsSection()" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                            <svg id="trendsToggleIcon" class="h-5 w-5 text-gray-500 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="trendsContent" style="display: block;">
+                    <!-- Weekly Availability Chart -->
+                    <div class="bg-gradient-to-br from-green-50 to-emerald-100 rounded-lg p-6 border border-green-200">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                                <h4 class="text-md font-semibold text-gray-800">Weekly Availability</h4>
+                            </div>
+                            <button onclick="refreshAvailability()" class="text-sm text-green-600 hover:text-green-800 font-medium">
+                                <svg class="inline h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                                Refresh
+                            </button>
+                        </div>
+                        <div class="relative h-96">
+                            <canvas id="availabilityChart"></canvas>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -244,6 +346,393 @@
         </div>
     </div>
 
+    <!-- Advanced Filter Modal -->
+    <div id="advancedFilterModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-4 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 max-w-4xl shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+            <div class="mt-3">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center">
+                        <svg class="h-6 w-6 text-purple-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.414A1 1 0 013 6.707V4z"></path>
+                        </svg>
+                        <h3 class="text-lg font-medium text-gray-900">Advanced Filter - Volunteer Records</h3>
+                    </div>
+                    <button id="closeAdvancedFilterBtn" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Personal Information Section -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-blue-900 mb-4 flex items-center">
+                            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                            Personal Information
+                        </h4>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                                <input type="text" id="filterFirstName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter first name">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                                <input type="text" id="filterLastName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter last name">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
+                                <input type="text" id="filterContactNumber" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter contact number">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                                <input type="email" id="filterEmailAddress" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter email address">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Volunteer Details Section -->
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-green-900 mb-4 flex items-center">
+                            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2V6"></path>
+                            </svg>
+                            Volunteer Details
+                        </h4>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Volunteer ID</label>
+                                <input type="text" id="filterVolunteerId" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500" placeholder="Enter volunteer ID">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                                <select id="filterDepartmentAdvanced" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500">
+                                    <option value="">All Departments</option>
+                                    <option value="Child Care">Child Care</option>
+                                    <option value="Education">Education</option>
+                                    <option value="Activities">Activities</option>
+                                    <option value="Kitchen">Kitchen</option>
+                                    <option value="Administration">Administration</option>
+                                    <option value="Events">Events</option>
+                                    <option value="Counseling">Counseling</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                <select id="filterStatusAdvanced" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500">
+                                    <option value="">All Status</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                    <option value="On Leave">On Leave</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Skills & Experience</label>
+                                <input type="text" id="filterSkills" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500" placeholder="Enter skills or experience">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Availability Section -->
+                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-purple-900 mb-4 flex items-center">
+                            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            Availability
+                        </h4>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Available Days</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="filterMonday" class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                                        <span class="ml-2 text-sm">Monday</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="filterTuesday" class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                                        <span class="ml-2 text-sm">Tuesday</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="filterWednesday" class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                                        <span class="ml-2 text-sm">Wednesday</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="filterThursday" class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                                        <span class="ml-2 text-sm">Thursday</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="filterFriday" class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                                        <span class="ml-2 text-sm">Friday</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="filterSaturday" class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                                        <span class="ml-2 text-sm">Saturday</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="filterSunday" class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                                        <span class="ml-2 text-sm">Sunday</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Date Range Section -->
+                    <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-orange-900 mb-4 flex items-center">
+                            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            Date Range
+                        </h4>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Date Joined From</label>
+                                <input type="date" id="filterDateFrom" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Date Joined To</label>
+                                <input type="date" id="filterDateTo" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter Actions -->
+                <div class="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
+                    <div class="flex items-center space-x-2">
+                        <span id="filterResultCount" class="text-sm text-gray-600">0 volunteers match your filters</span>
+                    </div>
+                    <div class="flex space-x-3">
+                        <button id="clearAdvancedFiltersBtn" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors">
+                            Clear All
+                        </button>
+                        <button id="applyAdvancedFiltersBtn" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                            Apply Filters
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Preview Modal -->
+    <div id="printModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-2 sm:p-4">
+        <div class="relative mx-auto border w-full max-w-7xl shadow-lg rounded-md bg-white flex flex-col" style="margin-top: 10px; margin-bottom: 10px; height: calc(100vh - 20px); max-height: 95vh;">
+            <!-- Modal Header -->
+            <div class="p-3 sm:p-4 lg:p-6 border-b border-gray-200 flex-shrink-0">
+                <h3 class="text-lg font-medium text-gray-900">Print Volunteer Records</h3>
+            </div>
+            
+            <!-- Modal Content -->
+            <div class="flex-1 overflow-hidden">
+                <div class="h-full flex flex-col lg:flex-row">
+                    <!-- Filter Options (Left Side) -->
+                    <div class="lg:w-1/3 xl:w-1/4 p-3 sm:p-4 lg:p-6 border-b lg:border-b-0 lg:border-r border-gray-200 bg-gray-50">
+                        <h4 class="font-semibold text-gray-900 mb-4">Filter Options</h4>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Department</label>
+                                <select id="printDepartmentFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm" onchange="updatePrintPreview()">
+                                    <option value="">All Departments</option>
+                                    <option value="Child Care">Child Care</option>
+                                    <option value="Education">Education</option>
+                                    <option value="Activities">Activities</option>
+                                    <option value="Kitchen">Kitchen</option>
+                                    <option value="Administration">Administration</option>
+                                    <option value="Events">Events</option>
+                                    <option value="Counseling">Counseling</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                                <select id="printStatusFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm" onchange="updatePrintPreview()">
+                                    <option value="">All Status</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                    <option value="On Leave">On Leave</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Gender</label>
+                                <select id="printGenderFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm" onchange="updatePrintPreview()">
+                                    <option value="">All Genders</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Availability</label>
+                                <select id="printAvailabilityFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm" onchange="updatePrintPreview()">
+                                    <option value="">All Days</option>
+                                    <option value="Monday">Monday</option>
+                                    <option value="Tuesday">Tuesday</option>
+                                    <option value="Wednesday">Wednesday</option>
+                                    <option value="Thursday">Thursday</option>
+                                    <option value="Friday">Friday</option>
+                                    <option value="Saturday">Saturday</option>
+                                    <option value="Sunday">Sunday</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Date Joined Range</label>
+                                <div class="space-y-2">
+                                    <div>
+                                        <label class="text-xs text-gray-600">From</label>
+                                        <input type="date" id="printDateFrom" class="w-full px-2 py-1 border border-gray-300 rounded text-sm" onchange="updatePrintPreview()">
+                                    </div>
+                                    <div>
+                                        <label class="text-xs text-gray-600">To</label>
+                                        <input type="date" id="printDateTo" class="w-full px-2 py-1 border border-gray-300 rounded text-sm" onchange="updatePrintPreview()">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="pt-2">
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="printIncludePhotos" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" checked onchange="updatePrintPreview()">
+                                    <span class="ml-2 text-sm text-gray-700">Include Photos</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 pt-4 border-t">
+                            <div class="flex items-center justify-between mb-3">
+                                
+                                <button onclick="resetPrintFilters()" class="px-3 py-1 bg-gray-300 text-gray-700 rounded text-xs hover:bg-gray-400">
+                                    Reset
+                                </button>
+                            </div>
+                            <div class="text-center">
+                                <p id="printRecordCount" class="text-sm text-gray-600">0 records will be printed</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Print Preview (Right Side) -->
+                    <div class="flex-1 overflow-y-auto">
+                        <div id="printPreviewContent" class="p-4">
+                            <!-- Print preview will be generated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="border-t border-gray-200 bg-gray-50 px-3 sm:px-4 lg:px-6 py-3 sm:py-4 rounded-b-md flex-shrink-0">
+                <div class="flex flex-col sm:flex-row justify-between">
+                    <div class="mb-2 sm:mb-0">
+                        <p class="text-sm text-gray-600">
+                            Generated on <span id="printDate"></span>
+                        </p>
+                    </div>
+                    <div class="flex space-x-3">
+                        <button onclick="closePrintModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 text-sm">
+                            Cancel
+                        </button>
+                        <button onclick="confirmPrint()" class="px-6 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-sm">
+                            Print Records
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Solo Print Modal -->
+    <div id="soloPrintModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-2 sm:p-4">
+        <div class="relative mx-auto border w-full max-w-7xl shadow-lg rounded-md bg-white flex flex-col" style="margin-top: 10px; margin-bottom: 10px; height: calc(100vh - 20px); max-height: 95vh;">
+            <!-- Modal Header -->
+            <div class="p-3 sm:p-4 lg:p-6 border-b border-gray-200 flex-shrink-0">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-medium text-gray-900">Solo Print Volunteer Record</h3>
+                    <button onclick="closeSoloPrintModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Modal Content -->
+            <div class="flex-1 overflow-hidden">
+                <div class="h-full flex flex-col lg:flex-row">
+                    <!-- Volunteer Selection (Left Side) -->
+                    <div class="lg:w-1/3 xl:w-1/4 p-3 sm:p-4 lg:p-6 border-b lg:border-b-0 lg:border-r border-gray-200 bg-gray-50">
+                        <h4 class="font-semibold text-gray-900 mb-4">Select Volunteer</h4>
+                        
+                        <!-- Search and Filter for Solo Print -->
+                        <div class="space-y-3 mb-4">
+                            <input type="text" id="soloSearchInput" placeholder="Search volunteers..." class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                            
+                            <select id="soloDepartmentFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                                <option value="">All Departments</option>
+                                <option value="Child Care">Child Care</option>
+                                <option value="Education">Education</option>
+                                <option value="Activities">Activities</option>
+                                <option value="Kitchen">Kitchen</option>
+                                <option value="Administration">Administration</option>
+                                <option value="Events">Events</option>
+                                <option value="Counseling">Counseling</option>
+                            </select>
+                            
+                            <button onclick="applySoloFilters()" class="w-full px-3 py-2 bg-indigo-600 text-white rounded text-sm hover:bg-indigo-700">
+                                Apply Filters
+                            </button>
+                        </div>
+                        
+                        <!-- Volunteer List -->
+                        <div class="max-h-96 overflow-y-auto border border-gray-200 rounded">
+                            <div id="soloVolunteerList" class="divide-y divide-gray-200">
+                                <!-- Volunteer list will be populated here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Print Options -->
+                        <div class="mt-4 pt-4 border-t">
+                            <label class="flex items-center mb-3">
+                                <input type="checkbox" id="soloIncludePhoto" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" checked>
+                                <span class="ml-2 text-sm text-gray-700">Include Photo</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Solo Print Preview (Right Side) -->
+                    <div class="flex-1 overflow-y-auto">
+                        <div id="soloPrintPreviewContent" class="p-4">
+                            <div class="text-center text-gray-500 py-8">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                                <p class="mt-2">Select a volunteer to preview</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="border-t border-gray-200 bg-gray-50 px-3 sm:px-4 lg:px-6 py-3 sm:py-4 rounded-b-md flex-shrink-0">
+                <div class="flex justify-between">
+                    <button onclick="closeSoloPrintModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 text-sm">
+                        Cancel
+                    </button>
+                    <button id="printSoloRecordBtn" onclick="printSoloRecord()" disabled class="px-6 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-sm disabled:bg-gray-400 disabled:cursor-not-allowed">
+                        Print Record
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import {
             db,
@@ -268,6 +757,12 @@
             document.getElementById('statusFilter').addEventListener('change', filterRecords);
             document.getElementById('exportCSVBtn').addEventListener('click', exportToCSV);
             document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+            document.getElementById('advancedFilterBtn').addEventListener('click', openAdvancedFilter);
+            document.getElementById('closeAdvancedFilterBtn').addEventListener('click', closeAdvancedFilter);
+            document.getElementById('applyAdvancedFiltersBtn').addEventListener('click', applyAdvancedFilters);
+            document.getElementById('clearAdvancedFiltersBtn').addEventListener('click', clearAdvancedFilters);
+            document.getElementById('printBtn').addEventListener('click', openPrintModal);
+            document.getElementById('soloPrintBtn').addEventListener('click', openSoloPrintModal);
 
             // Keyboard navigation for modals
             document.addEventListener('keydown', function(event) {
@@ -275,6 +770,7 @@
                     closeAllModals();
                     closeModal();
                     closeEditPasswordModal();
+                    closeAdvancedFilter();
                 }
             });
 
@@ -304,6 +800,144 @@
             }
         };
 
+        let availabilityChart = null;
+        let allVolunteers = [];
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCharts();
+            loadRecordsFromFirestore();
+        });
+
+        function initializeCharts() {
+            // Weekly Availability Chart
+            const availabilityCtx = document.getElementById('availabilityChart').getContext('2d');
+            availabilityChart = new Chart(availabilityCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+                    datasets: [{
+                        label: 'Available Volunteers',
+                        data: [0, 0, 0, 0, 0, 0, 0],
+                        backgroundColor: '#10B981',
+                        borderColor: '#059669',
+                        borderWidth: 1,
+                        borderRadius: 4,
+                        hoverBackgroundColor: '#047857',
+                        hoverBorderColor: '#047857'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.parsed.y} volunteers available on ${context.label}`;
+                                },
+                                afterLabel: function(context) {
+                                    return 'Click to filter volunteers for this day';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    },
+                    onClick: function(event, elements) {
+                        if (elements.length > 0) {
+                            const elementIndex = elements[0].index;
+                            const dayName = this.data.labels[elementIndex];
+                            filterVolunteersByDay(dayName);
+                        }
+                    },
+                    onHover: function(event, elements) {
+                        event.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+                    }
+                }
+            });
+        }
+
+        function updateTrendCharts() {
+            if (!allVolunteers.length) return;
+
+            // Update Weekly Availability
+            const weeklyAvailability = [0, 0, 0, 0, 0, 0, 0]; // Mon-Sun
+            allVolunteers.forEach(volunteer => {
+                if (volunteer.availability) {
+                    const days = volunteer.availability.split(',');
+                    days.forEach(day => {
+                        const dayIndex = getDayIndex(day.trim());
+                        if (dayIndex !== -1) {
+                            weeklyAvailability[dayIndex]++;
+                        }
+                    });
+                }
+            });
+
+            availabilityChart.data.datasets[0].data = weeklyAvailability;
+            availabilityChart.update();
+
+            // Update statistics
+            updateAvailabilityStats(weeklyAvailability);
+        }
+
+        function getDayIndex(day) {
+            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            return days.indexOf(day.toLowerCase());
+        }
+
+        function updateAvailabilityStats(weeklyData) {
+            document.getElementById('totalVolunteers').textContent = `Total: ${allVolunteers.length}`;
+            
+            const activeVolunteers = allVolunteers.filter(v => v.volunteerStatus !== 'Inactive').length;
+            document.getElementById('activeVolunteers').textContent = `Active: ${activeVolunteers}`;
+            
+            const today = new Date().getDay(); // 0=Sunday, 1=Monday, etc.
+            const todayIndex = today === 0 ? 6 : today - 1; // Convert to our Monday=0 format
+            document.getElementById('availableToday').textContent = `Available Today: ${weeklyData[todayIndex] || 0}`;
+        }
+
+        window.toggleTrendsSection = function() {
+            const content = document.getElementById('trendsContent');
+            const icon = document.getElementById('trendsToggleIcon');
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                content.style.display = 'none';
+                icon.style.transform = 'rotate(-90deg)';
+            }
+        };
+
+        // Auto-refresh function with visual feedback
+        function autoRefreshAvailability() {
+            updateTrendCharts();
+            
+            // Add subtle visual feedback for auto-update
+            const autoIndicator = document.querySelector('.animate-pulse');
+            if (autoIndicator) {
+                autoIndicator.classList.add('bg-emerald-500');
+                setTimeout(() => {
+                    autoIndicator.classList.remove('bg-emerald-500');
+                }, 500);
+            }
+        }
+
+        window.clearDayFilter = function() {
+            clearDayFilter();
+        };
+
         async function loadRecordsFromFirestore() {
             try {
                 showSkeletonLoading();
@@ -311,6 +945,7 @@
                 const usersCol = collection(db, 'users');
                 const snapshot = await getDocs(usersCol);
                 allRecords = [];
+                allVolunteers = []; // Update the volunteers array for trends
                 snapshot.forEach(docSnap => {
                     const data = docSnap.data();
                     // Only include users with role 'volunteer'
@@ -320,15 +955,19 @@
                         // For compatibility, set volunteerId (if not present, fallback to uid)
                         data.volunteerId = data.volunteerId || data.uid || docSnap.id;
                         allRecords.push(data);
+                        allVolunteers.push(data); // Also add to volunteers array for trends
                     }
                 });
 
                 hideSkeletonLoading();
                 displayRecords(allRecords);
+                // Charts are auto-updated by displayRecords function
             } catch (error) {
                 console.error('Failed to load volunteer records from Firestore:', error);
                 hideSkeletonLoading();
                 displayRecords([]);
+                allVolunteers = []; // Clear volunteers array on error
+                // Charts are auto-updated by displayRecords function
             }
         }
 
@@ -376,6 +1015,8 @@
             if (records.length === 0) {
                 recordsGrid.innerHTML = '';
                 noRecords.classList.remove('hidden');
+                // Auto-update charts even when no records
+                autoRefreshAvailability();
                 return;
             }
 
@@ -431,6 +1072,9 @@
                     </div>
                 `;
             }).join('');
+            
+            // Auto-update charts when records are displayed
+            autoRefreshAvailability();
         }
 
         function getStatusColor(status) {
@@ -446,7 +1090,294 @@
             }
         }
 
+        function filterVolunteersByDay(dayName) {
+            // Clear existing filters first
+            document.getElementById('searchInput').value = '';
+            document.getElementById('departmentFilter').value = '';
+            document.getElementById('statusFilter').value = '';
+            
+            // Filter volunteers by the selected day
+            const filteredRecords = allRecords.filter(volunteer => {
+                if (!volunteer.availability) return false;
+                
+                const availableDays = volunteer.availability.toLowerCase().split(',').map(day => day.trim());
+                return availableDays.includes(dayName.toLowerCase());
+            });
+            
+            displayRecords(filteredRecords);
+            
+            // Show feedback message
+            const dayCount = filteredRecords.length;
+            showMessage(`Showing ${dayCount} volunteer${dayCount !== 1 ? 's' : ''} available on ${dayName}`, 'success');
+            
+            // Add visual feedback to show current filter
+            addDayFilterIndicator(dayName, dayCount);
+            
+            // Charts are auto-updated by displayRecords function
+        }
+
+        function addDayFilterIndicator(dayName, count) {
+            // Remove existing filter indicator
+            const existingIndicator = document.querySelector('.day-filter-indicator');
+            if (existingIndicator) {
+                existingIndicator.remove();
+            }
+            
+            // Add new filter indicator
+            const indicator = document.createElement('div');
+            indicator.className = 'day-filter-indicator bg-blue-100 border border-blue-300 rounded-lg p-3 mb-4 flex items-center justify-between';
+            indicator.innerHTML = `
+                <div class="flex items-center">
+                    <svg class="h-5 w-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.414A1 1 0 013 6.707V4z"></path>
+                    </svg>
+                    <span class="text-blue-800 font-medium">Filtered by: ${dayName} (${count} volunteer${count !== 1 ? 's' : ''})</span>
+                </div>
+                <button onclick="clearDayFilter()" class="text-blue-600 hover:text-blue-800 font-medium text-sm">
+                    Clear Filter
+                </button>
+            `;
+            
+            // Insert after the search section
+            const searchSection = document.querySelector('.mb-6.bg-white.rounded-lg.shadow.p-4');
+            searchSection.parentNode.insertBefore(indicator, searchSection.nextSibling);
+        }
+
+        function clearDayFilter() {
+            // Remove filter indicator
+            const indicator = document.querySelector('.day-filter-indicator');
+            if (indicator) {
+                indicator.remove();
+            }
+            
+            // Reset filters and display all records
+            document.getElementById('searchInput').value = '';
+            document.getElementById('departmentFilter').value = '';
+            document.getElementById('statusFilter').value = '';
+            displayRecords(allRecords);
+            
+            showMessage('Filter cleared - showing all volunteers', 'success');
+        }
+
+        function openAdvancedFilter() {
+            document.getElementById('advancedFilterModal').classList.remove('hidden');
+            updateFilterResultCount();
+        }
+
+        function closeAdvancedFilter() {
+            document.getElementById('advancedFilterModal').classList.add('hidden');
+        }
+
+        function clearAdvancedFilters() {
+            // Clear all filter inputs
+            document.getElementById('filterFirstName').value = '';
+            document.getElementById('filterLastName').value = '';
+            document.getElementById('filterContactNumber').value = '';
+            document.getElementById('filterEmailAddress').value = '';
+            document.getElementById('filterVolunteerId').value = '';
+            document.getElementById('filterDepartmentAdvanced').value = '';
+            document.getElementById('filterStatusAdvanced').value = '';
+            document.getElementById('filterSkills').value = '';
+            document.getElementById('filterDateFrom').value = '';
+            document.getElementById('filterDateTo').value = '';
+            
+            // Clear day checkboxes
+            const dayCheckboxes = ['filterMonday', 'filterTuesday', 'filterWednesday', 'filterThursday', 
+                                  'filterFriday', 'filterSaturday', 'filterSunday'];
+            dayCheckboxes.forEach(id => {
+                document.getElementById(id).checked = false;
+            });
+            
+            updateFilterResultCount();
+        }
+
+        function updateFilterResultCount() {
+            const filteredRecords = getAdvancedFilteredRecords();
+            const count = filteredRecords.length;
+            document.getElementById('filterResultCount').textContent = 
+                `${count} volunteer${count !== 1 ? 's' : ''} match your filters`;
+        }
+
+        function getAdvancedFilteredRecords() {
+            return allRecords.filter(volunteer => {
+                // Personal Information filters
+                const firstName = document.getElementById('filterFirstName').value.toLowerCase();
+                const lastName = document.getElementById('filterLastName').value.toLowerCase();
+                const contactNumber = document.getElementById('filterContactNumber').value.toLowerCase();
+                const emailAddress = document.getElementById('filterEmailAddress').value.toLowerCase();
+                
+                // Volunteer Details filters
+                const volunteerId = document.getElementById('filterVolunteerId').value.toLowerCase();
+                const department = document.getElementById('filterDepartmentAdvanced').value;
+                const status = document.getElementById('filterStatusAdvanced').value;
+                const skills = document.getElementById('filterSkills').value.toLowerCase();
+                
+                // Date filters
+                const dateFrom = document.getElementById('filterDateFrom').value;
+                const dateTo = document.getElementById('filterDateTo').value;
+                
+                // Day filters
+                const selectedDays = [];
+                const dayCheckboxes = [
+                    { id: 'filterMonday', day: 'monday' },
+                    { id: 'filterTuesday', day: 'tuesday' },
+                    { id: 'filterWednesday', day: 'wednesday' },
+                    { id: 'filterThursday', day: 'thursday' },
+                    { id: 'filterFriday', day: 'friday' },
+                    { id: 'filterSaturday', day: 'saturday' },
+                    { id: 'filterSunday', day: 'sunday' }
+                ];
+                
+                dayCheckboxes.forEach(({ id, day }) => {
+                    if (document.getElementById(id).checked) {
+                        selectedDays.push(day);
+                    }
+                });
+
+                // Apply filters
+                const matchesFirstName = !firstName || (volunteer.firstName || '').toLowerCase().includes(firstName);
+                const matchesLastName = !lastName || (volunteer.lastName || '').toLowerCase().includes(lastName);
+                const matchesContactNumber = !contactNumber || (volunteer.contactNumber || '').toLowerCase().includes(contactNumber);
+                const matchesEmailAddress = !emailAddress || (volunteer.emailAddress || '').toLowerCase().includes(emailAddress);
+                const matchesVolunteerId = !volunteerId || (volunteer.volunteerId || '').toLowerCase().includes(volunteerId);
+                const matchesDepartment = !department || volunteer.preferredDepartment === department;
+                const matchesStatus = !status || volunteer.volunteerStatus === status;
+                const matchesSkills = !skills || (volunteer.skillsAndExperience || '').toLowerCase().includes(skills);
+                
+                // Date range filter
+                let matchesDateRange = true;
+                if (dateFrom || dateTo) {
+                    const volunteerDate = volunteer.dateAdded;
+                    if (volunteerDate) {
+                        const volunteerDateObj = new Date(volunteerDate);
+                        if (dateFrom) {
+                            matchesDateRange = matchesDateRange && volunteerDateObj >= new Date(dateFrom);
+                        }
+                        if (dateTo) {
+                            matchesDateRange = matchesDateRange && volunteerDateObj <= new Date(dateTo);
+                        }
+                    } else {
+                        matchesDateRange = false;
+                    }
+                }
+                
+                // Day availability filter
+                let matchesDays = true;
+                if (selectedDays.length > 0) {
+                    if (!volunteer.availability) {
+                        matchesDays = false;
+                    } else {
+                        const volunteerDays = volunteer.availability.toLowerCase().split(',').map(day => day.trim());
+                        matchesDays = selectedDays.some(day => volunteerDays.includes(day));
+                    }
+                }
+
+                return matchesFirstName && matchesLastName && matchesContactNumber && matchesEmailAddress &&
+                       matchesVolunteerId && matchesDepartment && matchesStatus && matchesSkills &&
+                       matchesDateRange && matchesDays;
+            });
+        }
+
+        function applyAdvancedFilters() {
+            // Clear day filter indicator when using advanced filters
+            const indicator = document.querySelector('.day-filter-indicator');
+            if (indicator) {
+                indicator.remove();
+            }
+            
+            // Clear basic filters
+            document.getElementById('searchInput').value = '';
+            document.getElementById('departmentFilter').value = '';
+            document.getElementById('statusFilter').value = '';
+            
+            const filteredRecords = getAdvancedFilteredRecords();
+            displayRecords(filteredRecords);
+            closeAdvancedFilter();
+            
+            const count = filteredRecords.length;
+            showMessage(`Applied advanced filters - showing ${count} volunteer${count !== 1 ? 's' : ''}`, 'success');
+            
+            // Add advanced filter indicator
+            addAdvancedFilterIndicator(count);
+            
+            // Charts are auto-updated by displayRecords function
+        }
+
+        function addAdvancedFilterIndicator(count) {
+            // Remove existing filter indicator
+            const existingIndicator = document.querySelector('.advanced-filter-indicator');
+            if (existingIndicator) {
+                existingIndicator.remove();
+            }
+            
+            // Add new filter indicator
+            const indicator = document.createElement('div');
+            indicator.className = 'advanced-filter-indicator bg-purple-100 border border-purple-300 rounded-lg p-3 mb-4 flex items-center justify-between';
+            indicator.innerHTML = `
+                <div class="flex items-center">
+                    <svg class="h-5 w-5 text-purple-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.414A1 1 0 013 6.707V4z"></path>
+                    </svg>
+                    <span class="text-purple-800 font-medium">Advanced filters applied (${count} volunteer${count !== 1 ? 's' : ''})</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="openAdvancedFilter()" class="text-purple-600 hover:text-purple-800 font-medium text-sm">
+                        Edit Filters
+                    </button>
+                    <button onclick="clearAllFilters()" class="text-purple-600 hover:text-purple-800 font-medium text-sm">
+                        Clear All
+                    </button>
+                </div>
+            `;
+            
+            // Insert after the search section
+            const searchSection = document.querySelector('.mb-6.bg-white.rounded-lg.shadow.p-4');
+            searchSection.parentNode.insertBefore(indicator, searchSection.nextSibling);
+        }
+
+        window.openAdvancedFilter = function() {
+            openAdvancedFilter();
+        };
+
+        window.clearAllFilters = function() {
+            // Remove filter indicators
+            const indicators = document.querySelectorAll('.advanced-filter-indicator, .day-filter-indicator');
+            indicators.forEach(indicator => indicator.remove());
+            
+            // Clear all filters
+            document.getElementById('searchInput').value = '';
+            document.getElementById('departmentFilter').value = '';
+            document.getElementById('statusFilter').value = '';
+            clearAdvancedFilters();
+            
+            // Display all records
+            displayRecords(allRecords);
+            showMessage('All filters cleared - showing all volunteers', 'success');
+        };
+
+        // Add event listeners for real-time filter count updates
+        document.addEventListener('DOMContentLoaded', function() {
+            const filterInputs = [
+                'filterFirstName', 'filterLastName', 'filterContactNumber', 'filterEmailAddress',
+                'filterVolunteerId', 'filterDepartmentAdvanced', 'filterStatusAdvanced', 'filterSkills',
+                'filterDateFrom', 'filterDateTo', 'filterMonday', 'filterTuesday', 'filterWednesday',
+                'filterThursday', 'filterFriday', 'filterSaturday', 'filterSunday'
+            ];
+            
+            filterInputs.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('input', updateFilterResultCount);
+                    element.addEventListener('change', updateFilterResultCount);
+                }
+            });
+        });
+
         function filterRecords() {
+            // Clear filter indicators when using regular filters
+            const indicators = document.querySelectorAll('.day-filter-indicator, .advanced-filter-indicator');
+            indicators.forEach(indicator => indicator.remove());
+            
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const departmentFilter = document.getElementById('departmentFilter').value;
             const statusFilter = document.getElementById('statusFilter').value;
@@ -464,6 +1395,8 @@
             });
 
             displayRecords(filteredRecords);
+            
+            // Charts are auto-updated by displayRecords function
         }
 
         window.showVolunteerDetail = function(volunteerId) {
@@ -804,6 +1737,515 @@
                 messageContainer.classList.add('hidden');
             }, 5000);
         }
+
+        // Print Modal Functions
+        window.openPrintModal = function() {
+            document.getElementById('printModal').classList.remove('hidden');
+            generatePrintPreview();
+        };
+
+        window.closePrintModal = function() {
+            document.getElementById('printModal').classList.add('hidden');
+        };
+
+        window.updatePrintPreview = function() {
+            generatePrintPreview();
+        };
+
+        window.resetPrintFilters = function() {
+            document.getElementById('printDepartmentFilter').value = '';
+            document.getElementById('printStatusFilter').value = '';
+            document.getElementById('printGenderFilter').value = '';
+            document.getElementById('printAvailabilityFilter').value = '';
+            document.getElementById('printDateFrom').value = '';
+            document.getElementById('printDateTo').value = '';
+            document.getElementById('printIncludePhotos').checked = true;
+            generatePrintPreview();
+        };
+
+        window.confirmPrint = function() {
+            // Get filtered records for printing
+            const departmentFilter = document.getElementById('printDepartmentFilter').value;
+            const statusFilter = document.getElementById('printStatusFilter').value;
+            const genderFilter = document.getElementById('printGenderFilter').value;
+            const availabilityFilter = document.getElementById('printAvailabilityFilter').value;
+            const dateFrom = document.getElementById('printDateFrom').value;
+            const dateTo = document.getElementById('printDateTo').value;
+            const includePhotos = document.getElementById('printIncludePhotos').checked;
+
+            // Filter records based on print criteria
+            let printRecords = allRecords.filter(volunteer => {
+                const matchesDepartment = !departmentFilter || volunteer.preferredDepartment === departmentFilter;
+                const matchesStatus = !statusFilter || volunteer.volunteerStatus === statusFilter;
+                const matchesGender = !genderFilter || volunteer.gender === genderFilter;
+                
+                let matchesAvailability = true;
+                if (availabilityFilter) {
+                    const availability = volunteer.availability || '';
+                    matchesAvailability = availability.toLowerCase().includes(availabilityFilter.toLowerCase());
+                }
+                
+                let matchesDateRange = true;
+                if (dateFrom || dateTo) {
+                    const volunteerDate = volunteer.dateAdded;
+                    if (volunteerDate) {
+                        const date = new Date(volunteerDate);
+                        if (dateFrom && new Date(dateFrom) > date) matchesDateRange = false;
+                        if (dateTo && new Date(dateTo) < date) matchesDateRange = false;
+                    } else {
+                        matchesDateRange = false;
+                    }
+                }
+
+                return matchesDepartment && matchesStatus && matchesGender && matchesAvailability && matchesDateRange;
+            });
+
+            if (printRecords.length === 0) {
+                alert('No records to print');
+                return;
+            }
+
+            // Create print window
+            const printWindow = window.open('', '_blank');
+            const printContent = generatePrintContent(printRecords, includePhotos);
+            
+            printWindow.document.write(printContent);
+            printWindow.document.close();
+            
+            // Auto-print when loaded
+            printWindow.onload = function() {
+                printWindow.print();
+            };
+            
+            closePrintModal();
+        };
+
+        function generatePrintPreview() {
+            const departmentFilter = document.getElementById('printDepartmentFilter').value;
+            const statusFilter = document.getElementById('printStatusFilter').value;
+            const genderFilter = document.getElementById('printGenderFilter').value;
+            const availabilityFilter = document.getElementById('printAvailabilityFilter').value;
+            const dateFrom = document.getElementById('printDateFrom').value;
+            const dateTo = document.getElementById('printDateTo').value;
+            const includePhotos = document.getElementById('printIncludePhotos').checked;
+
+            // Filter records based on print criteria
+            let printRecords = allRecords.filter(volunteer => {
+                const matchesDepartment = !departmentFilter || volunteer.preferredDepartment === departmentFilter;
+                const matchesStatus = !statusFilter || volunteer.volunteerStatus === statusFilter;
+                const matchesGender = !genderFilter || volunteer.gender === genderFilter;
+                
+                let matchesAvailability = true;
+                if (availabilityFilter) {
+                    if (!volunteer.availability) {
+                        matchesAvailability = false;
+                    } else {
+                        const availableDays = volunteer.availability.toLowerCase().split(',').map(day => day.trim());
+                        matchesAvailability = availableDays.includes(availabilityFilter.toLowerCase());
+                    }
+                }
+                
+                let matchesDateRange = true;
+                if (dateFrom || dateTo) {
+                    const volunteerDate = volunteer.dateAdded;
+                    if (volunteerDate) {
+                        const volunteerDateObj = new Date(volunteerDate);
+                        if (dateFrom) {
+                            matchesDateRange = matchesDateRange && volunteerDateObj >= new Date(dateFrom);
+                        }
+                        if (dateTo) {
+                            matchesDateRange = matchesDateRange && volunteerDateObj <= new Date(dateTo);
+                        }
+                    } else {
+                        matchesDateRange = false;
+                    }
+                }
+
+                return matchesDepartment && matchesStatus && matchesGender && matchesAvailability && matchesDateRange;
+            });
+
+            // Update record count
+            document.getElementById('printRecordCount').textContent = `${printRecords.length} records will be printed`;
+            
+            // Update print date
+            document.getElementById('printDate').textContent = new Date().toLocaleDateString();
+
+            // Generate print content
+            const printContent = generatePrintContent(printRecords, includePhotos);
+            document.getElementById('printPreviewContent').innerHTML = printContent;
+        }
+
+        function generatePrintContent(records, includePhotos) {
+            const currentDate = new Date().toLocaleDateString();
+            
+            return `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Volunteer Records - Tahanan ng Pagmamahal</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            margin: 20px;
+                            font-size: 12px;
+                            line-height: 1.4;
+                        }
+                        .header {
+                            text-align: center;
+                            margin-bottom: 20px;
+                            border-bottom: 2px solid #333;
+                            padding-bottom: 15px;
+                        }
+                        .logo {
+                            height: 80px;
+                            margin-bottom: 10px;
+                        }
+                        h1 {
+                            margin: 10px 0 5px 0;
+                            font-size: 18px;
+                            color: #333;
+                        }
+                        .subtitle {
+                            font-size: 11px;
+                            color: #666;
+                            margin: 2px 0;
+                        }
+                        table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin: 20px 0;
+                            font-size: 10px;
+                        }
+                        th, td {
+                            border: 1px solid #333;
+                            padding: 4px 6px;
+                            text-align: left;
+                        }
+                        th {
+                            background-color: #f0f0f0;
+                            font-weight: bold;
+                            text-align: center;
+                        }
+                        .text-center {
+                            text-align: center;
+                        }
+                        .photo {
+                            width: 25px;
+                            height: 25px;
+                            object-fit: cover;
+                            border-radius: 2px;
+                        }
+                        .footer {
+                            margin-top: 30px;
+                            font-size: 10px;
+                        }
+                        .signature-section {
+                            margin-top: 40px;
+                            text-align: right;
+                        }
+                        .signature-line {
+                            border-top: 1px solid #333;
+                            width: 200px;
+                            margin: 0 0 5px auto;
+                        }
+                        @media print {
+                            body { margin: 15px; }
+                            .no-print { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <img src="tahanan-logo.png" alt="Tahanan ng Pagmamahal Logo" class="logo" style="display: block; margin: 0 auto;" onerror="this.style.display='none'">
+                        <div class="subtitle">45 Dr. Pilapil St., Brgy. Sagad, Pasig Metro Manila, Philippines</div>
+                        <div class="subtitle">Contact: (+63) 917 325 7168 Tel: +632 8631 7188</div>
+                        <div class="subtitle">Email: tahananmocil@gmail.com</div>
+                    </div>
+                    
+                    <h2 style="text-align: center; margin: 20px 0; font-size: 16px;">VOLUNTEER RECORDS</h2>
+                    <p style="text-align: center; font-size: 11px; color: #666; margin-bottom: 20px;">Generated on ${currentDate}</p>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                ${includePhotos ? '<th style="width: 40px;">Photo</th>' : ''}
+                                <th style="width: 60px;">ID</th>
+                                <th>Full Name</th>
+                                <th style="width: 80px;">Department</th>
+                                <th style="width: 60px;">Status</th>
+                                <th style="width: 80px;">Contact</th>
+                                <th style="width: 120px;">Email</th>
+                                <th style="width: 70px;">Date Joined</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${records.map(volunteer => {
+                                const fullName = `${volunteer.firstName || ''} ${volunteer.middleName || ''} ${volunteer.lastName || ''}`.trim();
+                                const photoSrc = volunteer.photoData || 'user.png';
+                                const dateJoined = volunteer.dateAdded ? new Date(volunteer.dateAdded).toLocaleDateString() : 'N/A';
+                                
+                                return `
+                                    <tr>
+                                        ${includePhotos ? `<td class="text-center"><img src="${photoSrc}" alt="${fullName}" class="photo" onerror="this.src='user.png'"></td>` : ''}
+                                        <td class="text-center">${volunteer.volunteerId || 'N/A'}</td>
+                                        <td>${fullName}</td>
+                                        <td class="text-center">${volunteer.preferredDepartment || 'N/A'}</td>
+                                        <td class="text-center">${volunteer.volunteerStatus || 'Active'}</td>
+                                        <td class="text-center">${volunteer.contactNumber || 'N/A'}</td>
+                                        <td class="text-center">${volunteer.emailAddress || 'N/A'}</td>
+                                        <td class="text-center">${dateJoined}</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                    
+                    <div class="footer">
+                        <p><strong>Total Records:</strong> ${records.length}</p>
+                        <p>This document was generated automatically by the TNP OMS system.</p>
+                    </div>
+                    
+                    <div class="signature-section">
+                        <div class="signature-line"></div>
+                        <div style="font-size: 10px;">Authorized Signature</div>
+                    </div>
+                </body>
+                </html>
+            `;
+        }
+
+        // Solo Print Modal Functions
+        let selectedVolunteerForSolo = null;
+        let filteredSoloVolunteers = [];
+
+        window.openSoloPrintModal = function() {
+            document.getElementById('soloPrintModal').classList.remove('hidden');
+            populateVolunteerList();
+        };
+
+        window.closeSoloPrintModal = function() {
+            document.getElementById('soloPrintModal').classList.add('hidden');
+            selectedVolunteerForSolo = null;
+        };
+
+        window.selectVolunteerForSoloPrint = function(volunteerId) {
+            const volunteer = allRecords.find(v => v.volunteerId === volunteerId || v.uid === volunteerId);
+            if (volunteer) {
+                selectedVolunteerForSolo = volunteer;
+                updateSoloPreview();
+                document.getElementById('printSoloRecordBtn').disabled = false;
+                
+                // Update selection visual feedback
+                document.querySelectorAll('.solo-volunteer-item').forEach(item => {
+                    item.classList.remove('bg-indigo-100', 'border-indigo-300');
+                    item.classList.add('bg-white', 'border-gray-200');
+                });
+                
+                const selectedItem = document.querySelector(`[onclick="selectVolunteerForSoloPrint('${volunteerId}')"]`);
+                if (selectedItem) {
+                    selectedItem.classList.remove('bg-white', 'border-gray-200');
+                    selectedItem.classList.add('bg-indigo-100', 'border-indigo-300');
+                }
+            }
+        };
+
+        window.updateSoloPreview = function() {
+            if (selectedVolunteerForSolo) {
+                const includePhoto = document.getElementById('soloIncludePhoto').checked;
+                const printContent = generateSoloPrintPreview(selectedVolunteerForSolo, includePhoto);
+                document.getElementById('soloPrintPreviewContent').innerHTML = printContent;
+            }
+        };
+
+        window.printSoloRecord = function() {
+            if (selectedVolunteerForSolo) {
+                window.print();
+            }
+        };
+
+        function populateVolunteerList() {
+            filteredSoloVolunteers = [...allRecords];
+            displaySoloVolunteerList();
+        }
+
+        window.applySoloFilters = function() {
+            const searchTerm = document.getElementById('soloSearchInput').value.toLowerCase();
+            const departmentFilter = document.getElementById('soloDepartmentFilter').value;
+
+            filteredSoloVolunteers = allRecords.filter(volunteer => {
+                const fullName = `${volunteer.firstName || ''} ${volunteer.middleName || ''} ${volunteer.lastName || ''}`.toLowerCase();
+                const matchesSearch = fullName.includes(searchTerm) || 
+                                    (volunteer.volunteerId || '').toLowerCase().includes(searchTerm);
+                const matchesDepartment = !departmentFilter || volunteer.preferredDepartment === departmentFilter;
+
+                return matchesSearch && matchesDepartment;
+            });
+
+            displaySoloVolunteerList();
+        };
+
+        function displaySoloVolunteerList() {
+            const listContainer = document.getElementById('soloVolunteerList');
+            
+            if (filteredSoloVolunteers.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="p-4 text-center text-gray-500">
+                        <p>No volunteers found</p>
+                    </div>
+                `;
+                return;
+            }
+
+            listContainer.innerHTML = filteredSoloVolunteers.map(volunteer => {
+                const fullName = `${volunteer.firstName || ''} ${volunteer.middleName || ''} ${volunteer.lastName || ''}`.trim();
+                const photoSrc = volunteer.photoData || 'user.png';
+                const volunteerId = volunteer.volunteerId || volunteer.uid;
+                
+                return `
+                    <div class="solo-volunteer-item p-3 border-l-4 border-transparent hover:bg-gray-50 cursor-pointer bg-white border-gray-200"
+                         onclick="selectVolunteerForSoloPrint('${volunteerId}')">
+                        <div class="flex items-center space-x-3">
+                            <img src="${photoSrc}" alt="${fullName}" class="h-10 w-10 rounded-full object-cover">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-gray-900 truncate">${fullName}</p>
+                                <p class="text-xs text-gray-500">${volunteer.volunteerId || 'N/A'}</p>
+                                <p class="text-xs text-gray-500">${volunteer.preferredDepartment || 'No Department'}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function generateSoloPrintPreview(volunteer, includePhoto) {
+            const fullName = `${volunteer.firstName || ''} ${volunteer.middleName || ''} ${volunteer.lastName || ''}`.trim();
+            const photoSrc = volunteer.photoData || 'user.png';
+            const currentDate = new Date().toLocaleDateString();
+
+            return `
+                <div class="print-content">
+                    <!-- Header -->
+                    <div class="text-center mb-6">
+                        <img src="${window.location.origin}${window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'))}/tahanan-logo.png" alt="Tahanan ng Pagmamahal Logo" style="height: 80px; margin: 0 auto 10px auto; display: block;" onerror="this.style.display='none'">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-900">TAHANAN NG PAGMAMAHAL</h1>
+                            <p class="text-lg text-gray-600">children's home inc.</p>
+                        </div>
+                        <div class="border-b-2 border-gray-300 pb-2">
+                            <p class="text-sm text-gray-600">45 Dr. Pilapil St., Brgy. Sagad, Pasig Metro Manila, Philippines</p>
+                            <p class="text-sm text-gray-600">Contact: (+63) 917 325 7168 Tel: +632 8631 7188</p>
+                            <p class="text-sm text-gray-600">Email: tahananmocil@gmail.com</p>
+                        </div>
+                        <div class="mt-4">
+                            <h2 class="text-xl font-semibold text-gray-900">VOLUNTEER RECORD</h2>
+                            <p class="text-sm text-gray-600">Generated on ${currentDate}</p>
+                        </div>
+                    </div>
+
+                    <!-- Volunteer Details -->
+                    <div class="bg-white border border-gray-300 rounded-lg overflow-hidden">
+                        ${includePhoto ? `
+                        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 text-center">
+                            <img src="${photoSrc}" alt="${fullName}" class="h-32 w-32 rounded-full object-cover mx-auto border-4 border-white shadow-lg">
+                        </div>
+                        ` : ''}
+                        
+                        <div class="px-6 py-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Personal Information -->
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-4 border-b pb-2">Personal Information</h3>
+                                    <div class="space-y-3">
+                                        <div class="flex">
+                                            <span class="w-32 text-sm font-medium text-gray-700">Full Name:</span>
+                                            <span class="text-sm text-gray-900">${fullName}</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-32 text-sm font-medium text-gray-700">Volunteer ID:</span>
+                                            <span class="text-sm text-gray-900">${volunteer.volunteerId || 'N/A'}</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-32 text-sm font-medium text-gray-700">Contact:</span>
+                                            <span class="text-sm text-gray-900">${volunteer.contactNumber || 'N/A'}</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-32 text-sm font-medium text-gray-700">Email:</span>
+                                            <span class="text-sm text-gray-900">${volunteer.emailAddress || 'N/A'}</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-32 text-sm font-medium text-gray-700">Date Joined:</span>
+                                            <span class="text-sm text-gray-900">${volunteer.dateAdded || 'N/A'}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Volunteer Information -->
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-4 border-b pb-2">Volunteer Information</h3>
+                                    <div class="space-y-3">
+                                        <div class="flex">
+                                            <span class="w-32 text-sm font-medium text-gray-700">Department:</span>
+                                            <span class="text-sm text-gray-900">${volunteer.preferredDepartment || 'N/A'}</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-32 text-sm font-medium text-gray-700">Status:</span>
+                                            <span class="text-sm text-gray-900">${volunteer.volunteerStatus || 'Active'}</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-32 text-sm font-medium text-gray-700">Availability:</span>
+                                            <span class="text-sm text-gray-900">${volunteer.availability || 'N/A'}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Additional Information -->
+                            <div class="mt-6">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4 border-b pb-2">Additional Information</h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <span class="block text-sm font-medium text-gray-700 mb-1">Skills & Experience:</span>
+                                        <p class="text-sm text-gray-900">${volunteer.skillsAndExperience || 'Not specified'}</p>
+                                    </div>
+                                    <div>
+                                        <span class="block text-sm font-medium text-gray-700 mb-1">Motivation for Volunteering:</span>
+                                        <p class="text-sm text-gray-900">${volunteer.motivationForVolunteering || 'Not specified'}</p>
+                                    </div>
+                                    <div>
+                                        <span class="block text-sm font-medium text-gray-700 mb-1">Emergency Contact:</span>
+                                        <p class="text-sm text-gray-900">
+                                            ${volunteer.emergencyContactName || 'Not specified'}
+                                            ${volunteer.emergencyContactRelationship ? `(${volunteer.emergencyContactRelationship})` : ''}
+                                            ${volunteer.emergencyContactNumber ? `- ${volunteer.emergencyContactNumber}` : ''}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="mt-8 flex justify-between items-end">
+                        <div>
+                            <p class="text-xs text-gray-500">This document was generated automatically by the TNP OMS system.</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="border-t border-gray-400 w-48 pt-2">
+                                <p class="text-sm text-gray-600">Authorized Signature</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Add event listener for solo photo checkbox
+        document.addEventListener('DOMContentLoaded', function() {
+            const soloPhotoCheckbox = document.getElementById('soloIncludePhoto');
+            if (soloPhotoCheckbox) {
+                soloPhotoCheckbox.addEventListener('change', updateSoloPreview);
+            }
+        });
 
         window.logout = function() {
             sessionManager.logout();
