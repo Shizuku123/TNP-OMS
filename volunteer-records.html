@@ -598,7 +598,7 @@
                             
                             <div class="pt-2">
                                 <label class="flex items-center">
-                                    <input type="checkbox" id="printIncludePhotos" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" checked onchange="updatePrintPreview()">
+                                    <input type="checkbox" id="printIncludePhotos" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" onchange="updatePrintPreview()">
                                     <span class="ml-2 text-sm text-gray-700">Include Photos</span>
                                 </label>
                             </div>
@@ -699,7 +699,7 @@
                         <!-- Print Options -->
                         <div class="mt-4 pt-4 border-t">
                             <label class="flex items-center mb-3">
-                                <input type="checkbox" id="soloIncludePhoto" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" checked>
+                                <input type="checkbox" id="soloIncludePhoto" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
                                 <span class="ml-2 text-sm text-gray-700">Include Photo</span>
                             </label>
                         </div>
@@ -1759,7 +1759,7 @@
             document.getElementById('printAvailabilityFilter').value = '';
             document.getElementById('printDateFrom').value = '';
             document.getElementById('printDateTo').value = '';
-            document.getElementById('printIncludePhotos').checked = true;
+            document.getElementById('printIncludePhotos').checked = false;
             generatePrintPreview();
         };
 
@@ -1922,9 +1922,13 @@
                             text-align: left;
                         }
                         th {
-                            background-color: #f0f0f0;
+                            background-color: #dc2626 !important;
+                            color: white !important;
                             font-weight: bold;
                             text-align: center;
+                            -webkit-print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                            print-color-adjust: exact !important;
                         }
                         .text-center {
                             text-align: center;
@@ -2059,7 +2063,18 @@
 
         window.printSoloRecord = function() {
             if (selectedVolunteerForSolo) {
-                window.print();
+                const includePhoto = document.getElementById('soloIncludePhoto').checked;
+                const printContent = generateSoloPrintContent(selectedVolunteerForSolo, includePhoto);
+                
+                // Create print window
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(printContent);
+                printWindow.document.close();
+                
+                // Auto-print when loaded
+                printWindow.onload = function() {
+                    printWindow.print();
+                };
             }
         };
 
@@ -2236,6 +2251,212 @@
                         </div>
                     </div>
                 </div>
+            `;
+        }
+
+        function generateSoloPrintContent(volunteer, includePhoto) {
+            const fullName = `${volunteer.firstName || ''} ${volunteer.middleName || ''} ${volunteer.lastName || ''}`.trim();
+            const photoSrc = volunteer.photoData || 'user.png';
+            const currentDate = new Date().toLocaleDateString();
+            const dateJoined = volunteer.dateAdded ? new Date(volunteer.dateAdded).toLocaleDateString() : 'N/A';
+
+            return `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Volunteer Record - ${fullName} - Tahanan ng Pagmamahal</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            margin: 20px;
+                            font-size: 12px;
+                            line-height: 1.4;
+                        }
+                        .header {
+                            text-align: center;
+                            margin-bottom: 20px;
+                            border-bottom: 2px solid #333;
+                            padding-bottom: 15px;
+                        }
+                        .logo {
+                            height: 80px;
+                            margin-bottom: 10px;
+                        }
+                        h1 {
+                            margin: 10px 0 5px 0;
+                            font-size: 18px;
+                            color: #333;
+                        }
+                        .subtitle {
+                            font-size: 11px;
+                            color: #666;
+                            margin: 2px 0;
+                        }
+                        .info-section {
+                            margin: 20px 0;
+                        }
+                        .section-header {
+                            margin: 20px 0 10px 0;
+                            font-size: 14px;
+                            color: #333;
+                            border-bottom: 2px solid #dc2626;
+                            padding-bottom: 5px;
+                            background-color: #dc2626 !important;
+                            color: white !important;
+                            padding: 8px;
+                            text-align: center;
+                            font-weight: bold;
+                            -webkit-print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        .info-row {
+                            display: table;
+                            width: 100%;
+                            margin-bottom: 8px;
+                        }
+                        .info-label {
+                            display: table-cell;
+                            width: 30%;
+                            font-weight: bold;
+                            padding: 8px;
+                            border: 1px solid #333;
+                            background-color: #dc2626 !important;
+                            color: white !important;
+                            -webkit-print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        .info-value {
+                            display: table-cell;
+                            padding: 8px;
+                            border: 1px solid #333;
+                        }
+                        .photo {
+                            width: 100px;
+                            height: 100px;
+                            object-fit: cover;
+                            border-radius: 4px;
+                            float: right;
+                            margin-left: 20px;
+                            margin-bottom: 20px;
+                        }
+                        .signature-section {
+                            margin-top: 40px;
+                            text-align: right;
+                        }
+                        .signature-line {
+                            border-top: 1px solid #333;
+                            width: 200px;
+                            margin: 0 0 5px auto;
+                        }
+                        @media print {
+                            body { margin: 15px; }
+                            .no-print { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <img src="tahanan-logo.png" alt="Tahanan ng Pagmamahal Logo" class="logo" style="display: block; margin: 0 auto;" onerror="this.style.display='none'">
+                        <h1>TAHANAN NG PAGMAMAHAL</h1>
+                        <div class="subtitle">children's home inc.</div>
+                        <div class="subtitle">45 Dr. Pilapil St., Brgy. Sagad, Pasig Metro Manila, Philippines</div>
+                        <div class="subtitle">Contact: (+63) 917 325 7168 Tel: +632 8631 7188</div>
+                        <div class="subtitle">Email: tahananmocil@gmail.com</div>
+                    </div>
+                    
+                    <h2 style="text-align: center; margin: 20px 0; font-size: 16px;">VOLUNTEER RECORD</h2>
+                    <p style="text-align: center; font-size: 11px; color: #666; margin-bottom: 20px;">Generated on ${currentDate}</p>
+                    
+                    ${includePhoto ? `<img src="${photoSrc}" alt="${fullName}" class="photo" onerror="this.style.display='none'">` : ''}
+                    
+                    <div class="info-section">
+                        <div class="section-header">PERSONAL INFORMATION</div>
+                        <div class="info-row">
+                            <div class="info-label">Full Name</div>
+                            <div class="info-value">${fullName}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Volunteer ID</div>
+                            <div class="info-value">${volunteer.volunteerId || 'N/A'}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Gender</div>
+                            <div class="info-value">${volunteer.gender || 'N/A'}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Date of Birth</div>
+                            <div class="info-value">${volunteer.dateOfBirth || 'N/A'}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Contact Number</div>
+                            <div class="info-value">${volunteer.contactNumber || 'N/A'}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Email Address</div>
+                            <div class="info-value">${volunteer.emailAddress || 'N/A'}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Address</div>
+                            <div class="info-value">${volunteer.address || 'N/A'}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section">
+                        <div class="section-header">VOLUNTEER DETAILS</div>
+                        <div class="info-row">
+                            <div class="info-label">Preferred Department</div>
+                            <div class="info-value">${volunteer.preferredDepartment || 'N/A'}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Status</div>
+                            <div class="info-value">${volunteer.volunteerStatus || 'Active'}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Availability</div>
+                            <div class="info-value">${volunteer.availability || 'N/A'}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Skills & Experience</div>
+                            <div class="info-value">${volunteer.skillsAndExperience || 'N/A'}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Motivation</div>
+                            <div class="info-value">${volunteer.motivation || 'N/A'}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Date Joined</div>
+                            <div class="info-value">${dateJoined}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section">
+                        <div class="section-header">EMERGENCY CONTACT</div>
+                        <div class="info-row">
+                            <div class="info-label">Emergency Contact Name</div>
+                            <div class="info-value">${volunteer.emergencyContactName || 'N/A'}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Relationship</div>
+                            <div class="info-value">${volunteer.emergencyContactRelationship || 'N/A'}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Emergency Contact Number</div>
+                            <div class="info-value">${volunteer.emergencyContactNumber || 'N/A'}</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 30px; font-size: 10px;">
+                        <p>This document was generated automatically by the TNP OMS system.</p>
+                    </div>
+                    
+                    <div class="signature-section">
+                        <div class="signature-line"></div>
+                        <div style="font-size: 10px;">Authorized Signature</div>
+                    </div>
+                </body>
+                </html>
             `;
         }
 
