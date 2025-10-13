@@ -19,6 +19,68 @@
             }
         }
     </script>
+    <style>
+        /* Tutorial Modal Responsive Styles */
+        @media (max-width: 640px) {
+            .tutorial-step img {
+                max-height: 300px;
+                object-fit: contain;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .tutorial-step img {
+                max-height: 250px;
+            }
+            
+            .tutorial-step h4 {
+                font-size: 1rem;
+            }
+            
+            .tutorial-step p {
+                font-size: 0.875rem;
+            }
+        }
+        
+        /* Features Granted Responsive Grid */
+        @media (max-width: 640px) {
+            #featuresGrantedSection .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            #featuresGrantedSection label {
+                font-size: 0.875rem;
+            }
+        }
+        
+        /* Account Toggle Responsive */
+        @media (max-width: 480px) {
+            #createAccountToggle {
+                width: 2.5rem;
+                height: 1.25rem;
+            }
+            
+            #toggleIndicator {
+                width: 1rem;
+                height: 1rem;
+            }
+        }
+        
+        /* Tutorial Navigation Responsive */
+        @media (max-width: 640px) {
+            #tutorialModal .flex.justify-between {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            
+            #prevTutorialBtn, #nextTutorialBtn, #skipTutorialBtn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
     <!-- Header -->
@@ -31,10 +93,12 @@
                     </svg>
                 </a>
                 <h1 class="text-xl sm:text-2xl font-semibold text-gray-900 text-center flex-1">Add New Staff</h1>
-                <div class="hidden sm:flex items-center opacity-0">
-                    <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                    </svg>
+                <div class="flex items-center">
+                    <button id="tutorialBtn" class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-2 shadow-sm transition-all duration-300 transform hover:scale-110" title="Tutorial - How to Add Staff">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </button>
                 </div>
             </div>
         </div>
@@ -219,6 +283,129 @@
                         Close
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tutorial Modal -->
+    <div id="tutorialModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden p-2 sm:p-4">
+        <div class="bg-white rounded-lg p-4 sm:p-6 max-w-4xl w-full mx-2 sm:mx-4 max-h-[90vh] sm:max-h-[85vh] md:max-h-[80vh] flex flex-col">
+            <div class="flex items-center justify-between mb-4 sm:mb-6">
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900">Add Staff Tutorial</h3>
+                <button id="closeTutorialModal" class="text-gray-400 hover:text-gray-600 p-1">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="mb-4 sm:mb-6">
+                <div class="flex justify-between text-xs sm:text-sm text-gray-600 mb-2">
+                    <span>Step <span id="currentStep">1</span> of <span id="totalSteps">9</span></span>
+                    <span id="progressPercentage">11%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div id="progressBar" class="bg-red-primary h-2 rounded-full transition-all duration-300" style="width: 11%"></div>
+                </div>
+            </div>
+            
+            <!-- Tutorial Content -->
+            <div class="flex-1 overflow-y-auto">
+                <div id="tutorialStep1" class="tutorial-step">
+                    <div class="text-center">
+                        <img src="Toturial/Add Staff/pic1.png" alt="Staff Basic Information" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-4">
+                        <h4 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">Step 1: Fill Basic Information</h4>
+                        <p class="text-sm sm:text-base text-gray-600">Start by entering the staff member's personal information including photo, name, contact details, educational background, and employment details. Required fields are marked with an asterisk (*).</p>
+                    </div>
+                </div>
+                
+                <div id="tutorialStep2" class="tutorial-step hidden">
+                    <div class="text-center">
+                        <img src="Toturial/Add Staff/pic2.png" alt="Staff Documents" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-4">
+                        <h4 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">Step 2: Upload Employment Documents</h4>
+                        <p class="text-sm sm:text-base text-gray-600">Upload required employment documents including resume, valid IDs, clearances, certificates, and other necessary paperwork. Basic requirements and special requirements for child-caring institutions are clearly categorized.</p>
+                    </div>
+                </div>
+                
+                <div id="tutorialStep3" class="tutorial-step hidden">
+                    <div class="text-center">
+                        <img src="Toturial/Add Staff/pic3.png" alt="Features Granted" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-4">
+                        <h4 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">Step 3: Set Features Granted</h4>
+                        <p class="text-sm sm:text-base text-gray-600">Configure what system features and permissions the staff member will have access to. This determines what actions they can perform within the organization management system.</p>
+                    </div>
+                </div>
+                
+                <div id="tutorialStep4" class="tutorial-step hidden">
+                    <div class="text-center">
+                        <img src="Toturial/Add Staff/pic4.png" alt="Account Creation Toggle" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-4">
+                        <h4 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">Step 4: Account Creation Option</h4>
+                        <p class="text-sm sm:text-base text-gray-600">Toggle whether to create a system account for the staff member. When enabled, you can set a username and the features granted section becomes available to define their system permissions.</p>
+                    </div>
+                </div>
+                
+                <div id="tutorialStep5" class="tutorial-step hidden">
+                    <div class="text-center">
+                        <img src="Toturial/Add Staff/pic5.png" alt="Add Staff Button" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-4">
+                        <h4 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">Step 5: Submit Staff Information</h4>
+                        <p class="text-sm sm:text-base text-gray-600">Once all information is completed, click the "Add Staff" button to submit the form. The system will validate all required fields and process the staff registration.</p>
+                    </div>
+                </div>
+                
+                <div id="tutorialStep6" class="tutorial-step hidden">
+                    <div class="text-center">
+                        <img src="Toturial/Add Staff/pic6.png" alt="Preview Information" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-4">
+                        <h4 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">Step 6: Review Staff Information</h4>
+                        <p class="text-sm sm:text-base text-gray-600">Before final submission, review all entered information in the preview modal. You can edit any details if needed or confirm to save the staff record with all documents to the database.</p>
+                    </div>
+                </div>
+                
+                <div id="tutorialStep7" class="tutorial-step hidden">
+                    <div class="text-center">
+                        <img src="Toturial/Add Staff/pic7.png" alt="Offline Notification" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-4">
+                        <h4 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">Step 7: Offline Save Feature</h4>
+                        <p class="text-sm sm:text-base text-gray-600">When there's no internet connection or an error occurs, the system automatically saves the record offline. This ensures no data is lost and will be synchronized once the connection is restored.</p>
+                    </div>
+                </div>
+                
+                <div id="tutorialStep8" class="tutorial-step hidden">
+                    <div class="text-center">
+                        <img src="Toturial/Add Staff/pic8.png" alt="Offline Records Management" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-4">
+                        <h4 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">Step 8: Manage Offline Records</h4>
+                        <p class="text-sm sm:text-base text-gray-600">Access and manage offline saved records through the floating button. You can load saved records to edit them, manually sync individual records, or sync all records at once when connection is available.</p>
+                    </div>
+                </div>
+                
+                <div id="tutorialStep9" class="tutorial-step hidden">
+                    <div class="text-center">
+                        <img src="Toturial/Add Staff/pic9.png" alt="Success Confirmation" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-4">
+                        <h4 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">Step 9: Success Confirmation</h4>
+                        <p class="text-sm sm:text-base text-gray-600">After successfully saving a staff record, you'll see a confirmation message with the staff ID. You can choose to add another staff member, view all records, or close the modal. System accounts are created automatically if enabled.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Navigation Buttons -->
+            <div class="flex justify-between items-center mt-4 sm:mt-6 pt-4 border-t">
+                <button id="prevTutorialBtn" class="px-3 sm:px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base" disabled>
+                    <svg class="h-4 w-4 sm:h-5 sm:w-5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    Previous
+                </button>
+                
+                <div class="flex space-x-2">
+                    <button id="skipTutorialBtn" class="px-3 sm:px-4 py-2 text-gray-500 hover:text-gray-700 transition-colors text-sm sm:text-base">
+                        Skip Tutorial
+                    </button>
+                </div>
+                
+                <button id="nextTutorialBtn" class="px-3 sm:px-4 py-2 bg-red-primary text-white rounded-md hover:bg-red-700 transition-colors text-sm sm:text-base">
+                    Next
+                    <svg class="h-4 w-4 sm:h-5 sm:w-5 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
             </div>
         </div>
     </div>
@@ -1032,79 +1219,6 @@
                 </div>
             </div>
 
-            <!-- Restriction Codes -->
-            <div class="bg-white shadow rounded-lg p-4 sm:p-6">
-                <h2 class="text-lg font-medium text-gray-900 mb-6">Features Granted</h2>
-
-                <div class="mb-6">
-                    <h3 class="font-semibold text-gray-700 mb-2">Recording Sections</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <label class="flex items-center">
-                            <input type="checkbox" name="featureGranted[]" value="Add New Child" class="mr-2 rounded text-red-primary focus:ring-red-primary">
-                            <span>Add New Child</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="checkbox" name="featureGranted[]" value="Add New Staff" class="mr-2 rounded text-red-primary focus:ring-red-primary">
-                            <span>Add New Staff</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="checkbox" name="featureGranted[]" value="Add New Volunteer" class="mr-2 rounded text-red-primary focus:ring-red-primary">
-                            <span>Add New Volunteer</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="checkbox" name="featureGranted[]" value="Record Donation" class="mr-2 rounded text-red-primary focus:ring-red-primary">
-                            <span>Record Donation</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div>
-                    <h3 class="font-semibold text-gray-700 mb-2">Record Viewing</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <label class="flex items-center">
-                            <input type="checkbox" name="featureGranted[]" value="Child Records" class="mr-2 rounded text-red-primary focus:ring-red-primary">
-                            <span>Child Records</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="checkbox" name="featureGranted[]" value="Staff Records" class="mr-2 rounded text-red-primary focus:ring-red-primary">
-                            <span>Staff Records</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="checkbox" name="featureGranted[]" value="Volunteer Records" class="mr-2 rounded text-red-primary focus:ring-red-primary">
-                            <span>Volunteer Records</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="checkbox" name="featureGranted[]" value="Donation Records" class="mr-2 rounded text-red-primary focus:ring-red-primary">
-                            <span>Donation Records</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="checkbox" name="featureGranted[]" value="Donors Records" class="mr-2 rounded text-red-primary focus:ring-red-primary">
-                            <span>Donors Records</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="checkbox" name="featureGranted[]" value="Inventory Records" class="mr-2 rounded text-red-primary focus:ring-red-primary">
-                            <span>Inventory Records</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="checkbox" name="featureGranted[]" value="Expenses Records" class="mr-2 rounded text-red-primary focus:ring-red-primary">
-                            <span>Expenses Records</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="checkbox" name="featureGranted[]" value="Discharged Children Records" class="mr-2 rounded text-red-primary focus:ring-red-primary">
-                            <span>Discharged Children Records</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="checkbox" name="featureGranted[]" value="Archive Records" class="mr-2 rounded text-red-primary focus:ring-red-primary">
-                            <span>Archive Records</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="checkbox" name="featureGranted[]" value="Staff Attendance" class="mr-2 rounded text-red-primary focus:ring-red-primary">
-                            <span>Staff Attendance</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-
             <!-- Account Creation -->
             <div class="bg-white shadow rounded-lg p-4 sm:p-6">
                 <div class="flex items-center justify-between mb-6">
@@ -1124,11 +1238,95 @@
                         <input type="text" id="username" name="username"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                     </div>
-                    
                 </div>
                 
                 <div id="accountDisabledMessage" class="text-sm text-gray-500">
                     Account creation is disabled. The staff member will not have system access.
+                </div>
+            </div>
+
+            <!-- Features Granted -->
+            <div id="featuresGrantedSection" class="bg-white shadow rounded-lg p-4 sm:p-6 hidden">
+                <h2 class="text-lg font-medium text-gray-900 mb-6">Features Granted</h2>
+
+                <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div class="flex items-start">
+                        <svg class="h-5 w-5 text-blue-600 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div>
+                            <p class="text-sm text-blue-800 font-medium">Account Required</p>
+                            <p class="text-sm text-blue-700">Features can only be granted to staff members with system accounts. Enable account creation above to access these settings.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="font-semibold text-gray-700 mb-2">Recording Sections</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="featureGranted[]" value="Add New Child" class="mr-2 rounded text-red-primary focus:ring-red-primary" disabled>
+                            <span class="text-gray-500">Add New Child</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="featureGranted[]" value="Add New Staff" class="mr-2 rounded text-red-primary focus:ring-red-primary" disabled>
+                            <span class="text-gray-500">Add New Staff</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="featureGranted[]" value="Add New Volunteer" class="mr-2 rounded text-red-primary focus:ring-red-primary" disabled>
+                            <span class="text-gray-500">Add New Volunteer</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="featureGranted[]" value="Record Donation" class="mr-2 rounded text-red-primary focus:ring-red-primary" disabled>
+                            <span class="text-gray-500">Record Donation</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="font-semibold text-gray-700 mb-2">Record Viewing</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="featureGranted[]" value="Child Records" class="mr-2 rounded text-red-primary focus:ring-red-primary" disabled>
+                            <span class="text-gray-500">Child Records</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="featureGranted[]" value="Staff Records" class="mr-2 rounded text-red-primary focus:ring-red-primary" disabled>
+                            <span class="text-gray-500">Staff Records</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="featureGranted[]" value="Volunteer Records" class="mr-2 rounded text-red-primary focus:ring-red-primary" disabled>
+                            <span class="text-gray-500">Volunteer Records</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="featureGranted[]" value="Donation Records" class="mr-2 rounded text-red-primary focus:ring-red-primary" disabled>
+                            <span class="text-gray-500">Donation Records</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="featureGranted[]" value="Donors Records" class="mr-2 rounded text-red-primary focus:ring-red-primary" disabled>
+                            <span class="text-gray-500">Donors Records</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="featureGranted[]" value="Inventory Records" class="mr-2 rounded text-red-primary focus:ring-red-primary" disabled>
+                            <span class="text-gray-500">Inventory Records</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="featureGranted[]" value="Expenses Records" class="mr-2 rounded text-red-primary focus:ring-red-primary" disabled>
+                            <span class="text-gray-500">Expenses Records</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="featureGranted[]" value="Discharged Children Records" class="mr-2 rounded text-red-primary focus:ring-red-primary" disabled>
+                            <span class="text-gray-500">Discharged Children Records</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="featureGranted[]" value="Archive Records" class="mr-2 rounded text-red-primary focus:ring-red-primary" disabled>
+                            <span class="text-gray-500">Archive Records</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="featureGranted[]" value="Staff Attendance" class="mr-2 rounded text-red-primary focus:ring-red-primary" disabled>
+                            <span class="text-gray-500">Staff Attendance</span>
+                        </label>
+                    </div>
                 </div>
             </div>
 
@@ -1484,6 +1682,108 @@
             }
         }
 
+        // Tutorial functionality
+        let currentTutorialStep = 1;
+        const totalTutorialSteps = 9;
+
+        function setupTutorialFunctionality() {
+            const tutorialBtn = document.getElementById('tutorialBtn');
+            const tutorialModal = document.getElementById('tutorialModal');
+            const closeTutorialModal = document.getElementById('closeTutorialModal');
+            const prevTutorialBtn = document.getElementById('prevTutorialBtn');
+            const nextTutorialBtn = document.getElementById('nextTutorialBtn');
+            const skipTutorialBtn = document.getElementById('skipTutorialBtn');
+
+            tutorialBtn.addEventListener('click', showTutorialModal);
+            closeTutorialModal.addEventListener('click', hideTutorialModal);
+            skipTutorialBtn.addEventListener('click', hideTutorialModal);
+            prevTutorialBtn.addEventListener('click', goToPreviousTutorialStep);
+            nextTutorialBtn.addEventListener('click', goToNextTutorialStep);
+
+            // Close tutorial on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && !tutorialModal.classList.contains('hidden')) {
+                    hideTutorialModal();
+                }
+            });
+        }
+
+        function showTutorialModal() {
+            currentTutorialStep = 1;
+            document.getElementById('tutorialModal').classList.remove('hidden');
+            updateTutorialStep();
+        }
+
+        function hideTutorialModal() {
+            document.getElementById('tutorialModal').classList.add('hidden');
+        }
+
+        function goToNextTutorialStep() {
+            if (currentTutorialStep < totalTutorialSteps) {
+                currentTutorialStep++;
+                updateTutorialStep();
+            } else {
+                hideTutorialModal();
+            }
+        }
+
+        function goToPreviousTutorialStep() {
+            if (currentTutorialStep > 1) {
+                currentTutorialStep--;
+                updateTutorialStep();
+            }
+        }
+
+        function updateTutorialStep() {
+            // Hide all steps
+            for (let i = 1; i <= totalTutorialSteps; i++) {
+                const step = document.getElementById(`tutorialStep${i}`);
+                if (step) {
+                    step.classList.add('hidden');
+                }
+            }
+
+            // Show current step
+            const currentStepElement = document.getElementById(`tutorialStep${currentTutorialStep}`);
+            if (currentStepElement) {
+                currentStepElement.classList.remove('hidden');
+            }
+
+            // Update progress bar
+            const progressPercentage = Math.round((currentTutorialStep / totalTutorialSteps) * 100);
+            document.getElementById('progressBar').style.width = `${progressPercentage}%`;
+            document.getElementById('progressPercentage').textContent = `${progressPercentage}%`;
+            document.getElementById('currentStep').textContent = currentTutorialStep;
+            document.getElementById('totalSteps').textContent = totalTutorialSteps;
+
+            // Update navigation buttons
+            const prevBtn = document.getElementById('prevTutorialBtn');
+            const nextBtn = document.getElementById('nextTutorialBtn');
+
+            prevBtn.disabled = currentTutorialStep === 1;
+            if (currentTutorialStep === 1) {
+                prevBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                prevBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+
+            if (currentTutorialStep === totalTutorialSteps) {
+                nextBtn.innerHTML = `
+                    Finish
+                    <svg class="h-4 w-4 sm:h-5 sm:w-5 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                `;
+            } else {
+                nextBtn.innerHTML = `
+                    Next
+                    <svg class="h-4 w-4 sm:h-5 sm:w-5 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                `;
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             setupEventListeners();
             document.getElementById('dateHired').value = new Date().toISOString().split('T')[0];
@@ -1493,6 +1793,9 @@
             
             // Generate and display staff ID
             generateAndDisplayStaffId();
+            
+            // Setup tutorial functionality
+            setupTutorialFunctionality();
             
             // Test Firebase Auth connection
             console.log('Firebase Auth instance:', auth);
@@ -1643,7 +1946,9 @@
             const accountFields = document.getElementById('accountFields');
             const disabledMessage = document.getElementById('accountDisabledMessage');
             const usernameField = document.getElementById('username');
-            // const passwordField = document.getElementById('password');
+            const featuresGrantedSection = document.getElementById('featuresGrantedSection');
+            const featureCheckboxes = document.querySelectorAll('input[name="featureGranted[]"]');
+            const featureLabels = document.querySelectorAll('#featuresGrantedSection label span');
 
             if (createAccountEnabled) {
                 toggle.classList.remove('bg-gray-200');
@@ -1655,7 +1960,16 @@
                 accountFields.classList.remove('hidden');
                 disabledMessage.classList.add('hidden');
                 usernameField.required = true;
-                // passwordField.required = true;
+                
+                // Show and enable features granted section
+                featuresGrantedSection.classList.remove('hidden');
+                featureCheckboxes.forEach(checkbox => {
+                    checkbox.disabled = false;
+                });
+                featureLabels.forEach(label => {
+                    label.classList.remove('text-gray-500');
+                    label.classList.add('text-gray-900');
+                });
             } else {
                 toggle.classList.remove('bg-red-primary');
                 toggle.classList.add('bg-gray-200');
@@ -1666,9 +1980,18 @@
                 accountFields.classList.add('hidden');
                 disabledMessage.classList.remove('hidden');
                 usernameField.required = false;
-                // passwordField.required = false;
                 usernameField.value = '';
-                // passwordField.value = '';
+                
+                // Hide and disable features granted section
+                featuresGrantedSection.classList.add('hidden');
+                featureCheckboxes.forEach(checkbox => {
+                    checkbox.disabled = true;
+                    checkbox.checked = false; // Uncheck all features when account is disabled
+                });
+                featureLabels.forEach(label => {
+                    label.classList.remove('text-gray-900');
+                    label.classList.add('text-gray-500');
+                });
             }
         }
 

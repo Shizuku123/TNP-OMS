@@ -19,6 +19,38 @@
             }
         }
     </script>
+    <style>
+        /* Custom responsive styles for tutorial modal */
+        @media (max-width: 640px) {
+            #tutorialModal .bg-white {
+                margin: 1rem;
+                max-height: calc(100vh - 2rem);
+            }
+            
+            #tutorialContent img {
+                max-height: 250px !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            #tutorialModal .bg-white {
+                margin: 0.5rem;
+                max-height: calc(100vh - 1rem);
+            }
+            
+            #tutorialContent img {
+                max-height: 200px !important;
+            }
+            
+            #tutorialContent h4 {
+                font-size: 1.25rem !important;
+            }
+            
+            #tutorialContent p {
+                font-size: 0.875rem !important;
+            }
+        }
+    </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
     <!-- Top Header -->
@@ -31,7 +63,11 @@
                         </svg>
                     </a>
                 <h1 class="text-xl font-semibold text-gray-900">Record Donation</h1>
-                <div></div>
+                <button id="infoBtn" class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-2 shadow-sm transition-all duration-300 transform hover:scale-110" title="Tutorial - How to Record Donations">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </button>
             </div>
         </div>
     </header>
@@ -531,6 +567,71 @@
     <!-- Success/Error Messages -->
     <div id="messageContainer" class="fixed top-20 right-4 z-50 max-w-sm hidden"></div>
 
+    <!-- Tutorial Modal -->
+    <div id="tutorialModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl">
+            <!-- Tutorial Header -->
+            <div class="flex items-center justify-between p-4 sm:p-6 border-b bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
+                <div class="flex items-center">
+                    <svg class="h-6 w-6 sm:h-8 sm:w-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <div>
+                        <h3 class="text-lg sm:text-xl font-semibold">How to Record Donations</h3>
+                        <p class="text-blue-100 text-sm mt-1">Step-by-step guide to recording donations</p>
+                    </div>
+                </div>
+                <button id="closeTutorialModal" class="text-white hover:text-blue-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-colors">
+                    <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="px-4 sm:px-6 py-3 bg-gray-50 border-b">
+                <div class="flex items-center justify-between text-sm text-gray-600 mb-2">
+                    <span>Step <span id="currentStep">1</span> of <span id="totalSteps">10</span></span>
+                    <span id="progressPercent">10%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div id="progressBar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 10%"></div>
+                </div>
+            </div>
+
+            <!-- Tutorial Content -->
+            <div class="flex-1 overflow-y-auto p-4 sm:p-6">
+                <div id="tutorialContent" class="space-y-4">
+                    <!-- Step content will be dynamically loaded here -->
+                </div>
+            </div>
+
+            <!-- Tutorial Navigation -->
+            <div class="flex flex-col sm:flex-row justify-between items-center p-4 sm:p-6 border-t bg-gray-50 rounded-b-lg space-y-3 sm:space-y-0">
+                <button id="prevStep" class="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    Previous
+                </button>
+                
+                <div class="flex space-x-2">
+                    <!-- Step indicators will be dynamically generated -->
+                    <div id="stepIndicators" class="flex space-x-2">
+                        <!-- Step dots will be inserted here -->
+                    </div>
+                </div>
+                
+                <button id="nextStep" class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center">
+                    Next
+                    <svg class="h-4 w-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Content -->
     <div class="flex items-center justify-center min-h-screen bg-gray-100">
         <!-- Form Content -->
@@ -728,7 +829,7 @@
                 </div>
                 
                 <!-- Money Donation Offline Button -->
-                <div id="moneyOfflineBtn" class="fixed bottom-20 right-80 z-50">
+                <div id="moneyOfflineBtn" class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
                     <button class="relative bg-red-primary hover:bg-red-700 text-white rounded-full p-4 shadow-lg transition-all duration-300 transform hover:scale-110" title="View Offline Money Donation Records">
                         <svg class="h-10 w-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
@@ -872,7 +973,7 @@
                 </div>
                 
                 <!-- In-Kind Donation Offline Button -->
-                <div id="inKindOfflineBtn" class="fixed bottom-20 right-80 z-50">
+                <div id="inKindOfflineBtn" class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
                     <button class="relative bg-red-primary hover:bg-red-700 text-white rounded-full p-4 shadow-lg transition-all duration-300 transform hover:scale-110" title="View Offline In-Kind Donation Records">
                         <svg class="h-10 w-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
@@ -983,6 +1084,9 @@
             
             // Setup camera functionality
             setupCameraFunctionality();
+            
+            // Setup tutorial functionality
+            setupTutorialFunctionality();
         }
 
         // ========== OFFLINE STORAGE FUNCTIONS FOR MONEY DONATIONS ==========
@@ -2430,6 +2534,231 @@
             showMessage('Photo removed', 'success');
         }
 
+        // ========== TUTORIAL FUNCTIONALITY ==========
+        
+        let currentTutorialStep = 1;
+        const totalTutorialSteps = 12;
+        
+        const tutorialSteps = [
+            {
+                title: "Choose Donation Type",
+                description: "Start by selecting what type of donation you want to record. You can choose between Money donations for cash contributions or In-Kind donations for physical items.",
+                image: "Toturial/Record Donation/pic1.png"
+            },
+            {
+                title: "Money Donation Option",
+                description: "If you select Money donation, you'll be able to record any kind of monetary contribution including cash, bank transfers, checks, and online payments.",
+                image: "Toturial/Record Donation/pic1.1.png"
+            },
+            {
+                title: "In-Kind Donation Option", 
+                description: "If you select In-Kind donation, you can record physical donations such as food, medicine, clothing, equipment, and other material items.",
+                image: "Toturial/Record Donation/pic1.2.png"
+            },
+            {
+                title: "Money Donation Fields",
+                description: "Fill in all the required information for money donations including donor details, amount, payment method, and purpose of donation.",
+                image: "Toturial/Record Donation/pic2.png"
+            },
+            {
+                title: "Anonymous Donation Option",
+                description: "Check the 'Donate as Anonymous' checkbox if the donor wants to remain anonymous. This will automatically disable and clear the donor name fields.",
+                image: "Toturial/Record Donation/pic3.png"
+            },
+            {
+                title: "Save Money Donation",
+                description: "Click the 'Save Donation' button to record the money donation. The system will validate all required fields before saving.",
+                image: "Toturial/Record Donation/pic4.png"
+            },
+            {
+                title: "In-Kind Donation Fields",
+                description: "For in-kind donations, fill in the item details including category, description, quantity, condition, and recipient information.",
+                image: "Toturial/Record Donation/pic5.png"
+            },
+            {
+                title: "Capture Item Photo",
+                description: "For in-kind donations, you can capture a photo of the actual donated items using your device's camera or upload an existing image.",
+                image: "Toturial/Record Donation/pic6.png"
+            },
+            {
+                title: "Save In-Kind Donation",
+                description: "Click 'Save Donation' to record the in-kind donation. All item details and photos will be saved to the system.",
+                image: "Toturial/Record Donation/pic7.png"
+            },
+            {
+                title: "Online Save Notification",
+                description: "When online, you'll see a success notification confirming your donation has been saved to the database.",
+                image: "Toturial/Record Donation/pic8.png"
+            },
+            {
+                title: "Offline Saved Records",
+                description: "When offline, donations are saved locally and can be viewed in the offline records modal. You can sync these records later when internet connection is restored.",
+                image: "Toturial/Record Donation/pic9.png"
+            },
+            {
+                title: "Successfully Added to Database",
+                description: "Once donations are successfully saved (either online or synced from offline), you'll see confirmation that the records have been added to the database.",
+                image: "Toturial/Record Donation/pic10.png"
+            }
+        ];
+        
+        function setupTutorialFunctionality() {
+            const infoBtn = document.getElementById('infoBtn');
+            const tutorialModal = document.getElementById('tutorialModal');
+            const closeTutorialModal = document.getElementById('closeTutorialModal');
+            const prevStep = document.getElementById('prevStep');
+            const nextStep = document.getElementById('nextStep');
+            
+            if (infoBtn) {
+                infoBtn.addEventListener('click', openTutorial);
+            }
+            
+            if (closeTutorialModal) {
+                closeTutorialModal.addEventListener('click', closeTutorial);
+            }
+            
+            if (prevStep) {
+                prevStep.addEventListener('click', goToPrevStep);
+            }
+            
+            if (nextStep) {
+                nextStep.addEventListener('click', (e) => {
+                    const action = nextStep.dataset.action;
+                    if (action === 'finish') {
+                        closeTutorial();
+                    } else {
+                        goToNextStep();
+                    }
+                });
+            }
+            
+            // Close tutorial on outside click
+            tutorialModal?.addEventListener('click', (e) => {
+                if (e.target === tutorialModal) {
+                    closeTutorial();
+                }
+            });
+            
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (tutorialModal && !tutorialModal.classList.contains('hidden')) {
+                    if (e.key === 'Escape') {
+                        closeTutorial();
+                    } else if (e.key === 'ArrowLeft' && currentTutorialStep > 1) {
+                        goToPrevStep();
+                    } else if (e.key === 'ArrowRight' && currentTutorialStep < totalTutorialSteps) {
+                        goToNextStep();
+                    }
+                }
+            });
+            
+            generateStepIndicators();
+        }
+        
+        function openTutorial() {
+            currentTutorialStep = 1;
+            updateTutorialStep();
+            document.getElementById('tutorialModal').classList.remove('hidden');
+        }
+        
+        function closeTutorial() {
+            document.getElementById('tutorialModal').classList.add('hidden');
+        }
+        
+        function goToPrevStep() {
+            if (currentTutorialStep > 1) {
+                currentTutorialStep--;
+                updateTutorialStep();
+            }
+        }
+        
+        function goToNextStep() {
+            if (currentTutorialStep < totalTutorialSteps) {
+                currentTutorialStep++;
+                updateTutorialStep();
+            }
+        }
+        
+        function goToStep(step) {
+            if (step >= 1 && step <= totalTutorialSteps) {
+                currentTutorialStep = step;
+                updateTutorialStep();
+            }
+        }
+        
+        function updateTutorialStep() {
+            const step = tutorialSteps[currentTutorialStep - 1];
+            const progress = (currentTutorialStep / totalTutorialSteps) * 100;
+            
+            // Update progress bar
+            document.getElementById('currentStep').textContent = currentTutorialStep;
+            document.getElementById('totalSteps').textContent = totalTutorialSteps;
+            document.getElementById('progressPercent').textContent = Math.round(progress) + '%';
+            document.getElementById('progressBar').style.width = progress + '%';
+            
+            // Update content
+            const tutorialContent = document.getElementById('tutorialContent');
+            tutorialContent.innerHTML = `
+                <div class="text-center">
+                    <img src="${step.image}" alt="${step.title}" class="mx-auto rounded-lg shadow-lg max-w-full h-auto mb-6" style="max-height: 400px;">
+                    <h4 class="text-xl sm:text-2xl font-semibold text-gray-900 mb-4">${step.title}</h4>
+                    <p class="text-gray-600 leading-relaxed text-base sm:text-lg">${step.description}</p>
+                </div>
+            `;
+            
+            // Update navigation buttons
+            const prevBtn = document.getElementById('prevStep');
+            const nextBtn = document.getElementById('nextStep');
+            
+            prevBtn.disabled = currentTutorialStep === 1;
+            
+            if (currentTutorialStep === totalTutorialSteps) {
+                nextBtn.innerHTML = `
+                    Finish
+                    <svg class="h-4 w-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                `;
+                // Don't set onclick - let the event listener handle it
+                nextBtn.dataset.action = 'finish';
+            } else {
+                nextBtn.innerHTML = `
+                    Next
+                    <svg class="h-4 w-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                `;
+                // Don't set onclick - let the event listener handle it
+                nextBtn.dataset.action = 'next';
+            }
+            
+            updateStepIndicators();
+        }
+        
+        function generateStepIndicators() {
+            const container = document.getElementById('stepIndicators');
+            container.innerHTML = '';
+            
+            for (let i = 1; i <= totalTutorialSteps; i++) {
+                const indicator = document.createElement('button');
+                indicator.className = `w-3 h-3 rounded-full transition-colors ${i === currentTutorialStep ? 'bg-blue-600' : 'bg-gray-300 hover:bg-gray-400'}`;
+                indicator.title = `Go to step ${i}`;
+                indicator.onclick = () => goToStep(i);
+                container.appendChild(indicator);
+            }
+        }
+        
+        function updateStepIndicators() {
+            const indicators = document.querySelectorAll('#stepIndicators button');
+            indicators.forEach((indicator, index) => {
+                if (index + 1 === currentTutorialStep) {
+                    indicator.className = 'w-3 h-3 rounded-full transition-colors bg-blue-600';
+                } else {
+                    indicator.className = 'w-3 h-3 rounded-full transition-colors bg-gray-300 hover:bg-gray-400';
+                }
+            });
+        }
+
         window.selectDonationType = selectDonationType;
         window.goBack = goBack;
         window.toggleAnonymousMoney = toggleAnonymousMoney;
@@ -2442,7 +2771,7 @@
     </script>
 
     <!-- Floating Offline Save Button -->
-    <div id="offlineSaveBtn" class="fixed bottom-20 right-80 z-50">
+    <div id="offlineSaveBtn" class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
         <button class="relative bg-red-primary hover:bg-red-700 text-white rounded-full p-4 shadow-lg transition-all duration-300 transform hover:scale-110" title="View Offline Saved Records">
             <svg class="h-10 w-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>

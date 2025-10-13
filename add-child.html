@@ -31,10 +31,12 @@
                             </svg>
                                 </a>
                 <h1 class="text-xl sm:text-2xl font-semibold text-gray-900 text-center flex-1">Add New Child</h1>
-                <div class="hidden sm:flex items-center opacity-0">
-                    <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                    </svg>
+                <div class="flex items-center">
+                    <button id="tutorialBtn" class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-2 shadow-sm transition-all duration-300 transform hover:scale-110" title="Tutorial - How to Add Child">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </button>
                 </div>
             </div>
         </div>
@@ -173,6 +175,145 @@
                         
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tutorial Modal -->
+    <div id="tutorialModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-semibold text-gray-900">Add Child Tutorial</h3>
+                <button id="closeTutorialModal" class="text-gray-400 hover:text-gray-600 p-1">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="mb-6">
+                <div class="flex justify-between text-sm text-gray-600 mb-2">
+                    <span>Step <span id="currentStep">1</span> of <span id="totalSteps">11</span></span>
+                    <span id="progressPercentage">9%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div id="progressBar" class="bg-red-primary h-2 rounded-full transition-all duration-300" style="width: 9%"></div>
+                </div>
+            </div>
+            
+            <!-- Tutorial Content -->
+            <div class="flex-1 overflow-y-auto">
+                <div id="tutorialStep1" class="tutorial-step">
+                    <div class="text-center">
+                        <img src="Toturial/Add Child/pic1.png" alt="Upload Profile Picture" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-4">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-2">Step 1: Upload Profile Picture</h4>
+                        <p class="text-gray-600">Start by uploading a profile picture for the child. You can either select an image from your device or use the camera to take a new photo. This helps with easy identification of the child in the system.</p>
+                    </div>
+                </div>
+                
+                <div id="tutorialStep2" class="tutorial-step hidden">
+                    <div class="text-center">
+                        <img src="Toturial/Add Child/pic2.png" alt="Basic Information" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-4">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-2">Step 2: Fill Basic Information</h4>
+                        <p class="text-gray-600">Enter the child's basic personal information including first name, middle name, last name, gender, date of birth, place of birth, nationality, and religion. Required fields are marked with an asterisk (*).</p>
+                    </div>
+                </div>
+                
+                <div id="tutorialStep3" class="tutorial-step hidden">
+                    <div class="text-center">
+                        <img src="Toturial/Add Child/pic3.png" alt="Background Information" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-4">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-2">Step 3: Background Information</h4>
+                        <p class="text-gray-600">Provide details about the child's entry into the orphanage including entry date, entry age (automatically calculated), reason for admission, and current status. This information helps track the child's journey.</p>
+                    </div>
+                </div>
+                
+                <div id="tutorialStep4" class="tutorial-step hidden">
+                    <div class="text-center">
+                        <img src="Toturial/Add Child/pic4.png" alt="Family and Legal Information" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-4">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-2">Step 4: Family & Legal Information</h4>
+                        <p class="text-gray-600">Record family details including father's and mother's names, parental status, and information about siblings in the orphanage. If the child is a foundling, some fields will be automatically disabled.</p>
+                    </div>
+                </div>
+                
+                <div id="tutorialStep5" class="tutorial-step hidden">
+                    <div class="text-center">
+                        <img src="Toturial/Add Child/pic5.png" alt="Health and Medical Information" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-4">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-2">Step 5: Health & Medical Information</h4>
+                        <p class="text-gray-600">Enter important health details such as blood type, known allergies, medical conditions, and the date of the last medical checkup. This information is crucial for the child's healthcare management.</p>
+                    </div>
+                </div>
+                
+                <div id="tutorialStep6" class="tutorial-step hidden">
+                    <div class="text-center">
+                        <img src="Toturial/Add Child/pic6.png" alt="Submit Button" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-4">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-2">Step 6: Submit the Form</h4>
+                        <p class="text-gray-600">Once all required information is filled, click the "Add Child" button to submit the form. You can also preview the information before final submission or save it offline if needed.</p>
+                    </div>
+                </div>
+                
+                <div id="tutorialStep7" class="tutorial-step hidden">
+                    <div class="text-center">
+                        <img src="Toturial/Add Child/pic7.png" alt="Preview Input" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-4">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-2">Step 7: Review Information</h4>
+                        <p class="text-gray-600">Before saving, review all the entered information in the preview modal. You can edit any details if needed or confirm to save the child record to the database.</p>
+                    </div>
+                </div>
+                
+                <div id="tutorialStep8" class="tutorial-step hidden">
+                    <div class="text-center">
+                        <img src="Toturial/Add Child/pic8.png" alt="Offline Save Notice" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-4">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-2">Step 8: Offline Save Feature</h4>
+                        <p class="text-gray-600">When there's no internet connection or an error occurs, the system automatically saves the record offline. This ensures no data is lost and will be synchronized once the connection is restored.</p>
+                    </div>
+                </div>
+                
+                <div id="tutorialStep9" class="tutorial-step hidden">
+                    <div class="text-center">
+                        <img src="Toturial/Add Child/pic9.png" alt="Offline Records Button" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-4">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-2">Step 9: Offline Records Button</h4>
+                        <p class="text-gray-600">The floating button in the bottom-right corner shows when there are offline records saved. Click it to view and manage all records that are waiting to be synchronized with the database.</p>
+                    </div>
+                </div>
+                
+                <div id="tutorialStep10" class="tutorial-step hidden">
+                    <div class="text-center">
+                        <img src="Toturial/Add Child/pic10.png" alt="Offline Records List" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-4">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-2">Step 10: Manage Offline Records</h4>
+                        <p class="text-gray-600">In the offline records modal, you can load saved records to fill the form fields, manually sync individual records to the database, or remove records you no longer need. Use "Sync All" to upload all offline records at once.</p>
+                    </div>
+                </div>
+                
+                <div id="tutorialStep11" class="tutorial-step hidden">
+                    <div class="text-center">
+                        <img src="Toturial/Add Child/pic11.png" alt="Success Notice" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-4">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-2">Step 11: Success Confirmation</h4>
+                        <p class="text-gray-600">After successfully saving a child record, you'll see a confirmation message. You can choose to add another child, view all records, or close the modal. The system will generate a unique child ID automatically.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Navigation Buttons -->
+            <div class="flex justify-between items-center mt-6 pt-4 border-t">
+                <button id="prevTutorialBtn" class="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    <svg class="h-5 w-5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    Previous
+                </button>
+                
+                <div class="flex space-x-2">
+                    <button id="skipTutorialBtn" class="px-4 py-2 text-gray-500 hover:text-gray-700 transition-colors">
+                        Skip Tutorial
+                    </button>
+                </div>
+                
+                <button id="nextTutorialBtn" class="px-4 py-2 bg-red-primary text-white rounded-md hover:bg-red-700 transition-colors">
+                    Next
+                    <svg class="h-5 w-5 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
             </div>
         </div>
     </div>
@@ -1293,7 +1434,112 @@
 
             // Setup event listeners
             setupEventListeners();
+            
+            // Setup tutorial functionality
+            setupTutorialFunctionality();
         });
+
+        // Tutorial functionality
+        let currentTutorialStep = 1;
+        const totalTutorialSteps = 11;
+
+        function setupTutorialFunctionality() {
+            const tutorialBtn = document.getElementById('tutorialBtn');
+            const tutorialModal = document.getElementById('tutorialModal');
+            const closeTutorialModal = document.getElementById('closeTutorialModal');
+            const prevTutorialBtn = document.getElementById('prevTutorialBtn');
+            const nextTutorialBtn = document.getElementById('nextTutorialBtn');
+            const skipTutorialBtn = document.getElementById('skipTutorialBtn');
+
+            tutorialBtn.addEventListener('click', showTutorialModal);
+            closeTutorialModal.addEventListener('click', hideTutorialModal);
+            skipTutorialBtn.addEventListener('click', hideTutorialModal);
+            prevTutorialBtn.addEventListener('click', goToPreviousTutorialStep);
+            nextTutorialBtn.addEventListener('click', goToNextTutorialStep);
+
+            // Close tutorial on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && !tutorialModal.classList.contains('hidden')) {
+                    hideTutorialModal();
+                }
+            });
+        }
+
+        function showTutorialModal() {
+            currentTutorialStep = 1;
+            document.getElementById('tutorialModal').classList.remove('hidden');
+            updateTutorialStep();
+        }
+
+        function hideTutorialModal() {
+            document.getElementById('tutorialModal').classList.add('hidden');
+        }
+
+        function goToNextTutorialStep() {
+            if (currentTutorialStep < totalTutorialSteps) {
+                currentTutorialStep++;
+                updateTutorialStep();
+            } else {
+                hideTutorialModal();
+            }
+        }
+
+        function goToPreviousTutorialStep() {
+            if (currentTutorialStep > 1) {
+                currentTutorialStep--;
+                updateTutorialStep();
+            }
+        }
+
+        function updateTutorialStep() {
+            // Hide all steps
+            for (let i = 1; i <= totalTutorialSteps; i++) {
+                const step = document.getElementById(`tutorialStep${i}`);
+                if (step) {
+                    step.classList.add('hidden');
+                }
+            }
+
+            // Show current step
+            const currentStepElement = document.getElementById(`tutorialStep${currentTutorialStep}`);
+            if (currentStepElement) {
+                currentStepElement.classList.remove('hidden');
+            }
+
+            // Update progress bar
+            const progressPercentage = Math.round((currentTutorialStep / totalTutorialSteps) * 100);
+            document.getElementById('progressBar').style.width = `${progressPercentage}%`;
+            document.getElementById('progressPercentage').textContent = `${progressPercentage}%`;
+            document.getElementById('currentStep').textContent = currentTutorialStep;
+            document.getElementById('totalSteps').textContent = totalTutorialSteps;
+
+            // Update navigation buttons
+            const prevBtn = document.getElementById('prevTutorialBtn');
+            const nextBtn = document.getElementById('nextTutorialBtn');
+
+            prevBtn.disabled = currentTutorialStep === 1;
+            if (currentTutorialStep === 1) {
+                prevBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                prevBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+
+            if (currentTutorialStep === totalTutorialSteps) {
+                nextBtn.innerHTML = `
+                    Finish
+                    <svg class="h-5 w-5 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                `;
+            } else {
+                nextBtn.innerHTML = `
+                    Next
+                    <svg class="h-5 w-5 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                `;
+            }
+        }
 
         function setupEventListeners() {
             // Siblings names field toggle
