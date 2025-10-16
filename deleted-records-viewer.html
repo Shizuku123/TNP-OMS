@@ -103,6 +103,8 @@
                         <option value="all" selected>All Types</option>
                         <option value="children">Children Records</option>
                         <option value="staff">Staff Records</option>
+                        <option value="volunteer">Volunteer Records</option>
+                        <option value="donation">Donation Records</option>
                     </select>
                     <select id="statusFilter" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
                         <option value="all">All Records</option>
@@ -348,6 +350,16 @@
         }
 
         async function loadDeletedRecords() {
+                // Load from inventory collection (soft deleted inventory records)
+                const inventoryCol = collection(db, 'inventory');
+                const inventorySnapshot = await getDocs(inventoryCol);
+                inventorySnapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if (data.currentStatus === "deleted") {
+                        deletedRecords.push({...data, source: 'inventory', recordType: 'inventory', inventoryId: docSnap.id});
+                        deletedRecordsDocs.push({ id: docSnap.id, data: {...data, source: 'inventory', recordType: 'inventory', inventoryId: docSnap.id} });
+                    }
+                });
             try {
                 // Show skeleton loading
                 showSkeletonLoader();
@@ -366,22 +378,18 @@
                     }
                 });
 
-                // Load from users collection (soft deleted staff records)
+                // Load from users collection (soft deleted staff/volunteer records)
                 const usersCol = collection(db, 'users');
                 const usersSnapshot = await getDocs(usersCol);
                 usersSnapshot.forEach(docSnap => {
                     const data = docSnap.data();
-                    if (data.currentStatus === "deleted" && data.role === "staff") {
-                        deletedRecords.push({...data, source: 'users', recordType: 'staff'});
-                        deletedRecordsDocs.push({ id: docSnap.id, data: {...data, source: 'users', recordType: 'staff'} });
-                        console.log('Loaded staff record:', {
-                            id: docSnap.id,
-                            name: `${data.firstName || ''} ${data.lastName || ''}`.trim(),
-                            staffId: data.staffId || data.uid,
-                            currentStatus: data.currentStatus,
-                            role: data.role,
-                            expiryDate: data.expiryDate
-                        });
+                    if (data.currentStatus === "deleted") {
+                        let type = 'staff';
+                        if (data.role === 'volunteer' || data.position === 'volunteer') {
+                            type = 'volunteer';
+                        }
+                        deletedRecords.push({...data, source: 'users', recordType: type});
+                        deletedRecordsDocs.push({ id: docSnap.id, data: {...data, source: 'users', recordType: type} });
                     }
                 });
 
@@ -390,7 +398,18 @@
                 const deletedSnapshot = await getDocs(deletedCol);
                 deletedSnapshot.forEach(docSnap => {
                     const data = docSnap.data();
-                    const recordType = data.childId ? 'children' : 'staff';
+                    let recordType = 'unknown';
+                    if (data.childId) {
+                        recordType = 'children';
+                    } else if (data.staffId || data.uid) {
+                        if (data.role === 'volunteer' || data.position === 'volunteer') {
+                            recordType = 'volunteer';
+                        } else {
+                            recordType = 'staff';
+                        }
+                    } else if (data.donationId) {
+                        recordType = 'donation';
+                    }
                     deletedRecords.push({...data, source: 'deletedRecords', recordType: recordType});
                     deletedRecordsDocs.push({ id: docSnap.id, data: {...data, source: 'deletedRecords', recordType: recordType} });
                 });
@@ -557,6 +576,7 @@
         }
 
         function generateRecordHTML(record, layout = 'full') {
+            // ...existing code...
             const now = new Date();
             const expiryDate = record.expiryDate ? new Date(record.expiryDate) : null;
             // If no expiry date, consider it as not expired for recovery purposes
@@ -566,26 +586,40 @@
             let fullName = '';
             let recordId = '';
             let recordIcon = '';
-            
+            let typeLabel = '';
             if (record.recordType === 'children') {
                 fullName = `${record.firstName || ''} ${record.middleName || ''} ${record.lastName || ''}`.trim();
                 recordId = record.childId;
-                recordIcon = `<svg class="h-4 w-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                </svg>`;
-            } else {
+                recordIcon = `<svg class="h-4 w-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/></svg>`;
+                typeLabel = 'Child';
+            } else if (record.recordType === 'staff') {
                 fullName = `${record.firstName || ''} ${record.middleName || ''} ${record.lastName || ''}`.trim();
                 recordId = record.staffId || record.uid;
-                recordIcon = `<svg class="h-4 w-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0H8m8 0v2a2 2 0 01-2 2H10a2 2 0 01-2-2V6"></path>
-                </svg>`;
+                recordIcon = `<svg class="h-4 w-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" stroke-width="2"/></svg>`;
+                typeLabel = 'Staff';
+            } else if (record.recordType === 'volunteer') {
+                fullName = `${record.firstName || ''} ${record.middleName || ''} ${record.lastName || ''}`.trim();
+                recordId = record.staffId || record.uid;
+                recordIcon = `<svg class="h-4 w-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polygon points="12,2 22,22 2,22" stroke-width="2"/></svg>`;
+                typeLabel = 'Volunteer';
+            } else if (record.recordType === 'donation') {
+                fullName = record.itemDescription || 'No Description';
+                recordId = record.donationId;
+                recordIcon = `<svg class="h-4 w-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 21C12 21 7 16.5 7 12C7 8.68629 9.68629 6 13 6C16.3137 6 19 8.68629 19 12C19 16.5 12 21 12 21Z" stroke-width="2"/></svg>`;
+                typeLabel = 'Donation';
+            } else {
+                fullName = 'Unknown';
+                recordId = record.childId || record.staffId || record.uid || record.donationId || '';
+                recordIcon = `<svg class="h-4 w-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/></svg>`;
+                typeLabel = 'Unknown';
             }
 
-            // Improved recovery condition - allow recovery if not expired AND from any source for staff, or from original collections for children
+            // Improved recovery condition - allow recovery if not expired AND from any source for staff, volunteer, inventory, or from original collections for children
             const canRecover = !isExpired && (
                 record.source === 'children' || 
                 record.source === 'users' || 
-                (record.recordType === 'staff' && record.source === 'deletedRecords')
+                record.source === 'inventory' ||
+                (['staff','volunteer','inventory'].includes(record.recordType) && record.source === 'deletedRecords')
             );
 
             // Debug logging for staff records
@@ -623,12 +657,7 @@
                                                 class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">
                                             View
                                         </button>
-                                        ${canRecover ? `
-                                            <button onclick="window.recoverRecord('${recordId}', '${record.recordType}')" 
-                                                    class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200">
-                                                Recover
-                                            </button>
-                                        ` : ''}
+                                        ${canRecover ? `<button onclick="window.recoverRecord('${recordId}', '${record.recordType}')" class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200">Recover</button>` : ''}
                                         <button onclick="window.permanentlyDelete('${recordId}', '${record.recordType}')" 
                                                 class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200">
                                             Delete
@@ -643,53 +672,19 @@
 
             // Full layout (original)
             return `
-                <div class="p-6 hover:bg-gray-50">
-                    <div class="flex items-center justify-between">
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center space-x-3">
-                                <div class="flex-shrink-0">
-                                    <img class="h-10 w-10 rounded-full object-cover" 
-                                         src="${record.photoString || 'user.png'}" 
-                                         alt="${fullName}">
-                                </div>
-                                <div class="min-w-0 flex-1">
-                                    <p class="text-sm font-medium text-gray-900 truncate flex items-center">
-                                        ${recordIcon}
-                                        <span class="ml-2">${fullName}</span>
-                                    </p>
-                                    <p class="text-sm text-gray-500">ID: ${recordId}</p>
-                                    <div class="flex items-center space-x-2 text-xs text-gray-400">
-                                        <span>Source: ${record.source === 'children' || record.source === 'users' ? 'Soft Deleted' : 'Permanently Moved'}</span>
-                                        <span>•</span>
-                                        <span>Type: ${record.recordType === 'children' ? 'Child' : 'Staff'}</span>
-                                        ${record.position ? `<span>•</span><span>Position: ${record.position}</span>` : ''}
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="mt-2 flex items-center space-x-4 text-sm text-gray-500">
-                                <span>Deleted by: ${record.deletedByName || record.deletedBy || 'N/A'}</span>
-                                <span>Date: ${formatDate(record.deletedDate)}</span>
-                                <span class="${isExpired ? 'text-red-600' : (daysLeft === 'No expiry' ? 'text-green-600' : 'text-orange-600')}">
-                                    ${isExpired ? 'Expired' : (daysLeft === 'No expiry' ? 'No expiry' : `${daysLeft} days left`)}
-                                </span>
-                            </div>
+                <div class="p-6 hover:bg-gray-50 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        ${recordIcon}
+                        <div>
+                            <div class="font-semibold text-gray-900">${fullName}</div>
+                            <div class="text-xs text-gray-500">ID: ${recordId}</div>
+                            <div class="text-xs text-blue-500">Type: ${typeLabel}</div>
                         </div>
-                        <div class="flex items-center space-x-2">
-                            <button onclick="window.viewRecordDetails('${recordId}', '${record.recordType}')" 
-                                    class="px-3 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors text-sm font-medium">
-                                View Details
-                            </button>
-                            ${canRecover ? `
-                                <button onclick="window.recoverRecord('${recordId}', '${record.recordType}')" 
-                                        class="px-3 py-2 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors text-sm font-medium">
-                                    Recover
-                                </button>
-                            ` : ''}
-                            <button onclick="window.permanentlyDelete('${recordId}', '${record.recordType}')" 
-                                    class="px-3 py-2 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors text-sm font-medium">
-                                Delete Permanently
-                            </button>
-                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button class="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 text-xs" onclick="viewRecordDetails('${recordId}','${record.recordType}')">Details</button>
+                        ${canRecover ? `<button class="px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 text-xs" onclick="recoverRecord('${recordId}','${record.recordType}')">Recover</button>` : ''}
+                        <button class="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 text-xs" onclick="permanentlyDelete('${recordId}','${record.recordType}')">Delete</button>
                     </div>
                 </div>
             `;
@@ -699,8 +694,14 @@
             const doc = deletedRecordsDocs.find(d => {
                 if (recordType === 'children') {
                     return d.data.childId === recordId;
-                } else {
+                } else if (recordType === 'staff' || recordType === 'volunteer') {
                     return d.data.staffId === recordId || d.data.uid === recordId;
+                } else if (recordType === 'donation') {
+                    return d.data.donationId === recordId;
+                } else if (recordType === 'inventory') {
+                    return d.data.inventoryId === recordId;
+                } else {
+                    return false;
                 }
             });
             return doc ? doc.id : null;
@@ -757,29 +758,71 @@
             recordToRecover = deletedRecords.find(record => {
                 if (recordType === 'children') {
                     return record.childId === recordId;
-                } else {
+                } else if (recordType === 'staff' || recordType === 'volunteer') {
                     return record.staffId === recordId || record.uid === recordId;
+                } else if (recordType === 'donation') {
+                    return record.donationId === recordId;
+                } else if (recordType === 'inventory') {
+                    return record.inventoryId === recordId;
+                } else {
+                    return false;
                 }
             });
             if (!recordToRecover) return;
             
-            const fullName = `${recordToRecover.firstName || ''} ${recordToRecover.middleName || ''} ${recordToRecover.lastName || ''}`.trim();
-            const displayId = recordType === 'children' ? recordToRecover.childId : (recordToRecover.staffId || recordToRecover.uid);
-            
-            document.getElementById('recordPreview').innerHTML = `
-                <div class="space-y-2">
-                    <p><span class="font-medium">Name:</span> ${fullName}</p>
-                    <p><span class="font-medium">ID:</span> ${displayId}</p>
-                    <p><span class="font-medium">Type:</span> ${recordType === 'children' ? 'Child' : 'Staff'}</p>
-                    ${recordType === 'children' ? 
-                        `<p><span class="font-medium">Date of Birth:</span> ${formatDate(recordToRecover.dateOfBirth)}</p>
-                         <p><span class="font-medium">Gender:</span> ${recordToRecover.gender || 'N/A'}</p>` :
-                        `<p><span class="font-medium">Position:</span> ${recordToRecover.position || 'N/A'}</p>
-                         <p><span class="font-medium">Email:</span> ${recordToRecover.emailAddress || 'N/A'}</p>`
-                    }
-                    <p><span class="font-medium">Status:</span> ${recordToRecover.currentStatus || 'N/A'}</p>
-                </div>
-            `;
+            let previewHTML = '';
+            if (recordType === 'children') {
+                const fullName = `${recordToRecover.firstName || ''} ${recordToRecover.middleName || ''} ${recordToRecover.lastName || ''}`.trim();
+                const displayId = recordToRecover.childId;
+                previewHTML = `
+                    <div class="space-y-2">
+                        <p><span class="font-medium">Name:</span> ${fullName}</p>
+                        <p><span class="font-medium">ID:</span> ${displayId}</p>
+                        <p><span class="font-medium">Type:</span> Child</p>
+                        <p><span class="font-medium">Date of Birth:</span> ${formatDate(recordToRecover.dateOfBirth)}</p>
+                        <p><span class="font-medium">Gender:</span> ${recordToRecover.gender || 'N/A'}</p>
+                        <p><span class="font-medium">Status:</span> ${recordToRecover.currentStatus || 'N/A'}</p>
+                    </div>
+                `;
+            } else if (recordType === 'staff' || recordType === 'volunteer') {
+                const fullName = `${recordToRecover.firstName || ''} ${recordToRecover.middleName || ''} ${recordToRecover.lastName || ''}`.trim();
+                const displayId = recordToRecover.staffId || recordToRecover.uid;
+                previewHTML = `
+                    <div class="space-y-2">
+                        <p><span class="font-medium">Name:</span> ${fullName}</p>
+                        <p><span class="font-medium">ID:</span> ${displayId}</p>
+                        <p><span class="font-medium">Type:</span> ${recordType.charAt(0).toUpperCase() + recordType.slice(1)}</p>
+                        <p><span class="font-medium">Position:</span> ${recordToRecover.position || 'N/A'}</p>
+                        <p><span class="font-medium">Email:</span> ${recordToRecover.emailAddress || 'N/A'}</p>
+                        <p><span class="font-medium">Status:</span> ${recordToRecover.currentStatus || 'N/A'}</p>
+                    </div>
+                `;
+            } else if (recordType === 'donation') {
+                previewHTML = `
+                    <div class="space-y-2">
+                        <p><span class="font-medium">Item Description:</span> ${recordToRecover.itemDescription || 'No Description'}</p>
+                        <p><span class="font-medium">Item Name:</span> ${recordToRecover.itemName || 'Unknown Item'}</p>
+                        <p><span class="font-medium">Donor Name:</span> ${recordToRecover.donorName || 'Unknown Donor'}</p>
+                        <p><span class="font-medium">ID:</span> ${recordToRecover.donationId}</p>
+                        <p><span class="font-medium">Type:</span> Donation</p>
+                        <p><span class="font-medium">Amount:</span> ${recordToRecover.amount || 'N/A'}</p>
+                        <p><span class="font-medium">Date:</span> ${formatDate(recordToRecover.dateOfDonation)}</p>
+                        <p><span class="font-medium">Status:</span> ${recordToRecover.currentStatus || 'N/A'}</p>
+                    </div>
+                `;
+            } else if (recordType === 'inventory') {
+                previewHTML = `
+                    <div class="space-y-2">
+                        <p><span class="font-medium">Item Name:</span> ${recordToRecover.itemName || 'Unknown Item'}</p>
+                        <p><span class="font-medium">ID:</span> ${recordToRecover.inventoryId}</p>
+                        <p><span class="font-medium">Type:</span> Inventory</p>
+                        <p><span class="font-medium">Quantity:</span> ${recordToRecover.quantity || 'N/A'}</p>
+                        <p><span class="font-medium">Location:</span> ${recordToRecover.location || 'N/A'}</p>
+                        <p><span class="font-medium">Status:</span> ${recordToRecover.currentStatus || 'N/A'}</p>
+                    </div>
+                `;
+            }
+            document.getElementById('recordPreview').innerHTML = previewHTML;
             document.getElementById('recoveryModal').classList.remove('hidden');
         };
 
@@ -791,14 +834,27 @@
         async function confirmRecovery() {
             if (!recordToRecover) return;
             try {
-                const recordId = recordToRecover.recordType === 'children' ? recordToRecover.childId : (recordToRecover.staffId || recordToRecover.uid);
-                const docId = getDocIdByRecordId(recordId, recordToRecover.recordType);
+                let recordId, docId, collectionName;
+                if (recordToRecover.recordType === 'children') {
+                    recordId = recordToRecover.childId;
+                    collectionName = 'children';
+                } else if (recordToRecover.recordType === 'staff' || recordToRecover.recordType === 'volunteer') {
+                    recordId = recordToRecover.staffId || recordToRecover.uid;
+                    collectionName = 'users';
+                } else if (recordToRecover.recordType === 'donation') {
+                    recordId = recordToRecover.donationId;
+                    collectionName = 'donations';
+                } else if (recordToRecover.recordType === 'inventory') {
+                    recordId = recordToRecover.inventoryId;
+                    collectionName = 'inventory';
+                }
+                docId = getDocIdByRecordId(recordId, recordToRecover.recordType);
                 if (!docId) {
                     showMessage('Error: record doc ID not found.', 'error');
                     return;
                 }
 
-                if (recordToRecover.source === 'children' || recordToRecover.source === 'users') {
+                if (recordToRecover.source === 'children' || recordToRecover.source === 'users' || recordToRecover.source === 'inventory') {
                     // Record is in original collection, just update status
                     const updatedRecord = { ...recordToRecover };
                     updatedRecord.currentStatus = "active";
@@ -812,7 +868,6 @@
                     delete updatedRecord.recordType;
                     
                     // Update Firestore document in appropriate collection
-                    const collectionName = recordToRecover.recordType === 'children' ? 'children' : 'users';
                     const targetCol = collection(db, collectionName);
                     const targetDocRef = doc(targetCol, docId);
                     await setDoc(targetDocRef, updatedRecord, { merge: true });
@@ -830,7 +885,6 @@
                     delete recoveredRecord.recordType;
                     
                     // Add to appropriate collection
-                    const collectionName = recordToRecover.recordType === 'children' ? 'children' : 'users';
                     const targetCol = collection(db, collectionName);
                     const newDocRef = doc(targetCol);
                     await setDoc(newDocRef, recoveredRecord);

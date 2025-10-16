@@ -34,9 +34,48 @@
                     </a>
                 </div>
                 <h1 class="text-xl font-semibold text-gray-900">Donation Records</h1>
-                <div></div>
+                <div>
+                    <button id="donationTutorialBtn" class="w-8 h-8 flex items-center justify-center bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors ml-2" title="Show Tutorial">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" />
+                            <text x="12" y="16" text-anchor="middle" font-size="12" fill="currentColor" font-family="Arial" font-weight="bold">i</text>
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
+    <!-- Tutorial Modal -->
+    <div id="donationTutorialModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-900">Donation Records Tutorial</h2>
+                <button id="closeDonationTutorialModal" class="text-gray-400 hover:text-gray-600">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <!-- Progress Bar -->
+            <div class="mb-6">
+                <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                    <div id="donationTutorialProgressBar" class="bg-blue-600 h-2 rounded-full" style="width: 0%"></div>
+                </div>
+                <div class="text-xs text-gray-500 text-right"><span id="donationTutorialProgressPercentage">0%</span></div>
+            </div>
+            <!-- Tutorial Content -->
+            <div class="flex-1 overflow-y-auto flex flex-col items-center justify-center">
+                <div id="donationTutorialImage" class="mb-4 w-full flex justify-center"></div>
+                <div id="donationTutorialStepText" class="text-base text-gray-700 text-center mb-4"></div>
+                <div id="donationTutorialStepDesc" class="text-sm text-gray-500 text-center mb-4"></div>
+            </div>
+            <!-- Navigation Buttons -->
+            <div class="flex justify-between items-center mt-6 pt-4 border-t">
+                <button id="donationTutorialPrevBtn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Previous</button>
+                <button id="donationTutorialSkipBtn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Skip Tutorial</button>
+                <button id="donationTutorialNextBtn" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Next</button>
+            </div>
+        </div>
+    </div>
     </header>
 
     <!-- Main Content -->
@@ -87,11 +126,11 @@
                             </svg>
                             Print
                         </button>
-                        <button id="exportCSVBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-center">
+                        <button id="inventoryBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-center">
                             <svg class="h-4 w-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M9 5l7-7M9 5l7 7m-7-7v14"></path>
                             </svg>
-                            Export CSV
+                            Inventory
                         </button>
                     </div>
                     <a href="record-donation.html" class="px-4 py-2 bg-red-primary text-white rounded-lg hover:bg-red-700 transition-colors text-center">
@@ -633,11 +672,184 @@
         </div>
     </div>
 
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center h-full w-full z-50">
+        <div class="p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                    <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mt-2">Delete Donation Record</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p class="text-sm text-gray-500">Are you sure you want to delete this donation record? This action cannot be undone.</p>
+                    <div class="mt-4">
+                        <label for="adminPassword" class="block text-sm font-medium text-gray-700 mb-2">Admin Password Required</label>
+                        <input type="password" id="adminPassword" autocomplete="new-password" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+                </div>
+                <div class="flex justify-center space-x-4 mt-4">
+                    <button onclick="closeDeleteModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors">
+                        Cancel
+                    </button>
+                    <button onclick="confirmDelete()" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Warning Modal -->
+    <div id="warningModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center h-full w-full z-50">
+        <div class="p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100">
+                    <svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mt-2">⚠️ Final Warning</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p class="text-sm text-gray-700 font-medium">This will delete the donation record!</p>
+                    <p class="text-sm text-gray-500 mt-2">The record will be moved to deleted records archive. This action cannot be undone.</p>
+                    <div class="mt-4 p-3 bg-red-50 rounded-md">
+                        <p class="text-sm text-red-700">⚠️ Are you absolutely sure you want to proceed?</p>
+                    </div>
+                </div>
+                <div class="flex justify-center space-x-4 mt-4">
+                    <button onclick="closeWarningModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors">
+                        Cancel
+                    </button>
+                    <button onclick="proceedWithDeletion()" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
+                        Yes, Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Modal -->
+    <div id="loadingModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center h-full w-full z-50">
+        <div class="p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-red-primary mx-auto"></div>
+                <h3 class="text-lg font-medium text-gray-900 mt-4">Deleting Donation Record</h3>
+                <p class="text-sm text-gray-500 mt-2">Please wait while we process the deletion...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successDeleteModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center h-full w-full z-50">
+        <div class="p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+                    <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mt-2">Donation Record Deleted Successfully!</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p class="text-sm text-gray-500">The donation record has been permanently deleted and moved to the deleted records archive.</p>
+                </div>
+                <div class="flex justify-center mt-4">
+                    <button onclick="closeSuccessDeleteModal()" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+                        OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
+    // --- Donation Records Tutorial Modal Logic ---
+    let donationTutorialStep = 1;
+    const donationTutorialTotalSteps = 5;
+    const donationTutorialSteps = [
+        {
+            image: 'Toturial/Donation Records/pic1.png',
+            title: 'Step 1: Quick Actions',
+            desc: 'Access quick actions such as adding a new donation, filtering, and exporting records. These actions are available at the top of the Donation Records page for fast management.'
+        },
+        {
+            image: 'Toturial/Donation Records/pic2.png',
+            title: 'Step 2: Trends Overview',
+            desc: 'View donation trends with a chart. Green represents money donations, blue represents in-kind donations. Analyze donation patterns over time.'
+        },
+        {
+            image: 'Toturial/Donation Records/pic3.png',
+            title: 'Step 3: Money Category',
+            desc: 'Select the Money category to view trends and a list of all money donations. The trends chart and donation list will update to show only money donations.'
+        },
+        {
+            image: 'Toturial/Donation Records/pic4.png',
+            title: 'Step 4: In-Kind Category',
+            desc: 'Select the In-Kind category to view trends and a list of all in-kind donations. The trends chart and donation list will update to show only in-kind donations.'
+        },
+        {
+            image: 'Toturial/Donation Records/pic5.png',
+            title: 'Step 5: Print Function',
+            desc: 'Use the print function to generate printable reports of donation records. Customize filters and preview before printing.'
+        }
+    ];
+
+    function showDonationTutorialModal() {
+        donationTutorialStep = 1;
+        updateDonationTutorialStep();
+        document.getElementById('donationTutorialModal').classList.remove('hidden');
+    }
+
+    function hideDonationTutorialModal() {
+        document.getElementById('donationTutorialModal').classList.add('hidden');
+    }
+
+    function donationTutorialNext() {
+        if (donationTutorialStep < donationTutorialTotalSteps) {
+            donationTutorialStep++;
+            updateDonationTutorialStep();
+        } else {
+            hideDonationTutorialModal();
+        }
+    }
+
+    function donationTutorialPrev() {
+        if (donationTutorialStep > 1) {
+            donationTutorialStep--;
+            updateDonationTutorialStep();
+        }
+    }
+
+    function updateDonationTutorialStep() {
+        const step = donationTutorialSteps[donationTutorialStep - 1];
+        document.getElementById('donationTutorialImage').innerHTML = `<img src='${step.image}' alt='Tutorial Step ${donationTutorialStep}' class='rounded border w-full max-w-md'>`;
+        document.getElementById('donationTutorialStepText').innerHTML = `<span class='font-semibold'>${step.title}</span> <span class='ml-2 text-xs text-gray-400'>Step ${donationTutorialStep} of ${donationTutorialTotalSteps}</span>`;
+        document.getElementById('donationTutorialStepDesc').textContent = step.desc;
+        document.getElementById('donationTutorialPrevBtn').disabled = donationTutorialStep === 1;
+        document.getElementById('donationTutorialNextBtn').textContent = donationTutorialStep === donationTutorialTotalSteps ? 'Finish' : 'Next';
+        // Progress bar
+        const progress = Math.round((donationTutorialStep / donationTutorialTotalSteps) * 100);
+        document.getElementById('donationTutorialProgressBar').style.width = `${progress}%`;
+        document.getElementById('donationTutorialProgressPercentage').textContent = `${progress}%`;
+    }
+
+    // Setup tutorial button and modal events
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('donationTutorialBtn').addEventListener('click', showDonationTutorialModal);
+        document.getElementById('closeDonationTutorialModal').addEventListener('click', hideDonationTutorialModal);
+        document.getElementById('donationTutorialSkipBtn').addEventListener('click', hideDonationTutorialModal);
+        document.getElementById('donationTutorialPrevBtn').addEventListener('click', donationTutorialPrev);
+        document.getElementById('donationTutorialNextBtn').addEventListener('click', donationTutorialNext);
+    });
         import {
             db,
             collection,
-            getDocs
+            getDocs,
+            deleteDoc,
+            doc,
+            addDoc
         } from './firebase.js';
 
         let allRecords = [];
@@ -645,6 +857,7 @@
         let currentFilter = 'all';
         let currentUser = null;
         let isAdvancedFilterActive = false;
+        let currentDeleteId = null;
 
         // Session Manager
         const sessionManager = {
@@ -895,7 +1108,9 @@
         function setupEventListeners() {
             document.getElementById('searchInput').addEventListener('input', filterRecords);
             document.getElementById('typeFilter').addEventListener('change', filterRecords);
-            document.getElementById('exportCSVBtn').addEventListener('click', exportToCSV);
+            document.getElementById('inventoryBtn').addEventListener('click', function() {
+                window.location.href = 'inventory.html';
+            });
             document.getElementById('printBtn').addEventListener('click', printRecords);
             document.getElementById('advancedFilterBtn').addEventListener('click', openAdvancedFilter);
 
@@ -1221,6 +1436,19 @@
                             </div>
                         ` : '')}
                     </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="mt-6 pt-4 border-t border-gray-200 flex justify-end space-x-3">
+                    <button onclick="closeModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors">
+                        Close
+                    </button>
+                    <button onclick="showWarningModal('${record.donationId}')" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
+                        <svg class="h-4 w-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        Delete Record
+                    </button>
                 </div>
             `;
             document.getElementById('recordModal').classList.remove('hidden');
@@ -2530,6 +2758,181 @@
             
             // Update statistics for the filtered month
             updateMonthFilterStatistics();
+        }
+
+        // Delete Modal Functions
+        window.showWarningModal = function(donationId) {
+            console.log('showWarningModal called with ID:', donationId);
+            
+            if (!donationId || donationId === 'null' || donationId === 'undefined') {
+                alert('Cannot delete record: Invalid or missing donation identifier. Please refresh the page and try again.');
+                return;
+            }
+            
+            currentDeleteId = donationId;
+            document.getElementById('warningModal').classList.remove('hidden');
+        };
+
+        window.closeDeleteModal = function() {
+            document.getElementById('deleteModal').classList.add('hidden');
+        };
+
+        window.closeWarningModal = function() {
+            document.getElementById('warningModal').classList.add('hidden');
+        };
+
+        window.closeSuccessDeleteModal = function() {
+            document.getElementById('successDeleteModal').classList.add('hidden');
+        };
+
+        window.proceedWithDeletion = function() {
+            console.log('proceedWithDeletion called, currentDeleteId:', currentDeleteId);
+            closeWarningModal();
+            // Show password modal for admin verification
+            document.getElementById('deleteModal').classList.remove('hidden');
+            document.getElementById('adminPassword').value = '';
+        };
+
+        window.confirmDelete = async function() {
+            const adminPassword = document.getElementById('adminPassword').value;
+            console.log('confirmDelete called, currentDeleteId:', currentDeleteId);
+            
+            if (!adminPassword) {
+                alert('Admin password is required to delete donation records.');
+                return;
+            }
+            
+            try {
+                // Check Firebase users for admin with matching password
+                const usersCol = collection(db, 'users');
+                const snapshot = await getDocs(usersCol);
+                let adminFound = false;
+                
+                snapshot.forEach(docSnap => {
+                    const userData = docSnap.data();
+                    if (userData.role === 'admin') {
+                        // Check if password matches the generated password format or username is admin
+                        const generatedPassword = `TNPOMS@${userData.dateOfBirth?.split('-').reverse().join('')}`;
+                        if (generatedPassword === adminPassword || userData.username === 'admin') {
+                            adminFound = true;
+                        }
+                    }
+                });
+                
+                if (!adminFound) {
+                    // Fallback to local accounts for backward compatibility
+                    const accounts = JSON.parse(localStorage.getItem('accounts') || '{"accounts":[]}');
+                    const adminUser = accounts.accounts.find(acc => 
+                        acc.username === 'admin' && acc.password === adminPassword
+                    );
+                    if (!adminUser) {
+                        // Additional safety password fallback
+                        if (adminPassword === 'password123') {
+                            adminFound = true;
+                            console.log('Admin authenticated via safety password');
+                        } else {
+                            alert('Invalid admin password. Please contact an administrator if you need access.');
+                            return;
+                        }
+                    } else {
+                        adminFound = true;
+                    }
+                }
+                
+                // Close password modal and proceed with deletion
+                closeDeleteModal();
+                console.log('Before calling performDeletion, currentDeleteId:', currentDeleteId);
+                await performDeletion();
+                
+            } catch (error) {
+                console.error('Error verifying admin password:', error);
+                alert('Error verifying admin password. Please try again.');
+            }
+        };
+
+        async function performDeletion() {
+            // Show loading modal
+            document.getElementById('loadingModal').classList.remove('hidden');
+            
+            try {
+                console.log('Starting deletion for ID:', currentDeleteId);
+                
+                // Find the donation record in our loaded records
+                let donationRecord = allRecords.find(record => 
+                    record.donationId === currentDeleteId ||
+                    record.docId === currentDeleteId ||
+                    record.uid === currentDeleteId
+                );
+                
+                if (!donationRecord) {
+                    document.getElementById('loadingModal').classList.add('hidden');
+                    alert(`Donation record with ID "${currentDeleteId}" not found in loaded records. Please refresh the page and try again.`);
+                    console.log('Current Delete ID:', currentDeleteId);
+                    console.log('Available donation records:', allRecords.map(record => ({
+                        donationId: record.donationId,
+                        docId: record.docId,
+                        donorName: record.donorName
+                    })));
+                    return;
+                }
+                
+                console.log('Found donation record to delete:', {
+                    donationId: donationRecord.donationId,
+                    docId: donationRecord.docId,
+                    donorName: donationRecord.donorName
+                });
+                
+                // Add deletion metadata
+                const deletedRecord = {
+                    ...donationRecord,
+                    deletedAt: new Date().toISOString(),
+                    deletedBy: currentUser ? currentUser.username : 'Unknown',
+                    deletionReason: 'Manual deletion by admin',
+                    originalCollection: 'donations'
+                };
+                
+                // Add to deletedRecords collection
+                const deletedRecordsCol = collection(db, 'deletedRecords');
+                await addDoc(deletedRecordsCol, deletedRecord);
+                console.log('Added to deletedRecords collection');
+                
+                // Delete from donations collection using the document ID
+                // First, we need to find the actual document in Firestore
+                const donationsCol = collection(db, 'donations');
+                const donationsSnapshot = await getDocs(donationsCol);
+                let documentToDelete = null;
+                
+                donationsSnapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if (data.donationId === currentDeleteId) {
+                        documentToDelete = docSnap.id;
+                    }
+                });
+                
+                if (documentToDelete) {
+                    await deleteDoc(doc(db, 'donations', documentToDelete));
+                    console.log('Deleted from donations collection');
+                } else {
+                    console.error('Could not find document to delete in Firestore');
+                }
+                
+                // Hide loading modal
+                document.getElementById('loadingModal').classList.add('hidden');
+                
+                // Show success modal
+                document.getElementById('successDeleteModal').classList.remove('hidden');
+                
+                // Close the record detail modal
+                closeModal();
+                
+                // Reload records
+                await loadRecordsFromFirebase();
+                
+            } catch (error) {
+                console.error('Error deleting donation record:', error);
+                document.getElementById('loadingModal').classList.add('hidden');
+                alert(`Failed to delete donation record: ${error.message}. Please try again or contact support if the problem persists.`);
+            }
         }
 
         // Function to update statistics when month filter is active

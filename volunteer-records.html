@@ -116,9 +116,6 @@
                     <button id="soloPrintBtn" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors text-center">
                         Solo Print
                     </button>
-                    <button id="exportCSVBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-center">
-                        Export CSV
-                    </button>
                     <a href="add-volunteer.html" class="px-4 py-2 bg-red-primary text-white rounded-lg hover:bg-red-700 transition-colors text-center inline-block">
                         Add Volunteer
                     </a>
@@ -733,6 +730,81 @@
         </div>
     </div>
 
+    <!-- Tutorial Modal -->
+    <div id="tutorialModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-semibold text-gray-900">Volunteer Records Tutorial</h3>
+                <button id="closeTutorialModal" class="text-gray-400 hover:text-gray-600 p-1">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="mb-6">
+                <div class="flex justify-between text-sm text-gray-600 mb-2">
+                    <span>Step <span id="currentStep">1</span> of <span id="totalSteps">3</span></span>
+                    <span id="progressPercentage">33%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div id="progressBar" class="bg-red-primary h-2 rounded-full transition-all duration-300" style="width: 33%"></div>
+                </div>
+            </div>
+            
+            <!-- Tutorial Content -->
+            <div class="flex-1 overflow-y-auto">
+                <div id="tutorialStep1" class="tutorial-step">
+                    <div class="text-center">
+                        <img src="Toturial/Volunteer Records/pic1.png" alt="Quick Actions and Filters" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-4">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-2">Step 1: Quick Actions and Filters</h4>
+                        <p class="text-gray-600">Use the action buttons to manage volunteer records efficiently. The <strong>Advanced Filter</strong> button opens detailed filtering options, <strong>Print Records</strong> allows you to print overall volunteer reports, and <strong>Solo Print</strong> lets you print individual volunteer records. Search by name or ID, and filter by department or status using the dropdown menus.</p>
+                    </div>
+                </div>
+                
+                <div id="tutorialStep2" class="tutorial-step hidden">
+                    <div class="text-center">
+                        <img src="Toturial/Volunteer Records/pic2.png" alt="Volunteer Availability Trends" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-4">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-2">Step 2: Volunteer Availability Trends</h4>
+                        <p class="text-gray-600">The trends section displays a weekly availability chart showing how many volunteers are available each day of the week. This helps with scheduling and resource planning. You can click on specific days in the chart to filter volunteers by their availability, and view statistics including total volunteers, active volunteers, and those available today.</p>
+                    </div>
+                </div>
+                
+                <div id="tutorialStep3" class="tutorial-step hidden">
+                    <div class="text-center">
+                        <img src="Toturial/Volunteer Records/pic3.png" alt="Volunteer Records List" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-4">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-2">Step 3: Volunteer Records List</h4>
+                        <p class="text-gray-600">The main area displays all volunteer records in a grid format. Each card shows the volunteer's photo, name, ID, department, status, and availability days. You can click on any card to view detailed information, or use the edit and delete buttons to manage records. The status is color-coded for quick identification (Green for Active, Red for Inactive, Yellow for On Leave).</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Navigation Buttons -->
+            <div class="flex justify-between items-center mt-6 pt-4 border-t">
+                <button id="prevTutorialBtn" class="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    <svg class="h-5 w-5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    Previous
+                </button>
+                
+                <div class="flex space-x-2">
+                    <button id="skipTutorialBtn" class="px-4 py-2 text-gray-500 hover:text-gray-700 transition-colors">
+                        Skip Tutorial
+                    </button>
+                </div>
+                
+                <button id="nextTutorialBtn" class="px-4 py-2 bg-red-primary text-white rounded-md hover:bg-red-700 transition-colors">
+                    Next
+                    <svg class="h-5 w-5 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import {
             db,
@@ -755,7 +827,6 @@
             document.getElementById('searchInput').addEventListener('input', filterRecords);
             document.getElementById('departmentFilter').addEventListener('change', filterRecords);
             document.getElementById('statusFilter').addEventListener('change', filterRecords);
-            document.getElementById('exportCSVBtn').addEventListener('click', exportToCSV);
             document.getElementById('closeModalBtn').addEventListener('click', closeModal);
             document.getElementById('advancedFilterBtn').addEventListener('click', openAdvancedFilter);
             document.getElementById('closeAdvancedFilterBtn').addEventListener('click', closeAdvancedFilter);
@@ -763,6 +834,9 @@
             document.getElementById('clearAdvancedFiltersBtn').addEventListener('click', clearAdvancedFilters);
             document.getElementById('printBtn').addEventListener('click', openPrintModal);
             document.getElementById('soloPrintBtn').addEventListener('click', openSoloPrintModal);
+
+            // Tutorial functionality
+            setupTutorialFunctionality();
 
             // Keyboard navigation for modals
             document.addEventListener('keydown', function(event) {
@@ -2141,17 +2215,16 @@
                 <div class="print-content">
                     <!-- Header -->
                     <div class="text-center mb-6">
-                        <img src="${window.location.origin}${window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'))}/tahanan-logo.png" alt="Tahanan ng Pagmamahal Logo" style="height: 80px; margin: 0 auto 10px auto; display: block;" onerror="this.style.display='none'">
+                        <img src="${window.location.origin}${window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'))}/tahanan-logo.png" alt="Tahanan ng Pagmamahal Logo" style="height: 100px; margin: 0 auto 10px auto; display: block;" onerror="this.style.display='none'">
                         <div>
-                            <h1 class="text-2xl font-bold text-gray-900">TAHANAN NG PAGMAMAHAL</h1>
-                            <p class="text-lg text-gray-600">children's home inc.</p>
                         </div>
                         <div class="border-b-2 border-gray-300 pb-2">
                             <p class="text-sm text-gray-600">45 Dr. Pilapil St., Brgy. Sagad, Pasig Metro Manila, Philippines</p>
                             <p class="text-sm text-gray-600">Contact: (+63) 917 325 7168 Tel: +632 8631 7188</p>
-                            <p class="text-sm text-gray-600">Email: tahananmocil@gmail.com</p>
+                            <p class="text-sm text-gray-600">Email: tahananmocil@gmail.com</p><br>
+                            <p class="text-sm text-gray-600">Generated on ${currentDate}</p>
                         </div>
-                        <div class="mt-4">
+                        <div class="mt-4 hidden">
                             <h2 class="text-xl font-semibold text-gray-900">VOLUNTEER RECORD</h2>
                             <p class="text-sm text-gray-600">Generated on ${currentDate}</p>
                         </div>
@@ -2217,22 +2290,22 @@
                             <!-- Additional Information -->
                             <div class="mt-6">
                                 <h3 class="text-lg font-semibold text-gray-900 mb-4 border-b pb-2">Additional Information</h3>
-                                <div class="space-y-4">
-                                    <div>
-                                        <span class="block text-sm font-medium text-gray-700 mb-1">Skills & Experience:</span>
-                                        <p class="text-sm text-gray-900">${volunteer.skillsAndExperience || 'Not specified'}</p>
+                                <div class="space-y-3">
+                                    <div class="flex">
+                                        <span class="w-32 text-sm font-medium text-gray-700">Skills & Experience:</span>
+                                        <span class="text-sm text-gray-900">${volunteer.skillsAndExperience || 'Not specified'}</span>
                                     </div>
-                                    <div>
-                                        <span class="block text-sm font-medium text-gray-700 mb-1">Motivation for Volunteering:</span>
-                                        <p class="text-sm text-gray-900">${volunteer.motivationForVolunteering || 'Not specified'}</p>
+                                    <div class="flex">
+                                        <span class="w-32 text-sm font-medium text-gray-700">Motivation for Volunteering:</span>
+                                        <span class="text-sm text-gray-900">${volunteer.motivationForVolunteering || 'Not specified'}</span>
                                     </div>
-                                    <div>
-                                        <span class="block text-sm font-medium text-gray-700 mb-1">Emergency Contact:</span>
-                                        <p class="text-sm text-gray-900">
+                                    <div class="flex">
+                                        <span class="w-32 text-sm font-medium text-gray-700">Emergency Contact:</span>
+                                        <span class="text-sm text-gray-900">
                                             ${volunteer.emergencyContactName || 'Not specified'}
                                             ${volunteer.emergencyContactRelationship ? `(${volunteer.emergencyContactRelationship})` : ''}
                                             ${volunteer.emergencyContactNumber ? `- ${volunteer.emergencyContactNumber}` : ''}
-                                        </p>
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -2258,7 +2331,6 @@
             const fullName = `${volunteer.firstName || ''} ${volunteer.middleName || ''} ${volunteer.lastName || ''}`.trim();
             const photoSrc = volunteer.photoData || 'user.png';
             const currentDate = new Date().toLocaleDateString();
-            const dateJoined = volunteer.dateAdded ? new Date(volunteer.dateAdded).toLocaleDateString() : 'N/A';
 
             return `
                 <!DOCTYPE html>
@@ -2269,191 +2341,273 @@
                         body {
                             font-family: Arial, sans-serif;
                             margin: 20px;
-                            font-size: 12px;
-                            line-height: 1.4;
+                            font-size: 14px;
+                            line-height: 1.6;
+                            color: #333;
                         }
                         .header {
                             text-align: center;
-                            margin-bottom: 20px;
-                            border-bottom: 2px solid #333;
-                            padding-bottom: 15px;
+                            margin-bottom: 30px;
+                            border-bottom: 2px solid #ccc;
+                            padding-bottom: 20px;
                         }
                         .logo {
                             height: 80px;
                             margin-bottom: 10px;
+                            display: block;
+                            margin-left: auto;
+                            margin-right: auto;
                         }
                         h1 {
                             margin: 10px 0 5px 0;
-                            font-size: 18px;
+                            font-size: 24px;
+                            font-weight: bold;
                             color: #333;
                         }
                         .subtitle {
-                            font-size: 11px;
+                            font-size: 16px;
                             color: #666;
                             margin: 2px 0;
                         }
-                        .info-section {
+                        .contact-info {
+                            font-size: 12px;
+                            color: #666;
+                            margin: 2px 0;
+                        }
+                        .record-title {
+                            text-align: center;
+                            margin: 30px 0;
+                        }
+                        .record-title h2 {
+                            font-size: 20px;
+                            font-weight: 600;
+                            color: #333;
+                            margin: 0 0 5px 0;
+                        }
+                        .generated-date {
+                            font-size: 12px;
+                            color: #666;
+                        }
+                        .content-container {
+                            background: white;
+                            border: 1px solid #ddd;
+                            border-radius: 8px;
+                            overflow: hidden;
                             margin: 20px 0;
                         }
-                        .section-header {
-                            margin: 20px 0 10px 0;
-                            font-size: 14px;
-                            color: #333;
-                            border-bottom: 2px solid #dc2626;
-                            padding-bottom: 5px;
-                            background-color: #dc2626 !important;
-                            color: white !important;
-                            padding: 8px;
+                        .photo-section {
+                            background: #f9f9f9;
+                            padding: 20px;
                             text-align: center;
-                            font-weight: bold;
-                            -webkit-print-color-adjust: exact !important;
-                            color-adjust: exact !important;
-                            print-color-adjust: exact !important;
-                        }
-                        .info-row {
-                            display: table;
-                            width: 100%;
-                            margin-bottom: 8px;
-                        }
-                        .info-label {
-                            display: table-cell;
-                            width: 30%;
-                            font-weight: bold;
-                            padding: 8px;
-                            border: 1px solid #333;
-                            background-color: #dc2626 !important;
-                            color: white !important;
-                            -webkit-print-color-adjust: exact !important;
-                            color-adjust: exact !important;
-                            print-color-adjust: exact !important;
-                        }
-                        .info-value {
-                            display: table-cell;
-                            padding: 8px;
-                            border: 1px solid #333;
+                            border-bottom: 1px solid #ddd;
                         }
                         .photo {
-                            width: 100px;
-                            height: 100px;
+                            width: 120px;
+                            height: 120px;
+                            border-radius: 50%;
                             object-fit: cover;
-                            border-radius: 4px;
-                            float: right;
-                            margin-left: 20px;
-                            margin-bottom: 20px;
+                            border: 4px solid white;
+                            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
                         }
-                        .signature-section {
+                        .details-section {
+                            padding: 30px;
+                        }
+                        .info-grid {
+                            display: grid;
+                            grid-template-columns: 1fr 1fr;
+                            gap: 30px;
+                            margin-bottom: 30px;
+                        }
+                        .info-group {
+                            margin-bottom: 30px;
+                        }
+                        .info-group h3 {
+                            font-size: 18px;
+                            font-weight: 600;
+                            color: #333;
+                            margin-bottom: 15px;
+                            padding-bottom: 8px;
+                            border-bottom: 1px solid #ddd;
+                        }
+                        .info-item {
+                            display: flex;
+                            margin-bottom: 12px;
+                        }
+                        .info-label {
+                            width: 140px;
+                            font-weight: bold;
+                            color: #555;
+                            flex-shrink: 0;
+                        }
+                        .info-value {
+                            color: #333;
+                            flex: 1;
+                        }
+                        .additional-info {
+                            margin-top: 30px;
+                        }
+                        .additional-info h3 {
+                            font-size: 18px;
+                            font-weight: 600;
+                            color: #333;
+                            margin-bottom: 15px;
+                            padding-bottom: 8px;
+                            border-bottom: 1px solid #ddd;
+                        }
+                        .text-item {
+                            margin-bottom: 15px;
+                        }
+                        .text-label {
+                            font-weight: 500;
+                            color: #555;
+                            display: block;
+                            margin-bottom: 5px;
+                        }
+                        .text-value {
+                            color: #333;
+                            line-height: 1.5;
+                        }
+                        .footer {
                             margin-top: 40px;
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: end;
+                        }
+                        .footer-note {
+                            font-size: 10px;
+                            color: #999;
+                        }
+                        .signature-area {
                             text-align: right;
                         }
                         .signature-line {
-                            border-top: 1px solid #333;
+                            border-top: 1px solid #666;
                             width: 200px;
-                            margin: 0 0 5px auto;
+                            margin-bottom: 5px;
+                        }
+                        .signature-text {
+                            font-size: 12px;
+                            color: #666;
                         }
                         @media print {
-                            body { margin: 15px; }
-                            .no-print { display: none; }
+                            body { 
+                                margin: 15px;
+                                font-size: 12px;
+                            }
+                            .info-grid {
+                                grid-template-columns: 1fr 1fr;
+                                gap: 20px;
+                            }
+                            .content-container {
+                                border: 1px solid #333;
+                            }
+                            .photo-section {
+                                background: #f5f5f5 !important;
+                                -webkit-print-color-adjust: exact;
+                            }
                         }
                     </style>
                 </head>
                 <body>
+                    <!-- Header -->
                     <div class="header">
-                        <img src="tahanan-logo.png" alt="Tahanan ng Pagmamahal Logo" class="logo" style="display: block; margin: 0 auto;" onerror="this.style.display='none'">
-                        <h1>TAHANAN NG PAGMAMAHAL</h1>
-                        <div class="subtitle">children's home inc.</div>
-                        <div class="subtitle">45 Dr. Pilapil St., Brgy. Sagad, Pasig Metro Manila, Philippines</div>
-                        <div class="subtitle">Contact: (+63) 917 325 7168 Tel: +632 8631 7188</div>
-                        <div class="subtitle">Email: tahananmocil@gmail.com</div>
-                    </div>
-                    
-                    <h2 style="text-align: center; margin: 20px 0; font-size: 16px;">VOLUNTEER RECORD</h2>
-                    <p style="text-align: center; font-size: 11px; color: #666; margin-bottom: 20px;">Generated on ${currentDate}</p>
-                    
-                    ${includePhoto ? `<img src="${photoSrc}" alt="${fullName}" class="photo" onerror="this.style.display='none'">` : ''}
-                    
-                    <div class="info-section">
-                        <div class="section-header">PERSONAL INFORMATION</div>
-                        <div class="info-row">
-                            <div class="info-label">Full Name</div>
-                            <div class="info-value">${fullName}</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Volunteer ID</div>
-                            <div class="info-value">${volunteer.volunteerId || 'N/A'}</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Gender</div>
-                            <div class="info-value">${volunteer.gender || 'N/A'}</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Date of Birth</div>
-                            <div class="info-value">${volunteer.dateOfBirth || 'N/A'}</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Contact Number</div>
-                            <div class="info-value">${volunteer.contactNumber || 'N/A'}</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Email Address</div>
-                            <div class="info-value">${volunteer.emailAddress || 'N/A'}</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Address</div>
-                            <div class="info-value">${volunteer.address || 'N/A'}</div>
+                        <img src="tahanan-logo.png" alt="Tahanan ng Pagmamahal Logo" class="logo" onerror="this.style.display='none'">
+                        <div class="contact-info">
+                            <p>45 Dr. Pilapil St., Brgy. Sagad, Pasig Metro Manila, Philippines</p>
+                            <p>Contact: (+63) 917 325 7168 Tel: +632 8631 7188</p>
+                            <p>Email: tahananmocil@gmail.com</p><br>
+                            <p class="generated-date">Generated on ${currentDate}</p>
                         </div>
                     </div>
                     
-                    <div class="info-section">
-                        <div class="section-header">VOLUNTEER DETAILS</div>
-                        <div class="info-row">
-                            <div class="info-label">Preferred Department</div>
-                            <div class="info-value">${volunteer.preferredDepartment || 'N/A'}</div>
+                    <div class="record-title hidden">
+                    </div>
+                    
+                    <!-- Volunteer Details -->
+                    <div class="content-container">
+                        ${includePhoto ? `
+                        <div class="photo-section">
+                            <img src="${photoSrc}" alt="${fullName}" class="photo" onerror="this.style.display='none'">
                         </div>
-                        <div class="info-row">
-                            <div class="info-label">Status</div>
-                            <div class="info-value">${volunteer.volunteerStatus || 'Active'}</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Availability</div>
-                            <div class="info-value">${volunteer.availability || 'N/A'}</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Skills & Experience</div>
-                            <div class="info-value">${volunteer.skillsAndExperience || 'N/A'}</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Motivation</div>
-                            <div class="info-value">${volunteer.motivation || 'N/A'}</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Date Joined</div>
-                            <div class="info-value">${dateJoined}</div>
+                        ` : ''}
+                        
+                        <div class="details-section">
+                            <div class="info-grid">
+                                <!-- Personal Information -->
+                                <div class="info-group">
+                                    <h3>Personal Information</h3>
+                                    <div class="info-item">
+                                        <span class="info-label">Full Name:</span>
+                                        <span class="info-value">${fullName}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Volunteer ID:</span>
+                                        <span class="info-value">${volunteer.volunteerId || 'N/A'}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Contact:</span>
+                                        <span class="info-value">${volunteer.contactNumber || 'N/A'}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Email:</span>
+                                        <span class="info-value">${volunteer.emailAddress || 'N/A'}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Date Joined:</span>
+                                        <span class="info-value">${volunteer.dateAdded || 'N/A'}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Volunteer Information -->
+                                <div class="info-group">
+                                    <h3>Volunteer Information</h3>
+                                    <div class="info-item">
+                                        <span class="info-label">Department:</span>
+                                        <span class="info-value">${volunteer.preferredDepartment || 'N/A'}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Status:</span>
+                                        <span class="info-value">${volunteer.volunteerStatus || 'Active'}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Availability:</span>
+                                        <span class="info-value">${volunteer.availability || 'N/A'}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Additional Information -->
+                            <div class="additional-info">
+                                <h3>Additional Information</h3>
+                                <div class="info-item">
+                                    <span class="info-label">Skills & Experience:</span>
+                                    <span class="info-value">${volunteer.skillsAndExperience || 'Not specified'}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Motivation for Volunteering:</span>
+                                    <span class="info-value">${volunteer.motivationForVolunteering || 'Not specified'}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Emergency Contact:</span>
+                                    <span class="info-value">
+                                        ${volunteer.emergencyContactName || 'Not specified'}
+                                        ${volunteer.emergencyContactRelationship ? `(${volunteer.emergencyContactRelationship})` : ''}
+                                        ${volunteer.emergencyContactNumber ? `- ${volunteer.emergencyContactNumber}` : ''}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="info-section">
-                        <div class="section-header">EMERGENCY CONTACT</div>
-                        <div class="info-row">
-                            <div class="info-label">Emergency Contact Name</div>
-                            <div class="info-value">${volunteer.emergencyContactName || 'N/A'}</div>
+                    <!-- Footer -->
+                    <div class="footer">
+                        <div class="footer-note">
+                            <p>This document was generated automatically by the TNP OMS system.</p>
                         </div>
-                        <div class="info-row">
-                            <div class="info-label">Relationship</div>
-                            <div class="info-value">${volunteer.emergencyContactRelationship || 'N/A'}</div>
+                        <div class="signature-area">
+                            <div class="signature-line"></div>
+                            <p class="signature-text">Authorized Signature</p>
                         </div>
-                        <div class="info-row">
-                            <div class="info-label">Emergency Contact Number</div>
-                            <div class="info-value">${volunteer.emergencyContactNumber || 'N/A'}</div>
-                        </div>
-                    </div>
-                    
-                    <div style="margin-top: 30px; font-size: 10px;">
-                        <p>This document was generated automatically by the TNP OMS system.</p>
-                    </div>
-                    
-                    <div class="signature-section">
-                        <div class="signature-line"></div>
-                        <div style="font-size: 10px;">Authorized Signature</div>
                     </div>
                 </body>
                 </html>
@@ -2467,6 +2621,108 @@
                 soloPhotoCheckbox.addEventListener('change', updateSoloPreview);
             }
         });
+
+        // Tutorial functionality
+        let currentTutorialStep = 1;
+        const totalTutorialSteps = 3;
+
+        function setupTutorialFunctionality() {
+            const tutorialBtn = document.getElementById('tutorialBtn');
+            const tutorialModal = document.getElementById('tutorialModal');
+            const closeTutorialModal = document.getElementById('closeTutorialModal');
+            const prevTutorialBtn = document.getElementById('prevTutorialBtn');
+            const nextTutorialBtn = document.getElementById('nextTutorialBtn');
+            const skipTutorialBtn = document.getElementById('skipTutorialBtn');
+
+            tutorialBtn.addEventListener('click', showTutorialModal);
+            closeTutorialModal.addEventListener('click', hideTutorialModal);
+            skipTutorialBtn.addEventListener('click', hideTutorialModal);
+            prevTutorialBtn.addEventListener('click', goToPreviousTutorialStep);
+            nextTutorialBtn.addEventListener('click', goToNextTutorialStep);
+
+            // Close tutorial on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && !tutorialModal.classList.contains('hidden')) {
+                    hideTutorialModal();
+                }
+            });
+        }
+
+        function showTutorialModal() {
+            currentTutorialStep = 1;
+            document.getElementById('tutorialModal').classList.remove('hidden');
+            updateTutorialStep();
+        }
+
+        function hideTutorialModal() {
+            document.getElementById('tutorialModal').classList.add('hidden');
+        }
+
+        function goToNextTutorialStep() {
+            if (currentTutorialStep < totalTutorialSteps) {
+                currentTutorialStep++;
+                updateTutorialStep();
+            } else {
+                hideTutorialModal();
+            }
+        }
+
+        function goToPreviousTutorialStep() {
+            if (currentTutorialStep > 1) {
+                currentTutorialStep--;
+                updateTutorialStep();
+            }
+        }
+
+        function updateTutorialStep() {
+            // Hide all steps
+            for (let i = 1; i <= totalTutorialSteps; i++) {
+                const step = document.getElementById(`tutorialStep${i}`);
+                if (step) {
+                    step.classList.add('hidden');
+                }
+            }
+
+            // Show current step
+            const currentStepElement = document.getElementById(`tutorialStep${currentTutorialStep}`);
+            if (currentStepElement) {
+                currentStepElement.classList.remove('hidden');
+            }
+
+            // Update progress bar
+            const progressPercentage = Math.round((currentTutorialStep / totalTutorialSteps) * 100);
+            document.getElementById('progressBar').style.width = `${progressPercentage}%`;
+            document.getElementById('progressPercentage').textContent = `${progressPercentage}%`;
+            document.getElementById('currentStep').textContent = currentTutorialStep;
+            document.getElementById('totalSteps').textContent = totalTutorialSteps;
+
+            // Update navigation buttons
+            const prevBtn = document.getElementById('prevTutorialBtn');
+            const nextBtn = document.getElementById('nextTutorialBtn');
+
+            prevBtn.disabled = currentTutorialStep === 1;
+            if (currentTutorialStep === 1) {
+                prevBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                prevBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+
+            if (currentTutorialStep === totalTutorialSteps) {
+                nextBtn.innerHTML = `
+                    Finish
+                    <svg class="h-5 w-5 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                `;
+            } else {
+                nextBtn.innerHTML = `
+                    Next
+                    <svg class="h-5 w-5 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                `;
+            }
+        }
 
         window.logout = function() {
             sessionManager.logout();
