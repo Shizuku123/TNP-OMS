@@ -543,6 +543,64 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Inventory Integration Section -->
+                    <div id="inventoryPreviewSection" class="bg-gradient-to-r from-green-50 to-green-100 rounded-lg border border-green-200 shadow-sm">
+                        <div class="bg-green-100 px-6 py-3 border-b border-green-200 rounded-t-lg">
+                            <h5 class="text-lg font-semibold text-green-800 flex items-center">
+                                <svg class="h-5 w-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                </svg>
+                                📦 Auto-Inventory Preview
+                            </h5>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-start space-x-4">
+                                <div class="flex-shrink-0">
+                                    <div class="w-12 h-12 bg-green-200 rounded-full flex items-center justify-center">
+                                        <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <h6 class="text-sm font-semibold text-green-800 mb-2">This donation will be automatically added to inventory</h6>
+                                    <div class="bg-white rounded-lg p-4 border border-green-200">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                                            <div>
+                                                <span class="font-medium text-gray-700">Item Name:</span>
+                                                <span class="text-gray-600 ml-2" id="previewInventoryItemName">-</span>
+                                            </div>
+                                            <div>
+                                                <span class="font-medium text-gray-700">Category:</span>
+                                                <span class="text-gray-600 ml-2" id="previewInventoryCategory">-</span>
+                                            </div>
+                                            <div>
+                                                <span class="font-medium text-gray-700">Quantity:</span>
+                                                <span class="text-gray-600 ml-2" id="previewInventoryQuantity">-</span>
+                                            </div>
+                                            <div>
+                                                <span class="font-medium text-gray-700">Condition:</span>
+                                                <span class="text-gray-600 ml-2" id="previewInventoryCondition">-</span>
+                                            </div>
+                                            <div id="previewInventoryExpiryContainer" class="hidden md:col-span-2">
+                                                <span class="font-medium text-gray-700">Expiry Date:</span>
+                                                <span class="text-gray-600 ml-2" id="previewInventoryExpiry">-</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="inventoryWarning" class="hidden mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                        <div class="flex items-center">
+                                            <svg class="h-4 w-4 text-yellow-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                            </svg>
+                                            <span class="text-sm text-yellow-700" id="inventoryWarningText">Note: Expired items will not be added to inventory</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -847,6 +905,26 @@
                         <h2 class="text-xl font-semibold text-gray-900">In-Kind Donation Details</h2>
                         <button type="button" onclick="goBack()" class="text-red-primary hover:text-red-700 text-sm">← Back to selection</button>
                     </div>
+                    
+                    <!-- Auto-Inventory Notice -->
+                    <div class="px-6 py-4 bg-green-50 border-b border-green-200">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-green-800">
+                                    🏪 Auto-Inventory Integration Enabled
+                                </h3>
+                                <div class="mt-1 text-sm text-green-700">
+                                    <p>In-kind donations will be automatically added to the inventory system for easy tracking and distribution management.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <form id="inKindDonationForm" class="p-6 space-y-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <!-- Donation Information -->
@@ -872,28 +950,148 @@
                                         <option value="Other">Other</option>
                                     </select>
                                 </div>
+
+                                <!-- Item Type Selection -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Item Description *</label>
-                                    <textarea name="itemDescription" rows="3" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="Describe the donated items"></textarea>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Item Type *</label>
+                                    <div class="flex space-x-4">
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="itemType" value="simple" checked class="mr-2 text-red-primary focus:ring-red-primary">
+                                            <span class="text-sm font-medium">📦 Simple Item</span>
+                                        </label>
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="itemType" value="packaged" class="mr-2 text-red-primary focus:ring-red-primary">
+                                            <span class="text-sm font-medium">📦📦 Packaged Item (Multi-level)</span>
+                                        </label>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">Choose "Packaged" for complex items like "10 boxes of 50 sachets each"</p>
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Quantity *</label>
-                                    <input type="number" name="quantity" min="1" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="e.g., 10">
+
+                                <!-- Item Information -->
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Item Name *</label>
+                                        <input type="text" name="itemName" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="e.g., Hand Soap, Rice, School Bag">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Item Brand</label>
+                                        <input type="text" name="itemBrand" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="e.g., Dove, Safeguard (optional)">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Item Description *</label>
+                                        <textarea name="itemDescription" rows="3" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="Detailed description of the donated items"></textarea>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Unit</label>
-                                    <select name="unit" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
-                                        <option value="pieces">Pieces</option>
-                                        <option value="boxes">Boxes</option>
-                                        <option value="bags">Bags</option>
-                                        <option value="sets">Sets</option>
-                                        <option value="kilograms">Kilograms</option>
-                                        <option value="liters">Liters</option>
-                                        <option value="packs">Packs</option>
-                                        <option value="bottles">Bottles</option>
-                                        <option value="cans">Cans</option>
-                                        <option value="other">Other</option>
-                                    </select>
+                                <!-- Simple Item Fields -->
+                                <div id="simpleItemFields" class="space-y-4">
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Quantity *</label>
+                                            <input type="number" name="quantity" min="1" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="e.g., 10">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Unit</label>
+                                            <select name="unit" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
+                                                <option value="pieces">Pieces</option>
+                                                <option value="boxes">Boxes</option>
+                                                <option value="packs">Packs</option>
+                                                <option value="bottles">Bottles</option>
+                                                <option value="kg">Kilograms</option>
+                                                <option value="liters">Liters</option>
+                                                <option value="sets">Sets</option>
+                                                <option value="bags">Bags</option>
+                                                <option value="cans">Cans</option>
+                                                <option value="other">Other</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Packaged Item Fields -->
+                                <div id="packagedItemFields" class="hidden space-y-4">
+                                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                        <h4 class="font-medium text-blue-800 mb-3 flex items-center">
+                                            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                            </svg>
+                                            📦 Package Structure
+                                        </h4>
+                                        
+                                        <!-- Primary Unit (Outer Package) -->
+                                        <div class="grid grid-cols-3 gap-3 mb-3">
+                                            <div>
+                                                <label class="block text-xs font-medium text-gray-600 mb-1">Outer Quantity *</label>
+                                                <input type="number" name="primaryQuantity" min="1" class="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-red-primary focus:border-red-primary" placeholder="10">
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-medium text-gray-600 mb-1">Outer Unit</label>
+                                                <select name="primaryUnit" class="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-red-primary focus:border-red-primary">
+                                                    <option value="boxes">Boxes</option>
+                                                    <option value="cases">Cases</option>
+                                                    <option value="cartons">Cartons</option>
+                                                    <option value="packs">Packs</option>
+                                                    <option value="bags">Bags</option>
+                                                    <option value="pallets">Pallets</option>
+                                                </select>
+                                            </div>
+                                            <div class="flex items-end">
+                                                <span class="text-xs text-gray-500 pb-1">of items</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Secondary Unit (Inner Contents) -->
+                                        <div class="grid grid-cols-3 gap-3 mb-3">
+                                            <div>
+                                                <label class="block text-xs font-medium text-gray-600 mb-1">Per Package *</label>
+                                                <input type="number" name="secondaryQuantity" min="1" class="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-red-primary focus:border-red-primary" placeholder="50">
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-medium text-gray-600 mb-1">Inner Unit</label>
+                                                <select name="secondaryUnit" class="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-red-primary focus:border-red-primary">
+                                                    <option value="pieces">Pieces</option>
+                                                    <option value="sachets">Sachets</option>
+                                                    <option value="bottles">Bottles</option>
+                                                    <option value="tubes">Tubes</option>
+                                                    <option value="items">Items</option>
+                                                    <option value="units">Units</option>
+                                                </select>
+                                            </div>
+                                            <div class="flex items-end">
+                                                <span class="text-xs text-gray-500 pb-1">each</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Weight/Volume per Unit (Optional) -->
+                                        <div class="grid grid-cols-3 gap-3 mb-3">
+                                            <div>
+                                                <label class="block text-xs font-medium text-gray-600 mb-1">Weight/Volume</label>
+                                                <input type="number" name="tertiaryWeight" step="0.1" class="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-red-primary focus:border-red-primary" placeholder="20">
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-medium text-gray-600 mb-1">Weight Unit</label>
+                                                <select name="tertiaryUnit" class="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-red-primary focus:border-red-primary">
+                                                    <option value="">None</option>
+                                                    <option value="grams">Grams</option>
+                                                    <option value="kg">Kilograms</option>
+                                                    <option value="ml">Milliliters</option>
+                                                    <option value="liters">Liters</option>
+                                                    <option value="oz">Ounces</option>
+                                                </select>
+                                            </div>
+                                            <div class="flex items-end">
+                                                <span class="text-xs text-gray-500 pb-1">per piece</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Calculated Totals -->
+                                        <div id="calculationDisplay" class="bg-green-50 p-3 rounded border-l-4 border-green-400">
+                                            <h5 class="text-xs font-medium text-green-800 mb-1">💡 Calculated Totals:</h5>
+                                            <div class="text-xs text-green-700">
+                                                <div>Total Items: <span id="totalSecondary">0</span></div>
+                                                <div id="totalWeightDiv" class="hidden">Total Weight: <span id="totalWeight">-</span> <span id="weightUnit">g</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div id="expiryDateField" class="hidden">
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Expiry Date</label>
@@ -913,6 +1111,10 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Receiver Name</label>
                                     <input type="text" name="receiverName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="Staff member who received the donation">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                                    <textarea name="notes" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="Additional notes about the donation (optional)"></textarea>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Photo of Donated Items</label>
@@ -999,6 +1201,9 @@
             document.querySelectorAll('input[name="dateOfDonation"]').forEach(input => {
                 input.value = today;
             });
+            
+            // Initialize item type fields (ensure simple is selected by default)
+            toggleItemTypeFields();
         });
 
         function setupEventListeners() {
@@ -1087,6 +1292,27 @@
             
             // Setup tutorial functionality
             setupTutorialFunctionality();
+            
+            // Setup item type radio button event listeners
+            document.querySelectorAll('input[name="itemType"]').forEach(radio => {
+                radio.addEventListener('change', toggleItemTypeFields);
+            });
+            
+            // Setup packaged item calculation event listeners
+            const calculationInputs = [
+                'input[name="primaryQuantity"]',
+                'input[name="secondaryQuantity"]', 
+                'input[name="tertiaryWeight"]',
+                'select[name="tertiaryUnit"]'
+            ];
+            
+            calculationInputs.forEach(selector => {
+                const element = document.querySelector(selector);
+                if (element) {
+                    element.addEventListener('input', calculatePackagedTotals);
+                    element.addEventListener('change', calculatePackagedTotals);
+                }
+            });
         }
 
         // ========== OFFLINE STORAGE FUNCTIONS FOR MONEY DONATIONS ==========
@@ -1180,14 +1406,26 @@
             try {
                 const offlineRecords = getOfflineInKindDonations();
                 
-                // Check for duplicates based on key fields
-                const isDuplicate = offlineRecords.some(record => 
-                    record.donorName === donationData.donorName &&
-                    record.itemCategory === donationData.itemCategory &&
-                    record.itemDescription === donationData.itemDescription &&
-                    record.quantity === donationData.quantity &&
-                    record.dateOfDonation === donationData.dateOfDonation
-                );
+                // Check for duplicates based on key fields - handle both item types
+                const isDuplicate = offlineRecords.some(record => {
+                    if (record.donorName !== donationData.donorName ||
+                        record.itemCategory !== donationData.itemCategory ||
+                        record.itemName !== donationData.itemName ||
+                        record.itemDescription !== donationData.itemDescription ||
+                        record.dateOfDonation !== donationData.dateOfDonation) {
+                        return false;
+                    }
+                    
+                    // Check quantity based on item type
+                    if (donationData.itemType === 'simple') {
+                        return record.quantity === donationData.quantity;
+                    } else if (donationData.itemType === 'packaged') {
+                        return record.primaryQuantity === donationData.primaryQuantity &&
+                               record.secondaryQuantity === donationData.secondaryQuantity;
+                    }
+                    
+                    return false;
+                });
                 
                 if (isDuplicate) {
                     console.log('Duplicate in-kind donation detected, not saving offline');
@@ -1713,6 +1951,63 @@
             }
         }
 
+        function toggleItemTypeFields() {
+            const itemType = document.querySelector('input[name="itemType"]:checked').value;
+            const simpleFields = document.getElementById('simpleItemFields');
+            const packagedFields = document.getElementById('packagedItemFields');
+            
+            if (itemType === 'simple') {
+                simpleFields.classList.remove('hidden');
+                packagedFields.classList.add('hidden');
+                
+                // Make simple fields required
+                document.querySelector('input[name="quantity"]').required = true;
+                
+                // Clear packaged fields and remove requirements
+                document.querySelector('input[name="primaryQuantity"]').required = false;
+                document.querySelector('input[name="secondaryQuantity"]').required = false;
+                document.querySelector('input[name="primaryQuantity"]').value = '';
+                document.querySelector('input[name="secondaryQuantity"]').value = '';
+                document.querySelector('input[name="tertiaryWeight"]').value = '';
+            } else {
+                simpleFields.classList.add('hidden');
+                packagedFields.classList.remove('hidden');
+                
+                // Make packaged fields required
+                document.querySelector('input[name="primaryQuantity"]').required = true;
+                document.querySelector('input[name="secondaryQuantity"]').required = true;
+                
+                // Clear simple fields and remove requirements
+                document.querySelector('input[name="quantity"]').required = false;
+                document.querySelector('input[name="quantity"]').value = '';
+                
+                // Calculate totals
+                calculatePackagedTotals();
+            }
+        }
+
+        function calculatePackagedTotals() {
+            const primaryQty = parseInt(document.querySelector('input[name="primaryQuantity"]').value) || 0;
+            const secondaryQty = parseInt(document.querySelector('input[name="secondaryQuantity"]').value) || 0;
+            const tertiaryWeight = parseFloat(document.querySelector('input[name="tertiaryWeight"]').value) || 0;
+            const tertiaryUnit = document.querySelector('select[name="tertiaryUnit"]').value;
+            
+            // Calculate total items
+            const totalItems = primaryQty * secondaryQty;
+            document.getElementById('totalSecondary').textContent = totalItems.toLocaleString();
+            
+            // Calculate total weight if specified
+            const totalWeightDiv = document.getElementById('totalWeightDiv');
+            if (tertiaryWeight > 0 && tertiaryUnit) {
+                const totalWeight = totalItems * tertiaryWeight;
+                document.getElementById('totalWeight').textContent = totalWeight.toLocaleString();
+                document.getElementById('weightUnit').textContent = tertiaryUnit;
+                totalWeightDiv.classList.remove('hidden');
+            } else {
+                totalWeightDiv.classList.add('hidden');
+            }
+        }
+
         function togglePaymentFields() {
             const paymentType = document.querySelector('select[name="typeOfDonation"]').value;
             const bankTransferFields = document.getElementById('bankTransferFields');
@@ -1828,6 +2123,7 @@
             const form = document.getElementById('inKindDonationForm');
             const formData = new FormData(form);
             const isAnonymous = formData.get('anonymous') === 'on';
+            const itemType = formData.get('itemType') || 'simple';
 
             // Generate temporary donation ID for preview
             const tempDonationId = 'DN' + String(Math.floor(Math.random() * 1000)).padStart(3, '0');
@@ -1837,15 +2133,35 @@
             document.getElementById('previewInKindCategory').textContent = formData.get('itemCategory') || 'N/A';
             document.getElementById('previewInKindDate').textContent = formData.get('dateOfDonation') || 'N/A';
             
-            const quantity = parseInt(formData.get('quantity')) || 0;
-            const unit = formData.get('unit') || '';
-            document.getElementById('previewInKindQuantity').textContent = `${quantity} ${unit}`.trim();
+            // Handle quantity display based on item type
+            let quantityDisplay = '';
+            if (itemType === 'packaged') {
+                const primaryQty = parseInt(formData.get('primaryQuantity')) || 0;
+                const secondaryQty = parseInt(formData.get('secondaryQuantity')) || 0;
+                const primaryUnit = formData.get('primaryUnit') || '';
+                const secondaryUnit = formData.get('secondaryUnit') || '';
+                quantityDisplay = `${primaryQty} ${primaryUnit} of ${secondaryQty} ${secondaryUnit} each`;
+            } else {
+                const quantity = parseInt(formData.get('quantity')) || 0;
+                const unit = formData.get('unit') || '';
+                quantityDisplay = `${quantity} ${unit}`.trim();
+            }
+            document.getElementById('previewInKindQuantity').textContent = quantityDisplay;
             
             document.getElementById('previewInKindDonor').textContent = isAnonymous ? 'Anonymous' : (formData.get('donorName') || 'N/A');
             
-            // Item Information
-            document.getElementById('previewInKindDescription').textContent = formData.get('itemDescription') || 'Not specified';
-            document.getElementById('previewInKindUnit').textContent = unit || 'Not specified';
+            // Item Information - use new structured fields
+            const itemName = formData.get('itemName') || 'Not specified';
+            const itemBrand = formData.get('itemBrand');
+            const itemDescription = formData.get('itemDescription') || 'Not specified';
+            
+            // Display item name with brand if available
+            const fullItemName = itemBrand ? `${itemName} (${itemBrand})` : itemName;
+            document.getElementById('previewInKindDescription').textContent = fullItemName;
+            
+            document.getElementById('previewInKindUnit').textContent = itemType === 'packaged' 
+                ? `${formData.get('secondaryUnit') || ''} (${itemType})`
+                : (formData.get('unit') || 'Not specified');
             document.getElementById('previewInKindCondition').textContent = formData.get('conditionOfItems') || 'Not specified';
             document.getElementById('previewInKindReceiver').textContent = formData.get('receiverName') || 'Not specified';
             
@@ -1881,8 +2197,65 @@
             document.getElementById('previewInKindEmail').textContent = isAnonymous ? 'Anonymous' : (formData.get('emailAddress') || 'Not provided');
             document.getElementById('previewInKindAddress').textContent = formData.get('address') || 'Not provided';
             
+            // Update inventory preview
+            updateInventoryPreview(formData);
+            
             // Show the modal
             document.getElementById('inKindPreviewModal').classList.remove('hidden');
+        }
+
+        function updateInventoryPreview(formData) {
+            // Get item type
+            const itemType = formData.get('itemType') || 'simple';
+            
+            // Populate inventory preview fields - use new itemName field
+            const itemName = formData.get('itemName') || formData.get('itemDescription') || '-';
+            document.getElementById('previewInventoryItemName').textContent = itemName;
+            document.getElementById('previewInventoryCategory').textContent = formData.get('itemCategory') || '-';
+            document.getElementById('previewInventoryCondition').textContent = formData.get('conditionOfItems') || '-';
+            
+            // Handle quantity based on item type
+            let quantityText = '';
+            if (itemType === 'packaged') {
+                const primaryQty = parseInt(formData.get('primaryQuantity')) || 0;
+                const secondaryQty = parseInt(formData.get('secondaryQuantity')) || 0;
+                const primaryUnit = formData.get('primaryUnit') || '';
+                const secondaryUnit = formData.get('secondaryUnit') || '';
+                const totalItems = primaryQty * secondaryQty;
+                
+                quantityText = `${primaryQty} ${primaryUnit} × ${secondaryQty} ${secondaryUnit} = ${totalItems.toLocaleString()} ${secondaryUnit}`;
+            } else {
+                const quantity = parseInt(formData.get('quantity')) || 0;
+                const unit = formData.get('unit') || '';
+                quantityText = `${quantity} ${unit}`.trim();
+            }
+            document.getElementById('previewInventoryQuantity').textContent = quantityText;
+            
+            // Handle expiry date
+            const expiryDate = formData.get('expiryDate');
+            const expiryContainer = document.getElementById('previewInventoryExpiryContainer');
+            const inventoryWarning = document.getElementById('inventoryWarning');
+            
+            if (expiryDate && formData.get('itemCategory') === 'Food') {
+                document.getElementById('previewInventoryExpiry').textContent = new Date(expiryDate).toLocaleDateString();
+                expiryContainer.classList.remove('hidden');
+                
+                // Check if item is expired
+                const now = new Date();
+                now.setHours(0, 0, 0, 0);
+                const expiry = new Date(expiryDate);
+                expiry.setHours(0, 0, 0, 0);
+                
+                if (expiry <= now) {
+                    inventoryWarning.classList.remove('hidden');
+                    document.getElementById('inventoryWarningText').textContent = 'Note: This item is expired and will not be added to inventory';
+                } else {
+                    inventoryWarning.classList.add('hidden');
+                }
+            } else {
+                expiryContainer.classList.add('hidden');
+                inventoryWarning.classList.add('hidden');
+            }
         }
         
         function hideInKindPreviewModal() {
@@ -1936,13 +2309,39 @@
             document.getElementById('loadingScreen').classList.add('hidden');
         }
         
-        function showSuccessModal(message, donationId = '') {
+        function showSuccessModal(message, donationId = '', inventoryId = '') {
             const successModal = document.getElementById('successModal');
             const successMessage = document.getElementById('successMessage');
-            successMessage.textContent = message;
+            
+            let fullMessage = message;
             if (donationId) {
-                successMessage.textContent += ` Donation ID: ${donationId}`;
+                fullMessage += ` Donation ID: ${donationId}`;
             }
+            if (inventoryId) {
+                fullMessage += ` | Added to Inventory: ${inventoryId}`;
+            }
+            
+            successMessage.innerHTML = fullMessage;
+            
+            // Add inventory link if inventory ID is provided
+            if (inventoryId) {
+                const inventoryLink = document.createElement('div');
+                inventoryLink.className = 'mt-3 p-3 bg-green-50 border border-green-200 rounded-lg';
+                inventoryLink.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-green-700">
+                            ✅ <strong>Auto-added to inventory!</strong>
+                        </span>
+                        <a href="inventory.html" target="_blank" 
+                           class="text-green-600 hover:text-green-800 text-sm font-medium underline">
+                            View Inventory →
+                        </a>
+                    </div>
+                    <p class="text-xs text-green-600 mt-1">Inventory ID: ${inventoryId}</p>
+                `;
+                successMessage.appendChild(inventoryLink);
+            }
+            
             successModal.classList.remove('hidden');
         }
         
@@ -2070,9 +2469,9 @@
             if (navigator.onLine) {
                 // Try to save online first
                 try {
-                    await saveDonationToFirestore(donationData);
+                    const result = await saveDonationToFirestore(donationData);
                     hideLoadingScreen();
-                    showSuccessModal(`Money donation of ₱${amount} from ${donorName} saved successfully!`, donationData.donationId);
+                    showSuccessModal(`Money donation of ₱${amount} from ${donorName} saved successfully!`, donationData.donationId, result.inventoryId);
                     resetMoneyForm();
                 } catch (error) {
                     hideLoadingScreen();
@@ -2108,12 +2507,27 @@
                 // Validate required fields before showing preview
                 const formData = new FormData(form);
                 const isAnonymous = formData.get('anonymous') === 'on';
+                const itemType = formData.get('itemType') || 'simple';
                 
-                // Basic validation
-                if (!formData.get('dateOfDonation') || !formData.get('itemCategory') || !formData.get('itemDescription') || 
-                    !formData.get('quantity') || !formData.get('conditionOfItems')) {
-                    showErrorModal('Please fill in all required fields (date, category, description, quantity, and condition).');
+                // Basic validation - common fields
+                if (!formData.get('dateOfDonation') || !formData.get('itemCategory') || 
+                    !formData.get('itemName') || !formData.get('itemDescription') || 
+                    !formData.get('conditionOfItems')) {
+                    showErrorModal('Please fill in all required fields (date, category, item name, description, and condition).');
                     return;
+                }
+                
+                // Validate quantity fields based on item type
+                if (itemType === 'simple') {
+                    if (!formData.get('quantity')) {
+                        showErrorModal('Please fill in the quantity field.');
+                        return;
+                    }
+                } else if (itemType === 'packaged') {
+                    if (!formData.get('primaryQuantity') || !formData.get('secondaryQuantity')) {
+                        showErrorModal('Please fill in both outer quantity and per package quantity for packaged items.');
+                        return;
+                    }
                 }
                 
                 if (!isAnonymous && (!formData.get('donorName') || !formData.get('emailAddress'))) {
@@ -2129,17 +2543,21 @@
             // If we reach here, it's a confirmed submission - proceed with saving
             const formData = new FormData(form);
             const isAnonymous = formData.get('anonymous') === 'on';
+            const itemType = formData.get('itemType') || 'simple';
 
+            // Create base donation data
             const donationData = {
                 donationType: 'in-kind',
                 dateOfDonation: formData.get('dateOfDonation'),
                 itemCategory: formData.get('itemCategory'),
+                itemName: formData.get('itemName'),
+                itemBrand: formData.get('itemBrand') || '',
                 itemDescription: formData.get('itemDescription'),
-                quantity: parseInt(formData.get('quantity'), 10),
-                unit: formData.get('unit'),
-                expiryDate: formData.get('expiryDate') || '',
+                itemType: itemType,
                 conditionOfItems: formData.get('conditionOfItems'),
+                expiryDate: formData.get('expiryDate') || '',
                 receiverName: formData.get('receiverName') || '',
+                notes: formData.get('notes') || '',
                 donorName: isAnonymous ? 'Anonymous' : formData.get('donorName'),
                 contactNumber: formData.get('contactNumber') || '',
                 emailAddress: isAnonymous ? '' : formData.get('emailAddress'),
@@ -2149,13 +2567,34 @@
                 donationId: await generateDonationId()
             };
 
+            // Add quantity fields based on item type
+            if (itemType === 'simple') {
+                donationData.quantity = parseInt(formData.get('quantity'), 10);
+                donationData.unit = formData.get('unit');
+            } else if (itemType === 'packaged') {
+                donationData.primaryQuantity = parseInt(formData.get('primaryQuantity'), 10);
+                donationData.primaryUnit = formData.get('primaryUnit');
+                donationData.secondaryQuantity = parseInt(formData.get('secondaryQuantity'), 10);
+                donationData.secondaryUnit = formData.get('secondaryUnit');
+                donationData.tertiaryWeight = parseFloat(formData.get('tertiaryWeight')) || null;
+                donationData.tertiaryUnit = formData.get('tertiaryUnit') || null;
+                
+                // Calculate total for display purposes
+                donationData.calculatedTotalQuantity = donationData.primaryQuantity * donationData.secondaryQuantity;
+                donationData.calculatedUnit = donationData.secondaryUnit;
+            }
+
             // Handle photo upload (base64 string)
             const photoFile = form.querySelector('input[name="photo"]').files[0];
             if (photoFile) {
                 try {
+                    console.log('Processing photo file:', photoFile.name, photoFile.size, 'bytes'); // Debug log
                     donationData.photoString = await new Promise((resolve, reject) => {
                         const reader = new FileReader();
-                        reader.onload = () => resolve(reader.result);
+                        reader.onload = () => {
+                            console.log('Photo converted to base64, length:', reader.result.length); // Debug log
+                            resolve(reader.result);
+                        };
                         reader.onerror = reject;
                         reader.readAsDataURL(photoFile);
                     });
@@ -2164,23 +2603,34 @@
                     donationData.photoString = '';
                 }
             } else {
+                console.log('No photo file found'); // Debug log
                 donationData.photoString = '';
             }
 
             // Show enhanced loading screen with donation details
             const donorName = donationData.donorName;
-            const itemDescription = donationData.itemDescription;
-            const quantity = donationData.quantity;
-            const unit = donationData.unit || '';
-            showLoadingScreen(`Saving in-kind donation from ${donorName} (${quantity} ${unit} ${itemDescription})...`);
+            const itemName = donationData.itemName;
+            
+            // Create display text based on item type
+            let quantityDisplay = '';
+            if (itemType === 'simple') {
+                quantityDisplay = `${donationData.quantity} ${donationData.unit || ''}`;
+            } else {
+                quantityDisplay = `${donationData.primaryQuantity} ${donationData.primaryUnit} of ${donationData.secondaryQuantity} ${donationData.secondaryUnit} each (${donationData.calculatedTotalQuantity} total)`;
+            }
+            
+            showLoadingScreen(`Saving in-kind donation from ${donorName} (${quantityDisplay} ${itemName})...`);
 
             // Check if online
             if (navigator.onLine) {
                 // Try to save online first
                 try {
-                    await saveDonationToFirestore(donationData);
+                    const result = await saveDonationToFirestore(donationData);
                     hideLoadingScreen();
-                    showSuccessModal(`In-kind donation of ${quantity} ${unit} ${itemDescription} from ${donorName} saved successfully!`, donationData.donationId);
+                    
+                    // Handle result safely
+                    const inventoryId = result && result.inventoryId ? result.inventoryId : null;
+                    showSuccessModal(`In-kind donation of ${quantityDisplay} ${itemName} from ${donorName} saved successfully!`, donationData.donationId, inventoryId);
                     resetInKindForm();
                 } catch (error) {
                     hideLoadingScreen();
@@ -2188,7 +2638,7 @@
                     // Try to save offline as fallback
                     const savedOffline = saveInKindDonationOffline(donationData);
                     if (savedOffline) {
-                        showOfflineSuccessModal(`In-kind donation of ${quantity} ${unit} ${itemDescription} from ${donorName} saved offline.`, 'in-kind');
+                        showOfflineSuccessModal(`In-kind donation of ${quantityDisplay} ${itemName} from ${donorName} saved offline.`, 'in-kind');
                         resetInKindForm();
                     } else {
                         showErrorModal('Failed to save donation. Please try again.');
@@ -2199,7 +2649,7 @@
                 // Save offline when no internet connection
                 const savedOffline = saveInKindDonationOffline(donationData);
                 if (savedOffline) {
-                    showOfflineSuccessModal(`In-kind donation of ${quantity} ${unit} ${itemDescription} from ${donorName} saved offline.`, 'in-kind');
+                    showOfflineSuccessModal(`In-kind donation of ${quantityDisplay} ${itemName} from ${donorName} saved offline.`, 'in-kind');
                     resetInKindForm();
                 } else {
                     showErrorModal('Failed to save donation offline. Please try again.');
@@ -2253,15 +2703,41 @@
                         }
                     }
                 } else if (data.donationType === 'in-kind') {
-                    if (!data.dateOfDonation || !data.itemCategory || !data.itemDescription || isNaN(data.quantity) || !data.conditionOfItems) {
+                    // Updated validation for new field structure
+                    if (!data.dateOfDonation || !data.itemCategory || !data.itemName || !data.itemDescription || !data.conditionOfItems) {
                         showMessage('Please fill in all required fields.', 'error');
                         return;
+                    }
+                    
+                    // Validate quantity fields based on item type
+                    if (data.itemType === 'simple') {
+                        if (!data.quantity || isNaN(data.quantity)) {
+                            showMessage('Please fill in a valid quantity.', 'error');
+                            return;
+                        }
+                    } else if (data.itemType === 'packaged') {
+                        if (!data.primaryQuantity || isNaN(data.primaryQuantity) || !data.secondaryQuantity || isNaN(data.secondaryQuantity)) {
+                            showMessage('Please fill in valid quantities for packaged items.', 'error');
+                            return;
+                        }
                     }
                 }
 
                 const donationCol = collection(db, 'donations');
                 const newDonationRef = doc(donationCol); // auto-id
                 await setDoc(newDonationRef, data);
+
+                // Send thank you email to the donor (if not anonymous)
+                await sendDonationThankYouEmail(data);
+
+                // Auto-create inventory item for in-kind donations
+                let inventoryId = null;
+                if (data.donationType === 'in-kind') {
+                    console.log('Creating inventory from donation data:', data); // Debug log
+                    console.log('Photo string in data:', data.photoString); // Debug photo
+                    inventoryId = await createInventoryFromDonation(data);
+                    console.log('Inventory creation result:', inventoryId); // Debug log
+                }
 
                 // Fix: Always log activity, even for anonymous/guest users
                 let currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
@@ -2272,11 +2748,27 @@
                 if (data.donationType === 'money') {
                     activityDetails = `Recorded money donation (${data.donationId}): ₱${data.amount.toFixed(2)} from ${data.donorName} - ${data.typeOfDonation}`;
                 } else if (data.donationType === 'in-kind') {
-                    activityDetails = `Recorded in-kind donation (${data.donationId}): ${data.quantity} ${data.unit} of ${data.itemCategory} from ${data.donorName}`;
+                    // Create activity description based on item type
+                    let quantityDesc = '';
+                    if (data.itemType === 'simple') {
+                        quantityDesc = `${data.quantity} ${data.unit || ''}`;
+                    } else if (data.itemType === 'packaged') {
+                        quantityDesc = `${data.primaryQuantity} ${data.primaryUnit} of ${data.secondaryQuantity} ${data.secondaryUnit} each (${data.calculatedTotalQuantity} total)`;
+                    }
+                    
+                    activityDetails = `Recorded in-kind donation (${data.donationId}): ${quantityDesc} ${data.itemName} (${data.itemCategory}) from ${data.donorName}`;
+                    if (inventoryId) {
+                        activityDetails += ` (Added to inventory: ${inventoryId})`;
+                    }
                 }
                 await logActivity('Recorded Donation', activityDetails, currentUser);
 
                 showMessage('Donation saved successfully!', 'success');
+                
+                // Return inventory ID for success modal enhancement
+                const result = { success: true, inventoryId: inventoryId };
+                console.log('Returning from saveDonationToFirestore:', result); // Debug log
+                return result;
                 setTimeout(() => {
                     goBack();
                     document.getElementById('moneyDonationForm').reset();
@@ -2349,6 +2841,9 @@
             } else if (type === 'error') {
                 bgColor = 'bg-red-100 border-red-400 text-red-700';
                 icon = '✗';
+            } else if (type === 'warning') {
+                bgColor = 'bg-yellow-100 border-yellow-400 text-yellow-700';
+                icon = '⚠';
             } else {
                 bgColor = 'bg-blue-100 border-blue-400 text-blue-700';
                 icon = 'ℹ';
@@ -2759,6 +3254,249 @@
             });
         }
 
+        // Test function to check if mail.php is working
+        async function testMailPHP() {
+            try {
+                const testData = new FormData();
+                testData.append('action', 'test');
+                
+                const response = await fetch('mail.php', {
+                    method: 'POST',
+                    body: testData
+                });
+                
+                const responseText = await response.text();
+                console.log('mail.php test response:', responseText);
+                
+                try {
+                    const result = JSON.parse(responseText);
+                    console.log('mail.php test result:', result);
+                } catch (e) {
+                    console.error('mail.php returned non-JSON:', responseText);
+                }
+            } catch (error) {
+                console.error('Error testing mail.php:', error);
+            }
+        }
+
+        // Send thank you email to donor after successful donation recording
+        async function sendDonationThankYouEmail(donationData) {
+            try {
+                // Skip email for anonymous donations or missing email
+                if (donationData.isAnonymous || 
+                    donationData.donorName === 'Anonymous' || 
+                    !donationData.emailAddress || 
+                    donationData.emailAddress.trim() === '') {
+                    console.log('Skipping email for anonymous donation or missing email address');
+                    return;
+                }
+
+                // Prepare email data
+                const emailData = new FormData();
+                emailData.append('action', 'send_donation_thanks');
+                emailData.append('donorName', donationData.donorName);
+                emailData.append('donorEmail', donationData.emailAddress);
+                emailData.append('donationType', donationData.donationType);
+                emailData.append('donationId', donationData.donationId);
+                emailData.append('donationDate', donationData.dateOfDonation);
+
+                if (donationData.donationType === 'money') {
+                    emailData.append('donationAmount', donationData.amount);
+                    emailData.append('donationItems', '');
+                } else if (donationData.donationType === 'in-kind') {
+                    emailData.append('donationAmount', '');
+                    
+                    // Create proper item description based on item type
+                    let itemDescription = '';
+                    if (donationData.itemType === 'simple') {
+                        itemDescription = `${donationData.quantity} ${donationData.unit || ''} of ${donationData.itemCategory} - ${donationData.itemName}`;
+                        if (donationData.itemBrand) {
+                            itemDescription += ` (${donationData.itemBrand})`;
+                        }
+                    } else if (donationData.itemType === 'packaged') {
+                        // For packaged items, show the calculated total with inner unit
+                        const totalItems = donationData.calculatedTotalQuantity || (donationData.primaryQuantity * donationData.secondaryQuantity);
+                        const unit = donationData.secondaryUnit || donationData.calculatedUnit || 'items';
+                        
+                        itemDescription = `${totalItems} ${unit} of ${donationData.itemCategory} - ${donationData.itemName}`;
+                        if (donationData.itemBrand) {
+                            itemDescription += ` (${donationData.itemBrand})`;
+                        }
+                        
+                        // Add packaging details
+                        itemDescription += ` [${donationData.primaryQuantity} ${donationData.primaryUnit} of ${donationData.secondaryQuantity} ${donationData.secondaryUnit} each]`;
+                    }
+                    
+                    emailData.append('donationItems', itemDescription);
+                    console.log('Email item description:', itemDescription); // Debug log
+                }
+
+                // Send email via AJAX to mail.php
+                const response = await fetch('mail.php', {
+                    method: 'POST',
+                    body: emailData
+                });
+
+                // Check if response is OK
+                if (!response.ok) {
+                    console.log('HTTP error when sending email:', response.status, response.statusText);
+                    return;
+                }
+
+                // Get response text first to check if it's valid JSON
+                const responseText = await response.text();
+                
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                } catch (parseError) {
+                    console.error('Invalid JSON response from mail.php:', responseText);
+                    console.error('Parse error:', parseError);
+                    return;
+                }
+                
+                if (result.success) {
+                    console.log('Thank you email sent successfully to:', donationData.emailAddress);
+                    // Optionally show a small notification to the user
+                    showMessage('Donation recorded and thank you email sent!', 'success');
+                } else {
+                    console.log('Failed to send thank you email:', result.message);
+                    // Don't show error to user as donation was still saved successfully
+                }
+            } catch (error) {
+                console.error('Error sending thank you email:', error);
+                // Don't throw error as donation was saved successfully
+            }
+        }
+
+        // Create inventory item automatically from in-kind donation
+        async function createInventoryFromDonation(donationData) {
+            try {
+                console.log('🔍 Debug - Donation data received:', donationData);
+                console.log('🔍 Debug - PhotoString in donationData:', donationData.photoString);
+                // Skip inventory creation for expired items (optional business rule)
+                if (donationData.expiryDate) {
+                    const today = new Date();
+                    const expiryDate = new Date(donationData.expiryDate);
+                    if (expiryDate < today) {
+                        console.log('Skipping inventory creation for expired item:', donationData.itemName);
+                        return;
+                    }
+                }
+
+                // Generate unique inventory ID
+                const inventoryId = `INV-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+                // Handle different item types and calculate final quantities
+                let finalQuantity = 0;
+                let finalUnit = '';
+                let packageStructure = null;
+
+                if (donationData.itemType === 'packaged') {
+                    // For packaged items, use calculated totals
+                    const primaryQty = parseInt(donationData.primaryQuantity) || 0;
+                    const secondaryQty = parseInt(donationData.secondaryQuantity) || 0;
+                    finalQuantity = primaryQty * secondaryQty;
+                    finalUnit = donationData.secondaryUnit || 'pieces';
+                    
+                    // Store package structure for reference
+                    packageStructure = {
+                        primaryQuantity: primaryQty,
+                        primaryUnit: donationData.primaryUnit,
+                        secondaryQuantity: secondaryQty,
+                        secondaryUnit: donationData.secondaryUnit,
+                        tertiaryWeight: parseFloat(donationData.tertiaryWeight) || null,
+                        tertiaryUnit: donationData.tertiaryUnit || null,
+                        totalCalculated: finalQuantity
+                    };
+                } else {
+                    // For simple items, use direct values
+                    finalQuantity = parseInt(donationData.quantity) || 0;
+                    finalUnit = donationData.unit || 'pieces';
+                }
+
+                // Map donation data to inventory format
+                console.log('🔍 Debug - About to create inventory with photoString:', donationData.photoString);
+                const inventoryData = {
+                    inventoryId: inventoryId,
+                    itemName: donationData.itemName || donationData.itemDescription, // Use new itemName field
+                    itemBrand: donationData.itemBrand || '', // Now collected in donations
+                    itemDescription: donationData.itemDescription,
+                    itemCategory: donationData.itemCategory,
+                    itemType: donationData.itemType || 'simple', // Store item type
+                    quantity: finalQuantity,
+                    unit: finalUnit,
+                    conditionOfItems: donationData.conditionOfItems || 'Good',
+                    expiryDate: donationData.expiryDate || null,
+                    donorName: donationData.donorName || 'Anonymous',
+                    notes: donationData.notes || '',
+                    photoString: donationData.photoString || '', // Include photo from donation
+                    dateAdded: new Date().toISOString(),
+                    addedBy: JSON.parse(localStorage.getItem('currentUser') || '{}').email || 'system',
+                    source: 'donation', // Track source as donation
+                    sourceReference: donationData.donationId, // Link back to donation
+                    receiverName: donationData.receiverName || '', // Staff who received the donation
+                    
+                    // Package structure for packaged items
+                    packageStructure: packageStructure,
+                    
+                    // Additional inventory tracking fields
+                    lastUpdated: new Date().toISOString(),
+                    status: 'available', // available, reserved, distributed
+                    location: '', // Storage location (can be added later)
+                    
+                    // Donation-specific metadata
+                    donationDate: donationData.dateOfDonation,
+                    isAnonymous: donationData.isAnonymous || false
+                };
+
+                console.log('🔍 Debug - Final inventoryData object:', inventoryData);
+                console.log('🔍 Debug - PhotoString in inventoryData:', inventoryData.photoString);
+
+                // Save to inventory collection
+                const inventoryCol = collection(db, 'inventory');
+                const newInventoryRef = doc(inventoryCol, inventoryId);
+                await setDoc(newInventoryRef, inventoryData);
+
+                // Log activity for inventory creation
+                let currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                if (!currentUser.username) {
+                    currentUser = { username: 'System', role: 'system', staffId: '' };
+                }
+
+                const itemDescription = donationData.itemType === 'packaged' 
+                    ? `${donationData.primaryQuantity} ${donationData.primaryUnit} of ${donationData.secondaryQuantity} ${donationData.secondaryUnit} each (${finalQuantity} total ${finalUnit})`
+                    : `${finalQuantity} ${finalUnit}`;
+
+                await logActivity('Inventory Added', 
+                    `Auto-created inventory item (${inventoryId}): ${itemDescription} of ${donationData.itemCategory} from donation ${donationData.donationId}`, 
+                    currentUser
+                );
+
+                console.log('✅ Inventory item created successfully:', inventoryId);
+                
+                return inventoryId;
+
+            } catch (error) {
+                console.error('❌ Error creating inventory from donation:', error);
+                
+                // Log the error but don't fail the donation process
+                try {
+                    let currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                    await logActivity('Inventory Creation Failed', 
+                        `Failed to create inventory from donation ${donationData.donationId}: ${error.message}`, 
+                        currentUser
+                    );
+                } catch (logError) {
+                    console.error('Failed to log inventory creation error:', logError);
+                }
+                
+                // Don't throw error - donation was successful even if inventory creation failed
+                showMessage('Donation recorded! (Note: Could not auto-add to inventory)', 'warning');
+                return null;
+            }
+        }
+
         window.selectDonationType = selectDonationType;
         window.goBack = goBack;
         window.toggleAnonymousMoney = toggleAnonymousMoney;
@@ -2768,6 +3506,7 @@
         window.syncSingleOfflineRecord = syncSingleOfflineRecord;
         window.viewOfflineRecordDetails = viewOfflineRecordDetails;
         window.deleteOfflineRecord = deleteOfflineRecord;
+        window.testMailPHP = testMailPHP;
     </script>
 
     <!-- Floating Offline Save Button -->
