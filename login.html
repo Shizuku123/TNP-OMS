@@ -714,36 +714,62 @@ ensureAdminUser();
           // Handle failed login attempts (only if we have user data)
           if ((error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') && userData && userDocRef) {
             try {
-              // Get current failed attempts
-              const currentAttempts = userData.failedLoginAttempts || 0;
-              const newAttempts = currentAttempts + 1;
+              // Check if this is an admin account - admins are protected from automatic blocking
+              const isAdminAccount = userData.role === 'Admin';
               
-              // Update failed login attempts
-              const updateData = {
-                failedLoginAttempts: newAttempts,
-                lastFailedLogin: new Date().toISOString()
-              };
-              
-              // Block account if this is the 3rd failed attempt
-              if (newAttempts >= 3) {
-                updateData.isBlocked = true;
-                updateData.blockReason = 'Account automatically blocked due to 3 consecutive failed login attempts';
-                updateData.blockedDate = new Date().toISOString();
-                updateData.blockedBy = 'System';
+              if (isAdminAccount) {
+                // For admin accounts, track failed attempts but don't block automatically
+                const currentAttempts = userData.failedLoginAttempts || 0;
+                const newAttempts = currentAttempts + 1;
                 
-                // Update user document
+                // Update failed login attempts for tracking purposes only
+                const updateData = {
+                  failedLoginAttempts: newAttempts,
+                  lastFailedLogin: new Date().toISOString()
+                };
+                
                 await updateDoc(userDocRef, updateData);
                 
-                // Log the account blocking activity
-                await logActivity('Account Blocked', `Account ${userInput} was automatically blocked due to 3 failed login attempts`, { username: userInput });
+                // Log the failed admin login attempt for security monitoring
+                await logActivity('Admin Login Failed', `Failed login attempt for admin account: ${userInput}`, { 
+                  username: userInput, 
+                  attempts: newAttempts,
+                  note: 'Admin account protected from automatic blocking'
+                });
                 
-                errorMessage.textContent = 'Account has been blocked due to 3 consecutive failed login attempts. Please contact an administrator.';
+                errorMessage.textContent = 'Invalid password. Admin accounts are protected from automatic blocking for security reasons.';
               } else {
-                // Update failed attempts count
-                await updateDoc(userDocRef, updateData);
+                // For non-admin accounts, apply the 3-strike blocking rule
+                const currentAttempts = userData.failedLoginAttempts || 0;
+                const newAttempts = currentAttempts + 1;
                 
-                const remainingAttempts = 3 - newAttempts;
-                errorMessage.textContent = `Invalid password. ${remainingAttempts} attempt${remainingAttempts !== 1 ? 's' : ''} remaining before account is blocked.`;
+                // Update failed login attempts
+                const updateData = {
+                  failedLoginAttempts: newAttempts,
+                  lastFailedLogin: new Date().toISOString()
+                };
+                
+                // Block account if this is the 3rd failed attempt
+                if (newAttempts >= 3) {
+                  updateData.isBlocked = true;
+                  updateData.blockReason = 'Account automatically blocked due to 3 consecutive failed login attempts';
+                  updateData.blockedDate = new Date().toISOString();
+                  updateData.blockedBy = 'System';
+                  
+                  // Update user document
+                  await updateDoc(userDocRef, updateData);
+                  
+                  // Log the account blocking activity
+                  await logActivity('Account Blocked', `Account ${userInput} was automatically blocked due to 3 failed login attempts`, { username: userInput });
+                  
+                  errorMessage.textContent = 'Account has been blocked due to 3 consecutive failed login attempts. Please contact an administrator.';
+                } else {
+                  // Update failed attempts count
+                  await updateDoc(userDocRef, updateData);
+                  
+                  const remainingAttempts = 3 - newAttempts;
+                  errorMessage.textContent = `Invalid password. ${remainingAttempts} attempt${remainingAttempts !== 1 ? 's' : ''} remaining before account is blocked.`;
+                }
               }
             } catch (updateError) {
               console.error('Error updating failed login attempts:', updateError);

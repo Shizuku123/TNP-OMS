@@ -457,19 +457,16 @@
                 return true;
             }
             
-            // Staff can access if they have Staff Records feature
+            // Staff can access if they have Staff Records or Account Management feature
             if ((currentUser.role === 'Staff' || currentUser.role === 'staff') && 
                 currentUser.featureGranted && 
                 Array.isArray(currentUser.featureGranted) &&
-                currentUser.featureGranted.includes('Staff Records')) {
-                console.log('Staff user with Staff Records feature, granting access');
+                (currentUser.featureGranted.includes('Staff Records') || currentUser.featureGranted.includes('Account Management'))) {
+                console.log('Staff user with Staff Records or Account Management feature, granting access');
                 return true;
             }
             
-            // Temporary: Allow any authenticated user for debugging
-            console.log('TEMPORARY: Allowing access for debugging purposes');
-            return true; // Remove this line after debugging
-            
+            // No permission granted
             console.log('User does not have permission');
             return false;
         }
@@ -689,9 +686,16 @@
             tableBody.innerHTML = accountsToShow.map(account => `
                 <tr class="hover:bg-gray-50">
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <input type="checkbox" value="${account.uid}" onchange="toggleAccountSelection('${account.uid}')" 
-                               ${selectedAccounts.has(account.uid) ? 'checked' : ''}
-                               class="rounded border-gray-300 text-red-600 focus:ring-red-500">
+                        ${(() => {
+                            const adminRoles = ['Admin', 'admin', 'ADMIN', 'Administrator', 'administrator'];
+                            const isAdmin = adminRoles.includes(account.role) || adminRoles.includes(account.accountType);
+                            
+                            if (isAdmin) {
+                                return '<div class="w-4 h-4 flex items-center justify-center"><svg class="w-3 h-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" /></svg></div>';
+                            } else {
+                                return `<input type="checkbox" value="${account.uid}" onchange="toggleAccountSelection('${account.uid}')" ${selectedAccounts.has(account.uid) ? 'checked' : ''} class="rounded border-gray-300 text-red-600 focus:ring-red-500">`;
+                            }
+                        })()}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="flex items-center">
@@ -726,10 +730,18 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                         <div class="flex justify-center space-x-2">
-                            ${account.isBlocked ? 
-                                `<button onclick="showUnblockModal('${account.uid}')" class="text-green-600 hover:text-green-900 text-sm">Unblock</button>` :
-                                `<button onclick="showBlockModal('${account.uid}')" class="text-red-600 hover:text-red-900 text-sm">Block</button>`
-                            }
+                            ${(() => {
+                                const adminRoles = ['Admin', 'admin', 'ADMIN', 'Administrator', 'administrator'];
+                                const isAdmin = adminRoles.includes(account.role) || adminRoles.includes(account.accountType);
+                                
+                                if (isAdmin) {
+                                    return '<span class="text-gray-400 text-sm">Admin Protected</span>';
+                                } else if (account.isBlocked) {
+                                    return `<button onclick="showUnblockModal('${account.uid}')" class="text-green-600 hover:text-green-900 text-sm">Unblock</button>`;
+                                } else {
+                                    return `<button onclick="showBlockModal('${account.uid}')" class="text-red-600 hover:text-red-900 text-sm">Block</button>`;
+                                }
+                            })()}
                         </div>
                     </td>
                 </tr>
@@ -740,9 +752,16 @@
                 <div class="bg-white border border-gray-200 rounded-lg p-4">
                     <div class="flex items-start justify-between mb-3">
                         <div class="flex items-center">
-                            <input type="checkbox" value="${account.uid}" onchange="toggleAccountSelection('${account.uid}')" 
-                                   ${selectedAccounts.has(account.uid) ? 'checked' : ''}
-                                   class="rounded border-gray-300 text-red-600 focus:ring-red-500 mr-3">
+                            ${(() => {
+                                const adminRoles = ['Admin', 'admin', 'ADMIN', 'Administrator', 'administrator'];
+                                const isAdmin = adminRoles.includes(account.role) || adminRoles.includes(account.accountType);
+                                
+                                if (isAdmin) {
+                                    return '<div class="w-4 h-4 flex items-center justify-center mr-3"><svg class="w-3 h-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" /></svg></div>';
+                                } else {
+                                    return `<input type="checkbox" value="${account.uid}" onchange="toggleAccountSelection('${account.uid}')" ${selectedAccounts.has(account.uid) ? 'checked' : ''} class="rounded border-gray-300 text-red-600 focus:ring-red-500 mr-3">`;
+                                }
+                            })()}
                             <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
                                 <span class="text-sm font-medium text-gray-700">${getInitials(account.fullName)}</span>
                             </div>
@@ -779,10 +798,18 @@
                     </div>
                     
                     <div class="flex justify-end">
-                        ${account.isBlocked ? 
-                            `<button onclick="showUnblockModal('${account.uid}')" class="px-3 py-1 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors">Unblock</button>` :
-                            `<button onclick="showBlockModal('${account.uid}')" class="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors">Block</button>`
-                        }
+                        ${(() => {
+                            const adminRoles = ['Admin', 'admin', 'ADMIN', 'Administrator', 'administrator'];
+                            const isAdmin = adminRoles.includes(account.role) || adminRoles.includes(account.accountType);
+                            
+                            if (isAdmin) {
+                                return '<span class="px-3 py-1 text-sm bg-gray-100 text-gray-500 rounded">Admin Protected</span>';
+                            } else if (account.isBlocked) {
+                                return `<button onclick="showUnblockModal('${account.uid}')" class="px-3 py-1 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors">Unblock</button>`;
+                            } else {
+                                return `<button onclick="showBlockModal('${account.uid}')" class="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors">Block</button>`;
+                            }
+                        })()}
                     </div>
                 </div>
             `).join('');
@@ -860,6 +887,13 @@
         function showBlockModal(uid) {
             const account = allAccounts.find(acc => acc.uid === uid);
             if (!account) return;
+
+            // Prevent blocking admin accounts
+            const adminRoles = ['Admin', 'admin', 'ADMIN', 'Administrator', 'administrator'];
+            if (adminRoles.includes(account.role) || adminRoles.includes(account.accountType)) {
+                showMessage('Cannot block admin accounts. Admin accounts cannot be blocked for security reasons.', 'error');
+                return;
+            }
 
             pendingAction = { type: 'block', accounts: [account] };
             
@@ -950,6 +984,18 @@
 
             if (accounts.length === 0) {
                 showMessage('Selected accounts are already blocked.', 'error');
+                return;
+            }
+
+            // Check for admin accounts in selection
+            const adminRoles = ['Admin', 'admin', 'ADMIN', 'Administrator', 'administrator'];
+            const adminAccounts = accounts.filter(acc => 
+                adminRoles.includes(acc.role) || adminRoles.includes(acc.accountType)
+            );
+
+            if (adminAccounts.length > 0) {
+                const adminNames = adminAccounts.map(acc => acc.fullName).join(', ');
+                showMessage(`Cannot block admin accounts: ${adminNames}. Admin accounts cannot be blocked for security reasons.`, 'error');
                 return;
             }
 
