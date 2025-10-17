@@ -58,7 +58,7 @@
                     </div>
                     <div class="ml-5 w-0 flex-1">
                         <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Available Cash</dt>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Cash</dt>
                             <dd class="flex items-baseline">
                                 <div class="text-2xl font-semibold text-gray-900" id="totalCash">₱0.00</div>
                             </dd>
@@ -79,9 +79,9 @@
                     </div>
                     <div class="ml-5 w-0 flex-1">
                         <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Total Checks</dt>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Checks</dt>
                             <dd class="flex items-baseline">
-                                <div class="text-2xl font-semibold text-gray-900" id="totalChecks">0</div>
+                                <div class="text-2xl font-semibold text-gray-900" id="totalChecks">₱0.00</div>
                             </dd>
                         </dl>
                     </div>
@@ -100,7 +100,7 @@
                     </div>
                     <div class="ml-5 w-0 flex-1">
                         <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Available Bank Transfers</dt>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Bank Transfers</dt>
                             <dd class="flex items-baseline">
                                 <div class="text-2xl font-semibold text-gray-900" id="totalBankTransfers">₱0.00</div>
                             </dd>
@@ -121,7 +121,7 @@
                     </div>
                     <div class="ml-5 w-0 flex-1">
                         <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Available Online Payments</dt>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Online Payments</dt>
                             <dd class="flex items-baseline">
                                 <div class="text-2xl font-semibold text-gray-900" id="totalOnlinePayments">₱0.00</div>
                             </dd>
@@ -139,10 +139,9 @@
                     </div>
                     <div class="ml-5 w-0 flex-1">
                         <dl>
-                            <dt class="text-lg font-medium text-black truncate">Total Available Donations</dt>
+                            <dt class="text-lg font-medium text-black truncate">Total Available Funds</dt>
                             <dd class="flex items-baseline">
                                 <div class="text-3xl font-bold text-black" id="totalDonations">₱0.00</div>
-                                <span class="ml-2 text-sm font-medium text-black-100" id="donationsCount">(0 donations)</span>
                             </dd>
                         </dl>
                     </div>
@@ -459,7 +458,8 @@
             doc,
             query,
             where,
-            orderBy
+            orderBy,
+            getDoc
         } from './firebase.js';
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -1216,144 +1216,89 @@
 
         async function deductFromDonations(expenseData) {
             try {
-                const amount = expenseData.amount;
+                const amount = parseFloat(expenseData.amount);
                 const paymentMethod = expenseData.paymentMethod;
                 
                 console.log(`=== DEDUCTION DEBUG ===`);
-                console.log(`Trying to deduct ${amount} from ${paymentMethod} donations`);
+                console.log(`Deducting ${amount} using ${paymentMethod} payment method`);
 
-                // Get donations (don't try to order to avoid query errors)
-                const donationsCol = collection(db, 'donations');
-                const donationsSnapshot = await getDocs(donationsCol);
+                // Get the appropriate balance document based on payment method
+                let balanceDoc;
+                switch(paymentMethod) {
+                    case 'Cash':
+                        balanceDoc = doc(db, 'TotalFunds', 'cashBalance');
+                        break;
+                    case 'Check':
+                        balanceDoc = doc(db, 'TotalFunds', 'checkBalance');
+                        break;
+                    case 'Bank Transfer':
+                        balanceDoc = doc(db, 'TotalFunds', 'bankBalance');
+                        break;
+                    case 'Online Payment':
+                        balanceDoc = doc(db, 'TotalFunds', 'onlineBalance');
+                        break;
+                    default:
+                        throw new Error('Invalid payment method');
+                }
 
-                console.log(`Found ${donationsSnapshot.size} total donations`);
+                // Get fundBalance document
+                const fundBalanceDoc = doc(db, 'TotalFunds', 'fundBalance');
 
-                let remainingAmount = amount;
-                const updates = [];
-                let matchingDonationsFound = 0;
-                let totalAvailableForMethod = 0;
+                // Get current balances
+                const balanceSnapshot = await getDoc(balanceDoc);
+                const fundBalanceSnapshot = await getDoc(fundBalanceDoc);
 
-                // Find donations that match the payment method and have available balance
-                donationsSnapshot.forEach((docSnapshot, index) => {
-                    const donation = docSnapshot.data();
-                    const donationAmount = parseFloat(donation.amount) || 0;
-                    const usedAmount = parseFloat(donation.usedAmount) || 0;
-                    const availableAmount = donationAmount - usedAmount;
+                if (!balanceSnapshot.exists()) {
+                    throw new Error(`No balance found for ${paymentMethod}`);
+                }
+                if (!fundBalanceSnapshot.exists()) {
+                    throw new Error('No fund balance found');
+                }
 
-                    console.log(`\nDonation ${index + 1} (ID: ${docSnapshot.id}):`);
-                    console.log(`  Amount: ${donationAmount}, Used: ${usedAmount}, Available: ${availableAmount}`);
-                    console.log(`  Full data:`, donation);
+                const currentBalance = balanceSnapshot.data().amount;
+                const currentFundBalance = fundBalanceSnapshot.data().amount;
 
-                    // Check if this donation matches the payment method
-                    let donationPaymentMethod = '';
-                    if (donation.paymentDetails && donation.paymentDetails.typeOfDonation) {
-                        donationPaymentMethod = donation.paymentDetails.typeOfDonation;
-                        console.log(`  Payment method from paymentDetails: "${donationPaymentMethod}"`);
-                    } else if (donation.typeOfDonation) {
-                        donationPaymentMethod = donation.typeOfDonation;
-                        console.log(`  Payment method from typeOfDonation: "${donationPaymentMethod}"`);
-                    } else {
-                        console.log(`  No payment method found in donation`);
-                    }
+                // Check if sufficient funds are available
+                if (currentBalance < amount) {
+                    throw new Error(`Insufficient ${paymentMethod} balance`);
+                }
+                if (currentFundBalance < amount) {
+                    throw new Error('Insufficient total funds');
+                }
 
-                    // Match payment methods - More flexible matching
-                    const normalizeMethod = (method) => {
-                        if (!method) return '';
-                        return method.toString().toLowerCase().trim();
-                    };
+                // Get current Philippines time
+                const now = new Date();
+                const options = {
+                    timeZone: 'Asia/Manila',
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true
+                };
+                const phTime = now.toLocaleString('en-US', options);
 
-                    const expenseMethodNormalized = normalizeMethod(paymentMethod);
-                    const donationMethodNormalized = normalizeMethod(donationPaymentMethod);
-
-                    let methodMatches = false;
-                    
-                    // Cash matching
-                    if (expenseMethodNormalized === 'cash') {
-                        methodMatches = donationMethodNormalized === 'cash' || 
-                                       donationMethodNormalized.includes('cash');
-                    }
-                    // Check matching
-                    else if (expenseMethodNormalized === 'check') {
-                        methodMatches = donationMethodNormalized === 'check' || 
-                                       donationMethodNormalized.includes('check') ||
-                                       donationMethodNormalized === 'cheque';
-                    }
-                    // Bank Transfer matching
-                    else if (expenseMethodNormalized === 'bank transfer') {
-                        methodMatches = donationMethodNormalized === 'bank transfer' || 
-                                       donationMethodNormalized === 'banktransfer' ||
-                                       donationMethodNormalized.includes('bank') ||
-                                       donationMethodNormalized.includes('transfer');
-                    }
-                    // Online Payment matching
-                    else if (expenseMethodNormalized === 'online payment') {
-                        methodMatches = donationMethodNormalized === 'online payment' || 
-                                       donationMethodNormalized === 'onlinepayment' ||
-                                       donationMethodNormalized.includes('online') ||
-                                       donationMethodNormalized === 'gcash' ||
-                                       donationMethodNormalized === 'paypal' ||
-                                       donationMethodNormalized === 'paymaya' ||
-                                       donationMethodNormalized.includes('digital');
-                    }
-
-                    console.log(`  Expense method: "${paymentMethod}" (normalized: "${expenseMethodNormalized}")`);
-                    console.log(`  Donation method: "${donationPaymentMethod}" (normalized: "${donationMethodNormalized}")`);
-                    console.log(`  Matches: ${methodMatches}`);
-
-                    if (methodMatches) {
-                        matchingDonationsFound++;
-                        totalAvailableForMethod += availableAmount;
-                        console.log(`  ✓ Method matches! Available: ${availableAmount}`);
-
-                        if (availableAmount > 0 && remainingAmount > 0) {
-                            const deductAmount = Math.min(remainingAmount, availableAmount);
-                            const newUsedAmount = usedAmount + deductAmount;
-
-                            updates.push({
-                                docRef: doc(db, 'donations', docSnapshot.id),
-                                newUsedAmount: newUsedAmount,
-                                deductAmount: deductAmount,
-                                donationId: docSnapshot.id
-                            });
-
-                            remainingAmount -= deductAmount;
-                            console.log(`  → Will deduct ${deductAmount}, new used amount: ${newUsedAmount}, remaining: ${remainingAmount}`);
-                        }
-                    } else {
-                        console.log(`  ✗ Method doesn't match`);
-                    }
+                // Update specific balance
+                await updateDoc(balanceDoc, {
+                    amount: currentBalance - amount,
+                    lastUpdated: phTime
                 });
 
-                console.log(`\n=== SUMMARY ===`);
-                console.log(`Matching donations found: ${matchingDonationsFound}`);
-                console.log(`Total available for ${paymentMethod}: ${totalAvailableForMethod}`);
-                console.log(`Updates to apply: ${updates.length}`);
-                console.log(`Remaining amount after matching: ${remainingAmount}`);
-
-                // Apply all updates
-                for (const update of updates) {
-                    console.log(`Applying update to donation ${update.donationId}: deducting ${update.deductAmount}`);
-                    try {
-                        await updateDoc(update.docRef, {
-                            usedAmount: update.newUsedAmount,
-                            lastUpdated: new Date()
-                        });
-                        console.log(`✓ Successfully updated donation ${update.donationId}`);
-                    } catch (updateError) {
-                        console.error(`✗ Failed to update donation ${update.donationId}:`, updateError);
-                        throw updateError;
-                    }
-                }
-
-                if (remainingAmount > 0) {
-                    console.warn(`Warning: Could not find sufficient ${paymentMethod} donations. Remaining amount: ${remainingAmount}`);
-                    alert(`Warning: Only ${amount - remainingAmount} out of ${amount} was deducted from ${paymentMethod} donations. Insufficient funds available.`);
-                }
+                // Update fund balance
+                await updateDoc(fundBalanceDoc, {
+                    amount: currentFundBalance - amount,
+                    lastUpdated: phTime
+                });
 
                 console.log('=== DEDUCTION COMPLETED ===');
+                console.log(`Successfully deducted ${amount} from ${paymentMethod} balance`);
+                console.log(`New ${paymentMethod} balance: ${currentBalance - amount}`);
+                console.log(`New total fund balance: ${currentFundBalance - amount}`);
 
             } catch (error) {
-                console.error('Error deducting from donations:', error);
+                console.error('Error processing deduction:', error);
                 throw error;
             }
         }
@@ -1398,102 +1343,14 @@
             try {
                 console.log('=== LOADING SUMMARY DATA ===');
                 
-                const donationsCol = collection(db, 'donations');
-                const donationsSnapshot = await getDocs(donationsCol);
-                
-                console.log(`Found ${donationsSnapshot.size} donations`);
+                // Get balances from TotalFunds collection
+                const cashDoc = await getDoc(doc(db, 'TotalFunds', 'cashBalance'));
+                const checkDoc = await getDoc(doc(db, 'TotalFunds', 'checkBalance'));
+                const bankDoc = await getDoc(doc(db, 'TotalFunds', 'bankBalance'));
+                const onlineDoc = await getDoc(doc(db, 'TotalFunds', 'onlineBalance'));
+                const totalDoc = await getDoc(doc(db, 'TotalFunds', 'fundBalance'));
 
-                // First, let's see all unique payment methods in your database
-                const uniquePaymentMethods = new Set();
-
-                let totalCash = 0;
-                let totalChecksCount = 0;
-                let totalBankTransfers = 0;
-                let totalOnlinePayments = 0;
-                let totalDonationsAmount = 0;
-                let totalDonationsCount = 0;
-
-                // Also calculate available amounts (total - used)
-                let availableCash = 0;
-                let availableBankTransfers = 0;
-                let availableOnlinePayments = 0;
-                let totalAvailable = 0;
-
-                donationsSnapshot.forEach((doc, index) => {
-                    const data = doc.data();
-                    const amount = parseFloat(data.amount) || 0;
-                    const usedAmount = parseFloat(data.usedAmount) || 0;
-                    const availableAmount = amount - usedAmount;
-                    
-                    console.log(`\nDonation ${index + 1} (${doc.id}):`);
-                    console.log(`  Amount: ${amount}, Used: ${usedAmount}, Available: ${availableAmount}`);
-                    console.log(`  Data structure:`, data);
-                    
-                    // Count all donations
-                    totalDonationsAmount += amount;
-                    totalDonationsCount++;
-                    totalAvailable += availableAmount;
-                    
-                    // Check payment method from paymentDetails or direct field
-                    let paymentMethod = '';
-                    if (data.paymentDetails && data.paymentDetails.typeOfDonation) {
-                        paymentMethod = data.paymentDetails.typeOfDonation;
-                        console.log(`  Payment method (from paymentDetails): "${paymentMethod}"`);
-                    } else if (data.typeOfDonation) {
-                        paymentMethod = data.typeOfDonation;
-                        console.log(`  Payment method (direct): "${paymentMethod}"`);
-                    } else {
-                        console.log(`  No payment method found`);
-                    }
-
-                    // Add to unique payment methods
-                    if (paymentMethod) {
-                        uniquePaymentMethods.add(paymentMethod);
-                    }
-                    
-                    // Categorize by payment method
-                    switch (paymentMethod.toLowerCase()) {
-                        case 'cash':
-                            totalCash += amount;
-                            availableCash += availableAmount;
-                            console.log(`  → Categorized as CASH`);
-                            break;
-                        case 'check':
-                            totalChecksCount++;
-                            console.log(`  → Categorized as CHECK`);
-                            break;
-                        case 'bank transfer':
-                        case 'banktransfer':
-                            totalBankTransfers += amount;
-                            availableBankTransfers += availableAmount;
-                            console.log(`  → Categorized as BANK TRANSFER`);
-                            break;
-                        case 'online payment':
-                        case 'onlinepayment':
-                        case 'gcash':
-                        case 'paypal':
-                        case 'paymaya':
-                            totalOnlinePayments += amount;
-                            availableOnlinePayments += availableAmount;
-                            console.log(`  → Categorized as ONLINE PAYMENT`);
-                            break;
-                        default:
-                            console.log(`  → NOT CATEGORIZED (method: "${paymentMethod}")`);
-                            break;
-                    }
-                });
-
-                console.log('\n=== ALL UNIQUE PAYMENT METHODS IN DATABASE ===');
-                console.log('Unique payment methods found:', Array.from(uniquePaymentMethods));
-                
-                console.log('\n=== SUMMARY TOTALS ===');
-                console.log(`Available Cash: ${availableCash}`);
-                console.log(`Total Checks: ${totalChecksCount}`);
-                console.log(`Available Bank Transfers: ${availableBankTransfers}`);
-                console.log(`Available Online Payments: ${availableOnlinePayments}`);
-                console.log(`Total Available: ${totalAvailable}`);
-
-                // Format currency
+                // Format currency function
                 const formatCurrency = (amount) => {
                     return new Intl.NumberFormat('en-PH', {
                         style: 'currency',
@@ -1502,13 +1359,34 @@
                     }).format(amount);
                 };
 
+                // Get amounts from documents or default to 0 if document doesn't exist
+                const availableCash = cashDoc.exists() ? cashDoc.data().amount : 0;
+                const totalChecks = checkDoc.exists() ? checkDoc.data().amount : 0;
+                const availableBankTransfers = bankDoc.exists() ? bankDoc.data().amount : 0;
+                const availableOnlinePayments = onlineDoc.exists() ? onlineDoc.data().amount : 0;
+                const totalFunds = totalDoc.exists() ? totalDoc.data().amount : 0;
+
+                console.log('=== LOADING BALANCES FROM TOTALFUNDS ===');
+                console.log(`Cash Balance: ${availableCash}`);
+                console.log(`Check Balance: ${totalChecks}`);
+                console.log(`Bank Transfer Balance: ${availableBankTransfers}`);
+                console.log(`Online Payment Balance: ${availableOnlinePayments}`);
+                console.log(`Total Funds: ${totalFunds}`);
+
+                // Add a console log of formatted values
+                console.log('\n=== FORMATTED VALUES ===');
+                console.log('Cash Balance:', formatCurrency(availableCash));
+                console.log('Check Balance:', formatCurrency(totalChecks));
+                console.log('Bank Transfer Balance:', formatCurrency(availableBankTransfers));
+                console.log('Online Payment Balance:', formatCurrency(availableOnlinePayments));
+                console.log('Total Balance:', formatCurrency(totalFunds));
+
                 // Update the cards with available amounts
                 document.getElementById('totalCash').textContent = formatCurrency(availableCash);
-                document.getElementById('totalChecks').textContent = totalChecksCount.toLocaleString();
+                document.getElementById('totalChecks').textContent = formatCurrency(totalChecks);
                 document.getElementById('totalBankTransfers').textContent = formatCurrency(availableBankTransfers);
                 document.getElementById('totalOnlinePayments').textContent = formatCurrency(availableOnlinePayments);
-                document.getElementById('totalDonations').textContent = formatCurrency(totalAvailable);
-                document.getElementById('donationsCount').textContent = `(${totalDonationsCount.toLocaleString()} donations)`;
+                document.getElementById('totalDonations').textContent = formatCurrency(totalFunds);
 
                 console.log('Summary data updated successfully');
 
@@ -1516,11 +1394,10 @@
                 console.error('Error loading summary data:', error);
                 // Set default values on error
                 document.getElementById('totalCash').textContent = '₱0.00';
-                document.getElementById('totalChecks').textContent = '0';
+                document.getElementById('totalChecks').textContent = '₱0.00';
                 document.getElementById('totalBankTransfers').textContent = '₱0.00';
                 document.getElementById('totalOnlinePayments').textContent = '₱0.00';
                 document.getElementById('totalDonations').textContent = '₱0.00';
-                document.getElementById('donationsCount').textContent = '(0 donations)';
             }
         }
 
