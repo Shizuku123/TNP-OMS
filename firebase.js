@@ -24,24 +24,24 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js"
 
 // Your Firebase config
-const firebaseConfig = {
-  apiKey: "AIzaSyB77G8wkD94q6AGGbDNtusEFUEc8X708ug",
-  authDomain: "tnp-oms-e4036.firebaseapp.com",
-  projectId: "tnp-oms-e4036",
-  storageBucket: "tnp-oms-e4036.appspot.com",
-  messagingSenderId: "822922660224",
-  appId: "1:822922660224:web:846c38ace3cc4787ee9965"
-};
-
 // const firebaseConfig = {
-//   apiKey: "AIzaSyBKh0X9zMvJYwPmld1dngMBqkw-UWLGO7M",
-//   authDomain: "tnp-oms-2b2c7.firebaseapp.com",
-//   projectId: "tnp-oms-2b2c7",
-//   storageBucket: "tnp-oms-2b2c7.appspot.com",
-//   messagingSenderId: "101796900523",
-//   appId: "1:101796900523:web:ff0a5dbc63bb16131f91ee",
-//   measurementId: "G-H52TVZV37N",
-// }
+//   apiKey: "AIzaSyB77G8wkD94q6AGGbDNtusEFUEc8X708ug",
+//   authDomain: "tnp-oms-e4036.firebaseapp.com",
+//   projectId: "tnp-oms-e4036",
+//   storageBucket: "tnp-oms-e4036.appspot.com",
+//   messagingSenderId: "822922660224",
+//   appId: "1:822922660224:web:846c38ace3cc4787ee9965"
+// };
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBKh0X9zMvJYwPmld1dngMBqkw-UWLGO7M",
+  authDomain: "tnp-oms-2b2c7.firebaseapp.com",
+  projectId: "tnp-oms-2b2c7",
+  storageBucket: "tnp-oms-2b2c7.appspot.com",
+  messagingSenderId: "101796900523",
+  appId: "1:101796900523:web:ff0a5dbc63bb16131f91ee",
+  measurementId: "G-H52TVZV37N",
+}
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig)

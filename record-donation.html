@@ -2331,27 +2331,28 @@
                 // Add payment-specific details
                 if (donationData.typeOfDonation === 'Bank Transfer') {
                     donationData.paymentDetails = {
-                        bankName: formData.get('bankName'),
-                        bankBranch: formData.get('bankBranch'),
-                        dateOfTransfer: formData.get('dateOfTransfer'),
-                        transactionRef: formData.get('transactionRef')
+                        bankName: formData.get('bankName') || '',
+                        bankBranch: formData.get('bankBranch') || '',
+                        accountInfo: formData.get('accountInfo') || '',
+                        dateOfTransfer: formData.get('dateOfTransfer') || '',
+                        transactionRef: formData.get('transactionRef') || ''
                     };
                 } else if (donationData.typeOfDonation === 'Check') {
                     donationData.paymentDetails = {
-                        bankName: formData.get('bankName'),
-                        bankBranch: formData.get('bankBranch'),
-                        checkNumber: formData.get('checkNumber'),
-                        checkDate: formData.get('checkDate'),
-                        payeeName: formData.get('payeeName')
+                        bankName: formData.get('checkBankName') || '',  // Updated to match form field name
+                        bankBranch: formData.get('checkBankBranch') || '',
+                        checkNumber: formData.get('checkNumber') || '',
+                        checkDate: formData.get('checkDate') || '',
+                        payeeName: formData.get('payeeName') || '',
+                        accountInfo: formData.get('payeeName') || '' // Using payeeName as accountInfo for check payments
                     };
                     if (formData.get('tin')) {
                         donationData.paymentDetails.tin = formData.get('tin');
                     }
                 } else if (donationData.typeOfDonation === 'Online Payment') {
                     donationData.paymentDetails = {
-                        platform: formData.get('onlinePaymentPlatform'),
-                        referenceNumber: formData.get('referenceNumber'),
-                        accountName: formData.get('accountName')
+                        paymentMethod: formData.get('onlinePaymentMethod') || '',
+                        transactionRef: formData.get('onlineTransactionRef') || ''
                     };
                 }
 
@@ -2846,16 +2847,35 @@
 
                     // Payment type specific validation
                     if (data.typeOfDonation === 'Bank Transfer' && data.paymentDetails) {
-                        if (!data.paymentDetails.bankName || !data.paymentDetails.accountInfo || !data.paymentDetails.transactionRef) {
-                            throw new Error('Missing required bank transfer details');
+                        // For debugging
+                        console.log('Bank transfer details:', data.paymentDetails);
+                        const missing = [];
+                        if (!data.paymentDetails.bankName) missing.push('Bank Name');
+                        if (!data.paymentDetails.accountInfo) missing.push('Account Information');
+                        if (!data.paymentDetails.transactionRef) missing.push('Transaction Reference');
+                        if (missing.length > 0) {
+                            throw new Error(`Missing required bank transfer details: ${missing.join(', ')}`);
                         }
                     } else if (data.typeOfDonation === 'Check' && data.paymentDetails) {
-                        if (!data.paymentDetails.checkNumber || !data.paymentDetails.bankName || !data.paymentDetails.checkDate || !data.paymentDetails.payeeName) {
-                            throw new Error('Missing required check details');
+                        // For debugging
+                        console.log('Check payment details:', data.paymentDetails);
+                        if (!data.paymentDetails.checkNumber || !data.paymentDetails.bankName || !data.paymentDetails.checkDate || !data.paymentDetails.payeeName || !data.paymentDetails.accountInfo) {
+                            const missing = [];
+                            if (!data.paymentDetails.checkNumber) missing.push('Check Number');
+                            if (!data.paymentDetails.bankName) missing.push('Bank Name');
+                            if (!data.paymentDetails.checkDate) missing.push('Check Date');
+                            if (!data.paymentDetails.payeeName) missing.push('Payee Name');
+                            if (!data.paymentDetails.accountInfo) missing.push('Account Info');
+                            throw new Error(`Missing required check details: ${missing.join(', ')}`);
                         }
                     } else if (data.typeOfDonation === 'Online Payment' && data.paymentDetails) {
-                        if (!data.paymentDetails.paymentMethod || !data.paymentDetails.transactionRef) {
-                            throw new Error('Missing required online payment details');
+                        // For debugging
+                        console.log('Online payment details:', data.paymentDetails);
+                        const missing = [];
+                        if (!data.paymentDetails.paymentMethod) missing.push('Payment Method');
+                        if (!data.paymentDetails.transactionRef) missing.push('Transaction Reference');
+                        if (missing.length > 0) {
+                            throw new Error(`Missing required online payment details: ${missing.join(', ')}`);
                         }
                     }
                 } else if (data.donationType === 'in-kind') {
