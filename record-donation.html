@@ -2680,7 +2680,51 @@
         // Save donation record to Firestore
         async function saveDonationToFirestore(data) {
             try {
-                // Validate required fields (unchanged)
+                showLoadingScreen('Saving donation record...');
+                
+                // Set timestamps and format data
+                data.dateAdded = new Date().toISOString().split('T')[0];
+                data.lastUpdated = new Date();
+                
+                // Get donationId
+                const donationId = await generateDonationId();
+                data.donationId = donationId;
+
+                // Save to donations collection
+                const donationsRef = collection(db, 'donations');
+                const docRef = doc(donationsRef, donationId);
+                await setDoc(docRef, data);
+
+                // Update TotalFunds if this is a money donation
+                if (data.donationType === 'money') {
+                    const fundBalanceRef = doc(db, 'TotalFunds', 'fundBalance');
+                    
+                    try {
+                        // Try to get the current fund balance
+                        const fundBalanceDoc = await getDocs(collection(db, 'TotalFunds'));
+                        let currentAmount = 0;
+
+                        // If document exists, get current amount
+                        if (!fundBalanceDoc.empty) {
+                            const fundData = fundBalanceDoc.docs[0].data();
+                            currentAmount = fundData.amount || 0;
+                        }
+
+                        // Add new donation amount to current total
+                        const newAmount = currentAmount + data.amount;
+
+                        // Update or create the fundBalance document
+                        await setDoc(fundBalanceRef, {
+                            amount: newAmount,
+                            lastUpdated: data.dateAdded
+                        });
+                    } catch (error) {
+                        console.error('Error updating TotalFunds:', error);
+                        // Continue execution even if TotalFunds update fails
+                    }
+                }
+
+                // Validate required fields
                 if (data.donationType === 'money') {
                     if (!data.dateOfDonation || !data.typeOfDonation || isNaN(data.amount)) {
                         showMessage('Please fill in all required fields.', 'error');

@@ -6,6 +6,7 @@
     <title>Expenses Tracking - Tahanan ng Pagmamahal OMS</title>
     <script type="module" src="firebase.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -41,71 +42,79 @@
 
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <!-- Action Buttons -->
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center justify-center space-x-2 mb-4">
-            <img src="GCash-Logo (2).png" alt="GCash" class="h-20 w-auto">
-            </div>
-            <div class="flex justify-center">
-            <div class="grid grid-cols-2 gap-4">
-                <button onclick="sendMoney()" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-center">
-                Send money
-                </button>
-                <button onclick="viewTransactionHistory()" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-center">
-                Transaction History
-                </button>
-            </div>
-            </div>
-        </div>
         <!-- Record Expenses Button -->
         
         
         <!-- Statistics Cards -->
-        <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 pt-5">
-            <!-- Total Donations Card -->
+        <div class="grid grid-cols-1 gap-6 mb-8 pt-5">
+            <!-- Overall Expenses Card -->
             <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-600">Total Donations</p>
-                        <p id="totalDonations" class="text-2xl font-bold text-green-600">₱0.00</p>
-                        <p class="text-xs text-green-500 mt-1"> Available for expenses</p>
+                <div class="flex flex-col md:flex-row items-start justify-between mb-8">
+                    <!-- Left-aligned Total Amount -->
+                    <div class="mb-4 md:mb-0">
+                        <p id="totalExpenses" class="text-4xl md:text-5xl lg:text-6xl font-bold text-red-600 leading-none">₱0.00</p>
+                        <p class="text-sm md:text-base text-gray-600 mt-2">Total expenses recorded</p>
+                    </div>
+                    <!-- Year selector -->
+                    <div class="flex items-center space-x-2">
+                        <select id="yearSelector" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm">
+                            <!-- Years will be populated by JavaScript -->
+                        </select>
+                        <button id="viewToggle" class="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">
+                            Detailed View
+                        </button>
                     </div>
                 </div>
-            </div>
-
-            <!-- Cash Expenses Card -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-600">Cash Expenses</p>
-                        <p id="cashExpenses" class="text-2xl font-bold text-gray-900">₱0.00</p>
-                        <p class="text-xs text-red-500 mt-1">+ 10% Increase from last month</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- GCash Expenses Card -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <div class="flex items-center space-x-2 mb-1">
-                            <img src="GCash-Logo (2).png" alt="GCash" class="h-12 w-auto -mt-5">
+                
+                <!-- Payment Method Breakdown -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <!-- Cash Expenses -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex items-center space-x-2">
+                            <svg class="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                            <p class="text-sm font-medium text-gray-600">Cash Expenses</p>
                         </div>
-                        <p id="gcashExpenses" class="text-2xl font-bold text-gray-900">₱0.00</p>
-                        <p class="text-xs text-red-500 mt-1">+ 10% Increase from last month</p>
+                        <p id="cashExpenses" class="text-xl font-bold text-gray-900 mt-2">₱0.00</p>
+                    </div>
+
+                    <!-- Check Expenses -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex items-center space-x-2">
+                            <svg class="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <p class="text-sm font-medium text-gray-600">Check Expenses</p>
+                        </div>
+                        <p id="checkExpenses" class="text-xl font-bold text-gray-900 mt-2">₱0.00</p>
+                    </div>
+
+                    <!-- Bank Transfer Expenses -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex items-center space-x-2">
+                            <svg class="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                            </svg>
+                            <p class="text-sm font-medium text-gray-600">Bank Transfer</p>
+                        </div>
+                        <p id="bankExpenses" class="text-xl font-bold text-gray-900 mt-2">₱0.00</p>
+                    </div>
+
+                    <!-- Online Payment Expenses -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex items-center space-x-2">
+                            <svg class="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
+                            </svg>
+                            <p class="text-sm font-medium text-gray-600">Online Payment</p>
+                        </div>
+                        <p id="onlineExpenses" class="text-xl font-bold text-gray-900 mt-2">₱0.00</p>
                     </div>
                 </div>
-            </div>
-
-            <!-- Total Checks Card -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-600">Total Checks</p>
-                        <p id="totalChecks" class="text-2xl font-bold text-gray-900">0</p>
-                        <p class="text-xs text-green-500 mt-1">+ 2 checks this month</p>
-                    </div>
-                   
+                <!-- Chart Container -->
+                <div class="mt-4">
+                    <canvas id="expensesChart" class="w-full" height="100"></canvas>
                 </div>
             </div>
         </div>
@@ -117,35 +126,94 @@
             </div>
             
             <!-- Search and Filter Controls -->
-            <div class="p-6 border-b border-gray-200">
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                    <div class="md:col-span-1">
+            <div class="p-6 border-b border-gray-200 space-y-4">
+                <!-- Search and Action Buttons Row -->
+                <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
+                    <!-- Search Bar -->
+                    <div class="md:col-span-4">
                         <input type="text" id="searchInput" placeholder="Search" 
-                               class="w-full  h-12 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                               class="w-full h-12 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
                     </div>
-                    <div class="md:col-span-1 flex space-x-2">
-                        <input type="date" id="dateStart"
-                            class="w-1/2 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary mb-2">
-                        <input type="date" id="dateEnd"
-                            class="w-1/2 h-12  px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary mb-2">
-                    </div>
+
+                    <!-- Print Report Button -->
                     <div class="md:col-span-1">
-                        <select id="typeFilter" class="w-full h-12  px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
-                            <option value="">All types</option>
-                            <option value="cash">Cash</option>
-                            <option value="gcash">GCash</option>
-                            <option value="check">Check</option>
+                        <button onclick="printReport()" class="w-full h-12 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center">
+                            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                            </svg>
+                            Print Report
+                        </button>
+                    </div>
+
+                    <!-- Record Expenses Button -->
+                    <div class="md:col-span-1">
+                        <button onclick="openRecordExpenseModal()" class="w-full h-12 px-4 py-2 bg-red-primary text-white rounded-lg hover:bg-red-700 transition-colors">
+                            Record Expenses
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filters Row -->
+                <div class="grid grid-cols-1 md:grid-cols-10 gap-4 items-center">
+                    <!-- Sort Dropdown -->
+                    <div class="md:col-span-2">
+                        <select id="sortFilter" class="w-full h-12 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <option value="default">Default</option>
+                            <option value="highToLow">High to Low</option>
+                            <option value="lowToHigh">Low to High</option>
                         </select>
                     </div>
-                    <button onclick="openRecordExpenseModal()" class="h-12 px-4 py-3 bg-red-primary text-white rounded-lg hover:bg-red-700 transition-colors text-center">
-                        Record Expenses
-                    </button>
+
+                    <!-- Payment Type Filter -->
+                    <div class="md:col-span-2">
+                        <select id="typeFilter" class="w-full h-12 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <option value="all">All</option>
+                            <option value="cash">Cash</option>
+                            <option value="check">Check</option>
+                            <option value="bank Transfer">Bank Transfer</option>
+                            <option value="online Payment">Online Payment</option>
+                        </select>
+                    </div>
+
+                    <!-- Date Range -->
+                    <div class="md:col-span-3 flex space-x-2">
+                        <input type="date" id="dateStart" placeholder="From"
+                            class="w-1/2 h-12 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        <input type="date" id="dateEnd" placeholder="To"
+                            class="w-1/2 h-12 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+
+                    <!-- Year Filter -->
+                    <div class="md:col-span-2">
+                        <select id="yearFilter" class="w-full h-12 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <option value="">Select Year</option>
+                            <option value="2025">2025</option>
+                            <option value="2024">2024</option>
+                            <option value="2023">2023</option>
+                            <option value="2022">2022</option>
+                            <option value="2021">2021</option>
+                            <option value="2020">2020</option>
+                            <option value="2019">2019</option>
+                            <option value="2018">2018</option>
+                            <option value="2017">2017</option>
+                            <option value="2016">2016</option>
+                            <option value="2015">2015</option>
+                            <option value="2014">2014</option>
+                            <option value="2013">2013</option>
+                            <option value="2012">2012</option>
+                            <option value="2011">2011</option>
+                            <option value="2010">2010</option>
+                            <option value="2009">2009</option>
+                            <option value="2008">2008</option>
+                            <option value="2007">2007</option>
+                        </select>
+                    </div>
+
+                    <!-- Clear Filters Button -->
                     <div class="md:col-span-1">
-                        <button onclick="viewAllHistory()" class="w-full h-12 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
-                            View All History
+                        <button id="clearFiltersBtn" class="w-full h-12 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                            Clear
                         </button>
-                        
-                        
                     </div>
                 </div>
             </div>
@@ -336,6 +404,7 @@
             
             await loadData();
             setupEventListeners();
+            setupChartEventListeners();
         });
 
         async function loadData() {
@@ -347,23 +416,20 @@
                 const expensesSnapshot = await getDocs(expensesCol);
                 allExpenses = [];
                 expensesSnapshot.forEach(docSnap => {
-                    allExpenses.push(docSnap.data());
-                });
-
-                // Load donations for total calculation
-                const donationsCol = collection(db, 'donations');
-                const donationsSnapshot = await getDocs(donationsCol);
-                allDonations = [];
-                donationsSnapshot.forEach(docSnap => {
                     const data = docSnap.data();
-                    if (data.donationType === 'money') {
-                        allDonations.push(data);
+                    if (data.status === 'approved') {  // Only include approved expenses
+                        allExpenses.push(data);
                     }
                 });
+                
+                // Debug log
+                console.log('Loaded expenses:', allExpenses);
                 
                 hideSkeletonLoading();
                 updateStatistics();
                 displayTransactions();
+                // Initialize chart after data is loaded
+                updateExpensesChart();
             } catch (error) {
                 console.error('Failed to load data:', error);
                 hideSkeletonLoading();
@@ -382,30 +448,203 @@
             document.getElementById('transactionList').classList.remove('hidden');
         }
 
+        // Global variables for chart
+        let expensesChart = null;
+        let isDetailedView = false;
+
         function updateStatistics() {
-            // Calculate total donations
-            const totalDonations = allDonations.reduce((sum, donation) => {
-                return sum + parseFloat(donation.amount || 0);
-            }, 0);
-            document.getElementById('totalDonations').textContent = `₱${totalDonations.toLocaleString()}`;
+            // Initialize counters for each payment method
+            let totalExpenses = 0;
+            let cashExpenses = 0;
+            let checkExpenses = 0;
+            let bankExpenses = 0;
+            let onlineExpenses = 0;
 
-            // Calculate expenses by type
-            const cashExpenses = allExpenses.filter(e => e.paymentMethod === 'cash')
-                .reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0);
-            const gcashExpenses = allExpenses.filter(e => e.paymentMethod === 'gcash')
-                .reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0);
-            const totalChecks = allExpenses.filter(e => e.paymentMethod === 'check').length;
+            // Calculate expenses for each payment method
+            allExpenses.forEach(expense => {
+                if (expense.status === 'approved') {
+                    const amount = parseFloat(expense.amount) || 0;
+                    totalExpenses += amount;
 
+                    // Add to specific payment method total
+                    switch(expense.paymentMethod.toLowerCase()) {
+                        case 'cash':
+                            cashExpenses += amount;
+                            break;
+                        case 'check':
+                            checkExpenses += amount;
+                            break;
+                        case 'bank transfer':
+                            bankExpenses += amount;
+                            break;
+                        case 'online payment':
+                            onlineExpenses += amount;
+                            break;
+                        // Also handle GCash as online payment
+                        case 'gcash':
+                            onlineExpenses += amount;
+                            break;
+                    }
+                }
+            });
+
+            // Update the display for all expense categories
+            document.getElementById('totalExpenses').textContent = `₱${totalExpenses.toLocaleString()}`;
             document.getElementById('cashExpenses').textContent = `₱${cashExpenses.toLocaleString()}`;
-            document.getElementById('gcashExpenses').textContent = `₱${gcashExpenses.toLocaleString()}`;
-            document.getElementById('totalChecks').textContent = totalChecks;
+            document.getElementById('checkExpenses').textContent = `₱${checkExpenses.toLocaleString()}`;
+            document.getElementById('bankExpenses').textContent = `₱${bankExpenses.toLocaleString()}`;
+            document.getElementById('onlineExpenses').textContent = `₱${onlineExpenses.toLocaleString()}`;
+            
+            // Update chart
+            updateExpensesChart();
         }
 
-        function displayTransactions() {
+        function initializeYearSelector() {
+            const yearSelector = document.getElementById('yearSelector');
+            const currentYear = new Date().getFullYear();
+            const startYear = 2020; // You can adjust this
+            
+            for (let year = currentYear; year >= startYear; year--) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                yearSelector.appendChild(option);
+            }
+        }
+
+        function getMonthlyExpenses(year, paymentMethod = null) {
+            const monthlyData = Array(12).fill(0);
+            
+            allExpenses.forEach(expense => {
+                if (expense.status !== 'approved') return;
+                
+                const expenseDate = new Date(expense.date);
+                if (expenseDate.getFullYear() === year) {
+                    // If we're filtering by payment method but it doesn't match, skip this expense
+                    if (paymentMethod && expense.paymentMethod !== paymentMethod) {
+                        return;
+                    }
+                    
+                    // Get the month (0-11) from the date
+                    const month = expenseDate.getMonth();
+                    
+                    // Add the expense amount to the corresponding month
+                    const amount = parseFloat(expense.amount) || 0;
+                    monthlyData[month] += amount;
+                }
+            });
+            
+            return monthlyData;
+        }
+
+        function updateExpensesChart() {
+            const ctx = document.getElementById('expensesChart').getContext('2d');
+            const selectedYear = parseInt(document.getElementById('yearSelector').value);
+            
+            if (expensesChart) {
+                expensesChart.destroy();
+            }
+
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            
+            let datasets;
+            if (isDetailedView) {
+                datasets = [
+                    {
+                        label: 'Cash Payment',
+                        data: getMonthlyExpenses(selectedYear, 'Cash'),
+                        borderColor: '#10B981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Online Payment',
+                        data: getMonthlyExpenses(selectedYear, 'Online Payment'),
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Bank Transfer',
+                        data: getMonthlyExpenses(selectedYear, 'Bank Transfer'),
+                        borderColor: '#F59E0B',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Check Payment',
+                        data: getMonthlyExpenses(selectedYear, 'Check'),
+                        borderColor: '#8B5CF6',
+                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                        tension: 0.4
+                    }
+                ];
+            } else {
+                datasets = [{
+                    label: 'Total Expenses',
+                    data: getMonthlyExpenses(selectedYear),
+                    borderColor: '#DC2626',
+                    backgroundColor: 'rgba(220, 38, 38, 0.1)',
+                    tension: 0.4
+                }];
+            }
+
+            expensesChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₱' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            });
+        }
+
+        // Add event listeners for the chart functionality
+        function setupChartEventListeners() {
+            // Initialize year selector and chart
+            initializeYearSelector();
+            updateExpensesChart();
+            
+            // Year selector change handler
+            document.getElementById('yearSelector').addEventListener('change', function() {
+                updateExpensesChart();
+            });
+
+            // View toggle handler
+            document.getElementById('viewToggle').addEventListener('click', function() {
+                isDetailedView = !isDetailedView;
+                this.textContent = isDetailedView ? 'Simple View' : 'Detailed View';
+                updateExpensesChart();
+            });
+        }
+
+        function displayTransactions(expenses = allExpenses) {
             const transactionList = document.getElementById('transactionList');
             const noTransactions = document.getElementById('noTransactions');
             
-            if (allExpenses.length === 0) {
+            if (expenses.length === 0) {
                 transactionList.innerHTML = '';
                 noTransactions.classList.remove('hidden');
                 return;
@@ -414,9 +653,8 @@
             noTransactions.classList.add('hidden');
             
             // Sort by date (newest first)
-            const sortedExpenses = [...allExpenses].sort((a, b) => 
-                new Date(b.dateTime) - new Date(a.dateTime)
-            ).slice(0, 5); // Show only recent 5
+            const sortedExpenses = [...expenses].sort((a, b) => 
+                new Date(b.dateTime) - new Date(a.dateTime));
 
             transactionList.innerHTML = sortedExpenses.map(expense => `
                 <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer mb-4">
@@ -425,13 +663,15 @@
                             ${getPaymentMethodIcon(expense.paymentMethod)}
                         </div>
                         <div>
-                            <p class="font-medium text-gray-900">${expense.vendorName || 'Unknown Vendor'}</p>
-                            <p class="text-sm text-gray-500">${expense.purpose || 'No description'}</p>
+                            <p class="font-medium text-gray-900">${expense.createdBy || 'Unknown Vendor'}</p>
+                            <p class="text-sm text-gray-500">${expense.expenseId || 'No ID'}</p>
+                            <p class="text-sm text-gray-500">${expense.description || 'No description'}</p>
                         </div>
                     </div>
                     <div class="text-right">
                         <p class="font-semibold text-red-600">-₱${parseFloat(expense.amount || 0).toLocaleString()}</p>
-                        <p class="text-sm text-gray-500">${formatDate(expense.dateTime)}</p>
+                        <p class="text-sm text-gray-500">${expense.paymentMethod || 'No payment method'}</p>
+                        <p class="text-sm text-gray-500">${formatDate(expense.date)}</p>
                     </div>
                 </div>
             `).join('');
@@ -481,12 +721,109 @@
             // Search and filter
             document.getElementById('searchInput').addEventListener('input', filterTransactions);
             document.getElementById('typeFilter').addEventListener('change', filterTransactions);
+            document.getElementById('sortFilter').addEventListener('change', filterTransactions);
+            document.getElementById('dateStart').addEventListener('change', filterTransactions);
+            document.getElementById('dateEnd').addEventListener('change', filterTransactions);
+            document.getElementById('yearFilter').addEventListener('change', filterTransactions);
+            
+            // Clear filters button
+            document.getElementById('clearFiltersBtn').addEventListener('click', () => {
+                document.getElementById('searchInput').value = '';
+                document.getElementById('typeFilter').value = 'all';
+                document.getElementById('sortFilter').value = 'default';
+                document.getElementById('dateStart').value = '';
+                document.getElementById('dateEnd').value = '';
+                document.getElementById('yearFilter').value = '';
+                filterTransactions();
+            });
         }
 
         function filterTransactions() {
-            // Implementation for filtering transactions
-            displayTransactions();
-        }
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const sortValue = document.getElementById('sortFilter').value;
+            const typeFilter = document.getElementById('typeFilter').value;
+            const dateStart = document.getElementById('dateStart').value;
+            const dateEnd = document.getElementById('dateEnd').value;
+            const yearFilter = document.getElementById('yearFilter').value;
+            
+            console.log('Filtering with:', {
+                searchTerm,
+                sortValue,
+                typeFilter,
+                dateStart,
+                dateEnd,
+                yearFilter
+            });
+            
+            // First, apply all filters
+            let filteredExpenses = allExpenses.filter(expense => {
+                // Apply search filter
+                const matchesSearch = !searchTerm || (
+                    (expense.recordedBy && expense.recordedBy.toLowerCase().includes(searchTerm)) ||
+                    (expense.amount && expense.amount.toString().includes(searchTerm)) ||
+                    (expense.paymentMethod && expense.paymentMethod.toLowerCase().includes(searchTerm))
+                );
+
+                // Apply payment type filter
+                const matchesType = typeFilter === 'all' || 
+                    (expense.paymentMethod && expense.paymentMethod.toLowerCase() === typeFilter.toLowerCase());
+
+                // Apply date range filter
+                let matchesDate = true;
+                const expenseDate = new Date(expense.date);
+                expenseDate.setHours(0, 0, 0, 0); // Normalize time to start of day
+
+                if (dateStart) {
+                    const startDate = new Date(dateStart);
+                    startDate.setHours(0, 0, 0, 0);
+                    matchesDate = matchesDate && expenseDate >= startDate;
+                }
+                
+                if (dateEnd) {
+                    const endDate = new Date(dateEnd);
+                    endDate.setHours(23, 59, 59, 999);
+                    matchesDate = matchesDate && expenseDate <= endDate;
+                }
+
+                // Apply year filter
+                let matchesYear = true;
+                if (yearFilter) {
+                    // Extract year from expense date and compare with selected year
+                    const expenseYear = expenseDate.getFullYear().toString();
+                    matchesYear = expenseYear === yearFilter;
+                }
+
+                return matchesSearch && matchesType && matchesDate && matchesYear;
+            });
+
+            // Then, apply sorting
+            console.log('Before sorting:', filteredExpenses);
+            
+            switch(sortValue) {
+                case 'highToLow':
+                    filteredExpenses.sort((a, b) => {
+                        const amountA = parseFloat(a.amount) || 0;
+                        const amountB = parseFloat(b.amount) || 0;
+                        return amountB - amountA;
+                    });
+                    break;
+                    
+                case 'lowToHigh':
+                    filteredExpenses.sort((a, b) => {
+                        const amountA = parseFloat(a.amount) || 0;
+                        const amountB = parseFloat(b.amount) || 0;
+                        return amountA - amountB;
+                    });
+                    break;
+                    
+                default:
+                    // Default sorting by date (newest first)
+                    filteredExpenses.sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime));
+            }
+            
+            console.log('After sorting:', filteredExpenses);
+            displayTransactions(filteredExpenses);
+}
 
         async function recordExpense() {
             try {
@@ -532,25 +869,16 @@
 
         // Global functions
         window.openRecordExpenseModal = function() {
-            document.getElementById('recordExpenseModal').classList.remove('hidden');
+            window.location.href = "record-expenses.html"
         };
 
         window.closeRecordExpenseModal = function() {
             document.getElementById('recordExpenseModal').classList.add('hidden');
         };
 
-        window.viewAllHistory = function() {
-            // Implementation for viewing all history
-            alert('View All History functionality to be implemented');
-        };
+        
 
-        window.sendMoney = function() {
-            alert('Send Money functionality to be implemented');
-        };
-
-        window.viewTransactionHistory = function() {
-            alert('Transaction History functionality to be implemented');
-        };
+        
 
         function formatDate(dateString) {
             if (!dateString) return 'N/A';

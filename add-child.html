@@ -609,6 +609,8 @@
                     <div class="sm:col-span-2 lg:col-span-3">
                         <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
                         <textarea id="notes" name="notes" rows="2"
+                                  maxlength="500"
+                                  title="Notes can contain letters, numbers, and safe punctuation only"
                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base"></textarea>
                     </div>
                     <div class="sm:col-span-2 lg:col-span-3">
@@ -620,16 +622,25 @@
                     <div>
                         <label for="firstName" class="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
                         <input type="text" id="firstName" name="firstName" required
+                               pattern="[a-zA-Z\s\-']+"
+                               maxlength="50"
+                               title="Only letters, spaces, hyphens, and apostrophes are allowed"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                     </div>
                     <div>
                         <label for="middleName" class="block text-sm font-medium text-gray-700 mb-2">Middle Name</label>
                         <input type="text" id="middleName" name="middleName"
+                               pattern="[a-zA-Z\s\-']*"
+                               maxlength="50"
+                               title="Only letters, spaces, hyphens, and apostrophes are allowed"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
                     </div>
                     <div>
                         <label for="lastName" class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
                         <input type="text" id="lastName" name="lastName"
+                               pattern="[a-zA-Z\s\-']+"
+                               maxlength="50"
+                               title="Only letters, spaces, hyphens, and apostrophes are allowed"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
                     </div>
                     <div>
@@ -653,16 +664,25 @@
                     <div>
                         <label for="placeOfBirth" class="block text-sm font-medium text-gray-700 mb-2">Place of Birth</label>
                         <input type="text" id="placeOfBirth" name="placeOfBirth" placeholder="Municipality, City, Province"
+                               pattern="[a-zA-Z\s\.,\-]+"
+                               maxlength="100"
+                               title="Only letters, spaces, periods, commas, and dashes are allowed"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
                     </div>
                     <div>
                         <label for="nationality" class="block text-sm font-medium text-gray-700 mb-2">Nationality</label>
                         <input type="text" id="nationality" name="nationality" value="Filipino"
+                               pattern="[a-zA-Z\s\-]+"
+                               maxlength="50"
+                               title="Only letters, spaces, and dashes are allowed"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
                     </div>
                     <div>
                         <label for="religion" class="block text-sm font-medium text-gray-700 mb-2">Religion</label>
                         <input type="text" id="religion" name="religion"
+                               pattern="[a-zA-Z\s\-']+"
+                               maxlength="50"
+                               title="Only letters, spaces, dashes, and apostrophes are allowed"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
                     </div>
                 </div>
@@ -717,11 +737,17 @@
                     <div>
                         <label for="fatherName" class="block text-sm font-medium text-gray-700 mb-2">Father's Name</label>
                         <input type="text" id="fatherName" name="fatherName"
+                               pattern="[a-zA-Z\s\-']+"
+                               maxlength="100"
+                               title="Only letters, spaces, hyphens, and apostrophes are allowed"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
                     </div>
                     <div>
                         <label for="motherName" class="block text-sm font-medium text-gray-700 mb-2">Mother's Name</label>
                         <input type="text" id="motherName" name="motherName"
+                               pattern="[a-zA-Z\s\-']+"
+                               maxlength="100"
+                               title="Only letters, spaces, hyphens, and apostrophes are allowed"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
                     </div>
                     <div>
@@ -776,12 +802,16 @@
                     <div class="sm:col-span-2">
                         <label for="allergies" class="block text-sm font-medium text-gray-700 mb-2">Allergies</label>
                         <input type="text" id="allergies" name="allergies" placeholder="Food, medicine, etc."
+                               maxlength="200"
+                               title="Allergies can contain letters, numbers, spaces, and safe punctuation only"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
                     </div>
                     <div class="sm:col-span-2 lg:col-span-3">
                         <label for="medicalConditions" class="block text-sm font-medium text-gray-700 mb-2">Medical Conditions</label>
                         <textarea id="medicalConditions" name="medicalConditions" rows="3"
                                   placeholder="Asthma, disabilities, chronic conditions, etc."
+                                  maxlength="500"
+                                  title="Medical conditions can contain letters, numbers, spaces, and safe punctuation only"
                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary"></textarea>
                     </div>
                     <div>
@@ -1592,6 +1622,128 @@
             // Form submission
             document.getElementById('childForm').addEventListener('submit', handleSubmit);
 
+            // ========== REAL-TIME SECURITY VALIDATION ==========
+            
+            // Name fields validation (firstName, middleName, lastName)
+            const nameFields = ['firstName', 'middleName', 'lastName', 'fatherName', 'motherName'];
+            nameFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    // Real-time input validation
+                    field.addEventListener('input', function() {
+                        const sanitized = validateNameField(this.value);
+                        if (this.value !== sanitized) {
+                            this.value = sanitized;
+                            this.style.borderColor = '#ef4444'; // Red border for blocked input
+                            setTimeout(() => {
+                                this.style.borderColor = '';
+                            }, 1000);
+                        }
+                    });
+
+                    // Keypress prevention for invalid characters
+                    field.addEventListener('keypress', function(e) {
+                        const allowedPattern = /^[a-zA-Z\s\-']$/;
+                        if (!allowedPattern.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab') {
+                            e.preventDefault();
+                            this.style.borderColor = '#ef4444';
+                            setTimeout(() => {
+                                this.style.borderColor = '';
+                            }, 1000);
+                        }
+                    });
+
+                    // Paste validation
+                    field.addEventListener('paste', function(e) {
+                        e.preventDefault();
+                        const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                        const sanitized = validateNameField(pastedText);
+                        this.value = sanitized;
+                        if (pastedText !== sanitized) {
+                            this.style.borderColor = '#ef4444';
+                            setTimeout(() => {
+                                this.style.borderColor = '';
+                            }, 1000);
+                        }
+                    });
+                }
+            });
+
+            // Place and nationality fields
+            const placeFields = ['placeOfBirth', 'nationality', 'religion'];
+            placeFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.addEventListener('input', function() {
+                        const sanitized = validateNameField(this.value);
+                        if (this.value !== sanitized) {
+                            this.value = sanitized;
+                            this.style.borderColor = '#ef4444';
+                            setTimeout(() => {
+                                this.style.borderColor = '';
+                            }, 1000);
+                        }
+                    });
+
+                    field.addEventListener('keypress', function(e) {
+                        const allowedPattern = /^[a-zA-Z\s\-',.]$/;
+                        if (!allowedPattern.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab') {
+                            e.preventDefault();
+                            this.style.borderColor = '#ef4444';
+                            setTimeout(() => {
+                                this.style.borderColor = '';
+                            }, 1000);
+                        }
+                    });
+                }
+            });
+
+            // Reason for admission and notes fields
+            const reasonField = document.getElementById('reasonForAdmission');
+            if (reasonField) {
+                reasonField.addEventListener('input', function() {
+                    const sanitized = validateReasonField(this.value);
+                    if (this.value !== sanitized) {
+                        this.value = sanitized;
+                        this.style.borderColor = '#ef4444';
+                        setTimeout(() => {
+                            this.style.borderColor = '';
+                        }, 1000);
+                    }
+                });
+            }
+
+            // Notes and description fields
+            const textareaFields = ['notes', 'allergies', 'medicalConditions', 'siblingsNamesList'];
+            textareaFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.addEventListener('input', function() {
+                        const sanitized = validateNotesField(this.value);
+                        if (this.value !== sanitized) {
+                            this.value = sanitized;
+                            this.style.borderColor = '#ef4444';
+                            setTimeout(() => {
+                                this.style.borderColor = '';
+                            }, 1000);
+                        }
+                    });
+
+                    field.addEventListener('paste', function(e) {
+                        e.preventDefault();
+                        const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                        const sanitized = validateNotesField(pastedText);
+                        this.value = sanitized;
+                        if (pastedText !== sanitized) {
+                            this.style.borderColor = '#ef4444';
+                            setTimeout(() => {
+                                this.style.borderColor = '';
+                            }, 1000);
+                        }
+                    });
+                }
+            });
+
             // Modal event listeners
             setupModalEventListeners();
 
@@ -1712,6 +1864,72 @@
 
             // Prevent double submission
             if (!document.getElementById('loadingScreen').classList.contains('hidden')) {
+                return;
+            }
+
+            // ========== COMPREHENSIVE SECURITY VALIDATION ON SUBMIT ==========
+            
+            // Validate pattern attributes before other validations
+            const inputs = document.querySelectorAll('#childForm input[pattern], #childForm textarea[pattern]');
+            let hasPatternError = false;
+            
+            inputs.forEach(input => {
+                if (input.value && input.pattern) {
+                    const regex = new RegExp(input.pattern);
+                    if (!regex.test(input.value)) {
+                        hasPatternError = true;
+                        input.style.borderColor = '#ef4444';
+                        
+                        // Show specific error message
+                        const errorMsg = input.title || 'Invalid format detected';
+                        let errorElement = input.parentNode.querySelector('.pattern-error');
+                        if (!errorElement) {
+                            errorElement = document.createElement('p');
+                            errorElement.className = 'pattern-error text-red-500 text-xs mt-1';
+                            input.parentNode.appendChild(errorElement);
+                        }
+                        errorElement.textContent = errorMsg;
+                    } else {
+                        // Clear error if field is now valid
+                        const errorElement = input.parentNode.querySelector('.pattern-error');
+                        if (errorElement) {
+                            errorElement.remove();
+                        }
+                        input.style.borderColor = '';
+                    }
+                }
+            });
+            
+            // Check all text inputs and textareas for dangerous content
+            const allTextInputs = document.querySelectorAll('#childForm input[type="text"], #childForm textarea');
+            let hasDangerousContent = false;
+            
+            allTextInputs.forEach(input => {
+                const originalValue = input.value;
+                const sanitizedValue = sanitizeInput(originalValue);
+                
+                if (originalValue !== sanitizedValue && originalValue.trim() !== '') {
+                    hasDangerousContent = true;
+                    input.style.borderColor = '#ef4444';
+                    
+                    // Show security warning
+                    let errorElement = input.parentNode.querySelector('.security-error');
+                    if (!errorElement) {
+                        errorElement = document.createElement('p');
+                        errorElement.className = 'security-error text-red-500 text-xs mt-1 font-semibold';
+                        input.parentNode.appendChild(errorElement);
+                    }
+                    errorElement.textContent = '⚠️ Security: Dangerous characters detected and blocked';
+                }
+            });
+            
+            if (hasPatternError) {
+                alert('❌ SECURITY VALIDATION FAILED!\n\nPlease correct the highlighted fields with invalid characters or formats before submitting.');
+                return;
+            }
+            
+            if (hasDangerousContent) {
+                alert('🛡️ SECURITY ALERT!\n\nDangerous content detected in form fields. The content has been sanitized. Please review and resubmit.');
                 return;
             }
 
@@ -1838,6 +2056,61 @@
                 await saveChildRecord(window.pendingChildData);
                 window.pendingChildData = null;
             }
+        }
+
+        // ========== COMPREHENSIVE SECURITY VALIDATION FUNCTIONS ==========
+        
+        // Main sanitization function that removes dangerous content
+        function sanitizeInput(input) {
+            if (!input) return '';
+            
+            let sanitized = input.toString();
+            
+            // Remove HTML tags and script content
+            sanitized = sanitized.replace(/<[^>]*>/g, '');
+            sanitized = sanitized.replace(/javascript:/gi, '');
+            sanitized = sanitized.replace(/on\w+\s*=/gi, '');
+            
+            // Remove potentially dangerous characters and patterns
+            sanitized = sanitized.replace(/[<>'"&%$#@!`~\*\{\}\[\]\\\/\|]/g, '');
+            
+            // Remove SQL injection patterns
+            sanitized = sanitized.replace(/(\b(select|insert|update|delete|drop|create|alter|exec|execute|script|iframe|object|embed|form|input)\b)/gi, '');
+            
+            return sanitized.trim();
+        }
+        
+        // Generic text input validation with real-time sanitization
+        function validateTextInput(input, allowedPattern = /^[a-zA-Z\s\-',.]*$/) {
+            if (!input) return '';
+            
+            // First sanitize to remove dangerous content
+            let cleaned = sanitizeInput(input);
+            
+            // Then filter to only allowed characters
+            cleaned = cleaned.split('').filter(char => allowedPattern.test(char)).join('');
+            
+            return cleaned;
+        }
+        
+        // Name field validation (letters, spaces, hyphens, apostrophes only)
+        function validateNameField(input) {
+            return validateTextInput(input, /^[a-zA-Z\s\-']*$/);
+        }
+        
+        // Address field validation (letters, numbers, basic punctuation)
+        function validateAddressField(input) {
+            return validateTextInput(input, /^[a-zA-Z0-9\s\.,\-#/]*$/);
+        }
+        
+        // Reason field validation (allows more characters for descriptive text)
+        function validateReasonField(input) {
+            return validateTextInput(input, /^[a-zA-Z0-9\s\.,\-'()]*$/);
+        }
+        
+        // Notes field validation (comprehensive text with safe punctuation)
+        function validateNotesField(input) {
+            return validateTextInput(input, /^[a-zA-Z0-9\s\.,\-'()\n\r]*$/);
         }
 
         function showMessage(message, type) {
