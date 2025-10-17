@@ -891,22 +891,31 @@
                 <h2 class="text-lg font-medium text-gray-900 mb-6">Personal Information</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     <div>
-                        <label for="firstName" class="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
+                        <label for="firstName" class="block text-sm font-medium text-gray-700 mb-2">First Name <span class="text-red-500">*</span></label>
                         <input type="text" id="firstName" name="firstName" required
+                               pattern="[a-zA-Z\s\-']+"
+                               maxlength="50"
+                               title="Only letters, spaces, hyphens, and apostrophes are allowed"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                     </div>
                     <div>
                         <label for="middleName" class="block text-sm font-medium text-gray-700 mb-2">Middle Name</label>
                         <input type="text" id="middleName" name="middleName"
+                               pattern="[a-zA-Z\s\-']*"
+                               maxlength="50"
+                               title="Only letters, spaces, hyphens, and apostrophes are allowed"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                     </div>
                     <div>
-                        <label for="lastName" class="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
+                        <label for="lastName" class="block text-sm font-medium text-gray-700 mb-2">Last Name <span class="text-red-500">*</span></label>
                         <input type="text" id="lastName" name="lastName" required
+                               pattern="[a-zA-Z\s\-']+"
+                               maxlength="50"
+                               title="Only letters, spaces, hyphens, and apostrophes are allowed"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Gender *</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Gender <span class="text-red-500">*</span></label>
                         <div class="flex space-x-4">
                             <label class="flex items-center">
                                 <input type="radio" name="gender" value="Male" required class="text-red-primary focus:ring-red-primary">
@@ -919,23 +928,32 @@
                         </div>
                     </div>
                     <div>
-                        <label for="dateOfBirth" class="block text-sm font-medium text-gray-700 mb-2">Date of Birth *</label>
-                        <input type="date" id="dateOfBirth" name="dateOfBirth" required
+                        <label for="dateOfBirth" class="block text-sm font-medium text-gray-700 mb-2">Date of Birth <span class="text-red-500">*</span></label>
+                        <input type="date" id="dateOfBirth" name="dateOfBirth" required max="9999-12-31"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                     </div>
                     <div>
                         <label for="placeOfBirth" class="block text-sm font-medium text-gray-700 mb-2">Place of Birth</label>
                         <input type="text" id="placeOfBirth" name="placeOfBirth" placeholder="Municipality, City, Province"
+                               pattern="[a-zA-Z\s\.,\-]+"
+                               maxlength="100"
+                               title="Only letters, spaces, periods, commas, and dashes are allowed"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                     </div>
                     <div>
                         <label for="nationality" class="block text-sm font-medium text-gray-700 mb-2">Nationality</label>
                         <input type="text" id="nationality" name="nationality" value="Filipino"
+                               pattern="[a-zA-Z\s\-]+"
+                               maxlength="50"
+                               title="Only letters, spaces, and dashes are allowed"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                     </div>
                     <div>
                         <label for="religion" class="block text-sm font-medium text-gray-700 mb-2">Religion</label>
                         <input type="text" id="religion" name="religion"
+                               pattern="[a-zA-Z\s\-']+"
+                               maxlength="50"
+                               title="Only letters, spaces, dashes, and apostrophes are allowed"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                     </div>
                     <div>
@@ -951,12 +969,14 @@
                         </select>
                     </div>
                     <div class="sm:col-span-2 lg:col-span-3">
-                        <label for="currentAddress" class="block text-sm font-medium text-gray-700 mb-2">Current Address *</label>
+                        <label for="currentAddress" class="block text-sm font-medium text-gray-700 mb-2">Current Address <span class="text-red-500">*</span></label>
                         <textarea id="currentAddress" name="currentAddress" rows="3" required
+                                  maxlength="200"
+                                  title="Address can contain letters, numbers, spaces, periods, commas, dashes, hash, and forward slashes only"
                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base"></textarea>
                     </div>
                     <div>
-                        <label for="educationalBackground" class="block text-sm font-medium text-gray-700 mb-2">Highest Educational Background *</label>
+                        <label for="educationalBackground" class="block text-sm font-medium text-gray-700 mb-2">Highest Educational Background <span class="text-red-500">*</span></label>
                         <select id="educationalBackground" name="educationalBackground" required
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                             <option value="">Select Educational Background</option>
@@ -971,14 +991,21 @@
                         </select>
                     </div>
                     <div>
-                        <label for="contactNumber" class="block text-sm font-medium text-gray-700 mb-2">Contact Number *</label>
+                        <label for="contactNumber" class="block text-sm font-medium text-gray-700 mb-2">Contact Number <span class="text-red-500">*</span></label>
                         <input type="tel" id="contactNumber" name="contactNumber" required
+                               pattern="^(\+63\s?9\d{8}|09\d{8})$"
+                               maxlength="13"
+                               title="Please enter a valid Philippine mobile number: 09XXXXXXXXX or +63 9XXXXXXXXX"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                     </div>
                     <div>
-                        <label for="emailAddress" class="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+                        <label for="emailAddress" class="block text-sm font-medium text-gray-700 mb-2">Email Address <span class="text-red-500">*</span></label>
                         <input type="email" id="emailAddress" name="emailAddress" required
+                               pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
+                               placeholder="example@email.com"
+                               title="Please enter a valid email address"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
+                        <p class="mt-1 text-xs text-gray-500">Enter a valid email address</p>
                     </div>
                 </div>
             </div>
@@ -988,14 +1015,14 @@
                 <h2 class="text-lg font-medium text-gray-900 mb-6">Employment Information</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     <div>
-                        <label for="staffId" class="block text-sm font-medium text-gray-700 mb-2">Staff ID *</label>
+                        <label for="staffId" class="block text-sm font-medium text-gray-700 mb-2">Staff ID <span class="text-red-500">*</span></label>
                         <input type="text" id="staffId" name="staffId" readonly
                                class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-600 cursor-not-allowed focus:outline-none text-sm sm:text-base"
                                placeholder="Auto-generated">
                         <p class="mt-1 text-xs text-gray-500">Automatically generated - SE001, SE002, etc.</p>
                     </div>
                     <div>
-                        <label for="position" class="block text-sm font-medium text-gray-700 mb-2">Position *</label>
+                        <label for="position" class="block text-sm font-medium text-gray-700 mb-2">Position <span class="text-red-500">*</span></label>
                         <select id="position" name="position" required
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                             <option value="">Select position</option>
@@ -1040,17 +1067,23 @@
                     </div>
                     <div>
                         <label for="dateHired" class="block text-sm font-medium text-gray-700 mb-2">Date Hired</label>
-                        <input type="date" id="dateHired" name="dateHired"
+                        <input type="date" id="dateHired" name="dateHired" max="9999-12-31"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                     </div>
                     <div>
                         <label for="assignedSchedule" class="block text-sm font-medium text-gray-700 mb-2">Assigned Schedule</label>
                         <input type="text" id="assignedSchedule" name="assignedSchedule" placeholder="e.g., Monday-Friday 8AM-5PM"
+                               pattern="[a-zA-Z0-9\s\-:,/AM|PM]+"
+                               maxlength="100"
+                               title="Only letters, numbers, spaces, dashes, colons, commas, forward slashes, AM/PM are allowed"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                     </div>
                     <div>
                         <label for="supervisor" class="block text-sm font-medium text-gray-700 mb-2">Supervisor</label>
                         <input type="text" id="supervisor" name="supervisor"
+                               pattern="[a-zA-Z\s\-',.]+"
+                               maxlength="100"
+                               title="Only letters, spaces, dashes, apostrophes, commas, and periods are allowed"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                     </div>
                 </div>
@@ -1236,6 +1269,10 @@
                     <div>
                         <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Username *</label>
                         <input type="text" id="username" name="username"
+                               pattern="[a-zA-Z0-9_.-]+"
+                               minlength="3"
+                               maxlength="20"
+                               title="Username can only contain letters, numbers, underscores, periods, and hyphens. 3-20 characters."
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary text-sm sm:text-base">
                     </div>
                 </div>
@@ -1853,6 +1890,377 @@
             // Remove photo button
             document.getElementById('removePhotoBtn').addEventListener('click', function() {
                 removePhoto();
+            });
+
+            // Real-time security validation for all text inputs
+            const textInputs = [
+                { id: 'firstName', validator: validateNameField, name: 'First Name' },
+                { id: 'middleName', validator: validateNameField, name: 'Middle Name' },
+                { id: 'lastName', validator: validateNameField, name: 'Last Name' },
+                { id: 'placeOfBirth', validator: (val) => validateTextInput(val, 'Place of Birth', 100), name: 'Place of Birth' },
+                { id: 'nationality', validator: validateNameField, name: 'Nationality' },
+                { id: 'religion', validator: validateNameField, name: 'Religion' },
+                { id: 'assignedSchedule', validator: (val) => validateTextInput(val, 'Assigned Schedule', 100), name: 'Assigned Schedule' },
+                { id: 'supervisor', validator: validateNameField, name: 'Supervisor' }
+            ];
+
+            textInputs.forEach(input => {
+                const element = document.getElementById(input.id);
+                
+                // KEYPRESS EVENT - Prevent invalid characters from being typed
+                element.addEventListener('keypress', function(e) {
+                    // Allow control keys (backspace, delete, arrow keys, etc.)
+                    if (e.ctrlKey || e.metaKey || e.key === 'Backspace' || e.key === 'Delete' || 
+                        e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Tab') {
+                        return;
+                    }
+                    
+                    // Define allowed patterns for different field types
+                    let allowedPattern;
+                    if (['firstName', 'middleName', 'lastName', 'nationality', 'religion', 'supervisor'].includes(input.id)) {
+                        // Names: only letters, spaces, hyphens, apostrophes
+                        allowedPattern = /[a-zA-Z\s\-']/;
+                    } else if (input.id === 'placeOfBirth') {
+                        // Place: letters, spaces, periods, commas, hyphens
+                        allowedPattern = /[a-zA-Z\s\.,\-]/;
+                    } else if (input.id === 'assignedSchedule') {
+                        // Schedule: letters, numbers, spaces, basic punctuation for time
+                        allowedPattern = /[a-zA-Z0-9\s\-:,/AMPM]/;
+                    } else {
+                        // Default: letters and basic punctuation
+                        allowedPattern = /[a-zA-Z\s\-'.,]/;
+                    }
+                    
+                    // Block the character if it doesn't match the pattern
+                    if (!allowedPattern.test(e.key)) {
+                        e.preventDefault();
+                        
+                        // Visual feedback - flash red border
+                        element.style.borderColor = '#ef4444';
+                        element.style.boxShadow = '0 0 5px rgba(239, 68, 68, 0.5)';
+                        
+                        // Show warning message
+                        let warningElement = element.parentNode.querySelector('.input-warning');
+                        if (!warningElement) {
+                            warningElement = document.createElement('div');
+                            warningElement.className = 'input-warning text-red-500 text-xs mt-1 font-medium';
+                            element.parentNode.appendChild(warningElement);
+                        }
+                        
+                        // Set specific warning message
+                        if (['firstName', 'middleName', 'lastName', 'nationality', 'religion', 'supervisor'].includes(input.id)) {
+                            warningElement.textContent = `⚠️ Only letters, spaces, hyphens (-), and apostrophes (') allowed in ${input.name}`;
+                        } else {
+                            warningElement.textContent = `⚠️ Invalid character "${e.key}" blocked in ${input.name}`;
+                        }
+                        
+                        // Clear warning and styling after 2.5 seconds
+                        setTimeout(() => {
+                            if (warningElement) warningElement.remove();
+                            element.style.borderColor = '';
+                            element.style.boxShadow = '';
+                        }, 2500);
+                        
+                        return false;
+                    }
+                });
+                
+                // INPUT EVENT - Sanitize and validate after typing
+                element.addEventListener('input', function(e) {
+                    const value = e.target.value;
+                    if (value) {
+                        const validation = input.validator(value);
+                        
+                        if (validation.errors.length > 0) {
+                            e.target.classList.add('border-red-500');
+                            e.target.classList.remove('border-gray-300');
+                            e.target.title = validation.errors.join(', ');
+                        } else {
+                            e.target.classList.remove('border-red-500');
+                            e.target.classList.add('border-gray-300');
+                            e.target.title = '';
+                            // Auto-sanitize the input
+                            if (e.target.value !== validation.sanitized) {
+                                const cursorPosition = e.target.selectionStart;
+                                e.target.value = validation.sanitized;
+                                e.target.setSelectionRange(cursorPosition, cursorPosition);
+                            }
+                        }
+                    } else {
+                        e.target.classList.remove('border-red-500');
+                        e.target.classList.add('border-gray-300');
+                        e.target.title = '';
+                    }
+                });
+
+                // PASTE EVENT - Filter pasted content immediately
+                element.addEventListener('paste', function(e) {
+                    e.preventDefault(); // Prevent default paste
+                    
+                    // Get pasted text from clipboard
+                    const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                    
+                    // Apply field-specific filtering
+                    let filteredText = pastedText;
+                    if (['firstName', 'middleName', 'lastName', 'nationality', 'religion', 'supervisor'].includes(input.id)) {
+                        // Keep only letters, spaces, hyphens, apostrophes
+                        filteredText = pastedText.replace(/[^a-zA-Z\s\-']/g, '');
+                    } else if (input.id === 'placeOfBirth') {
+                        // Keep letters, spaces, periods, commas, hyphens
+                        filteredText = pastedText.replace(/[^a-zA-Z\s\.,\-]/g, '');
+                    } else if (input.id === 'assignedSchedule') {
+                        // Keep letters, numbers, spaces, time-related characters
+                        filteredText = pastedText.replace(/[^a-zA-Z0-9\s\-:,/AMPM]/g, '');
+                    } else {
+                        // Default filtering
+                        filteredText = pastedText.replace(/[^a-zA-Z\s\-'.,]/g, '');
+                    }
+                    
+                    // Set the filtered text
+                    e.target.value = filteredText;
+                    
+                    // Show notification if content was filtered
+                    if (pastedText !== filteredText) {
+                        let warningElement = element.parentNode.querySelector('.paste-warning');
+                        if (!warningElement) {
+                            warningElement = document.createElement('div');
+                            warningElement.className = 'paste-warning text-orange-600 text-xs mt-1 font-medium';
+                            element.parentNode.appendChild(warningElement);
+                        }
+                        
+                        const removedChars = pastedText.length - filteredText.length;
+                        warningElement.textContent = `🛡️ Pasted content filtered - ${removedChars} invalid character(s) removed`;
+                        
+                        setTimeout(() => {
+                            if (warningElement) warningElement.remove();
+                        }, 4000);
+                    }
+                    
+                    // Trigger input validation
+                    const event = new Event('input', { bubbles: true });
+                    e.target.dispatchEvent(event);
+                });
+            });
+
+            // Real-time validation for address
+            const addressElement = document.getElementById('currentAddress');
+            
+            // KEYPRESS - Block dangerous characters in address
+            addressElement.addEventListener('keypress', function(e) {
+                const char = String.fromCharCode(e.which);
+                // Allow only letters, numbers, spaces, periods, commas, dashes, hash, forward slashes
+                const allowedPattern = /[a-zA-Z0-9\s\.,\-#/]/;
+                
+                if (!allowedPattern.test(char)) {
+                    e.preventDefault();
+                    
+                    // Visual feedback for blocked character
+                    e.target.style.borderColor = '#ef4444';
+                    setTimeout(() => {
+                        e.target.style.borderColor = '';
+                    }, 500);
+                    
+                    console.log('Blocked dangerous character in address:', char);
+                }
+            });
+            
+            // PASTE - Sanitize pasted content in address
+            addressElement.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                const sanitized = sanitizeInput(pastedText);
+                
+                // Insert sanitized text at cursor position
+                const start = e.target.selectionStart;
+                const end = e.target.selectionEnd;
+                const currentValue = e.target.value;
+                e.target.value = currentValue.substring(0, start) + sanitized + currentValue.substring(end);
+                
+                // Trigger validation
+                const event = new Event('input', { bubbles: true });
+                e.target.dispatchEvent(event);
+            });
+            
+            addressElement.addEventListener('input', function(e) {
+                const value = e.target.value;
+                if (value) {
+                    const validation = validateAddressField(value);
+                    
+                    if (validation.errors.length > 0) {
+                        e.target.classList.add('border-red-500');
+                        e.target.classList.remove('border-gray-300');
+                        e.target.title = validation.errors.join(', ');
+                    } else {
+                        e.target.classList.remove('border-red-500');
+                        e.target.classList.add('border-gray-300');
+                        e.target.title = '';
+                        // Auto-sanitize the input
+                        if (e.target.value !== validation.sanitized) {
+                            const cursorPosition = e.target.selectionStart;
+                            e.target.value = validation.sanitized;
+                            e.target.setSelectionRange(cursorPosition, cursorPosition);
+                        }
+                    }
+                } else {
+                    e.target.classList.remove('border-red-500');
+                    e.target.classList.add('border-gray-300');
+                    e.target.title = '';
+                }
+            });
+
+            // Real-time validation for username
+            document.getElementById('username').addEventListener('input', function(e) {
+                const value = e.target.value;
+                if (value) {
+                    const validation = validateUsernameField(value);
+                    
+                    if (validation.errors.length > 0) {
+                        e.target.classList.add('border-red-500');
+                        e.target.classList.remove('border-gray-300');
+                        e.target.title = validation.errors.join(', ');
+                    } else {
+                        e.target.classList.remove('border-red-500');
+                        e.target.classList.add('border-gray-300');
+                        e.target.title = '';
+                        // Auto-sanitize the input
+                        if (e.target.value !== validation.sanitized) {
+                            const cursorPosition = e.target.selectionStart;
+                            e.target.value = validation.sanitized;
+                            e.target.setSelectionRange(cursorPosition, cursorPosition);
+                        }
+                    }
+                } else {
+                    e.target.classList.remove('border-red-500');
+                    e.target.classList.add('border-gray-300');
+                    e.target.title = '';
+                }
+            });
+
+            // Real-time validation for contact number
+            const contactElement = document.getElementById('contactNumber');
+            
+            // KEYPRESS - Block invalid characters for phone numbers
+            contactElement.addEventListener('keypress', function(e) {
+                // Allow control keys
+                if (e.ctrlKey || e.metaKey || e.key === 'Backspace' || e.key === 'Delete' || 
+                    e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Tab') {
+                    return;
+                }
+                
+                // Only allow numbers, +, spaces, parentheses, hyphens
+                const phonePattern = /[0-9+\s()\-]/;
+                if (!phonePattern.test(e.key)) {
+                    e.preventDefault();
+                    
+                    // Visual feedback
+                    contactElement.style.borderColor = '#ef4444';
+                    contactElement.style.boxShadow = '0 0 5px rgba(239, 68, 68, 0.5)';
+                    
+                    let warningElement = contactElement.parentNode.querySelector('.phone-warning');
+                    if (!warningElement) {
+                        warningElement = document.createElement('div');
+                        warningElement.className = 'phone-warning text-red-500 text-xs mt-1 font-medium';
+                        contactElement.parentNode.appendChild(warningElement);
+                    }
+                    warningElement.textContent = `⚠️ Only numbers, +, spaces, ( ), and - allowed in phone number`;
+                    
+                    setTimeout(() => {
+                        if (warningElement) warningElement.remove();
+                        contactElement.style.borderColor = '';
+                        contactElement.style.boxShadow = '';
+                    }, 2500);
+                    
+                    return false;
+                }
+            });
+            
+            contactElement.addEventListener('input', function(e) {
+                const value = e.target.value;
+                
+                // Dynamic maxlength based on input
+                if (value.startsWith('+63')) {
+                    e.target.setAttribute('maxlength', '13');
+                } else {
+                    e.target.setAttribute('maxlength', '11');
+                }
+                
+                // Sanitize input - only allow numbers, +, and spaces
+                const sanitized = value.replace(/[^0-9+\s]/g, '');
+                if (value !== sanitized) {
+                    e.target.value = sanitized;
+                }
+                
+                const isValid = validateContactNumber(sanitized);
+                
+                if (sanitized && !isValid) {
+                    e.target.classList.add('border-red-500');
+                    e.target.classList.remove('border-gray-300');
+                    e.target.title = 'Please enter a valid Philippine mobile number';
+                } else {
+                    e.target.classList.remove('border-red-500');
+                    e.target.classList.add('border-gray-300');
+                    e.target.title = '';
+                }
+            });
+
+            // Real-time validation for email
+            const emailElement = document.getElementById('emailAddress');
+            
+            // KEYPRESS - Block dangerous characters in email
+            emailElement.addEventListener('keypress', function(e) {
+                // Allow control keys
+                if (e.ctrlKey || e.metaKey || e.key === 'Backspace' || e.key === 'Delete' || 
+                    e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Tab') {
+                    return;
+                }
+                
+                // Block dangerous characters that could be used for XSS/injection
+                const dangerousChars = /[<>{}|\\^~[\]`;'"]/;
+                if (dangerousChars.test(e.key)) {
+                    e.preventDefault();
+                    
+                    // Visual feedback
+                    emailElement.style.borderColor = '#ef4444';
+                    emailElement.style.boxShadow = '0 0 5px rgba(239, 68, 68, 0.5)';
+                    
+                    let warningElement = emailElement.parentNode.querySelector('.email-warning');
+                    if (!warningElement) {
+                        warningElement = document.createElement('div');
+                        warningElement.className = 'email-warning text-red-500 text-xs mt-1 font-medium';
+                        emailElement.parentNode.appendChild(warningElement);
+                    }
+                    warningElement.textContent = `⚠️ Character "${e.key}" blocked for security - dangerous characters not allowed in email`;
+                    
+                    setTimeout(() => {
+                        if (warningElement) warningElement.remove();
+                        emailElement.style.borderColor = '';
+                        emailElement.style.boxShadow = '';
+                    }, 3000);
+                    
+                    return false;
+                }
+            });
+            
+            emailElement.addEventListener('input', function(e) {
+                const value = e.target.value;
+                
+                // Sanitize email input - remove potentially dangerous characters
+                const sanitized = value.replace(/[<>{}|\\^~[\]`;'"]/g, '');
+                if (value !== sanitized) {
+                    e.target.value = sanitized;
+                }
+                
+                const isValid = validateEmail(sanitized);
+                
+                if (sanitized && !isValid) {
+                    e.target.classList.add('border-red-500');
+                    e.target.classList.remove('border-gray-300');
+                    e.target.title = 'Please enter a valid email address';
+                } else {
+                    e.target.classList.remove('border-red-500');
+                    e.target.classList.add('border-gray-300');
+                    e.target.title = '';
+                }
             });
 
             // Account creation toggle
@@ -2552,11 +2960,253 @@
             }
         }
 
+        // Security and Validation functions
+        function sanitizeInput(input) {
+            if (!input) return '';
+            
+            // Remove potential HTML/script tags
+            const div = document.createElement('div');
+            div.textContent = input;
+            let sanitized = div.innerHTML;
+            
+            // Remove potentially dangerous characters
+            sanitized = sanitized.replace(/[<>{}|\\^~[\]`;"']/g, '');
+            
+            // Remove SQL injection patterns
+            sanitized = sanitized.replace(/(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION|SCRIPT)\b)/gi, '');
+            
+            return sanitized.trim();
+        }
+
+        function validateTextInput(input, fieldName, maxLength = 100) {
+            const sanitized = sanitizeInput(input);
+            const errors = [];
+            
+            // Check for length
+            if (sanitized.length > maxLength) {
+                errors.push(`${fieldName} must be ${maxLength} characters or less`);
+            }
+            
+            // Only allow letters, numbers, spaces, hyphens, apostrophes, and periods
+            const allowedPattern = /^[a-zA-Z0-9\s\-'\.]+$/;
+            if (sanitized && !allowedPattern.test(sanitized)) {
+                errors.push(`${fieldName} contains invalid characters. Only letters, numbers, spaces, hyphens, apostrophes, and periods are allowed`);
+            }
+            
+            return { sanitized, errors };
+        }
+
+        function validateNameField(input, fieldName) {
+            const sanitized = sanitizeInput(input);
+            const errors = [];
+            
+            // Names should only contain letters, spaces, hyphens, and apostrophes
+            const namePattern = /^[a-zA-Z\s\-']+$/;
+            if (sanitized && !namePattern.test(sanitized)) {
+                errors.push(`${fieldName} can only contain letters, spaces, hyphens, and apostrophes`);
+            }
+            
+            if (sanitized.length > 50) {
+                errors.push(`${fieldName} must be 50 characters or less`);
+            }
+            
+            return { sanitized, errors };
+        }
+
+        function validateAddressField(input) {
+            const sanitized = sanitizeInput(input);
+            const errors = [];
+            
+            // Address can have letters, numbers, spaces, commas, periods, hyphens
+            const addressPattern = /^[a-zA-Z0-9\s,.\-#\/]+$/;
+            if (sanitized && !addressPattern.test(sanitized)) {
+                errors.push('Address contains invalid characters. Only letters, numbers, spaces, commas, periods, hyphens, # and / are allowed');
+            }
+            
+            if (sanitized.length > 200) {
+                errors.push('Address must be 200 characters or less');
+            }
+            
+            return { sanitized, errors };
+        }
+
+        function validateUsernameField(input) {
+            const sanitized = sanitizeInput(input);
+            const errors = [];
+            
+            // Username should only contain letters, numbers, and underscores
+            const usernamePattern = /^[a-zA-Z0-9_]+$/;
+            if (sanitized && !usernamePattern.test(sanitized)) {
+                errors.push('Username can only contain letters, numbers, and underscores');
+            }
+            
+            if (sanitized.length < 3) {
+                errors.push('Username must be at least 3 characters long');
+            }
+            
+            if (sanitized.length > 20) {
+                errors.push('Username must be 20 characters or less');
+            }
+            
+            return { sanitized, errors };
+        }
+
+        function validateContactNumber(contactNumber) {
+            // Philippine mobile number validation
+            // Accepts: 09XXXXXXXXX (11 digits) or +63 9XXXXXXXXX (13 characters)
+            const sanitized = sanitizeInput(contactNumber);
+            const patterns = [
+                /^09\d{9}$/,                    // 09123456789 (11 digits)
+                /^\+63\s?9\d{8}$/              // +63 9123456789 or +639123456789 (13 characters)
+            ];
+            
+            return patterns.some(pattern => pattern.test(sanitized.trim()));
+        }
+
+        function validateEmail(email) {
+            // Enhanced email validation with security
+            const sanitized = sanitizeInput(email);
+            const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            return emailPattern.test(sanitized.trim()) && sanitized.length <= 100;
+        }
+
+        function validateAllFormInputs() {
+            const errors = [];
+            const sanitizedData = {};
+            
+            // Validate all text inputs
+            const textFields = [
+                { id: 'firstName', name: 'First Name', validator: validateNameField, required: true },
+                { id: 'middleName', name: 'Middle Name', validator: validateNameField, required: false },
+                { id: 'lastName', name: 'Last Name', validator: validateNameField, required: true },
+                { id: 'placeOfBirth', name: 'Place of Birth', validator: (val) => validateTextInput(val, 'Place of Birth', 100), required: false },
+                { id: 'nationality', name: 'Nationality', validator: validateNameField, required: false },
+                { id: 'religion', name: 'Religion', validator: validateNameField, required: false },
+                { id: 'assignedSchedule', name: 'Assigned Schedule', validator: (val) => validateTextInput(val, 'Assigned Schedule', 100), required: false },
+                { id: 'supervisor', name: 'Supervisor', validator: validateNameField, required: false }
+            ];
+            
+            textFields.forEach(field => {
+                const input = document.getElementById(field.id).value;
+                if (field.required && !input.trim()) {
+                    errors.push(`${field.name} is required`);
+                } else if (input.trim()) {
+                    const validation = field.validator(input);
+                    if (validation.errors.length > 0) {
+                        errors.push(...validation.errors);
+                    }
+                    sanitizedData[field.id] = validation.sanitized;
+                    // Update the input field with sanitized value
+                    document.getElementById(field.id).value = validation.sanitized;
+                }
+            });
+            
+            // Validate address
+            const address = document.getElementById('currentAddress').value;
+            if (!address.trim()) {
+                errors.push('Current Address is required');
+            } else {
+                const addressValidation = validateAddressField(address);
+                if (addressValidation.errors.length > 0) {
+                    errors.push(...addressValidation.errors);
+                }
+                sanitizedData.currentAddress = addressValidation.sanitized;
+                document.getElementById('currentAddress').value = addressValidation.sanitized;
+            }
+            
+            // Validate username if account creation is enabled
+            if (createAccountEnabled) {
+                const username = document.getElementById('username').value;
+                if (!username.trim()) {
+                    errors.push('Username is required when creating an account');
+                } else {
+                    const usernameValidation = validateUsernameField(username);
+                    if (usernameValidation.errors.length > 0) {
+                        errors.push(...usernameValidation.errors);
+                    }
+                    sanitizedData.username = usernameValidation.sanitized;
+                    document.getElementById('username').value = usernameValidation.sanitized;
+                }
+            }
+            
+            // Validate contact number
+            const contactNumber = document.getElementById('contactNumber').value;
+            if (!contactNumber.trim()) {
+                errors.push('Contact Number is required');
+            } else if (!validateContactNumber(contactNumber)) {
+                errors.push('Contact number must be in format: 09123456789 or +63 9123456789');
+            } else {
+                sanitizedData.contactNumber = sanitizeInput(contactNumber);
+                document.getElementById('contactNumber').value = sanitizedData.contactNumber;
+            }
+            
+            // Validate email
+            const email = document.getElementById('emailAddress').value;
+            if (!email.trim()) {
+                errors.push('Email Address is required');
+            } else if (!validateEmail(email)) {
+                errors.push('Please enter a valid email address');
+            } else {
+                sanitizedData.emailAddress = sanitizeInput(email);
+                document.getElementById('emailAddress').value = sanitizedData.emailAddress;
+            }
+            
+            return { errors, sanitizedData };
+        }
+
+        function validateFormInputs() {
+            const validation = validateAllFormInputs();
+            return validation.errors;
+        }
+
         async function handleSubmit(e) {
             e.preventDefault();
 
             // Prevent double submission
             if (!document.getElementById('loadingScreen').classList.contains('hidden')) {
+                return;
+            }
+
+            // Validate pattern attributes before other validations
+            const inputs = document.querySelectorAll('#staffForm input[pattern], #staffForm textarea[pattern]');
+            let hasPatternError = false;
+            
+            inputs.forEach(input => {
+                if (input.value && input.pattern) {
+                    const regex = new RegExp(input.pattern);
+                    if (!regex.test(input.value)) {
+                        hasPatternError = true;
+                        input.style.borderColor = '#ef4444';
+                        
+                        // Show specific error message
+                        const errorMsg = input.title || 'Invalid format detected';
+                        let errorElement = input.parentNode.querySelector('.pattern-error');
+                        if (!errorElement) {
+                            errorElement = document.createElement('p');
+                            errorElement.className = 'pattern-error text-red-500 text-xs mt-1';
+                            input.parentNode.appendChild(errorElement);
+                        }
+                        errorElement.textContent = errorMsg;
+                    } else {
+                        // Clear error if field is now valid
+                        const errorElement = input.parentNode.querySelector('.pattern-error');
+                        if (errorElement) {
+                            errorElement.remove();
+                        }
+                        input.style.borderColor = '';
+                    }
+                }
+            });
+            
+            if (hasPatternError) {
+                alert('Security validation failed: Please correct the highlighted fields with invalid characters or formats.');
+                return;
+            }
+
+            // Validate form inputs
+            const validationErrors = validateFormInputs();
+            if (validationErrors.length > 0) {
+                alert('Please fix the following errors:\n\n' + validationErrors.join('\n'));
                 return;
             }
 
