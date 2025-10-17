@@ -26,16 +26,21 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center">
-                    <a href="staff-records.html" class="flex items-center text-gray-600 hover:text-red-primary transition-colors">
+                    <a href="index.html" class="flex items-center text-gray-600 hover:text-red-primary transition-colors">
                         <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                         </svg>
-                        Back to Staff Records
+                        
                     </a>
                 </div>
                 <h1 class="text-xl font-semibold text-gray-900">Account Management</h1>
                 <div class="flex items-center space-x-4">
-                    <span class="text-sm text-gray-600" id="userInfo"></span>
+                    <button id="tutorialBtn" class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-2 shadow-sm transition-all duration-300 transform hover:scale-110" title="Tutorial - How to Use Account Management">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </button>
+                    <span class="text-sm text-gray-600 hidden" id="userInfo"></span>
                 </div>
             </div>
         </div>
@@ -1420,6 +1425,202 @@
         window.goToPage = goToPage;
         window.nextPage = nextPage;
         window.prevPage = prevPage;
+
+        // Tutorial functionality
+        let currentTutorialStep = 1;
+        const totalTutorialSteps = 3;
+
+        function setupTutorialFunctionality() {
+            const tutorialBtn = document.getElementById('tutorialBtn');
+            const tutorialModal = document.getElementById('tutorialModal');
+            const closeTutorialModal = document.getElementById('closeTutorialModal');
+            const prevTutorialBtn = document.getElementById('prevTutorialBtn');
+            const nextTutorialBtn = document.getElementById('nextTutorialBtn');
+            const skipTutorialBtn = document.getElementById('skipTutorialBtn');
+
+            if (tutorialBtn) tutorialBtn.addEventListener('click', showTutorialModal);
+            if (closeTutorialModal) closeTutorialModal.addEventListener('click', hideTutorialModal);
+            if (skipTutorialBtn) skipTutorialBtn.addEventListener('click', hideTutorialModal);
+            if (prevTutorialBtn) prevTutorialBtn.addEventListener('click', goToPreviousTutorialStep);
+            if (nextTutorialBtn) nextTutorialBtn.addEventListener('click', goToNextTutorialStep);
+
+            // Close tutorial on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && tutorialModal && !tutorialModal.classList.contains('hidden')) {
+                    hideTutorialModal();
+                }
+            });
+        }
+
+        function showTutorialModal() {
+            currentTutorialStep = 1;
+            const tutorialModal = document.getElementById('tutorialModal');
+            if (tutorialModal) {
+                tutorialModal.classList.remove('hidden');
+                updateTutorialStep();
+            }
+        }
+
+        function hideTutorialModal() {
+            const tutorialModal = document.getElementById('tutorialModal');
+            if (tutorialModal) {
+                tutorialModal.classList.add('hidden');
+            }
+        }
+
+        function goToNextTutorialStep() {
+            if (currentTutorialStep < totalTutorialSteps) {
+                currentTutorialStep++;
+                updateTutorialStep();
+            } else {
+                hideTutorialModal();
+            }
+        }
+
+        function goToPreviousTutorialStep() {
+            if (currentTutorialStep > 1) {
+                currentTutorialStep--;
+                updateTutorialStep();
+            }
+        }
+
+        function updateTutorialStep() {
+            // Hide all steps
+            for (let i = 1; i <= totalTutorialSteps; i++) {
+                const step = document.getElementById(`tutorialStep${i}`);
+                if (step) {
+                    step.classList.add('hidden');
+                }
+            }
+
+            // Show current step
+            const currentStepElement = document.getElementById(`tutorialStep${currentTutorialStep}`);
+            if (currentStepElement) {
+                currentStepElement.classList.remove('hidden');
+            }
+
+            // Update progress bar
+            const progressPercentage = Math.round((currentTutorialStep / totalTutorialSteps) * 100);
+            const progressBar = document.getElementById('progressBar');
+            const progressPercentageElement = document.getElementById('progressPercentage');
+            const currentStepTextElement = document.getElementById('currentStep');
+            const totalStepsElement = document.getElementById('totalSteps');
+
+            if (progressBar) progressBar.style.width = `${progressPercentage}%`;
+            if (progressPercentageElement) progressPercentageElement.textContent = `${progressPercentage}%`;
+            if (currentStepTextElement) currentStepTextElement.textContent = currentTutorialStep;
+            if (totalStepsElement) totalStepsElement.textContent = totalTutorialSteps;
+
+            // Update navigation buttons
+            const prevBtn = document.getElementById('prevTutorialBtn');
+            const nextBtn = document.getElementById('nextTutorialBtn');
+
+            if (prevBtn) {
+                prevBtn.disabled = currentTutorialStep === 1;
+                if (currentTutorialStep === 1) {
+                    prevBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                } else {
+                    prevBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            }
+
+            if (nextBtn) {
+                if (currentTutorialStep === totalTutorialSteps) {
+                    nextBtn.innerHTML = `
+                        Finish
+                        <svg class="h-4 w-4 sm:h-5 sm:w-5 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    `;
+                } else {
+                    nextBtn.innerHTML = `
+                        Next
+                        <svg class="h-4 w-4 sm:h-5 sm:w-5 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    `;
+                }
+            }
+        }
+
+        // Setup tutorial functionality on DOM load
+        setupTutorialFunctionality();
     </script>
+
+    <!-- Tutorial Modal -->
+    <div id="tutorialModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden p-2 sm:p-4">
+        <div class="bg-white rounded-lg p-4 sm:p-6 max-w-xs sm:max-w-4xl w-full mx-2 sm:mx-4 max-h-[95vh] sm:max-h-[90vh] overflow-hidden flex flex-col">
+            <div class="flex items-center justify-between mb-3 sm:mb-4">
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900">Account Management Tutorial</h3>
+                <button id="closeTutorialModal" class="text-gray-400 hover:text-gray-600 p-1">
+                    <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="mb-4 sm:mb-6">
+                <div class="flex justify-between text-xs sm:text-sm text-gray-600 mb-2">
+                    <span>Step <span id="currentStep">1</span> of <span id="totalSteps">3</span></span>
+                    <span id="progressPercentage">33%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div id="progressBar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 33%"></div>
+                </div>
+            </div>
+            
+            <!-- Tutorial Content -->
+            <div class="flex-1 overflow-y-auto">
+                <div id="tutorialStep1" class="tutorial-step">
+                    <div class="text-center">
+                        <img src="Toturial/Account Management/pic1.png" alt="Account Statistics Overview" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-3 sm:mb-4">
+                        <h4 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">Step 1: View Account Statistics</h4>
+                        <p class="text-sm sm:text-base text-gray-600">Monitor your organization's account metrics with real-time statistics showing total accounts, active users, blocked accounts, and staff members. These colorful cards provide instant insights into user distribution and system usage patterns for effective account management.</p>
+                    </div>
+                </div>
+                
+                <div id="tutorialStep2" class="tutorial-step hidden">
+                    <div class="text-center">
+                        <img src="Toturial/Account Management/pic2.png" alt="Account List Management" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-3 sm:mb-4">
+                        <h4 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">Step 2: Manage Account List</h4>
+                        <p class="text-sm sm:text-base text-gray-600">Browse and manage all user accounts through an organized interface with search, filter, and bulk selection capabilities. View detailed user information including roles, status, and contact details. Use filters to find specific accounts and export data for reporting purposes.</p>
+                    </div>
+                </div>
+                
+                <div id="tutorialStep3" class="tutorial-step hidden">
+                    <div class="text-center">
+                        <img src="Toturial/Account Management/pic3.png" alt="Block/Unblock Functionality" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-3 sm:mb-4">
+                        <h4 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">Step 3: Block/Unblock Accounts</h4>
+                        <p class="text-sm sm:text-base text-gray-600">Control user access with secure blocking functionality. Block individual accounts or perform bulk actions with proper confirmation dialogs. Always provide clear reasons for blocking actions to maintain proper documentation and ensure transparent user management practices.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Navigation Buttons -->
+            <div class="flex justify-between items-center mt-4 sm:mt-6 pt-3 sm:pt-4 border-t">
+                <button id="prevTutorialBtn" class="px-3 sm:px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm" disabled>
+                    <svg class="h-4 w-4 sm:h-5 sm:w-5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    Previous
+                </button>
+                
+                <div class="flex space-x-2">
+                    <button id="skipTutorialBtn" class="px-3 sm:px-4 py-2 text-gray-500 hover:text-gray-700 transition-colors text-xs sm:text-sm">
+                        Skip Tutorial
+                    </button>
+                </div>
+                
+                <button id="nextTutorialBtn" class="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-xs sm:text-sm">
+                    Next
+                    <svg class="h-4 w-4 sm:h-5 sm:w-5 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
