@@ -1189,8 +1189,36 @@
     </div>
 
     <script type="module">
-        import { db, collection, setDoc, doc, getDocs } from './firebase.js';
+        import { db, collection, setDoc, doc, getDocs, getDoc, query, where } from './firebase.js';
         import { logActivity } from './activity-logger.js';
+
+        // Check for duplicate donation ID
+        async function checkDuplicateDonationId(donationId) {
+            try {
+                const donationsRef = collection(db, 'donations');
+                const q = query(donationsRef, where('donationId', '==', donationId));
+                const querySnapshot = await getDocs(q);
+                return !querySnapshot.empty;
+            } catch (error) {
+                console.error('Error checking for duplicate donation ID:', error);
+                return false;
+            }
+        }
+
+        function showDuplicateIdError() {
+            const modal = document.getElementById('duplicateIdModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                document.getElementById('duplicateIdModalBtn').addEventListener('click', () => {
+                    location.reload();
+                });
+            } else {
+                showErrorModal("Security Alert: A duplicate donation ID was detected. The page will reload for security purposes.");
+                setTimeout(() => {
+                    location.reload();
+                }, 3000);
+            }
+        }
 
         let currentDonationType = null;
 
@@ -1233,6 +1261,11 @@
             
             // Error modal event listeners
             document.getElementById('closeErrorModalBtn').addEventListener('click', closeErrorModal);
+
+            // Duplicate ID modal event listener
+            document.getElementById('duplicateIdModalBtn')?.addEventListener('click', () => {
+                location.reload();
+            });
             
             // Offline success modal event listeners
             document.getElementById('addAnotherOfflineBtn').addEventListener('click', () => {
@@ -2262,36 +2295,156 @@
             document.getElementById('inKindPreviewModal').classList.add('hidden');
         }
         
-        function confirmAndSaveMoneyDonation() {
+        async function confirmAndSaveMoneyDonation(e) {
+            if (e) {
+                e.preventDefault();
+            }
             hideMoneyPreviewModal();
             
-            // Mark form as confirmed and trigger submission
+            // Get the form and prepare the data
             const form = document.getElementById('moneyDonationForm');
-            form.dataset.confirmed = 'true';
+            const formData = new FormData(form);
             
-            // Trigger the actual save process
-            form.dispatchEvent(new Event('submit', { bubbles: true }));
-            
-            // Reset confirmation flag after submission
-            setTimeout(() => {
-                form.dataset.confirmed = 'false';
-            }, 100);
+            try {
+                showLoadingScreen('Processing donation...');
+
+                // Generate donation ID
+                const donationId = await generateDonationId();
+                
+                // Prepare donation data
+                const donationData = {
+                    donationId: donationId,
+                    donationType: 'money',
+                    dateAdded: new Date().toISOString().split('T')[0],
+                    dateOfDonation: formData.get('dateOfDonation'),
+                    amount: parseFloat(formData.get('amount')),
+                    isAnonymous: formData.get('anonymous') === 'on',
+                    donorName: formData.get('donorName') || '',
+                    emailAddress: formData.get('emailAddress') || '',
+                    contactNumber: formData.get('contactNumber') || '',
+                    address: formData.get('address') || '',
+                    purpose: formData.get('purpose') || '',
+                    typeOfDonation: formData.get('typeOfDonation'),
+                    paymentDetails: {}
+                };
+
+                // Add payment-specific details
+                if (donationData.typeOfDonation === 'Bank Transfer') {
+                    donationData.paymentDetails = {
+                        bankName: formData.get('bankName'),
+                        bankBranch: formData.get('bankBranch'),
+                        dateOfTransfer: formData.get('dateOfTransfer'),
+                        transactionRef: formData.get('transactionRef')
+                    };
+                } else if (donationData.typeOfDonation === 'Check') {
+                    donationData.paymentDetails = {
+                        bankName: formData.get('bankName'),
+                        bankBranch: formData.get('bankBranch'),
+                        checkNumber: formData.get('checkNumber'),
+                        checkDate: formData.get('checkDate'),
+                        payeeName: formData.get('payeeName')
+                    };
+                    if (formData.get('tin')) {
+                        donationData.paymentDetails.tin = formData.get('tin');
+                    }
+                } else if (donationData.typeOfDonation === 'Online Payment') {
+                    donationData.paymentDetails = {
+                        platform: formData.get('onlinePaymentPlatform'),
+                        referenceNumber: formData.get('referenceNumber'),
+                        accountName: formData.get('accountName')
+                    };
+                }
+
+                // Save to Firestore
+                const success = await saveDonationToFirestore(donationData);
+
+                if (success) {
+                    // Send thank you email if email is provided and donation is not anonymous
+                    if (donationData.emailAddress && !donationData.isAnonymous) {
+                        await sendDonationThankYouEmail(donationData);
+                    }
+
+                    // Reset form and show success message
+                    resetMoneyForm();
+                    hideLoadingScreen();
+                    showSuccessModal('Donation recorded successfully!', donationData.donationId);
+                } else {
+                    throw new Error('Failed to save donation');
+                }
+
+            } catch (error) {
+                console.error('Error handling donation submission:', error);
+                hideLoadingScreen();
+                showErrorModal('Failed to record donation. Please try again.');
+            }
         }
         
-        function confirmAndSaveInKindDonation() {
+        async function confirmAndSaveInKindDonation(e) {
+            if (e) {
+                e.preventDefault();
+            }
             hideInKindPreviewModal();
             
-            // Mark form as confirmed and trigger submission
+            // Get the form and prepare the data
             const form = document.getElementById('inKindDonationForm');
-            form.dataset.confirmed = 'true';
+            const formData = new FormData(form);
             
-            // Trigger the actual save process
-            form.dispatchEvent(new Event('submit', { bubbles: true }));
-            
-            // Reset confirmation flag after submission
-            setTimeout(() => {
-                form.dataset.confirmed = 'false';
-            }, 100);
+            try {
+                showLoadingScreen('Processing donation...');
+
+                // Generate donation ID
+                const donationId = await generateDonationId();
+                
+                // Prepare donation data
+                const donationData = {
+                    donationId: donationId,
+                    donationType: 'in-kind',
+                    dateAdded: new Date().toISOString().split('T')[0],
+                    dateOfDonation: formData.get('dateOfDonation'),
+                    isAnonymous: formData.get('anonymous') === 'on',
+                    donorName: formData.get('donorName') || '',
+                    emailAddress: formData.get('emailAddress') || '',
+                    contactNumber: formData.get('contactNumber') || '',
+                    address: formData.get('address') || '',
+                    itemCategory: formData.get('itemCategory'),
+                    itemDescription: formData.get('itemDescription'),
+                    quantity: parseInt(formData.get('quantity')),
+                    unit: formData.get('unit'),
+                    conditionOfItems: formData.get('conditionOfItems'),
+                    receiverName: formData.get('receiverName'),
+                    expiryDate: formData.get('expiryDate') || ''
+                };
+
+                // Handle photo if present
+                const photoInput = form.querySelector('input[name="photo"]');
+                if (photoInput.files && photoInput.files[0]) {
+                    donationData.photoString = await convertPhotoToBase64(photoInput.files[0]);
+                }
+
+                // Save to Firestore and create inventory item
+                const success = await saveDonationToFirestore(donationData);
+                if (success) {
+                    // Create inventory item
+                    const inventoryId = await createInventoryFromDonation(donationData);
+
+                    // Send thank you email if email is provided and donation is not anonymous
+                    if (donationData.emailAddress && !donationData.isAnonymous) {
+                        await sendDonationThankYouEmail(donationData);
+                    }
+
+                    // Reset form and show success message
+                    resetInKindForm();
+                    hideLoadingScreen();
+                    showSuccessModal('Donation recorded successfully!', donationData.donationId, inventoryId);
+                } else {
+                    throw new Error('Failed to save donation');
+                }
+
+            } catch (error) {
+                console.error('Error handling donation submission:', error);
+                hideLoadingScreen();
+                showErrorModal('Failed to record donation. Please try again.');
+            }
         }
 
         // ========== MODAL MANAGEMENT FUNCTIONS ==========
@@ -2680,157 +2833,135 @@
         // Save donation record to Firestore
         async function saveDonationToFirestore(data) {
             try {
-                showLoadingScreen('Saving donation record...');
-                
-                // Set timestamps and format data
-                data.dateAdded = new Date().toISOString().split('T')[0];
-                data.lastUpdated = new Date();
-                
-                // Get donationId
-                const donationId = await generateDonationId();
-                data.donationId = donationId;
-
-                // Save to donations collection
-                const donationsRef = collection(db, 'donations');
-                const docRef = doc(donationsRef, donationId);
-                await setDoc(docRef, data);
-
-                // Update TotalFunds if this is a money donation
-                if (data.donationType === 'money') {
-                    const fundBalanceRef = doc(db, 'TotalFunds', 'fundBalance');
-                    
-                    try {
-                        // Try to get the current fund balance
-                        const fundBalanceDoc = await getDocs(collection(db, 'TotalFunds'));
-                        let currentAmount = 0;
-
-                        // If document exists, get current amount
-                        if (!fundBalanceDoc.empty) {
-                            const fundData = fundBalanceDoc.docs[0].data();
-                            currentAmount = fundData.amount || 0;
-                        }
-
-                        // Add new donation amount to current total
-                        const newAmount = currentAmount + data.amount;
-
-                        // Update or create the fundBalance document
-                        await setDoc(fundBalanceRef, {
-                            amount: newAmount,
-                            lastUpdated: data.dateAdded
-                        });
-                    } catch (error) {
-                        console.error('Error updating TotalFunds:', error);
-                        // Continue execution even if TotalFunds update fails
-                    }
+                // Verify required donationId
+                if (!data.donationId) {
+                    throw new Error('No donation ID provided');
                 }
 
-                // Validate required fields
+                // Validate required fields first
                 if (data.donationType === 'money') {
                     if (!data.dateOfDonation || !data.typeOfDonation || isNaN(data.amount)) {
-                        showMessage('Please fill in all required fields.', 'error');
-                        return;
+                        throw new Error('Missing required money donation fields');
                     }
+
+                    // Payment type specific validation
                     if (data.typeOfDonation === 'Bank Transfer' && data.paymentDetails) {
                         if (!data.paymentDetails.bankName || !data.paymentDetails.accountInfo || !data.paymentDetails.transactionRef) {
-                            showMessage('Please fill in all required bank transfer details.', 'error');
-                            return;
+                            throw new Error('Missing required bank transfer details');
                         }
                     } else if (data.typeOfDonation === 'Check' && data.paymentDetails) {
                         if (!data.paymentDetails.checkNumber || !data.paymentDetails.bankName || !data.paymentDetails.checkDate || !data.paymentDetails.payeeName) {
-                            showMessage('Please fill in all required check details.', 'error');
-                            return;
+                            throw new Error('Missing required check details');
                         }
                     } else if (data.typeOfDonation === 'Online Payment' && data.paymentDetails) {
                         if (!data.paymentDetails.paymentMethod || !data.paymentDetails.transactionRef) {
-                            showMessage('Please fill in all required online payment details.', 'error');
-                            return;
+                            throw new Error('Missing required online payment details');
                         }
                     }
                 } else if (data.donationType === 'in-kind') {
-                    // Updated validation for new field structure
                     if (!data.dateOfDonation || !data.itemCategory || !data.itemName || !data.itemDescription || !data.conditionOfItems) {
-                        showMessage('Please fill in all required fields.', 'error');
-                        return;
+                        throw new Error('Missing required in-kind donation fields');
                     }
-                    
-                    // Validate quantity fields based on item type
+
+                    // Quantity validation based on item type
                     if (data.itemType === 'simple') {
                         if (!data.quantity || isNaN(data.quantity)) {
-                            showMessage('Please fill in a valid quantity.', 'error');
-                            return;
+                            throw new Error('Invalid quantity for simple item');
                         }
                     } else if (data.itemType === 'packaged') {
                         if (!data.primaryQuantity || isNaN(data.primaryQuantity) || !data.secondaryQuantity || isNaN(data.secondaryQuantity)) {
-                            showMessage('Please fill in valid quantities for packaged items.', 'error');
-                            return;
+                            throw new Error('Invalid quantities for packaged item');
                         }
                     }
                 }
 
-                const donationCol = collection(db, 'donations');
-                const newDonationRef = doc(donationCol); // auto-id
-                await setDoc(newDonationRef, data);
+                // Update timestamps
+                data.dateAdded = new Date().toISOString().split('T')[0];
+                data.lastUpdated = new Date();
 
-                // Send thank you email to the donor (if not anonymous)
-                await sendDonationThankYouEmail(data);
+                // Save to Firestore using donation ID as document ID
+                const donationDoc = doc(db, 'donations', data.donationId);
+                await setDoc(donationDoc, data);
 
-                // Auto-create inventory item for in-kind donations
+                // Handle additional operations based on donation type
                 let inventoryId = null;
-                if (data.donationType === 'in-kind') {
-                    console.log('Creating inventory from donation data:', data); // Debug log
-                    console.log('Photo string in data:', data.photoString); // Debug photo
+
+                if (data.donationType === 'money') {
+                    // Get Philippines time for timestamps
+                    const philippinesTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila' });
+                    const lastUpdated = new Date(philippinesTime);
+                    const amount = parseFloat(data.amount);
+
+                    try {
+                        // Determine which balance document to update based on payment type
+                        let balanceType;
+                        switch (data.typeOfDonation.toLowerCase()) {
+                            case 'cash':
+                                balanceType = 'cashBalance';
+                                break;
+                            case 'check':
+                                balanceType = 'checkBalance';
+                                break;
+                            case 'bank transfer':
+                                balanceType = 'bankBalance';
+                                break;
+                            case 'online payment':
+                                balanceType = 'onlineBalance';
+                                break;
+                        }
+
+                        // Update specific balance document
+                        const balanceRef = doc(db, 'TotalFunds', balanceType);
+                        const balanceDoc = await getDoc(balanceRef);
+                        const currentBalance = balanceDoc.exists() ? balanceDoc.data().amount || 0 : 0;
+                        await setDoc(balanceRef, {
+                            amount: currentBalance + amount,
+                            lastUpdate: lastUpdated
+                        });
+
+                        // Update fundBalance document
+                        const fundBalanceRef = doc(db, 'TotalFunds', 'fundBalance');
+                        const fundBalanceDoc = await getDoc(fundBalanceRef);
+                        const currentFundBalance = fundBalanceDoc.exists() ? fundBalanceDoc.data().amount || 0 : 0;
+                        await setDoc(fundBalanceRef, {
+                            amount: currentFundBalance + amount,
+                            lastUpdate: lastUpdated
+                        });
+                    } catch (error) {
+                        console.error('Error updating TotalFunds:', error);
+                        // Continue even if TotalFunds update fails
+                    }
+                } else if (data.donationType === 'in-kind') {
+                    // Create inventory item
                     inventoryId = await createInventoryFromDonation(data);
-                    console.log('Inventory creation result:', inventoryId); // Debug log
                 }
 
-                // Fix: Always log activity, even for anonymous/guest users
-                let currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-                if (!currentUser.username) {
-                    currentUser = { username: 'Anonymous', role: 'donor', staffId: '' };
-                }
-                let activityDetails = '';
+                // Log activity
+                const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                const username = currentUser.username || 'Anonymous';
+                const role = currentUser.role || 'donor';
+                const staffId = currentUser.staffId || '';
+
+                let activityDetails;
                 if (data.donationType === 'money') {
                     activityDetails = `Recorded money donation (${data.donationId}): ₱${data.amount.toFixed(2)} from ${data.donorName} - ${data.typeOfDonation}`;
-                } else if (data.donationType === 'in-kind') {
-                    // Create activity description based on item type
-                    let quantityDesc = '';
-                    if (data.itemType === 'simple') {
-                        quantityDesc = `${data.quantity} ${data.unit || ''}`;
-                    } else if (data.itemType === 'packaged') {
-                        quantityDesc = `${data.primaryQuantity} ${data.primaryUnit} of ${data.secondaryQuantity} ${data.secondaryUnit} each (${data.calculatedTotalQuantity} total)`;
-                    }
+                } else {
+                    const quantityDesc = data.itemType === 'simple' 
+                        ? `${data.quantity} ${data.unit || ''}` 
+                        : `${data.primaryQuantity} ${data.primaryUnit} of ${data.secondaryQuantity} ${data.secondaryUnit} each`;
                     
                     activityDetails = `Recorded in-kind donation (${data.donationId}): ${quantityDesc} ${data.itemName} (${data.itemCategory}) from ${data.donorName}`;
                     if (inventoryId) {
                         activityDetails += ` (Added to inventory: ${inventoryId})`;
                     }
                 }
-                await logActivity('Recorded Donation', activityDetails, currentUser);
 
-                showMessage('Donation saved successfully!', 'success');
-                
-                // Return inventory ID for success modal enhancement
-                const result = { success: true, inventoryId: inventoryId };
-                console.log('Returning from saveDonationToFirestore:', result); // Debug log
-                return result;
-                setTimeout(() => {
-                    goBack();
-                    document.getElementById('moneyDonationForm').reset();
-                    document.getElementById('inKindDonationForm').reset();
-                    document.getElementById('anonymousCheckboxMoney').checked = false;
-                    document.getElementById('anonymousCheckboxInKind').checked = false;
-                    toggleAnonymousMoney();
-                    toggleAnonymousInKind();
-                    togglePaymentFields(); // Reset payment fields
-                    const today = new Date().toISOString().split('T')[0];
-                    document.querySelectorAll('input[name="dateOfDonation"]').forEach(input => {
-                        input.value = today;
-                    });
-                    document.getElementById('expiryDateField').classList.add('hidden');
-                }, 2000);
+                await logActivity('Recorded Donation', activityDetails, { username, role, staffId });
+
+                return { success: true, inventoryId };
             } catch (err) {
-                console.error('[v0] Error in saveDonationToFirestore:', err);
-                showMessage('Error saving donation. Please try again.', 'error');
+                console.error('Error in saveDonationToFirestore:', err);
+                throw err; // Let caller handle display of error messages
             }
         }
 
