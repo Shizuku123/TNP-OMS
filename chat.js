@@ -1,3 +1,23 @@
+// --- Polling-based browser notification for new messages ---
+// Helper function to show notifications
+function showNotification(title, message) {
+  if (Notification.permission === "granted") {
+    new Notification(title, {
+      body: message,
+      icon: 'tahanan-logo.jpg'
+    });
+  }
+}
+
+// Request notification permission if not already granted
+if (Notification.permission !== "granted") {
+  Notification.requestPermission();
+}
+
+// Track the last seen message ID
+let lastMessageId = null;
+
+// Poll the server every 5 seconds for new messages
 // chat.js - Real-time Messenger Integration with Firebase
 // --- Firebase SDK imports (for module environments) ---
 // If using <script> tags, use CDN links for Firebase Auth and Firestore instead.
@@ -118,7 +138,6 @@ document.addEventListener('DOMContentLoaded', function() {
   onAuthStateChanged(auth, user => {
     if (user) {
       currentUser = user;
-      console.log('User authenticated:', user.uid);
       loadInbox();
       // --- PATCH: Always show inbox overlay on mobile after load ---
       setTimeout(() => {
@@ -274,17 +293,16 @@ function setupInboxRealTimeUpdates() {
     inboxUnsubscribe();
   }
   
-  // Listen to all messages involving current user
-  const messagesRef = collection(db, 'messages');
-  const q = query(
-    messagesRef,
-    where('participants', 'array-contains', currentUser.uid),
-    orderBy('timestamp', 'desc')
-  );
   
+    // Listen to all messages involving current user
+    const messagesRef = collection(db, 'messages');
+    const q = query(
+      messagesRef,
+      where('participants', 'array-contains', currentUser.uid),
+      orderBy('timestamp', 'desc')
+    );
   inboxUnsubscribe = onSnapshot(q, async (snapshot) => {
-    console.log('Inbox real-time update triggered');
-    
+
     // Update inbox cache with latest messages
     await updateInboxCache();
   }, (error) => {
@@ -307,8 +325,8 @@ async function updateInboxCache() {
     );
     const [receivedSnap, sentSnap] = await Promise.all([getDocs(q), getDocs(sentQ)]);
     const allMessages = [];
-    receivedSnap.forEach(d => allMessages.push({...d.data(), id: d.id}));
-    sentSnap.forEach(d => allMessages.push({...d.data(), id: d.id}));
+      receivedSnap.forEach(d => allMessages.push({...d.data(), id: d.id}));
+      sentSnap.forEach(d => allMessages.push({...d.data(), id: d.id}));
 
     // Group by contact (other user)
     const latestByContact = {};
@@ -323,7 +341,7 @@ async function updateInboxCache() {
     const updatedInboxDisplay = allContacts.map(user => {
       const latestMsg = latestByContact[user.uid];
       let status = 'Available';
-      
+      let showNotif = false;
       if (latestMsg) {
         if (Array.isArray(latestMsg.hiddenFor) && latestMsg.hiddenFor.includes(currentUser.uid)) {
           return null; // skip hidden conversations
@@ -338,9 +356,16 @@ async function updateInboxCache() {
         } else {
           // You received the message
           status = 'Delivered';
+          // If message is unseen, trigger notification
+          if (!latestMsg.seen && latestMsg.receiverId === currentUser.uid) {
+            showNotif = true;
+          }
         }
       }
-      
+      // Show notification for unseen message
+      if (showNotif) {
+        showNotification('New Message From ' + (user.fullName || 'Unknown'), latestMsg.text || 'You have a new message');
+      }
       return {
         ...user,
         lastMessage: latestMsg ? latestMsg.text : 'No messages yet',
@@ -541,10 +566,19 @@ function renderInbox(users, error = false, inboxItems = []) {
       <p class="text-sm text-gray-500">${capitalizeRole(user.role)}</p>
     `;
     // Layout: avatar | content | delete
-    li.appendChild(document.createElement('img'));
-    li.firstChild.src = user.photo;
-    li.firstChild.alt = 'avatar';
-    li.firstChild.className = 'w-10 h-10 rounded-full object-cover bg-gray-200 border';
+    const img = document.createElement('img');
+    img.src = user.photo;
+    img.alt = 'avatar';
+    img.className = 'w-10 h-10 rounded-full object-cover bg-gray-200 border';
+    // If image fails to load, use a fallback
+    img.onerror = function(event) {
+      event.preventDefault();
+      this.onerror = null;
+      // Suppress error output in the console
+      try { window.event = null; } catch (e) {}
+      this.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.fullName || 'User');
+    };
+    li.appendChild(img);
     li.appendChild(contentDiv);
     li.appendChild(deleteBtn);
     // Click to select conversation
@@ -615,7 +649,7 @@ function capitalizeRole(role) {
 // --- Select Contact and Load Chat ---
 function selectContact(contactId, contactName, contactPhoto, contactRole, skipLoading = false) {
   window.selectContact = selectContact;
-  console.log('selectContact called with:', { contactId, contactName, contactPhoto, contactRole, skipLoading });
+
   
   if (!contactId) {
     console.error('No contact ID provided');
@@ -633,14 +667,7 @@ function selectContact(contactId, contactName, contactPhoto, contactRole, skipLo
   selectedContactName = contactName || '';
   selectedContactPhoto = contactPhoto || 'user.png';
   selectedContactRole = contactRole || '';
-  
-  console.log('Contact selected:', { 
-    selectedContact, 
-    selectedContactName, 
-    selectedContactPhoto, 
-    selectedContactRole,
-    isSameContact
-  });
+
 
 
   // --- Update mobile chat header (always) ---
@@ -693,7 +720,6 @@ function selectContact(contactId, contactName, contactPhoto, contactRole, skipLo
     orderBy('timestamp')
   );
 
-  console.log('Querying messages between', currentUser.uid, 'and', contactId);
 
   try {
     unsubscribeChat = onSnapshot(q, snapshot => {
@@ -965,7 +991,6 @@ function removeOptimisticMobileMessage(messageId) {
 
 // --- Render Chat Window ---
 function renderChat(messages) {
-  console.log('Rendering chat messages:', messages);
   
   // Always re-query the chatWindow to ensure it's available
   let chatWindow = document.getElementById('chat-messages');
