@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Functions</title>
+</head>
+<body>
+    <button id="testCaptureBtn">Test Capture</button>
+    <button id="testToggleBtn">Test Toggle</button>
+    <button id="testOfflineBtn">Test Offline</button>
+
+    <script>
+        // Test if we can access the elements
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded');
+            
+            const captureBtn = document.getElementById('testCaptureBtn');
+            const toggleBtn = document.getElementById('testToggleBtn');
+            const offlineBtn = document.getElementById('testOfflineBtn');
+            
+            if (captureBtn) {
+                captureBtn.addEventListener('click', function() {
+                    console.log('Capture button clicked!');
+                    alert('Capture button works!');
+                });
+                console.log('Capture button event listener added');
+            }
+            
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', function() {
+                    console.log('Toggle button clicked!');
+                    alert('Toggle button works!');
+                });
+                console.log('Toggle button event listener added');
+            }
+            
+            if (offlineBtn) {
+                offlineBtn.addEventListener('click', function() {
+                    console.log('Offline button clicked!');
+                    alert('Offline button works!');
+                });
+                console.log('Offline button event listener added');
+            }
+        });
+    </script>
+</body>
+</html>

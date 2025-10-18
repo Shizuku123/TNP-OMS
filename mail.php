@@ -168,13 +168,13 @@ function sendDonationThankYouEmail($donorName, $donorEmail, $donationType, $dona
         $mail->isSMTP();
         $mail->Host       = 'smtp.gmail.com';
         $mail->SMTPAuth   = true;
-        $mail->Username   = 'coffeecornerofficial1@gmail.com';  // Keep existing credentials
+        $mail->Username   = 'tahananngpagmamahalcapstone@gmail.com';  // Keep existing credentials
         $mail->Password   = 'sfxr wvap lbwj bszs';               // Keep existing credentials
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port       = 587;
 
         // Recipients
-        $mail->setFrom('coffeecornerofficial1@gmail.com', 'Tahanan ng Pagmamahal');
+        $mail->setFrom('tahananngpagmamahalcapstone@gmail.com', 'Tahanan ng Pagmamahal');
         $mail->addAddress($donorEmail, $donorName);
 
         // Content
@@ -277,7 +277,7 @@ function sendDonationThankYouEmail($donorName, $donorEmail, $donationType, $dona
                     font-size: 15px;
                 }
                 .impact-section {
-                    background: linear-gradient(135deg, #fef2f2, #fee2e2);
+                    background: #f8f9fa;
                     padding: 25px;
                     border-radius: 8px;
                     margin: 30px 0;

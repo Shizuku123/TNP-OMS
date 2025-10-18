@@ -172,6 +172,27 @@
             </div>
         </div>
     </div>
+
+    <!-- Generic Message Modal -->
+    <div id="messageModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
+            <div class="text-center">
+                <div id="messageIcon" class="mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4">
+                    <!-- Icon will be inserted here -->
+                </div>
+                <h3 id="messageTitle" class="text-lg font-medium text-gray-900 mb-2">Message</h3>
+                <p id="messageText" class="text-sm text-gray-600 mb-6 whitespace-pre-line"></p>
+                <div class="flex space-x-3 justify-center">
+                    <button id="messageOkBtn" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                        OK
+                    </button>
+                    <button id="messageCancelBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors hidden">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
                         
                     </button>
                 </div>
@@ -927,6 +948,215 @@
             }
         }
 
+        // Check for offline records on page load and notify user
+        function checkOfflineRecordsOnLoad() {
+            const records = getOfflineRecords();
+            if (records.length > 0) {
+                // Calculate how long ago the oldest record was saved
+                const oldestRecord = records.reduce((oldest, record) => 
+                    new Date(record.savedAt) < new Date(oldest.savedAt) ? record : oldest
+                );
+                
+                const savedTime = new Date(oldestRecord.savedAt);
+                const now = new Date();
+                const timeDiff = now - savedTime;
+                const hoursAgo = Math.floor(timeDiff / (1000 * 60 * 60));
+                const daysAgo = Math.floor(hoursAgo / 24);
+                
+                let timeText = '';
+                if (daysAgo > 0) {
+                    timeText = `${daysAgo} day${daysAgo > 1 ? 's' : ''} ago`;
+                } else if (hoursAgo > 0) {
+                    timeText = `${hoursAgo} hour${hoursAgo > 1 ? 's' : ''} ago`;
+                } else {
+                    timeText = 'recently';
+                }
+                
+                const message = `You have ${records.length} offline child record${records.length > 1 ? 's' : ''} saved ${timeText}.\n\nThese records are stored locally and need to be synced when you have an internet connection.`;
+                
+                setTimeout(async () => {
+                    const action = await showOfflineNotificationModal(message, records.length);
+                    
+                    if (action === 'view') {
+                        showOfflineModal();
+                    } else if (action === 'sync' && navigator.onLine) {
+                        syncAllOfflineRecords();
+                    }
+                }, 1000);
+            }
+        }
+
+        // Special notification modal for offline records on page load
+        function showOfflineNotificationModal(message, recordCount) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('messageModal');
+                const titleEl = document.getElementById('messageTitle');
+                const textEl = document.getElementById('messageText');
+                const iconEl = document.getElementById('messageIcon');
+                const okBtn = document.getElementById('messageOkBtn');
+                const cancelBtn = document.getElementById('messageCancelBtn');
+                
+                // Set title and message
+                titleEl.textContent = 'Offline Records Found';
+                textEl.textContent = message;
+                
+                // Set warning icon and colors
+                iconEl.className = 'mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4 bg-yellow-100';
+                iconEl.innerHTML = `
+                    <svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z"/>
+                    </svg>
+                `;
+                
+                // Update button layout for three options
+                const buttonContainer = okBtn.parentElement;
+                buttonContainer.innerHTML = `
+                    <button id="dismissBtn" class="px-4 py-2 text-gray-500 hover:text-gray-700 transition-colors">
+                        Dismiss
+                    </button>
+                    <button id="viewOfflineBtn" class="px-4 py-2 bg-red-primary hover:bg-red-700 text-white rounded-md transition-colors">
+                        View Records
+                    </button>
+                    ${navigator.onLine ? `
+                        <button id="syncNowBtn" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors">
+                            Sync Now
+                        </button>
+                    ` : ''}
+                `;
+                
+                // Set up event handlers
+                const handleDismiss = () => {
+                    modal.classList.add('hidden');
+                    resolve('dismiss');
+                };
+                
+                const handleView = () => {
+                    modal.classList.add('hidden');
+                    resolve('view');
+                };
+                
+                const handleSync = () => {
+                    modal.classList.add('hidden');
+                    resolve('sync');
+                };
+                
+                document.getElementById('dismissBtn').addEventListener('click', handleDismiss);
+                document.getElementById('viewOfflineBtn').addEventListener('click', handleView);
+                if (navigator.onLine) {
+                    const syncBtn = document.getElementById('syncNowBtn');
+                    if (syncBtn) {
+                        syncBtn.addEventListener('click', handleSync);
+                    }
+                }
+                
+                // Show modal
+                modal.classList.remove('hidden');
+            });
+        }
+
+        // ========== MODAL HELPER FUNCTIONS ==========
+        
+        function showMessageModal(title, message, type = 'info', showCancel = false) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('messageModal');
+                const titleEl = document.getElementById('messageTitle');
+                const textEl = document.getElementById('messageText');
+                const iconEl = document.getElementById('messageIcon');
+                const okBtn = document.getElementById('messageOkBtn');
+                const cancelBtn = document.getElementById('messageCancelBtn');
+                
+                // Set title and message
+                titleEl.textContent = title;
+                textEl.textContent = message;
+                
+                // Set icon and colors based on type
+                let iconHTML = '';
+                let iconClass = '';
+                let buttonClass = 'bg-blue-600 hover:bg-blue-700';
+                
+                switch(type) {
+                    case 'success':
+                        iconClass = 'bg-green-100';
+                        iconHTML = `<svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>`;
+                        buttonClass = 'bg-green-600 hover:bg-green-700';
+                        break;
+                    case 'error':
+                        iconClass = 'bg-red-100';
+                        iconHTML = `<svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>`;
+                        buttonClass = 'bg-red-600 hover:bg-red-700';
+                        break;
+                    case 'warning':
+                        iconClass = 'bg-yellow-100';
+                        iconHTML = `<svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z"/></svg>`;
+                        buttonClass = 'bg-yellow-600 hover:bg-yellow-700';
+                        break;
+                    case 'question':
+                        iconClass = 'bg-blue-100';
+                        iconHTML = `<svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`;
+                        buttonClass = 'bg-blue-600 hover:bg-blue-700';
+                        break;
+                    default:
+                        iconClass = 'bg-blue-100';
+                        iconHTML = `<svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`;
+                }
+                
+                // Set icon
+                iconEl.className = `mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4 ${iconClass}`;
+                iconEl.innerHTML = iconHTML;
+                
+                // Set button style
+                okBtn.className = `px-4 py-2 ${buttonClass} text-white rounded-md transition-colors`;
+                
+                // Show/hide cancel button
+                if (showCancel) {
+                    cancelBtn.classList.remove('hidden');
+                    okBtn.textContent = 'Yes';
+                    cancelBtn.textContent = 'No';
+                } else {
+                    cancelBtn.classList.add('hidden');
+                    okBtn.textContent = 'OK';
+                }
+                
+                // Set up event handlers
+                const handleOk = () => {
+                    modal.classList.add('hidden');
+                    okBtn.removeEventListener('click', handleOk);
+                    cancelBtn.removeEventListener('click', handleCancel);
+                    resolve(true);
+                };
+                
+                const handleCancel = () => {
+                    modal.classList.add('hidden');
+                    okBtn.removeEventListener('click', handleOk);
+                    cancelBtn.removeEventListener('click', handleCancel);
+                    resolve(false);
+                };
+                
+                okBtn.addEventListener('click', handleOk);
+                cancelBtn.addEventListener('click', handleCancel);
+                
+                // Show modal
+                modal.classList.remove('hidden');
+            });
+        }
+        
+        // Convenience functions
+        function showSuccessMessage(message) {
+            return showMessageModal('Success', message, 'success');
+        }
+        
+        function showErrorMessage(message) {
+            return showMessageModal('Error', message, 'error');
+        }
+        
+        function showWarningMessage(message) {
+            return showMessageModal('Warning', message, 'warning');
+        }
+        
+        function showConfirmMessage(message) {
+            return showMessageModal('Confirm', message, 'question', true);
+        }
+
         function isOnline() {
             return navigator.onLine;
         }
@@ -986,12 +1216,11 @@
         }
 
         function showErrorModal(message) {
-            document.getElementById('errorMessage').textContent = message;
-            document.getElementById('errorModal').classList.remove('hidden');
+            showErrorMessage(message);
         }
 
         function hideErrorModal() {
-            document.getElementById('errorModal').classList.add('hidden');
+            // Not needed anymore, handled by message modal
         }
 
         function showOfflineSuccessModal(childName, childId) {
@@ -1072,8 +1301,9 @@
             }
         };
 
-        window.deleteOfflineRecordById = function(recordId) {
-            if (confirm('Are you sure you want to delete this offline record?')) {
+        window.deleteOfflineRecordById = async function(recordId) {
+            const confirmed = await showConfirmMessage('Are you sure you want to delete this offline record?');
+            if (confirmed) {
                 deleteOfflineRecord(recordId);
                 populateOfflineModal();
             }
@@ -1474,6 +1704,11 @@
             
             // Setup tutorial functionality
             setupTutorialFunctionality();
+            
+            // Check for offline records on page load and notify user
+            setTimeout(() => {
+                checkOfflineRecordsOnLoad();
+            }, 500);
         });
 
         // Tutorial functionality
@@ -1792,7 +2027,7 @@
                 window.location.href = 'add-child.html';
             });
 
-            // Error modal button
+            // Error modal button (legacy - now using message modal)
             document.getElementById('closeErrorModalBtn').addEventListener('click', function() {
                 hideErrorModal();
             });
@@ -1817,8 +2052,9 @@
                 hideOfflineModal();
             });
 
-            document.getElementById('clearAllOffline').addEventListener('click', function() {
-                if (confirm('Are you sure you want to clear all offline records? This action cannot be undone.')) {
+            document.getElementById('clearAllOffline').addEventListener('click', async function() {
+                const confirmed = await showConfirmMessage('Are you sure you want to clear all offline records? This action cannot be undone.');
+                if (confirmed) {
                     clearAllOfflineRecords();
                     populateOfflineModal();
                 }
@@ -1924,12 +2160,12 @@
             });
             
             if (hasPatternError) {
-                alert('❌ SECURITY VALIDATION FAILED!\n\nPlease correct the highlighted fields with invalid characters or formats before submitting.');
+                showErrorMessage('SECURITY VALIDATION FAILED!\n\nPlease correct the highlighted fields with invalid characters or formats before submitting.');
                 return;
             }
             
             if (hasDangerousContent) {
-                alert('🛡️ SECURITY ALERT!\n\nDangerous content detected in form fields. The content has been sanitized. Please review and resubmit.');
+                showWarningMessage('SECURITY ALERT!\n\nDangerous content detected in form fields. The content has been sanitized. Please review and resubmit.');
                 return;
             }
 

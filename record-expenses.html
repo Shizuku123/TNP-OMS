@@ -20,6 +20,50 @@
             opacity: 0.6;
             pointer-events: none;
         }
+        
+        /* Tutorial Modal Responsive Styles */
+        @media (max-width: 640px) {
+            #tutorialModal .max-w-4xl {
+                max-width: 95vw;
+                margin: 0.5rem;
+            }
+            
+            #tutorialModal .p-6 {
+                padding: 1rem;
+            }
+            
+            #tutorialContent img {
+                max-height: 250px !important;
+            }
+            
+            #tutorialContent h4 {
+                font-size: 1.25rem !important;
+            }
+            
+            #tutorialContent p {
+                font-size: 0.875rem !important;
+            }
+            
+            .hidden.sm\\:block {
+                display: none !important;
+            }
+            
+            #prevStep, #nextStep {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.875rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            #tutorialContent img {
+                max-height: 200px !important;
+            }
+            
+            #stepIndicators button {
+                width: 0.625rem;
+                height: 0.625rem;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -36,7 +80,14 @@
                     </a>
                 </div>
                 <h1 class="text-xl font-semibold text-gray-900">Record Expenses</h1>
-                <div></div>
+                <div class="flex items-center">
+                    <!-- Tutorial Button -->
+                    <button id="infoBtn" class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-2 shadow-lg transition-all duration-300 transform hover:scale-110" title="Tutorial - How to record expenses">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
     </header>
@@ -60,7 +111,8 @@
                         <dl>
                             <dt class="text-sm font-medium text-gray-500 truncate">Cash</dt>
                             <dd class="flex items-baseline">
-                                <div class="text-2xl font-semibold text-gray-900" id="totalCash">₱0.00</div>
+                                <div class="text-2xl font-semibold text-gray-900" id="totalCash"></div>
+                                <div id="cashLoader" class="ml-2 animate-spin h-4 w-4 border-2 border-green-500 border-t-transparent rounded-full"></div>
                             </dd>
                         </dl>
                     </div>
@@ -81,7 +133,8 @@
                         <dl>
                             <dt class="text-sm font-medium text-gray-500 truncate">Checks</dt>
                             <dd class="flex items-baseline">
-                                <div class="text-2xl font-semibold text-gray-900" id="totalChecks">₱0.00</div>
+                                <div class="text-2xl font-semibold text-gray-900" id="totalChecks"></div>
+                                <div id="checksLoader" class="ml-2 animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
                             </dd>
                         </dl>
                     </div>
@@ -102,7 +155,8 @@
                         <dl>
                             <dt class="text-sm font-medium text-gray-500 truncate">Bank Transfers</dt>
                             <dd class="flex items-baseline">
-                                <div class="text-2xl font-semibold text-gray-900" id="totalBankTransfers">₱0.00</div>
+                                <div class="text-2xl font-semibold text-gray-900" id="totalBankTransfers"></div>
+                                <div id="bankLoader" class="ml-2 animate-spin h-4 w-4 border-2 border-purple-500 border-t-transparent rounded-full"></div>
                             </dd>
                         </dl>
                     </div>
@@ -123,7 +177,8 @@
                         <dl>
                             <dt class="text-sm font-medium text-gray-500 truncate">Online Payments</dt>
                             <dd class="flex items-baseline">
-                                <div class="text-2xl font-semibold text-gray-900" id="totalOnlinePayments">₱0.00</div>
+                                <div class="text-2xl font-semibold text-gray-900" id="totalOnlinePayments"></div>
+                                <div id="onlineLoader" class="ml-2 animate-spin h-4 w-4 border-2 border-indigo-500 border-t-transparent rounded-full"></div>
                             </dd>
                         </dl>
                     </div>
@@ -141,7 +196,8 @@
                         <dl>
                             <dt class="text-lg font-medium text-black truncate">Total Available Funds</dt>
                             <dd class="flex items-baseline">
-                                <div class="text-3xl font-bold text-black" id="totalDonations">₱0.00</div>
+                                <div class="text-3xl font-bold text-black" id="totalDonations"></div>
+                                <div id="totalLoader" class="ml-2 animate-spin h-5 w-5 border-2 border-green-600 border-t-transparent rounded-full"></div>
                             </dd>
                         </dl>
                     </div>
@@ -193,6 +249,8 @@
                         <div id="otherCategoryField" class="space-y-2 hidden">
                             <label for="otherCategory" class="block text-sm font-medium text-gray-700 mb-2">Specify Other Category <span class="text-red-500">*</span></label>
                             <input type="text" name="otherCategory" id="otherCategory"
+                                pattern="^[a-zA-Z0-9\s\.,\-'()]{2,100}$"
+                                title="Category name (letters, numbers, and basic punctuation only, 2-100 characters)"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
                                 placeholder="Please specify">
                         </div>
@@ -203,6 +261,8 @@
                         <div class="space-y-2">
                             <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description <span class="text-red-500">*</span></label>
                             <textarea name="description" id="description" rows="4" required
+                                pattern="^[a-zA-Z0-9\s\.,\-'()]{2,500}$"
+                                title="Description (letters, numbers, and basic punctuation only, 2-500 characters)"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm resize-none"
                                 placeholder="Detailed description of the expense"></textarea>
                         </div>
@@ -247,6 +307,8 @@
                         <div id="newCheckNumberField" class="space-y-2 hidden">
                             <label for="newCheckNumber" class="block text-sm font-medium text-gray-700 mb-2">Enter New Check Number <span class="text-red-500">*</span></label>
                             <input type="text" name="newCheckNumber" id="newCheckNumber"
+                                pattern="^[a-zA-Z0-9\-]{2,50}$"
+                                title="Check number (letters, numbers, and hyphens only, 2-50 characters)"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
                                 placeholder="Enter check number">
                         </div>
@@ -271,6 +333,8 @@
                                 <div class="space-y-2">
                                     <label for="referenceId" class="block text-sm font-medium text-gray-700 mb-2">Reference/Transaction ID <span class="text-red-500">*</span></label>
                                     <input type="text" name="referenceId" id="referenceId"
+                                        pattern="^[a-zA-Z0-9\-]{2,100}$"
+                                        title="Reference ID (letters, numbers, and hyphens only, 2-100 characters)"
                                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
                                         placeholder="Enter reference/transaction ID">
                                 </div>
@@ -284,6 +348,8 @@
                             <label for="requestedBy" class="block text-sm font-medium text-gray-700 mb-2">Requested By <span class="text-red-500">*</span></label>
                             <div class="relative">
                                 <input type="text" name="requestedBy" id="requestedBy" required
+                                    pattern="^[a-zA-Z\s\-']{2,100}$"
+                                    title="Name (letters, spaces, hyphens, and apostrophes only, 2-100 characters)"
                                     class="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
                                     placeholder="Enter name" readonly>
                                 <button type="button" id="clearRequestedBy" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-red-500 transition-colors hidden">
@@ -298,6 +364,8 @@
                             <label for="approvedBy" class="block text-sm font-medium text-gray-700 mb-2">Approved By</label>
                             <div class="relative">
                                 <input type="text" name="approvedBy" id="approvedBy"
+                                    pattern="^[a-zA-Z\s\-']{2,100}$"
+                                    title="Name (letters, spaces, hyphens, and apostrophes only, 2-100 characters)"
                                     class="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
                                     placeholder="Enter name" readonly>
                                 <button type="button" id="clearApprovedBy" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-red-500 transition-colors hidden">
@@ -317,12 +385,12 @@
                                 <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                                     <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
-                                <div class="flex text-sm text-gray-600">
+                                <div class="text-sm text-gray-600 text-center">
                                     <label for="attachment" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
                                         <span>Upload a file</span>
                                         <input id="attachment" name="attachment" type="file" class="sr-only" accept="image/*,.pdf,.doc,.docx">
                                     </label>
-                                    <p class="pl-1">or drag and drop</p>
+                                    <span class="pl-1">or drag and drop</span>
                                 </div>
                                 <button type="button" id="takePhotoBtn" class="w-full mt-3 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors flex items-center justify-center">
                                     <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -331,7 +399,7 @@
                                     </svg>
                                     Take Photo
                                 </button>
-                                <p class="text-xs text-gray-500">JPG, PNG or GIF up to 2MB • Take photo with camera or upload from device</p>
+                                <p class="text-xs text-gray-500 text-center">JPG, PNG or GIF up to 2MB • Take photo with camera or upload from device</p>
                             </div>
                         </div>
                         <div id="attachmentPreview" class="mt-3 hidden">
@@ -355,6 +423,8 @@
                     <div class="space-y-2">
                         <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Notes / Remarks</label>
                         <textarea name="notes" id="notes" rows="4"
+                            pattern="^[a-zA-Z0-9\s\.,\-'()]{0,500}$"
+                            title="Notes (letters, numbers, and basic punctuation only, max 500 characters)"
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm resize-none"
                             placeholder="Additional notes or remarks"></textarea>
                     </div>
@@ -448,6 +518,174 @@
         </div>
     </div>
 
+    <!-- Offline Records Modal -->
+    <div id="offlineModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-lg max-w-4xl w-full mx-4 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center p-6 border-b">
+                <h3 class="text-lg font-medium text-gray-900">Offline Saved Records</h3>
+                <button id="closeOfflineModal" class="text-gray-400 hover:text-gray-600">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div id="offlineRecordsContent" class="flex-1 overflow-y-auto">
+                <div id="noOfflineRecords" class="text-center py-8 text-gray-500">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <p>No offline records saved</p>
+                    <p class="text-sm">Records will appear here when saved offline</p>
+                </div>
+                
+                <div id="offlineRecordsList" class="space-y-4 hidden">
+                    <!-- Offline records will be populated here -->
+                </div>
+            </div>
+            
+            <div class="flex justify-between items-center p-6 border-t bg-gray-50">
+                <div class="text-sm text-gray-600">
+                    <p>Records are automatically synced when internet connection is restored.</p>
+                </div>
+                <div class="flex space-x-3">
+                    <button id="syncAllOffline" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                        Sync All
+                    </button>
+                    <button id="clearAllOffline" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                        Clear All
+                    </button>
+                    <button id="cancelOffline" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Offline Save Success Modal -->
+    <div id="offlineSuccessModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
+            <div class="text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100">
+                    <svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+                    </svg>
+                </div>
+                <h3 class="mt-4 text-lg font-medium text-gray-900">Saved Offline</h3>
+                <p id="offlineSuccessMessage" class="mt-2 text-sm text-gray-500"></p>
+                <div class="mt-6 space-y-3">
+                    <button id="addAnotherOfflineBtn" class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                        Add Another Expense
+                    </button>
+                    <button id="viewOfflineRecordsBtn" class="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                        View Offline Records
+                    </button>
+                    <button id="closeOfflineSuccessBtn" class="w-full px-4 py-2 text-gray-500 hover:text-gray-700 transition-colors">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generic Message Modal -->
+    <div id="messageModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
+            <div class="text-center">
+                <div id="messageIcon" class="mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4">
+                    <!-- Icon will be inserted here -->
+                </div>
+                <h3 id="messageTitle" class="text-lg font-medium text-gray-900 mb-2">Message</h3>
+                <p id="messageText" class="text-sm text-gray-600 mb-6 whitespace-pre-line"></p>
+                <div class="flex space-x-3 justify-center">
+                    <button id="messageOkBtn" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                        OK
+                    </button>
+                    <button id="messageCancelBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors hidden">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tutorial Modal -->
+    <div id="tutorialModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-60 hidden">
+        <div class="bg-white rounded-lg shadow-lg max-w-4xl w-full mx-4 max-h-[90vh] flex flex-col">
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center p-6 border-b">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-blue-100 rounded-full p-2">
+                        <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900">Record Expenses Tutorial</h3>
+                        <p class="text-sm text-gray-500">Step <span id="currentStep">1</span> of <span id="totalSteps">5</span> • <span id="progressPercent">20%</span> Complete</p>
+                    </div>
+                </div>
+                <button id="closeTutorialModal" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="px-6 pt-4">
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div id="progressBar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 20%"></div>
+                </div>
+                
+                <!-- Step Indicators -->
+                <div class="flex justify-center mt-4 space-x-2" id="stepIndicators">
+                    <!-- Indicators will be generated dynamically -->
+                </div>
+            </div>
+            
+            <!-- Tutorial Content -->
+            <div class="flex-1 overflow-y-auto p-6">
+                <div id="tutorialContent" class="text-center">
+                    <!-- Content will be populated dynamically -->
+                </div>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="flex justify-between items-center p-6 border-t bg-gray-50">
+                <button id="prevStep" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                    <svg class="h-4 w-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    Previous
+                </button>
+                
+                <div class="text-sm text-gray-500 hidden sm:block">
+                    Use arrow keys to navigate • Press ESC to close
+                </div>
+                
+                <button id="nextStep" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors" data-action="next">
+                    Next
+                    <svg class="h-4 w-4 inline ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Offline Button -->
+    <div id="offlineBtn" class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
+        <button class="relative bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg transition-all duration-300 transform hover:scale-110" title="View Offline Expense Records">
+            <svg class="h-10 w-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+            </svg>
+            <!-- Yellow notification dot for better visibility on blue background -->
+            <span id="offlineIndicator" class="absolute -top-1 -right-1 h-6 w-6 bg-yellow-500 rounded-full border-2 border-white text-xs text-black font-bold flex items-center justify-center hidden">0</span>
+        </button>
+    </div>
+
     <script type="module">
         import { 
             db,
@@ -462,6 +700,146 @@
             getDoc
         } from './firebase.js';
 
+        // ========== SECURITY VALIDATION FUNCTIONS ==========
+        
+        // Sanitize input to prevent XSS attacks (simplified version for backend)
+        function sanitizeInput(input) {
+            if (typeof input !== 'string') return input;
+            
+            return input
+                .replace(/<script[^>]*>.*?<\/script>/gis, '') // Remove script tags
+                .replace(/javascript:/gi, '') // Remove javascript: protocols
+                .replace(/on\w+\s*=/gi, '') // Remove event handlers
+                .trim(); // Just trim whitespace, dangerous chars are prevented on input
+        }
+
+        // Validate text input (names, descriptions, etc.) - same approach as add-child.html
+        function validateTextInput(input, fieldName) {
+            if (!input || typeof input !== 'string') {
+                return { isValid: false, message: `${fieldName} is required` };
+            }
+
+            // First sanitize to remove dangerous content
+            let sanitized = sanitizeInput(input.trim());
+            
+            // Then filter to only allowed characters based on field type
+            let allowedPattern;
+            if (fieldName.toLowerCase().includes('name') || fieldName.toLowerCase().includes('by')) {
+                // Names: letters, spaces, hyphens, apostrophes only
+                allowedPattern = /[a-zA-Z\s\-']/g;
+            } else if (fieldName.toLowerCase().includes('description') || fieldName.toLowerCase().includes('notes') || fieldName.toLowerCase().includes('category')) {
+                // Descriptions/notes: letters, numbers, basic punctuation
+                allowedPattern = /[a-zA-Z0-9\s\.,\-'()#/]/g;
+            } else if (fieldName.toLowerCase().includes('number') || fieldName.toLowerCase().includes('reference') || fieldName.toLowerCase().includes('id')) {
+                // Numbers/IDs: letters, numbers, hyphens only
+                allowedPattern = /[a-zA-Z0-9\-]/g;
+            } else {
+                // Default: letters, numbers, spaces, basic punctuation
+                allowedPattern = /[a-zA-Z0-9\s\.,\-'()]/g;
+            }
+            
+            sanitized = (sanitized.match(allowedPattern) || []).join('');
+
+            // Check for minimum length
+            if (sanitized.length < 2) {
+                return { isValid: false, message: `${fieldName} must be at least 2 characters long` };
+            }
+
+            // Check for maximum length
+            if (sanitized.length > (fieldName.toLowerCase().includes('description') || fieldName.toLowerCase().includes('notes') ? 500 : 100)) {
+                return { isValid: false, message: `${fieldName} must not exceed ${fieldName.toLowerCase().includes('description') || fieldName.toLowerCase().includes('notes') ? 500 : 100} characters` };
+            }
+
+            return { isValid: true, value: sanitized };
+        }
+
+        // Real-time input sanitization for form fields
+        function setupInputSanitization() {
+            // Get all text inputs, textareas, and relevant form fields
+            const textInputs = document.querySelectorAll('input[type="text"], textarea');
+            
+            textInputs.forEach(input => {
+                // Prevent dangerous and special characters on keypress
+                input.addEventListener('keypress', function(e) {
+                    const char = String.fromCharCode(e.which);
+                    let allowedPattern;
+                    
+                    // Define allowed patterns based on field type
+                    if (input.name === 'requestedBy' || input.name === 'approvedBy') {
+                        // Names: letters, spaces, hyphens, apostrophes only
+                        allowedPattern = /^[a-zA-Z\s\-']*$/;
+                    } else if (input.name === 'newCheckNumber' || input.name === 'referenceId') {
+                        // Numbers/IDs: letters, numbers, hyphens only
+                        allowedPattern = /^[a-zA-Z0-9\-]*$/;
+                    } else if (input.name === 'description' || input.name === 'notes' || input.name === 'otherCategory') {
+                        // Descriptions/notes: letters, numbers, basic punctuation only
+                        allowedPattern = /^[a-zA-Z0-9\s\.,\-'()]*$/;
+                    } else {
+                        // Default: letters, numbers, spaces, basic punctuation
+                        allowedPattern = /^[a-zA-Z0-9\s\.,\-'()]*$/;
+                    }
+                    
+                    if (!allowedPattern.test(char)) {
+                        e.preventDefault();
+                        showValidationMessage(input, 'Only letters, numbers, and basic punctuation allowed', 'warning');
+                        return false;
+                    }
+                });
+
+                // Handle paste events - filter to allowed characters only
+                input.addEventListener('paste', function(e) {
+                    setTimeout(() => {
+                        const value = input.value;
+                        let allowedPattern;
+                        
+                        // Define allowed patterns based on field type (same as keypress)
+                        if (input.name === 'requestedBy' || input.name === 'approvedBy') {
+                            allowedPattern = /[a-zA-Z\s\-']/g;
+                        } else if (input.name === 'newCheckNumber' || input.name === 'referenceId') {
+                            allowedPattern = /[a-zA-Z0-9\-]/g;
+                        } else if (input.name === 'description' || input.name === 'notes' || input.name === 'otherCategory') {
+                            allowedPattern = /[a-zA-Z0-9\s\.,\-'()]/g;
+                        } else {
+                            allowedPattern = /[a-zA-Z0-9\s\.,\-'()]/g;
+                        }
+                        
+                        const cleanValue = (value.match(allowedPattern) || []).join('');
+                        
+                        if (value !== cleanValue) {
+                            input.value = cleanValue;
+                            showValidationMessage(input, 'Special characters were removed from pasted content', 'warning');
+                        }
+                    }, 10);
+                });
+            });
+        }
+
+        // Show validation message near input field
+        function showValidationMessage(inputElement, message, type = 'error') {
+            // Remove existing validation message
+            const existingMessage = inputElement.parentNode.querySelector('.validation-message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+
+            // Create new validation message
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `validation-message text-sm mt-1 ${type === 'error' ? 'text-red-600' : type === 'warning' ? 'text-yellow-600' : 'text-green-600'}`;
+            messageDiv.textContent = message;
+
+            // Insert after input element
+            inputElement.parentNode.insertBefore(messageDiv, inputElement.nextSibling);
+
+            // Auto-remove after 3 seconds for warnings
+            if (type === 'warning') {
+                setTimeout(() => {
+                    if (messageDiv.parentNode) {
+                        messageDiv.remove();
+                    }
+                }, 3000);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('date').valueAsDate = new Date();
             generateExpenseId();
@@ -471,6 +849,51 @@
             initializeFormValidation();
             loadUserInfo();
             loadCheckNumbers();
+            setupInputSanitization(); // Add security validation
+            
+            // Initialize offline functionality
+            updateOfflineIndicator();
+            
+            // Offline button click
+            document.getElementById('offlineBtn').addEventListener('click', openOfflineModal);
+            
+            // Offline modal buttons
+            document.getElementById('closeOfflineModal').addEventListener('click', closeOfflineModal);
+            document.getElementById('cancelOffline').addEventListener('click', closeOfflineModal);
+            document.getElementById('syncAllOffline').addEventListener('click', syncAllOfflineRecords);
+            document.getElementById('clearAllOffline').addEventListener('click', clearAllOfflineRecords);
+            
+            // Offline success modal buttons
+            document.getElementById('closeOfflineSuccessBtn').addEventListener('click', closeOfflineSuccessModal);
+            document.getElementById('addAnotherOfflineBtn').addEventListener('click', function() {
+                closeOfflineSuccessModal();
+                // Form is already reset after successful offline save
+            });
+            document.getElementById('viewOfflineRecordsBtn').addEventListener('click', function() {
+                closeOfflineSuccessModal();
+                openOfflineModal();
+            });
+            
+            // Check for offline records on page load and when coming back online
+            window.addEventListener('online', async function() {
+                const records = getOfflineExpenses();
+                if (records.length > 0) {
+                    setTimeout(async () => {
+                        const shouldSync = await showConfirmMessage(`You have ${records.length} offline expense(s). Would you like to sync them now?`);
+                        if (shouldSync) {
+                            syncAllOfflineRecords();
+                        }
+                    }, 1000);
+                }
+            });
+            
+            // Check for offline records on page load and notify user
+            setTimeout(() => {
+                checkOfflineRecordsOnLoad();
+            }, 500);
+            
+            // Initialize tutorial functionality
+            setupTutorialFunctionality();
             
             // Debug: Log all payment methods in database
             debugPaymentMethods();
@@ -931,7 +1354,8 @@
             }
 
             if (!isValid) {
-                alert('Please fix the following errors:\\n\\n' + errors.join('\\n'));
+                const errorMessage = 'Please fix the following errors:\n\n' + errors.join('\n');
+                showErrorMessage(errorMessage);
             }
 
             return isValid;
@@ -1142,75 +1566,98 @@
         }
 
         async function submitForm() {
-            showLoadingModal('Saving expense record...');
+            // Get form data first
+            const expenseData = {
+                expenseId: document.getElementById('expenseId').value,
+                date: document.getElementById('date').value,
+                category: document.getElementById('category').value === 'Other' ? 
+                    document.getElementById('otherCategory').value : document.getElementById('category').value,
+                description: document.getElementById('description').value,
+                amount: parseFloat(document.getElementById('amount').value),
+                paymentMethod: document.getElementById('paymentMethod').value,
+                requestedBy: document.getElementById('requestedBy').value,
+                approvedBy: document.getElementById('approvedBy').value || '',
+                notes: document.getElementById('notes').value || '',
+                createdAt: new Date(),
+                createdBy: getCurrentUser(),
+                status: 'approved'
+            };
 
-            try {
-                // Get form data
-                const expenseData = {
-                    expenseId: document.getElementById('expenseId').value,
-                    date: document.getElementById('date').value,
-                    category: document.getElementById('category').value === 'Other' ? 
-                        document.getElementById('otherCategory').value : document.getElementById('category').value,
-                    description: document.getElementById('description').value,
-                    amount: parseFloat(document.getElementById('amount').value),
-                    paymentMethod: document.getElementById('paymentMethod').value,
-                    requestedBy: document.getElementById('requestedBy').value,
-                    approvedBy: document.getElementById('approvedBy').value || '',
-                    notes: document.getElementById('notes').value || '',
-                    createdAt: new Date(),
-                    createdBy: getCurrentUser(),
-                    status: 'approved'
-                };
-
-                // Add payment details based on method
-                const paymentMethod = document.getElementById('paymentMethod').value;
-                if (paymentMethod === 'Check') {
-                    const checkNumber = document.getElementById('checkNumber').value;
-                    if (checkNumber === 'new') {
-                        expenseData.checkNumber = document.getElementById('newCheckNumber').value;
-                    } else {
-                        expenseData.checkNumber = checkNumber;
-                    }
-                } else if (paymentMethod === 'Online Payment') {
-                    expenseData.onlinePaymentType = document.getElementById('onlinePaymentType').value;
-                    expenseData.referenceId = document.getElementById('referenceId').value;
+            // Add payment details based on method
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            if (paymentMethod === 'Check') {
+                const checkNumber = document.getElementById('checkNumber').value;
+                if (checkNumber === 'new') {
+                    expenseData.checkNumber = document.getElementById('newCheckNumber').value;
+                } else {
+                    expenseData.checkNumber = checkNumber;
                 }
+            } else if (paymentMethod === 'Online Payment') {
+                expenseData.onlinePaymentType = document.getElementById('onlinePaymentType').value;
+                expenseData.referenceId = document.getElementById('referenceId').value;
+            }
 
-                // Handle file upload if present
-                const fileInput = document.getElementById('attachment');
-                if (fileInput.files[0]) {
-                    // For now, we'll store the file name. In a full implementation,
-                    // you'd upload to Firebase Storage first
-                    expenseData.attachmentName = fileInput.files[0].name;
-                    expenseData.attachmentSize = fileInput.files[0].size;
-                }
+            // Handle file upload if present
+            const fileInput = document.getElementById('attachment');
+            if (fileInput.files[0]) {
+                // For now, we'll store the file name. In a full implementation,
+                // you'd upload to Firebase Storage first
+                expenseData.attachmentName = fileInput.files[0].name;
+                expenseData.attachmentSize = fileInput.files[0].size;
+            }
 
-                console.log('Saving expense data:', expenseData);
-
-                // Save to expenses collection
-                const expensesCol = collection(db, 'expenses');
-                await addDoc(expensesCol, expenseData);
-
-                console.log('Expense saved successfully');
-
-                // Now deduct from donations based on payment method
-                showLoadingModal('Updating donation records...');
-                await deductFromDonations(expenseData);
-
-                hideLoadingModal();
+            // Check if online
+            if (navigator.onLine) {
+                // Try to save online first
+                showLoadingModal('Saving expense record...');
                 
-                // Show success modal
-                document.getElementById('successModal').classList.remove('hidden');
+                try {
+                    console.log('Saving expense data:', expenseData);
 
-                // Reset form and reload data
-                resetForm();
-                generateExpenseId();
-                loadSummaryData();
+                    // Save to expenses collection
+                    const expensesCol = collection(db, 'expenses');
+                    await addDoc(expensesCol, expenseData);
 
-            } catch (error) {
-                console.error('Error saving expense:', error);
-                hideLoadingModal();
-                alert('Error saving expense record. Please try again.');
+                    console.log('Expense saved successfully');
+
+                    // Now deduct from donations based on payment method
+                    showLoadingModal('Updating donation records...');
+                    await deductFromDonations(expenseData);
+
+                    hideLoadingModal();
+                    
+                    // Show success modal
+                    document.getElementById('successModal').classList.remove('hidden');
+
+                    // Reset form and reload data
+                    resetForm();
+                    generateExpenseId();
+                    loadSummaryData();
+
+                } catch (error) {
+                    console.error('Error saving expense:', error);
+                    hideLoadingModal();
+                    
+                    // Try to save offline as fallback
+                    const savedOffline = saveExpenseOffline(expenseData);
+                    if (savedOffline) {
+                        showOfflineSuccessModal(`Expense record of ₱${expenseData.amount.toFixed(2)} saved offline.`);
+                        resetForm();
+                        generateExpenseId();
+                    } else {
+                        showErrorMessage('Failed to save expense. Please try again.');
+                    }
+                }
+            } else {
+                // Save offline when no internet connection
+                const savedOffline = saveExpenseOffline(expenseData);
+                if (savedOffline) {
+                    showOfflineSuccessModal(`Expense record of ₱${expenseData.amount.toFixed(2)} saved offline.`);
+                    resetForm();
+                    generateExpenseId();
+                } else {
+                    showErrorMessage('Failed to save expense offline. Please try again.');
+                }
             }
         }
 
@@ -1381,23 +1828,37 @@
                 console.log('Online Payment Balance:', formatCurrency(availableOnlinePayments));
                 console.log('Total Balance:', formatCurrency(totalFunds));
 
-                // Update the cards with available amounts
+                // Update the cards with available amounts and hide loaders
                 document.getElementById('totalCash').textContent = formatCurrency(availableCash);
                 document.getElementById('totalChecks').textContent = formatCurrency(totalChecks);
                 document.getElementById('totalBankTransfers').textContent = formatCurrency(availableBankTransfers);
                 document.getElementById('totalOnlinePayments').textContent = formatCurrency(availableOnlinePayments);
                 document.getElementById('totalDonations').textContent = formatCurrency(totalFunds);
 
+                // Hide all loading spinners
+                document.getElementById('cashLoader').style.display = 'none';
+                document.getElementById('checksLoader').style.display = 'none';
+                document.getElementById('bankLoader').style.display = 'none';
+                document.getElementById('onlineLoader').style.display = 'none';
+                document.getElementById('totalLoader').style.display = 'none';
+
                 console.log('Summary data updated successfully');
 
             } catch (error) {
                 console.error('Error loading summary data:', error);
-                // Set default values on error
+                // Set default values on error and hide loaders
                 document.getElementById('totalCash').textContent = '₱0.00';
                 document.getElementById('totalChecks').textContent = '₱0.00';
                 document.getElementById('totalBankTransfers').textContent = '₱0.00';
                 document.getElementById('totalOnlinePayments').textContent = '₱0.00';
                 document.getElementById('totalDonations').textContent = '₱0.00';
+                
+                // Hide all loading spinners on error
+                document.getElementById('cashLoader').style.display = 'none';
+                document.getElementById('checksLoader').style.display = 'none';
+                document.getElementById('bankLoader').style.display = 'none';
+                document.getElementById('onlineLoader').style.display = 'none';
+                document.getElementById('totalLoader').style.display = 'none';
             }
         }
 
@@ -1454,6 +1915,712 @@
                 console.error('Error debugging payment methods:', error);
             }
         }
+
+        // ========== OFFLINE STORAGE FUNCTIONS FOR EXPENSES ==========
+        
+        function saveExpenseOffline(expenseData) {
+            try {
+                const offlineRecords = getOfflineExpenses();
+                
+                // Check for duplicates based on key fields
+                const isDuplicate = offlineRecords.some(record => 
+                    record.expenseId === expenseData.expenseId ||
+                    (record.description === expenseData.description &&
+                     record.amount === expenseData.amount &&
+                     record.date === expenseData.date &&
+                     record.category === expenseData.category)
+                );
+                
+                if (isDuplicate) {
+                    console.log('Duplicate expense detected, not saving offline');
+                    return false;
+                }
+                
+                const offlineRecord = {
+                    ...expenseData,
+                    savedAt: new Date().toISOString(),
+                    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days
+                    offlineId: 'expense_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+                };
+                
+                offlineRecords.push(offlineRecord);
+                localStorage.setItem('offlineExpenses', JSON.stringify(offlineRecords));
+                updateOfflineIndicator();
+                
+                console.log('Expense saved offline:', offlineRecord);
+                return true;
+            } catch (error) {
+                console.error('Error saving expense offline:', error);
+                return false;
+            }
+        }
+        
+        function getOfflineExpenses() {
+            try {
+                const stored = localStorage.getItem('offlineExpenses');
+                const records = stored ? JSON.parse(stored) : [];
+                
+                // Filter out expired records
+                const now = new Date().toISOString();
+                const validRecords = records.filter(record => 
+                    record.expiresAt && record.expiresAt > now
+                );
+                
+                // Update storage if any records were removed
+                if (validRecords.length !== records.length) {
+                    localStorage.setItem('offlineExpenses', JSON.stringify(validRecords));
+                }
+                
+                return validRecords;
+            } catch (error) {
+                console.error('Error getting offline expenses:', error);
+                return [];
+            }
+        }
+        
+        function removeOfflineExpense(offlineId) {
+            try {
+                const records = getOfflineExpenses();
+                const filteredRecords = records.filter(record => record.offlineId !== offlineId);
+                localStorage.setItem('offlineExpenses', JSON.stringify(filteredRecords));
+                updateOfflineIndicator();
+                console.log('Removed offline expense:', offlineId);
+                return true;
+            } catch (error) {
+                console.error('Error removing offline expense:', error);
+                return false;
+            }
+        }
+        
+        function clearAllOfflineExpenses() {
+            try {
+                localStorage.removeItem('offlineExpenses');
+                updateOfflineIndicator();
+                console.log('Cleared all offline expenses');
+                return true;
+            } catch (error) {
+                console.error('Error clearing offline expenses:', error);
+                return false;
+            }
+        }
+        
+        function updateOfflineIndicator() {
+            const offlineRecords = getOfflineExpenses();
+            const indicator = document.getElementById('offlineIndicator');
+            const button = document.getElementById('offlineBtn');
+            
+            // Always show the button, just hide/show the indicator badge
+            if (button) {
+                button.classList.remove('hidden');
+            }
+            
+            if (offlineRecords.length > 0) {
+                if (indicator) {
+                    indicator.textContent = offlineRecords.length;
+                    indicator.classList.remove('hidden');
+                }
+            } else {
+                if (indicator) {
+                    indicator.classList.add('hidden');
+                }
+            }
+        }
+        
+        function openOfflineModal() {
+            populateOfflineRecordsList();
+            document.getElementById('offlineModal').classList.remove('hidden');
+        }
+        
+        function closeOfflineModal() {
+            document.getElementById('offlineModal').classList.add('hidden');
+        }
+        
+        function populateOfflineRecordsList() {
+            const records = getOfflineExpenses();
+            const recordsList = document.getElementById('offlineRecordsList');
+            const noRecordsDiv = document.getElementById('noOfflineRecords');
+            
+            if (records.length === 0) {
+                noRecordsDiv.classList.remove('hidden');
+                recordsList.classList.add('hidden');
+                return;
+            }
+            
+            noRecordsDiv.classList.add('hidden');
+            recordsList.classList.remove('hidden');
+            
+            recordsList.innerHTML = records.map(record => `
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <h4 class="font-medium text-gray-900">${record.expenseId}</h4>
+                            <p class="text-sm text-gray-600 mt-1">
+                                <span class="font-medium">${record.category}</span> - ₱${record.amount.toFixed(2)}
+                            </p>
+                            <p class="text-sm text-gray-600">${record.description}</p>
+                            <p class="text-xs text-gray-500 mt-2">
+                                Saved: ${new Date(record.savedAt).toLocaleString()}
+                            </p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="syncSingleOfflineRecord('${record.offlineId}')" 
+                                class="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 ${!navigator.onLine ? 'opacity-50 cursor-not-allowed' : ''}"
+                                ${!navigator.onLine ? 'disabled' : ''}>
+                                Sync
+                            </button>
+                            <button onclick="deleteOfflineRecord('${record.offlineId}')" 
+                                class="px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700">
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        async function syncAllOfflineRecords() {
+            const records = getOfflineExpenses();
+            if (records.length === 0) {
+                showWarningMessage('No offline records to sync.');
+                return;
+            }
+            
+            if (!navigator.onLine) {
+                showErrorMessage('No internet connection. Cannot sync records.');
+                return;
+            }
+            
+            showLoadingModal(`Syncing ${records.length} offline expense(s)...`);
+            let successCount = 0;
+            let failedRecords = [];
+            
+            for (const record of records) {
+                try {
+                    const { savedAt, expiresAt, offlineId, ...expenseData } = record;
+                    
+                    // Save to expenses collection
+                    const expensesCol = collection(db, 'expenses');
+                    await addDoc(expensesCol, {
+                        ...expenseData,
+                        syncedAt: new Date(),
+                        originallyOffline: true
+                    });
+                    
+                    // Deduct from donations
+                    await deductFromDonations(expenseData);
+                    
+                    removeOfflineExpense(offlineId);
+                    successCount++;
+                } catch (error) {
+                    console.error('Failed to sync expense:', record.offlineId, error);
+                    failedRecords.push(record);
+                }
+            }
+            
+            hideLoadingModal();
+            updateOfflineIndicator();
+            
+            if (failedRecords.length === 0) {
+                showSuccessMessage(`Successfully synced ${successCount} expense(s).`);
+                loadSummaryData(); // Refresh the display
+                closeOfflineModal();
+            } else {
+                showWarningMessage(`Synced ${successCount} expense(s). ${failedRecords.length} failed to sync.`);
+            }
+        }
+        
+        async function syncSingleOfflineRecord(offlineId) {
+            if (!navigator.onLine) {
+                showErrorMessage('No internet connection available.');
+                return;
+            }
+            
+            const records = getOfflineExpenses();
+            const record = records.find(r => r.offlineId === offlineId);
+            
+            if (!record) {
+                showErrorMessage('Record not found.');
+                return;
+            }
+            
+            try {
+                showLoadingModal('Syncing expense record...');
+                
+                const { savedAt, expiresAt, offlineId: id, ...expenseData } = record;
+                
+                // Save to expenses collection
+                const expensesCol = collection(db, 'expenses');
+                await addDoc(expensesCol, {
+                    ...expenseData,
+                    syncedAt: new Date(),
+                    originallyOffline: true
+                });
+                
+                // Deduct from donations
+                await deductFromDonations(expenseData);
+                
+                removeOfflineExpense(offlineId);
+                hideLoadingModal();
+                
+                populateOfflineRecordsList(); // Refresh the modal list
+                updateOfflineIndicator();
+                
+                showSuccessMessage('Expense record synced successfully.');
+                loadSummaryData(); // Refresh the main display
+            } catch (error) {
+                hideLoadingModal();
+                console.error('Error syncing record:', error);
+                showErrorMessage('Failed to sync record. Please try again.');
+            }
+        }
+        
+        async function deleteOfflineRecord(offlineId) {
+            const confirmed = await showConfirmMessage('Are you sure you want to delete this offline record?');
+            if (confirmed) {
+                if (removeOfflineExpense(offlineId)) {
+                    populateOfflineRecordsList(); // Refresh the modal list
+                    updateOfflineIndicator();
+                    showSuccessMessage('Record deleted successfully.');
+                } else {
+                    showErrorMessage('Failed to delete record.');
+                }
+            }
+        }
+        
+        async function clearAllOfflineRecords() {
+            const confirmed = await showConfirmMessage('Are you sure you want to delete all offline records? This action cannot be undone.');
+            if (confirmed) {
+                if (clearAllOfflineExpenses()) {
+                    populateOfflineRecordsList(); // Refresh the modal list
+                    updateOfflineIndicator();
+                    closeOfflineModal();
+                    showSuccessMessage('All offline records have been deleted.');
+                } else {
+                    showErrorMessage('Failed to clear offline records.');
+                }
+            }
+        }
+        
+        function showOfflineSuccessModal(message) {
+            document.getElementById('offlineSuccessMessage').textContent = message;
+            document.getElementById('offlineSuccessModal').classList.remove('hidden');
+        }
+        
+        function closeOfflineSuccessModal() {
+            document.getElementById('offlineSuccessModal').classList.add('hidden');
+        }
+
+        // Check for offline records on page load and notify user
+        function checkOfflineRecordsOnLoad() {
+            const records = getOfflineExpenses();
+            if (records.length > 0) {
+                // Calculate how long ago the oldest record was saved
+                const oldestRecord = records.reduce((oldest, record) => 
+                    new Date(record.savedAt) < new Date(oldest.savedAt) ? record : oldest
+                );
+                
+                const savedTime = new Date(oldestRecord.savedAt);
+                const now = new Date();
+                const timeDiff = now - savedTime;
+                const hoursAgo = Math.floor(timeDiff / (1000 * 60 * 60));
+                const daysAgo = Math.floor(hoursAgo / 24);
+                
+                let timeText = '';
+                if (daysAgo > 0) {
+                    timeText = `${daysAgo} day${daysAgo > 1 ? 's' : ''} ago`;
+                } else if (hoursAgo > 0) {
+                    timeText = `${hoursAgo} hour${hoursAgo > 1 ? 's' : ''} ago`;
+                } else {
+                    timeText = 'recently';
+                }
+                
+                const message = `You have ${records.length} offline expense record${records.length > 1 ? 's' : ''} saved ${timeText}.\n\nThese records are stored locally and need to be synced when you have an internet connection.`;
+                
+                setTimeout(async () => {
+                    const action = await showOfflineNotificationModal(message, records.length);
+                    
+                    if (action === 'view') {
+                        openOfflineModal();
+                    } else if (action === 'sync' && navigator.onLine) {
+                        syncAllOfflineRecords();
+                    }
+                }, 1000);
+            }
+        }
+
+        // ========== MODAL HELPER FUNCTIONS ==========
+        
+        function showMessageModal(title, message, type = 'info', showCancel = false) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('messageModal');
+                const titleEl = document.getElementById('messageTitle');
+                const textEl = document.getElementById('messageText');
+                const iconEl = document.getElementById('messageIcon');
+                const okBtn = document.getElementById('messageOkBtn');
+                const cancelBtn = document.getElementById('messageCancelBtn');
+                
+                // Set title and message
+                titleEl.textContent = title;
+                textEl.textContent = message;
+                
+                // Set icon and colors based on type
+                let iconHTML = '';
+                let iconClass = '';
+                let buttonClass = 'bg-blue-600 hover:bg-blue-700';
+                
+                switch(type) {
+                    case 'success':
+                        iconClass = 'bg-green-100';
+                        buttonClass = 'bg-green-600 hover:bg-green-700';
+                        iconHTML = `<svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>`;
+                        break;
+                    case 'error':
+                        iconClass = 'bg-red-100';
+                        buttonClass = 'bg-red-600 hover:bg-red-700';
+                        iconHTML = `<svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>`;
+                        break;
+                    case 'warning':
+                        iconClass = 'bg-yellow-100';
+                        buttonClass = 'bg-yellow-600 hover:bg-yellow-700';
+                        iconHTML = `<svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.732 15.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>`;
+                        break;
+                    case 'question':
+                        iconClass = 'bg-blue-100';
+                        buttonClass = 'bg-blue-600 hover:bg-blue-700';
+                        iconHTML = `<svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>`;
+                        break;
+                    default: // info
+                        iconClass = 'bg-blue-100';
+                        buttonClass = 'bg-blue-600 hover:bg-blue-700';
+                        iconHTML = `<svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>`;
+                }
+                
+                // Set icon
+                iconEl.className = `mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4 ${iconClass}`;
+                iconEl.innerHTML = iconHTML;
+                
+                // Set button style
+                okBtn.className = `px-4 py-2 ${buttonClass} text-white rounded-md transition-colors`;
+                
+                // Show/hide cancel button
+                if (showCancel) {
+                    cancelBtn.classList.remove('hidden');
+                    okBtn.textContent = 'Yes';
+                    cancelBtn.textContent = 'No';
+                } else {
+                    cancelBtn.classList.add('hidden');
+                    okBtn.textContent = 'OK';
+                }
+                
+                // Set up event handlers
+                const handleOk = () => {
+                    modal.classList.add('hidden');
+                    okBtn.removeEventListener('click', handleOk);
+                    cancelBtn.removeEventListener('click', handleCancel);
+                    resolve(true);
+                };
+                
+                const handleCancel = () => {
+                    modal.classList.add('hidden');
+                    okBtn.removeEventListener('click', handleOk);
+                    cancelBtn.removeEventListener('click', handleCancel);
+                    resolve(false);
+                };
+                
+                okBtn.addEventListener('click', handleOk);
+                cancelBtn.addEventListener('click', handleCancel);
+                
+                // Show modal
+                modal.classList.remove('hidden');
+            });
+        }
+        
+        // Convenience functions
+        function showSuccessMessage(message) {
+            return showMessageModal('Success', message, 'success');
+        }
+        
+        function showErrorMessage(message) {
+            return showMessageModal('Error', message, 'error');
+        }
+        
+        function showWarningMessage(message) {
+            return showMessageModal('Warning', message, 'warning');
+        }
+        
+        function showConfirmMessage(message) {
+            return showMessageModal('Confirm', message, 'question', true);
+        }
+
+        // Special notification modal for offline records on page load
+        function showOfflineNotificationModal(message, recordCount) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('messageModal');
+                const titleEl = document.getElementById('messageTitle');
+                const textEl = document.getElementById('messageText');
+                const iconEl = document.getElementById('messageIcon');
+                const okBtn = document.getElementById('messageOkBtn');
+                const cancelBtn = document.getElementById('messageCancelBtn');
+                
+                // Set title and message
+                titleEl.textContent = 'Offline Records Found';
+                textEl.textContent = message;
+                
+                // Set warning icon and colors
+                iconEl.className = 'mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4 bg-yellow-100';
+                iconEl.innerHTML = `
+                    <svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z"/>
+                    </svg>
+                `;
+                
+                // Update button layout for three options
+                const buttonContainer = okBtn.parentElement;
+                buttonContainer.innerHTML = `
+                    <button id="dismissBtn" class="px-4 py-2 text-gray-500 hover:text-gray-700 transition-colors">
+                        Dismiss
+                    </button>
+                    <button id="viewOfflineBtn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors">
+                        View Records
+                    </button>
+                    ${navigator.onLine ? `
+                        <button id="syncNowBtn" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors">
+                            Sync Now
+                        </button>
+                    ` : ''}
+                `;
+                
+                // Set up event handlers
+                const handleDismiss = () => {
+                    modal.classList.add('hidden');
+                    resolve('dismiss');
+                };
+                
+                const handleView = () => {
+                    modal.classList.add('hidden');
+                    resolve('view');
+                };
+                
+                const handleSync = () => {
+                    modal.classList.add('hidden');
+                    resolve('sync');
+                };
+                
+                document.getElementById('dismissBtn').addEventListener('click', handleDismiss);
+                document.getElementById('viewOfflineBtn').addEventListener('click', handleView);
+                if (navigator.onLine) {
+                    const syncBtn = document.getElementById('syncNowBtn');
+                    if (syncBtn) {
+                        syncBtn.addEventListener('click', handleSync);
+                    }
+                }
+                
+                // Show modal
+                modal.classList.remove('hidden');
+            });
+        }
+
+        // ========== TUTORIAL FUNCTIONALITY ==========
+        
+        let currentTutorialStep = 1;
+        const totalTutorialSteps = 5;
+        
+        const tutorialSteps = [
+            {
+                title: "Financial Overview Cards",
+                description: "These statistics cards show your available funds from different donation sources. Monitor your cash, check, bank transfer, and online payment balances before recording expenses.",
+                image: "Toturial/Record Expenses/pic1.png"
+            },
+            {
+                title: "Expense Form Fields",
+                description: "Fill in all the required information for your expense record including expense ID, date, category, description, amount, payment method, and approval details.",
+                image: "Toturial/Record Expenses/pic2.png"
+            },
+            {
+                title: "Receipt Upload",
+                description: "Upload receipt photos or transaction proof documents. You can either select files from your device or use the camera to capture receipts directly.",
+                image: "Toturial/Record Expenses/pic3.png"
+            },
+            {
+                title: "Save Expense Record",
+                description: "Once all fields are filled, click 'Preview & Submit' to review your expense details, then confirm to save the record to the system.",
+                image: "Toturial/Record Expenses/pic4.png"
+            },
+            {
+                title: "Offline Records Management",
+                description: "When offline, expenses are saved locally. View and manage your offline records here. Records will automatically sync when internet connection is restored.",
+                image: "Toturial/Record Expenses/pic5.png"
+            }
+        ];
+        
+        function setupTutorialFunctionality() {
+            const infoBtn = document.getElementById('infoBtn');
+            const tutorialModal = document.getElementById('tutorialModal');
+            const closeTutorialModal = document.getElementById('closeTutorialModal');
+            const prevStep = document.getElementById('prevStep');
+            const nextStep = document.getElementById('nextStep');
+            
+            if (infoBtn) {
+                infoBtn.addEventListener('click', openTutorial);
+            }
+            
+            if (closeTutorialModal) {
+                closeTutorialModal.addEventListener('click', closeTutorial);
+            }
+            
+            if (prevStep) {
+                prevStep.addEventListener('click', goToPrevStep);
+            }
+            
+            if (nextStep) {
+                nextStep.addEventListener('click', (e) => {
+                    const action = nextStep.dataset.action;
+                    if (action === 'finish') {
+                        closeTutorial();
+                    } else {
+                        goToNextStep();
+                    }
+                });
+            }
+            
+            // Close tutorial on outside click
+            tutorialModal?.addEventListener('click', (e) => {
+                if (e.target === tutorialModal) {
+                    closeTutorial();
+                }
+            });
+            
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (tutorialModal && !tutorialModal.classList.contains('hidden')) {
+                    if (e.key === 'Escape') {
+                        closeTutorial();
+                    } else if (e.key === 'ArrowLeft' && currentTutorialStep > 1) {
+                        goToPrevStep();
+                    } else if (e.key === 'ArrowRight' && currentTutorialStep < totalTutorialSteps) {
+                        goToNextStep();
+                    }
+                }
+            });
+            
+            generateStepIndicators();
+        }
+        
+        function openTutorial() {
+            currentTutorialStep = 1;
+            updateTutorialStep();
+            document.getElementById('tutorialModal').classList.remove('hidden');
+        }
+        
+        function closeTutorial() {
+            document.getElementById('tutorialModal').classList.add('hidden');
+        }
+        
+        function goToPrevStep() {
+            if (currentTutorialStep > 1) {
+                currentTutorialStep--;
+                updateTutorialStep();
+            }
+        }
+        
+        function goToNextStep() {
+            if (currentTutorialStep < totalTutorialSteps) {
+                currentTutorialStep++;
+                updateTutorialStep();
+            }
+        }
+        
+        function goToStep(step) {
+            if (step >= 1 && step <= totalTutorialSteps) {
+                currentTutorialStep = step;
+                updateTutorialStep();
+            }
+        }
+        
+        function updateTutorialStep() {
+            const step = tutorialSteps[currentTutorialStep - 1];
+            const progress = (currentTutorialStep / totalTutorialSteps) * 100;
+            
+            // Update progress bar
+            document.getElementById('currentStep').textContent = currentTutorialStep;
+            document.getElementById('totalSteps').textContent = totalTutorialSteps;
+            document.getElementById('progressPercent').textContent = Math.round(progress) + '%';
+            document.getElementById('progressBar').style.width = progress + '%';
+            
+            // Update content
+            const tutorialContent = document.getElementById('tutorialContent');
+            tutorialContent.innerHTML = `
+                <div class="text-center">
+                    <img src="${step.image}" alt="${step.title}" class="mx-auto rounded-lg shadow-lg max-w-full h-auto mb-6" style="max-height: 400px; object-fit: contain;">
+                    <h4 class="text-xl sm:text-2xl font-semibold text-gray-900 mb-4">${step.title}</h4>
+                    <p class="text-gray-600 leading-relaxed text-base sm:text-lg max-w-3xl mx-auto">${step.description}</p>
+                </div>
+            `;
+            
+            // Update navigation buttons
+            const prevBtn = document.getElementById('prevStep');
+            const nextBtn = document.getElementById('nextStep');
+            
+            prevBtn.disabled = currentTutorialStep === 1;
+            
+            if (currentTutorialStep === totalTutorialSteps) {
+                nextBtn.innerHTML = `
+                    Finish
+                    <svg class="h-4 w-4 inline ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                `;
+                nextBtn.dataset.action = 'finish';
+            } else {
+                nextBtn.innerHTML = `
+                    Next
+                    <svg class="h-4 w-4 inline ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                `;
+                nextBtn.dataset.action = 'next';
+            }
+            
+            updateStepIndicators();
+        }
+        
+        function generateStepIndicators() {
+            const container = document.getElementById('stepIndicators');
+            container.innerHTML = '';
+            
+            for (let i = 1; i <= totalTutorialSteps; i++) {
+                const indicator = document.createElement('button');
+                indicator.className = `w-3 h-3 rounded-full transition-colors ${i === currentTutorialStep ? 'bg-blue-600' : 'bg-gray-300 hover:bg-gray-400'}`;
+                indicator.title = `Go to step ${i}`;
+                indicator.onclick = () => goToStep(i);
+                container.appendChild(indicator);
+            }
+        }
+        
+        function updateStepIndicators() {
+            const indicators = document.querySelectorAll('#stepIndicators button');
+            indicators.forEach((indicator, index) => {
+                if (index + 1 === currentTutorialStep) {
+                    indicator.className = 'w-3 h-3 rounded-full transition-colors bg-blue-600';
+                } else {
+                    indicator.className = 'w-3 h-3 rounded-full transition-colors bg-gray-300 hover:bg-gray-400';
+                }
+            });
+        }
+
+        // Make functions globally available for onclick handlers
+        window.syncSingleOfflineRecord = syncSingleOfflineRecord;
+        window.deleteOfflineRecord = deleteOfflineRecord;
     </script>
 </body>
 </html>
