@@ -114,6 +114,27 @@
         </div>
     </div>
 
+    <!-- Generic Message Modal -->
+    <div id="messageModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
+            <div class="text-center">
+                <div id="messageIcon" class="mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4">
+                    <!-- Icon will be inserted here -->
+                </div>
+                <h3 id="messageTitle" class="text-lg font-medium text-gray-900 mb-2">Message</h3>
+                <p id="messageText" class="text-sm text-gray-600 mb-6 whitespace-pre-line"></p>
+                <div class="flex space-x-3 justify-center">
+                    <button id="messageOkBtn" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                        OK
+                    </button>
+                    <button id="messageCancelBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors hidden">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Loading Screen -->
     <div id="loadingScreen" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
@@ -765,15 +786,24 @@
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Branch (Optional)</label>
-                                        <input type="text" name="bankBranch" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="e.g., Makati Branch">
+                                        <input type="text" name="bankBranch" 
+                                               pattern="^[a-zA-Z0-9\s\-\.'&,()]{0,100}$"
+                                               title="Only letters, numbers, spaces, and basic punctuation allowed"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="e.g., Makati Branch">
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Account Number / Account Name *</label>
-                                        <input type="text" name="accountInfo" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="Orphanage's receiving account">
+                                        <input type="text" name="accountInfo" 
+                                               pattern="^[a-zA-Z0-9\s\-\.'&,()]{2,100}$"
+                                               title="Account information required (2-100 characters)"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="Orphanage's receiving account">
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Transaction Reference / Deposit Slip Number *</label>
-                                        <input type="text" name="transactionRef" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="Unique identifier from bank">
+                                        <input type="text" name="transactionRef" 
+                                               pattern="^[a-zA-Z0-9\s\-\.]{2,50}$"
+                                               title="Transaction reference required (2-50 characters)"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="Unique identifier from bank">
                                     </div>
                                 </div>
 
@@ -781,7 +811,10 @@
                                 <div id="checkFields" class="hidden space-y-4">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Check Number *</label>
-                                        <input type="text" name="checkNumber" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="6-10 digit number on check">
+                                        <input type="text" name="checkNumber" 
+                                               pattern="^[a-zA-Z0-9\-]{6,20}$"
+                                               title="Check number must be 6-20 characters (letters, numbers, hyphens only)"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="6-10 digit number on check">
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Bank Name *</label>
@@ -800,7 +833,10 @@
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Branch (Optional)</label>
-                                        <input type="text" name="checkBranch" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="e.g., Makati Branch">
+                                        <input type="text" name="checkBranch" 
+                                               pattern="^[a-zA-Z0-9\s\-\.'&,()]{0,100}$"
+                                               title="Only letters, numbers, spaces, and basic punctuation allowed"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="e.g., Makati Branch">
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Check Date *</label>
@@ -808,7 +844,10 @@
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Payee Name *</label>
-                                        <input type="text" name="payeeName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="Orphanage's official account name">
+                                        <input type="text" name="payeeName" 
+                                               pattern="^[a-zA-Z0-9\s\-\.'&,()]{2,100}$"
+                                               title="Payee name required (2-100 characters, letters, numbers, spaces, and basic punctuation only)"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="Orphanage's official account name">
                                     </div>
                                 </div>
 
@@ -829,7 +868,10 @@
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Transaction Reference / ID *</label>
-                                        <input type="text" name="onlineTransactionRef" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="Unique identifier from payment processor">
+                                        <input type="text" name="onlineTransactionRef" 
+                                               pattern="^[a-zA-Z0-9\s\-\.]{2,50}$"
+                                               title="Transaction reference required (2-50 characters)"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="Unique identifier from payment processor">
                                     </div>
                                 </div>
                                 <div>
@@ -841,7 +883,10 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Purpose / Designation</label>
-                                    <textarea name="purpose" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="e.g., General fund, Education, Medical expenses"></textarea>
+                                    <textarea name="purpose" rows="3" 
+                                              maxlength="500"
+                                              title="Purpose must not exceed 500 characters"
+                                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="e.g., General fund, Education, Medical expenses"></textarea>
                                 </div>
                             </div>
 
@@ -856,23 +901,39 @@
                                     <div class="space-y-4">
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-2">Donor Name *</label>
-                                            <input type="text" name="donorName" id="moneyDonorName" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
+                                            <input type="text" name="donorName" id="moneyDonorName" required 
+                                                   pattern="^[a-zA-Z\s\-']{2,100}$"
+                                                   title="Enter donor name (letters, spaces, hyphens, and apostrophes only)"
+                                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-2">Contact Number</label>
-                                            <input type="tel" name="contactNumber" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
+                                            <input type="tel" name="contactNumber" 
+                                                   pattern="^[\d\s\-\+\(\)]{7,20}$"
+                                                   title="Enter a valid phone number (7-20 characters)"
+                                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
-                                            <input type="email" name="emailAddress" id="moneyEmailAddress" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
+                                            <input type="email" name="emailAddress" id="moneyEmailAddress" required 
+                                                   pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+                                                   title="Enter a valid email address"
+                                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-2">Address</label>
-                                            <textarea name="address" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary"></textarea>
+                                            <textarea name="address" rows="3" 
+                                                      pattern="^[a-zA-Z0-9\s\.,\-'()#/]{0,500}$"
+                                                      maxlength="500"
+                                                      title="Address (letters, numbers, and basic punctuation only, max 500 characters)"
+                                                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary"></textarea>
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-2">TIN</label>
-                                            <input type="text" name="tin" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
+                                            <input type="text" name="tin" 
+                                                   pattern="^[a-zA-Z0-9\-\s]{0,50}$"
+                                                   title="TIN must contain only letters, numbers, hyphens, and spaces"
+                                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
                                         </div>
                                     </div>
                                 </div>
@@ -971,15 +1032,24 @@
                                 <div class="space-y-4">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Item Name *</label>
-                                        <input type="text" name="itemName" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="e.g., Hand Soap, Rice, School Bag">
+                                        <input type="text" name="itemName" required 
+                                               pattern="^[a-zA-Z0-9\s\-\.'&,()]{2,100}$"
+                                               title="Item name required (2-100 characters, letters, numbers, spaces, and basic punctuation only)"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="e.g., Hand Soap, Rice, School Bag">
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Item Brand</label>
-                                        <input type="text" name="itemBrand" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="e.g., Dove, Safeguard (optional)">
+                                        <input type="text" name="itemBrand" 
+                                               pattern="^[a-zA-Z0-9\s\-\.'&,()]{0,50}$"
+                                               title="Item brand (optional, max 50 characters)"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="e.g., Dove, Safeguard (optional)">
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Item Description *</label>
-                                        <textarea name="itemDescription" rows="3" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="Detailed description of the donated items"></textarea>
+                                        <textarea name="itemDescription" rows="3" required 
+                                                  maxlength="1000"
+                                                  title="Item description required (max 1000 characters)"
+                                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="Detailed description of the donated items"></textarea>
                                     </div>
                                 </div>
                                 <!-- Simple Item Fields -->
@@ -1110,11 +1180,17 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Receiver Name</label>
-                                    <input type="text" name="receiverName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="Staff member who received the donation">
+                                    <input type="text" name="receiverName" 
+                                           pattern="^[a-zA-Z0-9\s\-\.'&,()]{0,100}$"
+                                           title="Receiver name (optional, max 100 characters, letters, numbers, spaces, and basic punctuation only)"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="Staff member who received the donation">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
-                                    <textarea name="notes" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="Additional notes about the donation (optional)"></textarea>
+                                    <textarea name="notes" rows="2" 
+                                              maxlength="500"
+                                              title="Notes must not exceed 500 characters"
+                                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary" placeholder="Additional notes about the donation (optional)"></textarea>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Photo of Donated Items</label>
@@ -1148,19 +1224,32 @@
                                     <div class="space-y-4">
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-2">Donor Name *</label>
-                                            <input type="text" name="donorName" id="inKindDonorName" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
+                                            <input type="text" name="donorName" id="inKindDonorName" required 
+                                                   pattern="^[a-zA-Z\s\-']{2,100}$"
+                                                   title="Enter donor name (letters, spaces, hyphens, and apostrophes only)"
+                                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-2">Contact Number</label>
-                                            <input type="tel" name="contactNumber" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
+                                            <input type="tel" name="contactNumber" 
+                                                   pattern="^[\d\s\-\+\(\)]{7,20}$"
+                                                   title="Enter a valid phone number (7-20 characters)"
+                                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
-                                            <input type="email" name="emailAddress" id="inKindEmailAddress" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
+                                            <input type="email" name="emailAddress" id="inKindEmailAddress" required 
+                                                   pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+                                                   title="Enter a valid email address"
+                                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary">
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-2">Address</label>
-                                            <textarea name="address" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary"></textarea>
+                                            <textarea name="address" rows="3" 
+                                                      pattern="^[a-zA-Z0-9\s\.,\-'()#/]{0,500}$"
+                                                      maxlength="500"
+                                                      title="Address (letters, numbers, and basic punctuation only, max 500 characters)"
+                                                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-red-primary"></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -1191,6 +1280,369 @@
     <script type="module">
         import { db, collection, setDoc, doc, getDocs, getDoc, query, where } from './firebase.js';
         import { logActivity } from './activity-logger.js';
+
+        // ========== SECURITY VALIDATION FUNCTIONS ==========
+        
+        // Sanitize input to prevent XSS attacks (simplified version for backend)
+        function sanitizeInput(input) {
+            if (typeof input !== 'string') return input;
+            
+            return input
+                .replace(/<script[^>]*>.*?<\/script>/gis, '') // Remove script tags
+                .replace(/javascript:/gi, '') // Remove javascript: protocols
+                .replace(/on\w+\s*=/gi, '') // Remove event handlers
+                .trim(); // Just trim whitespace, dangerous chars are prevented on input
+        }
+
+        // Validate text input (names, descriptions, etc.) - same approach as add-child.html
+        function validateTextInput(input, fieldName) {
+            if (!input || typeof input !== 'string') {
+                return { isValid: false, message: `${fieldName} is required` };
+            }
+
+            // First sanitize to remove dangerous content
+            let sanitized = sanitizeInput(input.trim());
+            
+            // Then filter to only allowed characters based on field type
+            let allowedPattern;
+            if (fieldName.toLowerCase().includes('name')) {
+                // Names: letters, spaces, hyphens, apostrophes only
+                allowedPattern = /[a-zA-Z\s\-']/g;
+            } else if (fieldName.toLowerCase().includes('address') || fieldName.toLowerCase().includes('description') || fieldName.toLowerCase().includes('notes') || fieldName.toLowerCase().includes('purpose')) {
+                // Addresses/descriptions: letters, numbers, basic punctuation
+                allowedPattern = /[a-zA-Z0-9\s\.,\-'()#/]/g;
+            } else {
+                // Default: letters, numbers, spaces, basic punctuation
+                allowedPattern = /[a-zA-Z0-9\s\.,\-'()]/g;
+            }
+            
+            sanitized = (sanitized.match(allowedPattern) || []).join('');
+
+            // Check for minimum length
+            if (sanitized.length < 2) {
+                return { isValid: false, message: `${fieldName} must be at least 2 characters long` };
+            }
+
+            // Check for maximum length
+            if (sanitized.length > 100) {
+                return { isValid: false, message: `${fieldName} must not exceed 100 characters` };
+            }
+
+            return { isValid: true, value: sanitized };
+        }
+
+        // Validate email address
+        function validateEmailInput(email) {
+            if (!email) {
+                return { isValid: false, message: 'Email address is required' };
+            }
+
+            const sanitized = sanitizeInput(email.trim());
+            const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+            if (!emailRegex.test(sanitized)) {
+                return { isValid: false, message: 'Please enter a valid email address' };
+            }
+
+            return { isValid: true, value: sanitized };
+        }
+
+        // Validate phone number
+        function validatePhoneInput(phone) {
+            if (!phone) return { isValid: true, value: '' }; // Optional field
+
+            const sanitized = sanitizeInput(phone.trim());
+            const phoneRegex = /^[\d\s\-\+\(\)]{7,20}$/;
+
+            if (!phoneRegex.test(sanitized)) {
+                return { isValid: false, message: 'Please enter a valid phone number (digits, spaces, +, -, (), only)' };
+            }
+
+            return { isValid: true, value: sanitized };
+        }
+
+        // Validate numbers (amounts, quantities)
+        function validateNumberInput(number, fieldName, min = 0, max = 999999999) {
+            if (number === '' || number === null || number === undefined) {
+                return { isValid: false, message: `${fieldName} is required` };
+            }
+
+            const num = parseFloat(number);
+            
+            if (isNaN(num)) {
+                return { isValid: false, message: `${fieldName} must be a valid number` };
+            }
+
+            if (num < min) {
+                return { isValid: false, message: `${fieldName} must be at least ${min}` };
+            }
+
+            if (num > max) {
+                return { isValid: false, message: `${fieldName} must not exceed ${max}` };
+            }
+
+            return { isValid: true, value: num };
+        }
+
+        // Validate address/description fields (longer text)
+        function validateLongTextInput(input, fieldName, maxLength = 500) {
+            if (!input) return { isValid: true, value: '' }; // Optional field
+
+            const sanitized = sanitizeInput(input.trim());
+            
+            if (sanitized.length > maxLength) {
+                return { isValid: false, message: `${fieldName} must not exceed ${maxLength} characters` };
+            }
+
+            // Check for dangerous patterns
+            const dangerousPatterns = [
+                /script/gi,
+                /javascript/gi,
+                /vbscript/gi,
+                /onload/gi,
+                /onerror/gi,
+                /onclick/gi
+            ];
+
+            for (const pattern of dangerousPatterns) {
+                if (pattern.test(sanitized)) {
+                    return { isValid: false, message: `${fieldName} contains invalid characters` };
+                }
+            }
+
+            return { isValid: true, value: sanitized };
+        }
+
+        // Real-time input sanitization for form fields
+        function setupInputSanitization() {
+            // Get all text inputs, textareas, and relevant form fields
+            const textInputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], textarea');
+            
+            textInputs.forEach(input => {
+                // Prevent dangerous and special characters on keypress
+                input.addEventListener('keypress', function(e) {
+                    const char = String.fromCharCode(e.which);
+                    let allowedPattern;
+                    
+                    // Define allowed patterns based on field type
+                    if (input.name === 'donorName' || input.name === 'receiverName' || input.name === 'itemName' || input.name === 'itemBrand') {
+                        // Names: letters, spaces, hyphens, apostrophes only
+                        allowedPattern = /^[a-zA-Z\s\-']*$/;
+                    } else if (input.name === 'contactNumber') {
+                        // Phone numbers: digits, spaces, hyphens, parentheses, plus only
+                        allowedPattern = /^[\d\s\-\+\(\)]*$/;
+                    } else if (input.type === 'email') {
+                        // Email: letters, numbers, @ . _ - only
+                        allowedPattern = /^[a-zA-Z0-9@._-]*$/;
+                    } else if (input.name === 'address' || input.name === 'itemDescription' || input.name === 'notes' || input.name === 'purpose') {
+                        // Addresses/descriptions: letters, numbers, basic punctuation only
+                        allowedPattern = /^[a-zA-Z0-9\s\.,\-'()]*$/;
+                    } else {
+                        // Default: letters, numbers, spaces, basic punctuation
+                        allowedPattern = /^[a-zA-Z0-9\s\.,\-'()]*$/;
+                    }
+                    
+                    if (!allowedPattern.test(char)) {
+                        e.preventDefault();
+                        showValidationMessage(input, 'Only letters, numbers, and basic punctuation allowed', 'warning');
+                        return false;
+                    }
+                });
+
+                // Handle paste events - filter to allowed characters only
+                input.addEventListener('paste', function(e) {
+                    setTimeout(() => {
+                        const value = input.value;
+                        let allowedPattern;
+                        
+                        // Define allowed patterns based on field type (same as keypress)
+                        if (input.name === 'donorName' || input.name === 'receiverName' || input.name === 'itemName' || input.name === 'itemBrand') {
+                            allowedPattern = /[a-zA-Z\s\-']/g;
+                        } else if (input.name === 'contactNumber') {
+                            allowedPattern = /[\d\s\-\+\(\)]/g;
+                        } else if (input.type === 'email') {
+                            allowedPattern = /[a-zA-Z0-9@._-]/g;
+                        } else if (input.name === 'address' || input.name === 'itemDescription' || input.name === 'notes' || input.name === 'purpose') {
+                            allowedPattern = /[a-zA-Z0-9\s\.,\-'()]/g;
+                        } else {
+                            allowedPattern = /[a-zA-Z0-9\s\.,\-'()]/g;
+                        }
+                        
+                        const cleanValue = (value.match(allowedPattern) || []).join('');
+                        
+                        if (value !== cleanValue) {
+                            input.value = cleanValue;
+                            showValidationMessage(input, 'Special characters were removed from pasted content', 'warning');
+                        }
+                    }, 10);
+                });
+
+                // Add restrictive pattern validation for specific fields (same as add-child.html)
+                if (input.name === 'donorName' || input.name === 'receiverName' || input.name === 'itemName' || input.name === 'itemBrand') {
+                    input.pattern = "^[a-zA-Z\\s\\-']*$";
+                    input.title = "Only letters, spaces, hyphens, and apostrophes allowed";
+                }
+
+                if (input.name === 'contactNumber') {
+                    input.pattern = "^[\\d\\s\\-\\+\\(\\)]*$";
+                    input.title = "Only numbers, spaces, hyphens, parentheses, and plus sign allowed";
+                }
+                
+                if (input.name === 'address' || input.name === 'itemDescription' || input.name === 'notes' || input.name === 'purpose') {
+                    input.pattern = "^[a-zA-Z0-9\\s\\.,\\-'()#/]*$";
+                    input.title = "Only letters, numbers, spaces, and basic punctuation allowed";
+                }
+            });
+        }
+
+        // Show validation message near input field
+        function showValidationMessage(inputElement, message, type = 'error') {
+            // Remove existing validation message
+            const existingMessage = inputElement.parentNode.querySelector('.validation-message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+
+            // Create new validation message
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `validation-message text-sm mt-1 ${type === 'error' ? 'text-red-600' : type === 'warning' ? 'text-yellow-600' : 'text-green-600'}`;
+            messageDiv.textContent = message;
+
+            // Insert after input element
+            inputElement.parentNode.insertBefore(messageDiv, inputElement.nextSibling);
+
+            // Auto-remove after 3 seconds for warnings
+            if (type === 'warning') {
+                setTimeout(() => {
+                    if (messageDiv.parentNode) {
+                        messageDiv.remove();
+                    }
+                }, 3000);
+            }
+        }
+
+        // Validate entire form before submission
+        function validateForm(formId) {
+            const form = document.getElementById(formId);
+            const formData = new FormData(form);
+            const errors = [];
+
+            if (formId === 'moneyDonationForm') {
+                return validateMoneyDonationForm(formData);
+            } else if (formId === 'inKindDonationForm') {
+                return validateInKindDonationForm(formData);
+            }
+
+            return { isValid: false, errors: ['Unknown form type'] };
+        }
+
+        // Validate money donation form
+        function validateMoneyDonationForm(formData) {
+            const errors = [];
+            const isAnonymous = formData.get('anonymous') === 'on';
+
+            // Validate donor name (if not anonymous)
+            if (!isAnonymous) {
+                const donorName = validateTextInput(formData.get('donorName'), 'Donor Name');
+                if (!donorName.isValid) errors.push(donorName.message);
+
+                const email = validateEmailInput(formData.get('emailAddress'));
+                if (!email.isValid) errors.push(email.message);
+            }
+
+            // Validate contact number (optional)
+            const phone = validatePhoneInput(formData.get('contactNumber'));
+            if (!phone.isValid) errors.push(phone.message);
+
+            // Validate amount
+            const amount = validateNumberInput(formData.get('amount'), 'Amount', 1, 10000000);
+            if (!amount.isValid) errors.push(amount.message);
+
+            // Validate purpose/description
+            const purpose = validateLongTextInput(formData.get('purpose'), 'Purpose');
+            if (!purpose.isValid) errors.push(purpose.message);
+
+            // Validate address
+            const address = validateLongTextInput(formData.get('address'), 'Address');
+            if (!address.isValid) errors.push(address.message);
+
+            // Validate payment-specific fields
+            const paymentType = formData.get('typeOfDonation');
+            if (paymentType === 'Bank Transfer') {
+                const transactionRef = validateTextInput(formData.get('transactionRef'), 'Transaction Reference');
+                if (!transactionRef.isValid) errors.push(transactionRef.message);
+
+                const accountInfo = validateTextInput(formData.get('accountInfo'), 'Account Information');
+                if (!accountInfo.isValid) errors.push(accountInfo.message);
+            } else if (paymentType === 'Check') {
+                const checkNumber = validateTextInput(formData.get('checkNumber'), 'Check Number');
+                if (!checkNumber.isValid) errors.push(checkNumber.message);
+
+                const payeeName = validateTextInput(formData.get('payeeName'), 'Payee Name');
+                if (!payeeName.isValid) errors.push(payeeName.message);
+            } else if (paymentType === 'Online Payment') {
+                const onlineRef = validateTextInput(formData.get('onlineTransactionRef'), 'Transaction Reference');
+                if (!onlineRef.isValid) errors.push(onlineRef.message);
+            }
+
+            return { isValid: errors.length === 0, errors };
+        }
+
+        // Validate in-kind donation form
+        function validateInKindDonationForm(formData) {
+            const errors = [];
+            const isAnonymous = formData.get('anonymous') === 'on';
+
+            // Validate donor name (if not anonymous)
+            if (!isAnonymous) {
+                const donorName = validateTextInput(formData.get('donorName'), 'Donor Name');
+                if (!donorName.isValid) errors.push(donorName.message);
+
+                const email = validateEmailInput(formData.get('emailAddress'));
+                if (!email.isValid) errors.push(email.message);
+            }
+
+            // Validate contact number (optional)
+            const phone = validatePhoneInput(formData.get('contactNumber'));
+            if (!phone.isValid) errors.push(phone.message);
+
+            // Validate item information
+            const itemName = validateTextInput(formData.get('itemName'), 'Item Name');
+            if (!itemName.isValid) errors.push(itemName.message);
+
+            const itemDescription = validateLongTextInput(formData.get('itemDescription'), 'Item Description', 1000);
+            if (!itemDescription.isValid) errors.push(itemDescription.message);
+
+            const itemBrand = validateTextInput(formData.get('itemBrand') || '', 'Item Brand');
+            if (formData.get('itemBrand') && !itemBrand.isValid) errors.push(itemBrand.message);
+
+            // Validate quantities
+            const itemType = formData.get('itemType') || 'simple';
+            if (itemType === 'simple') {
+                const quantity = validateNumberInput(formData.get('quantity'), 'Quantity', 1, 1000000);
+                if (!quantity.isValid) errors.push(quantity.message);
+            } else if (itemType === 'packaged') {
+                const primaryQty = validateNumberInput(formData.get('primaryQuantity'), 'Primary Quantity', 1, 10000);
+                if (!primaryQty.isValid) errors.push(primaryQty.message);
+
+                const secondaryQty = validateNumberInput(formData.get('secondaryQuantity'), 'Secondary Quantity', 1, 10000);
+                if (!secondaryQty.isValid) errors.push(secondaryQty.message);
+            }
+
+            // Validate receiver name
+            const receiverName = validateTextInput(formData.get('receiverName') || '', 'Receiver Name');
+            if (formData.get('receiverName') && !receiverName.isValid) errors.push(receiverName.message);
+
+            // Validate notes
+            const notes = validateLongTextInput(formData.get('notes'), 'Notes');
+            if (!notes.isValid) errors.push(notes.message);
+
+            // Validate address
+            const address = validateLongTextInput(formData.get('address'), 'Address');
+            if (!address.isValid) errors.push(address.message);
+
+            return { isValid: errors.length === 0, errors };
+        }
 
         // Check for duplicate donation ID
         async function checkDuplicateDonationId(donationId) {
@@ -1232,6 +1684,9 @@
             
             // Initialize item type fields (ensure simple is selected by default)
             toggleItemTypeFields();
+            
+            // Check for offline records on page load and notify user
+            checkOfflineRecordsOnLoad();
         });
 
         function setupEventListeners() {
@@ -1345,6 +1800,223 @@
                     element.addEventListener('input', calculatePackagedTotals);
                     element.addEventListener('change', calculatePackagedTotals);
                 }
+            });
+            
+            // Setup security validation
+            setupInputSanitization();
+        }
+
+        // ========== OFFLINE NOTIFICATION FUNCTIONS ==========
+        
+        // Check for offline records on page load and notify user
+        function checkOfflineRecordsOnLoad() {
+            const moneyRecords = getOfflineMoneyDonations();
+            const inKindRecords = getOfflineInKindDonations();
+            const totalRecords = moneyRecords.length + inKindRecords.length;
+            
+            if (totalRecords > 0) {
+                // Calculate how long ago the oldest record was saved
+                const allRecords = [...moneyRecords, ...inKindRecords];
+                const oldestRecord = allRecords.reduce((oldest, record) => 
+                    new Date(record.savedAt) < new Date(oldest.savedAt) ? record : oldest
+                );
+                
+                const savedTime = new Date(oldestRecord.savedAt);
+                const now = new Date();
+                const timeDiff = now - savedTime;
+                const hoursAgo = Math.floor(timeDiff / (1000 * 60 * 60));
+                const daysAgo = Math.floor(hoursAgo / 24);
+                
+                let timeText = '';
+                if (daysAgo > 0) {
+                    timeText = `${daysAgo} day${daysAgo > 1 ? 's' : ''} ago`;
+                } else if (hoursAgo > 0) {
+                    timeText = `${hoursAgo} hour${hoursAgo > 1 ? 's' : ''} ago`;
+                } else {
+                    timeText = 'recently';
+                }
+                
+                let recordTypeText = '';
+                if (moneyRecords.length > 0 && inKindRecords.length > 0) {
+                    recordTypeText = `${moneyRecords.length} money and ${inKindRecords.length} in-kind donation record${totalRecords > 1 ? 's' : ''}`;
+                } else if (moneyRecords.length > 0) {
+                    recordTypeText = `${moneyRecords.length} money donation record${moneyRecords.length > 1 ? 's' : ''}`;
+                } else {
+                    recordTypeText = `${inKindRecords.length} in-kind donation record${inKindRecords.length > 1 ? 's' : ''}`;
+                }
+                
+                const message = `You have ${recordTypeText} saved ${timeText}.\n\nThese records are stored locally and need to be synced when you have an internet connection.`;
+                
+                setTimeout(async () => {
+                    const action = await showOfflineNotificationModal(message, totalRecords);
+                    
+                    if (action === 'view') {
+                        openOfflineModal();
+                    } else if (action === 'sync' && navigator.onLine) {
+                        syncAllOfflineRecords();
+                    }
+                }, 1000);
+            }
+        }
+
+        // Generic message modal functions
+        function showMessageModal(title, message, type = 'info', showCancel = false) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('messageModal');
+                const titleEl = document.getElementById('messageTitle');
+                const textEl = document.getElementById('messageText');
+                const iconEl = document.getElementById('messageIcon');
+                const okBtn = document.getElementById('messageOkBtn');
+                const cancelBtn = document.getElementById('messageCancelBtn');
+                
+                titleEl.textContent = title;
+                textEl.textContent = message;
+                
+                // Set icon and colors based on type
+                let iconHTML = '';
+                let iconBgClass = '';
+                
+                switch (type) {
+                    case 'success':
+                        iconBgClass = 'bg-green-100';
+                        iconHTML = `<svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>`;
+                        break;
+                    case 'error':
+                        iconBgClass = 'bg-red-100';
+                        iconHTML = `<svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>`;
+                        break;
+                    case 'warning':
+                        iconBgClass = 'bg-yellow-100';
+                        iconHTML = `<svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z"/>
+                        </svg>`;
+                        break;
+                    default:
+                        iconBgClass = 'bg-blue-100';
+                        iconHTML = `<svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>`;
+                }
+                
+                iconEl.className = `mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4 ${iconBgClass}`;
+                iconEl.innerHTML = iconHTML;
+                
+                if (showCancel) {
+                    cancelBtn.classList.remove('hidden');
+                } else {
+                    cancelBtn.classList.add('hidden');
+                }
+                
+                const handleOk = () => {
+                    modal.classList.add('hidden');
+                    resolve(true);
+                };
+                
+                const handleCancel = () => {
+                    modal.classList.add('hidden');
+                    resolve(false);
+                };
+                
+                // Remove existing event listeners
+                okBtn.replaceWith(okBtn.cloneNode(true));
+                cancelBtn.replaceWith(cancelBtn.cloneNode(true));
+                
+                // Get new references after replacing
+                const newOkBtn = document.getElementById('messageOkBtn');
+                const newCancelBtn = document.getElementById('messageCancelBtn');
+                
+                newOkBtn.addEventListener('click', handleOk);
+                newCancelBtn.addEventListener('click', handleCancel);
+                
+                modal.classList.remove('hidden');
+            });
+        }
+
+        function showSuccessMessage(message) {
+            return showMessageModal('Success', message, 'success');
+        }
+
+        function showErrorMessage(message) {
+            return showMessageModal('Error', message, 'error');
+        }
+
+        function showWarningMessage(message) {
+            return showMessageModal('Warning', message, 'warning');
+        }
+
+        function showConfirmMessage(message) {
+            return showMessageModal('Confirm', message, 'question', true);
+        }
+
+        // Special notification modal for offline records on page load
+        function showOfflineNotificationModal(message, recordCount) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('messageModal');
+                const titleEl = document.getElementById('messageTitle');
+                const textEl = document.getElementById('messageText');
+                const iconEl = document.getElementById('messageIcon');
+                const okBtn = document.getElementById('messageOkBtn');
+                const cancelBtn = document.getElementById('messageCancelBtn');
+                
+                // Set title and message
+                titleEl.textContent = 'Offline Records Found';
+                textEl.textContent = message;
+                
+                // Set warning icon and colors
+                iconEl.className = 'mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4 bg-yellow-100';
+                iconEl.innerHTML = `
+                    <svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z"/>
+                    </svg>
+                `;
+                
+                // Update button layout for three options
+                const buttonContainer = okBtn.parentElement;
+                buttonContainer.innerHTML = `
+                    <button id="dismissBtn" class="px-4 py-2 text-gray-500 hover:text-gray-700 transition-colors">
+                        Dismiss
+                    </button>
+                    <button id="viewOfflineBtn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors">
+                        View Records
+                    </button>
+                    ${navigator.onLine ? `
+                        <button id="syncNowBtn" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors">
+                            Sync Now
+                        </button>
+                    ` : ''}
+                `;
+                
+                // Set up event handlers
+                const handleDismiss = () => {
+                    modal.classList.add('hidden');
+                    resolve('dismiss');
+                };
+                
+                const handleView = () => {
+                    modal.classList.add('hidden');
+                    resolve('view');
+                };
+                
+                const handleSync = () => {
+                    modal.classList.add('hidden');
+                    resolve('sync');
+                };
+                
+                document.getElementById('dismissBtn').addEventListener('click', handleDismiss);
+                document.getElementById('viewOfflineBtn').addEventListener('click', handleView);
+                if (navigator.onLine) {
+                    const syncBtn = document.getElementById('syncNowBtn');
+                    if (syncBtn) {
+                        syncBtn.addEventListener('click', handleSync);
+                    }
+                }
+                
+                // Show modal
+                modal.classList.remove('hidden');
             });
         }
 
@@ -2306,8 +2978,6 @@
             const formData = new FormData(form);
             
             try {
-                showLoadingScreen('Processing donation...');
-
                 // Generate donation ID
                 const donationId = await generateDonationId();
                 
@@ -2356,21 +3026,39 @@
                     };
                 }
 
-                // Save to Firestore
-                const success = await saveDonationToFirestore(donationData);
+                // Check if online first, before showing loading screen or attempting to save
+                if (navigator.onLine) {
+                    // Show loading screen only for online saves
+                    showLoadingScreen('Processing donation...');
+                    
+                    // Save to Firestore
+                    const success = await saveDonationToFirestore(donationData);
 
-                if (success) {
-                    // Send thank you email if email is provided and donation is not anonymous
-                    if (donationData.emailAddress && !donationData.isAnonymous) {
-                        await sendDonationThankYouEmail(donationData);
+                    if (success) {
+                        // Send thank you email if email is provided and donation is not anonymous
+                        if (donationData.emailAddress && !donationData.isAnonymous) {
+                            await sendDonationThankYouEmail(donationData);
+                        }
+
+                        // Reset form and show success message
+                        resetMoneyForm();
+                        hideLoadingScreen();
+                        showSuccessModal('Donation recorded successfully!', donationData.donationId);
+                    } else {
+                        throw new Error('Failed to save donation');
                     }
-
-                    // Reset form and show success message
-                    resetMoneyForm();
-                    hideLoadingScreen();
-                    showSuccessModal('Donation recorded successfully!', donationData.donationId);
                 } else {
-                    throw new Error('Failed to save donation');
+                    // Save offline when no internet connection (no loading screen needed)
+                    const donorName = donationData.isAnonymous ? 'Anonymous' : donationData.donorName;
+                    const amount = donationData.amount.toLocaleString('en-US', {minimumFractionDigits: 2});
+                    
+                    const savedOffline = saveMoneyDonationOffline(donationData);
+                    if (savedOffline) {
+                        showOfflineSuccessModal(`Money donation from ${donorName} (₱${amount}) saved offline successfully!`, 'money');
+                        resetMoneyForm();
+                    } else {
+                        showErrorModal('Failed to save donation offline. Please try again.');
+                    }
                 }
 
             } catch (error) {
@@ -2391,8 +3079,6 @@
             const formData = new FormData(form);
             
             try {
-                showLoadingScreen('Processing donation...');
-
                 // Generate donation ID
                 const donationId = await generateDonationId();
                 
@@ -2422,23 +3108,42 @@
                     donationData.photoString = await convertPhotoToBase64(photoInput.files[0]);
                 }
 
-                // Save to Firestore and create inventory item
-                const success = await saveDonationToFirestore(donationData);
-                if (success) {
-                    // Create inventory item
-                    const inventoryId = await createInventoryFromDonation(donationData);
+                // Check if online first, before showing loading screen or attempting to save
+                if (navigator.onLine) {
+                    // Show loading screen only for online saves
+                    showLoadingScreen('Processing donation...');
+                    
+                    // Save to Firestore and create inventory item
+                    const success = await saveDonationToFirestore(donationData);
+                    if (success) {
+                        // Create inventory item
+                        const inventoryId = await createInventoryFromDonation(donationData);
 
-                    // Send thank you email if email is provided and donation is not anonymous
-                    if (donationData.emailAddress && !donationData.isAnonymous) {
-                        await sendDonationThankYouEmail(donationData);
+                        // Send thank you email if email is provided and donation is not anonymous
+                        if (donationData.emailAddress && !donationData.isAnonymous) {
+                            await sendDonationThankYouEmail(donationData);
+                        }
+
+                        // Reset form and show success message
+                        resetInKindForm();
+                        hideLoadingScreen();
+                        showSuccessModal('Donation recorded successfully!', donationData.donationId, inventoryId);
+                    } else {
+                        throw new Error('Failed to save donation');
                     }
-
-                    // Reset form and show success message
-                    resetInKindForm();
-                    hideLoadingScreen();
-                    showSuccessModal('Donation recorded successfully!', donationData.donationId, inventoryId);
                 } else {
-                    throw new Error('Failed to save donation');
+                    // Save offline when no internet connection (no loading screen needed)
+                    const donorName = donationData.isAnonymous ? 'Anonymous' : donationData.donorName;
+                    const itemName = donationData.itemDescription;
+                    const quantity = `${donationData.quantity} ${donationData.unit || ''}`;
+                    
+                    const savedOffline = saveInKindDonationOffline(donationData);
+                    if (savedOffline) {
+                        showOfflineSuccessModal(`In-kind donation from ${donorName} (${quantity} ${itemName}) saved offline successfully!`, 'in-kind');
+                        resetInKindForm();
+                    } else {
+                        showErrorModal('Failed to save donation offline. Please try again.');
+                    }
                 }
 
             } catch (error) {
@@ -2531,12 +3236,23 @@
             
             // Check if this is the initial submission (show preview) or confirmation (save record)
             if (form.dataset.confirmed !== 'true') {
-                // Validate required fields before showing preview
+                // Validate form data before showing preview
                 const formData = new FormData(form);
+                const validation = validateForm('moneyDonationForm');
+                
+                if (!validation.isValid) {
+                    let errorMessage = 'Please correct the following errors:\n\n';
+                    validation.errors.forEach((error, index) => {
+                        errorMessage += `${index + 1}. ${error}\n`;
+                    });
+                    showErrorModal(errorMessage);
+                    return;
+                }
+                
                 const isAnonymous = formData.get('anonymous') === 'on';
                 const paymentType = formData.get('typeOfDonation');
                 
-                // Basic validation
+                // Additional validation for required fields
                 if (!formData.get('dateOfDonation') || !paymentType || !formData.get('amount')) {
                     showErrorModal('Please fill in all required fields (date, payment type, and amount).');
                     return;
@@ -2547,19 +3263,31 @@
                     return;
                 }
                 
-                // Payment-specific validation
+                // Payment-specific validation with sanitization
                 if (paymentType === 'Bank Transfer') {
-                    if (!formData.get('bankName') || !formData.get('accountInfo') || !formData.get('transactionRef')) {
+                    const bankName = sanitizeInput(formData.get('bankName') || '');
+                    const accountInfo = sanitizeInput(formData.get('accountInfo') || '');
+                    const transactionRef = sanitizeInput(formData.get('transactionRef') || '');
+                    
+                    if (!bankName || !accountInfo || !transactionRef) {
                         showErrorModal('Please fill in all bank transfer details.');
                         return;
                     }
                 } else if (paymentType === 'Check') {
-                    if (!formData.get('checkNumber') || !formData.get('checkBankName') || !formData.get('checkDate') || !formData.get('payeeName')) {
+                    const checkNumber = sanitizeInput(formData.get('checkNumber') || '');
+                    const checkBankName = sanitizeInput(formData.get('checkBankName') || '');
+                    const checkDate = formData.get('checkDate');
+                    const payeeName = sanitizeInput(formData.get('payeeName') || '');
+                    
+                    if (!checkNumber || !checkBankName || !checkDate || !payeeName) {
                         showErrorModal('Please fill in all check details.');
                         return;
                     }
                 } else if (paymentType === 'Online Payment') {
-                    if (!formData.get('onlinePaymentMethod') || !formData.get('onlineTransactionRef')) {
+                    const onlineMethod = sanitizeInput(formData.get('onlinePaymentMethod') || '');
+                    const onlineRef = sanitizeInput(formData.get('onlineTransactionRef') || '');
+                    
+                    if (!onlineMethod || !onlineRef) {
                         showErrorModal('Please fill in all online payment details.');
                         return;
                     }
@@ -2577,50 +3305,50 @@
 
             const donationData = {
                 donationType: 'money',
-                dateOfDonation: formData.get('dateOfDonation'),
-                donorName: isAnonymous ? 'Anonymous' : formData.get('donorName'),
-                contactNumber: formData.get('contactNumber') || '',
-                emailAddress: isAnonymous ? '' : formData.get('emailAddress'),
-                address: formData.get('address') || '',
-                typeOfDonation: paymentType,
+                dateOfDonation: sanitizeInput(formData.get('dateOfDonation')),
+                donorName: isAnonymous ? 'Anonymous' : sanitizeInput(formData.get('donorName')),
+                contactNumber: sanitizeInput(formData.get('contactNumber') || ''),
+                emailAddress: isAnonymous ? '' : sanitizeInput(formData.get('emailAddress')),
+                address: sanitizeInput(formData.get('address') || ''),
+                typeOfDonation: sanitizeInput(paymentType),
                 amount: parseFloat(formData.get('amount')),
-                purpose: formData.get('purpose') || '',
-                tin: formData.get('tin') || '',
+                purpose: sanitizeInput(formData.get('purpose') || ''),
+                tin: sanitizeInput(formData.get('tin') || ''),
                 isAnonymous: isAnonymous,
                 dateAdded: new Date().toISOString().split('T')[0],
                 donationId: await generateDonationId()
             };
 
-            // Add payment-specific fields
+            // Add payment-specific fields with sanitization
             if (paymentType === 'Bank Transfer') {
                 donationData.paymentDetails = {
-                    bankName: formData.get('bankName'),
-                    bankBranch: formData.get('bankBranch') || '',
-                    accountInfo: formData.get('accountInfo'),
-                    transactionRef: formData.get('transactionRef')
+                    bankName: sanitizeInput(formData.get('bankName')),
+                    bankBranch: sanitizeInput(formData.get('bankBranch') || ''),
+                    accountInfo: sanitizeInput(formData.get('accountInfo')),
+                    transactionRef: sanitizeInput(formData.get('transactionRef'))
                 };
             } else if (paymentType === 'Check') {
                 donationData.paymentDetails = {
-                    checkNumber: formData.get('checkNumber'),
-                    bankName: formData.get('checkBankName'),
-                    bankBranch: formData.get('checkBranch') || '',
+                    checkNumber: sanitizeInput(formData.get('checkNumber')),
+                    bankName: sanitizeInput(formData.get('checkBankName')),
+                    bankBranch: sanitizeInput(formData.get('checkBranch') || ''),
                     checkDate: formData.get('checkDate'),
-                    payeeName: formData.get('payeeName')
+                    payeeName: sanitizeInput(formData.get('payeeName'))
                 };
             } else if (paymentType === 'Online Payment') {
                 donationData.paymentDetails = {
-                    paymentMethod: formData.get('onlinePaymentMethod'),
-                    transactionRef: formData.get('onlineTransactionRef')
+                    paymentMethod: sanitizeInput(formData.get('onlinePaymentMethod')),
+                    transactionRef: sanitizeInput(formData.get('onlineTransactionRef'))
                 };
             }
 
-            // Show enhanced loading screen with donation details
-            const donorName = donationData.donorName;
-            const amount = donationData.amount.toLocaleString('en-US', {minimumFractionDigits: 2});
-            showLoadingScreen(`Saving money donation from ${donorName} (₱${amount})...`);
-
-            // Check if online
+            // Check if online first, before showing loading screen
             if (navigator.onLine) {
+                // Show enhanced loading screen with donation details only for online saves
+                const donorName = donationData.donorName;
+                const amount = donationData.amount.toLocaleString('en-US', {minimumFractionDigits: 2});
+                showLoadingScreen(`Saving money donation from ${donorName} (₱${amount})...`);
+                
                 // Try to save online first
                 try {
                     const result = await saveDonationToFirestore(donationData);
@@ -2640,8 +3368,10 @@
                     }
                 }
             } else {
-                hideLoadingScreen();
-                // Save offline when no internet connection
+                // Save offline when no internet connection (no loading screen needed)
+                const donorName = donationData.donorName;
+                const amount = donationData.amount.toLocaleString('en-US', {minimumFractionDigits: 2});
+                
                 const savedOffline = saveMoneyDonationOffline(donationData);
                 if (savedOffline) {
                     showOfflineSuccessModal(`Money donation of ₱${amount} from ${donorName} saved offline.`, 'money');
@@ -2658,8 +3388,19 @@
             
             // Check if this is the initial submission (show preview) or confirmation (save record)
             if (form.dataset.confirmed !== 'true') {
-                // Validate required fields before showing preview
+                // Validate form data before showing preview
                 const formData = new FormData(form);
+                const validation = validateForm('inKindDonationForm');
+                
+                if (!validation.isValid) {
+                    let errorMessage = 'Please correct the following errors:\n\n';
+                    validation.errors.forEach((error, index) => {
+                        errorMessage += `${index + 1}. ${error}\n`;
+                    });
+                    showErrorModal(errorMessage);
+                    return;
+                }
+                
                 const isAnonymous = formData.get('anonymous') === 'on';
                 const itemType = formData.get('itemType') || 'simple';
                 
@@ -2699,23 +3440,23 @@
             const isAnonymous = formData.get('anonymous') === 'on';
             const itemType = formData.get('itemType') || 'simple';
 
-            // Create base donation data
+            // Create base donation data with sanitization
             const donationData = {
                 donationType: 'in-kind',
-                dateOfDonation: formData.get('dateOfDonation'),
-                itemCategory: formData.get('itemCategory'),
-                itemName: formData.get('itemName'),
-                itemBrand: formData.get('itemBrand') || '',
-                itemDescription: formData.get('itemDescription'),
-                itemType: itemType,
-                conditionOfItems: formData.get('conditionOfItems'),
+                dateOfDonation: sanitizeInput(formData.get('dateOfDonation')),
+                itemCategory: sanitizeInput(formData.get('itemCategory')),
+                itemName: sanitizeInput(formData.get('itemName')),
+                itemBrand: sanitizeInput(formData.get('itemBrand') || ''),
+                itemDescription: sanitizeInput(formData.get('itemDescription')),
+                itemType: sanitizeInput(itemType),
+                conditionOfItems: sanitizeInput(formData.get('conditionOfItems')),
                 expiryDate: formData.get('expiryDate') || '',
-                receiverName: formData.get('receiverName') || '',
-                notes: formData.get('notes') || '',
-                donorName: isAnonymous ? 'Anonymous' : formData.get('donorName'),
-                contactNumber: formData.get('contactNumber') || '',
-                emailAddress: isAnonymous ? '' : formData.get('emailAddress'),
-                address: formData.get('address') || '',
+                receiverName: sanitizeInput(formData.get('receiverName') || ''),
+                notes: sanitizeInput(formData.get('notes') || ''),
+                donorName: isAnonymous ? 'Anonymous' : sanitizeInput(formData.get('donorName')),
+                contactNumber: sanitizeInput(formData.get('contactNumber') || ''),
+                emailAddress: isAnonymous ? '' : sanitizeInput(formData.get('emailAddress')),
+                address: sanitizeInput(formData.get('address') || ''),
                 isAnonymous: isAnonymous,
                 dateAdded: new Date().toISOString().split('T')[0],
                 donationId: await generateDonationId()
@@ -2761,7 +3502,7 @@
                 donationData.photoString = '';
             }
 
-            // Show enhanced loading screen with donation details
+            // Create display text variables for later use
             const donorName = donationData.donorName;
             const itemName = donationData.itemName;
             
@@ -2772,11 +3513,12 @@
             } else {
                 quantityDisplay = `${donationData.primaryQuantity} ${donationData.primaryUnit} of ${donationData.secondaryQuantity} ${donationData.secondaryUnit} each (${donationData.calculatedTotalQuantity} total)`;
             }
-            
-            showLoadingScreen(`Saving in-kind donation from ${donorName} (${quantityDisplay} ${itemName})...`);
 
-            // Check if online
+            // Check if online first, before showing loading screen
             if (navigator.onLine) {
+                // Show enhanced loading screen with donation details only for online saves
+                showLoadingScreen(`Saving in-kind donation from ${donorName} (${quantityDisplay} ${itemName})...`);
+                
                 // Try to save online first
                 try {
                     const result = await saveDonationToFirestore(donationData);
@@ -2799,8 +3541,7 @@
                     }
                 }
             } else {
-                hideLoadingScreen();
-                // Save offline when no internet connection
+                // Save offline when no internet connection (no loading screen needed)
                 const savedOffline = saveInKindDonationOffline(donationData);
                 if (savedOffline) {
                     showOfflineSuccessModal(`In-kind donation of ${quantityDisplay} ${itemName} from ${donorName} saved offline.`, 'in-kind');
@@ -3522,17 +4263,19 @@
                         itemDescription += ` [${donationData.primaryQuantity} ${donationData.primaryUnit} of ${donationData.secondaryQuantity} ${donationData.secondaryUnit} each]`;
                     }
                     
-                    emailData.append('donationItems', itemDescription);
-                    console.log('Email item description:', itemDescription); // Debug log
+                emailData.append('donationItems', itemDescription);
+                console.log('Email item description:', itemDescription); // Debug log
                 }
+
+                console.log('Sending email to:', donationData.emailAddress);
+                console.log('Current page URL:', window.location.href);
+                console.log('Mail.php URL will be:', new URL('mail.php', window.location.href).href);
 
                 // Send email via AJAX to mail.php
                 const response = await fetch('mail.php', {
                     method: 'POST',
                     body: emailData
-                });
-
-                // Check if response is OK
+                });                // Check if response is OK
                 if (!response.ok) {
                     console.log('HTTP error when sending email:', response.status, response.statusText);
                     return;
@@ -3540,6 +4283,16 @@
 
                 // Get response text first to check if it's valid JSON
                 const responseText = await response.text();
+                console.log('Raw response from mail.php:', responseText);
+                
+                // Check if response looks like PHP source code (indicates Apache/PHP not working)
+                if (responseText.trim().startsWith('<?php')) {
+                    console.error('ERROR: Received PHP source code instead of executed result!');
+                    console.error('This indicates that Apache or PHP is not properly configured.');
+                    console.error('Please ensure XAMPP Apache is running and PHP is properly configured.');
+                    showMessage('Email service unavailable (Apache/PHP configuration issue)', 'warning');
+                    return;
+                }
                 
                 let result;
                 try {
@@ -3547,6 +4300,7 @@
                 } catch (parseError) {
                     console.error('Invalid JSON response from mail.php:', responseText);
                     console.error('Parse error:', parseError);
+                    showMessage('Email service response error', 'warning');
                     return;
                 }
                 
@@ -3557,10 +4311,12 @@
                 } else {
                     console.log('Failed to send thank you email:', result.message);
                     // Don't show error to user as donation was still saved successfully
+                    showMessage('Donation recorded successfully (email could not be sent)', 'success');
                 }
             } catch (error) {
                 console.error('Error sending thank you email:', error);
                 // Don't throw error as donation was saved successfully
+                showMessage('Donation recorded successfully (email service unavailable)', 'success');
             }
         }
 

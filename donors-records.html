@@ -19,6 +19,51 @@
             }
         }
     </script>
+    <style>
+        .donation-tab {
+            transition: all 0.2s ease-in-out;
+        }
+        .active-tab {
+            border-color: #dc2626 !important;
+            color: #dc2626 !important;
+        }
+        .trends-collapsed {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            padding: 0 !important;
+        }
+        .trends-expanded {
+            max-height: 1000px;
+            opacity: 1;
+        }
+        .chart-collapsed {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        .chart-expanded {
+            max-height: none;
+            opacity: 1;
+        }
+        
+        /* Print styles */
+        @media print {
+            body * { visibility: hidden; }
+            .print-content, .print-content * { visibility: visible; }
+            .print-content { 
+                position: absolute !important; 
+                left: 0 !important; 
+                top: 0 !important; 
+                width: 100% !important;
+                background: white !important;
+                color: black !important;
+            }
+            .no-print { display: none !important; }
+        }
+    </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
     <!-- Header -->
@@ -33,7 +78,13 @@
                     </a>
                 </div>
                 <h1 class="text-xl font-semibold text-gray-900">Donor Records</h1>
-                <div></div>
+                <div class="flex items-center space-x-1 sm:space-x-2">
+                    <button id="tutorialBtn" class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-2 shadow-sm transition-all duration-300 transform hover:scale-110" title="Tutorial - How to Use Donor Records">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
     </header>
@@ -44,8 +95,13 @@
         <div class="mb-6 bg-white rounded-lg shadow p-6">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
                 <div class="flex-1 max-w-lg">
-                    <input type="text" id="searchInput" placeholder="Search donors by name, email, or address..."
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    <div class="relative">
+                        <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <input type="text" id="searchInput" placeholder="Search donors by name, email, or address..."
+                               class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
                 </div>
                 <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
                     <select id="sortFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
@@ -54,8 +110,17 @@
                         <option value="recent">Sort by Recent Donation</option>
                         <option value="count">Sort by Donation Count</option>
                     </select>
-                    <button id="exportCSVBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-center">
-                        Export CSV
+                    <button id="advancedFilterBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-center">
+                        <svg class="h-4 w-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
+                        </svg>
+                        Advanced Filter
+                    </button>
+                    <button id="printBtn" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-center">
+                        <svg class="h-4 w-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                        </svg>
+                        Print
                     </button>
                     <a href="record-donation.html" class="px-4 py-2 bg-red-primary text-white rounded-lg hover:bg-red-700 transition-colors text-center">
                         Add Donation
@@ -64,57 +129,135 @@
             </div>
         </div>
 
-        <!-- Statistics Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                        </svg>
+        <!-- Trends Filter Controls -->
+        <div class="mb-6 bg-white rounded-lg shadow">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <svg class="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                            </svg>
+                            <h3 class="text-lg font-medium text-gray-900">Top Donors Ranking</h3>
+                        </div>
+                        <button id="toggleTrends" class="flex items-center space-x-1 text-sm text-gray-500 hover:text-gray-700 transition-colors lg:hidden">
+                            <span id="toggleText">Hide</span>
+                            <svg id="toggleIcon" class="h-4 w-4 transition-transform transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
                     </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Total Donors</p>
-                        <p id="totalDonors" class="text-2xl font-semibold text-gray-900">0</p>
+                    <button id="toggleTrendsDesktop" class="hidden lg:flex items-center space-x-1 text-sm text-gray-500 hover:text-gray-700 transition-colors">
+                        <span id="toggleTextDesktop">Hide</span>
+                        <svg id="toggleIconDesktop" class="h-4 w-4 transition-transform transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Collapsible Content -->
+            <div id="trendsContent" class="transition-all duration-300 ease-in-out trends-expanded">
+                <div class="p-6">
+                    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
+                        <select id="yearFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <option value="all">All Years</option>
+                            <!-- Years will be populated dynamically -->
+                        </select>
+                        <select id="periodFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <option value="all">All Time</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                            <option value="year">This Year</option>
+                        </select>
+                        <select id="rankingType" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <option value="amount">By Total Amount</option>
+                            <option value="count">By Donation Count</option>
+                            <option value="recent">By Recent Activity</option>
+                        </select>
+                        <div class="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg bg-white">
+                            <input type="checkbox" id="hideAnonymous" class="h-4 w-4 text-red-primary focus:ring-red-primary border-gray-300 rounded" checked>
+                            <label for="hideAnonymous" class="text-sm text-gray-700 cursor-pointer select-none">Hide Anonymous</label>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                        </svg>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Total Donated</p>
-                        <p id="totalAmount" class="text-2xl font-semibold text-gray-900">₱0</p>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="h-8 w-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                        </svg>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Active Donors</p>
-                        <p id="activeDonors" class="text-2xl font-semibold text-gray-900">0</p>
+        </div>
+
+        <!-- Top Donors Chart -->
+        <div id="trendsChart" class="mb-6 bg-white rounded-lg shadow transition-all duration-300 ease-in-out chart-expanded">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-medium text-gray-900">
+                        <span id="trendingTitle">Top Donors - All Time</span>
+                    </h3>
+                    <div class="flex items-center space-x-4">
+                        <span class="text-sm text-gray-500" id="trendingPeriod">Showing top 10 donors</span>
+                        <select id="chartType" class="px-3 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <option value="bar">Bar Chart</option>
+                            <option value="donut">Donut Chart</option>
+                        </select>
                     </div>
                 </div>
             </div>
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="h-8 w-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                        </svg>
+            
+            <!-- Donation Type Tabs -->
+            <div class="px-6 pt-4">
+                <div class="border-b border-gray-200">
+                    <nav class="-mb-px flex space-x-8">
+                        <button id="allTab" class="donation-tab active-tab border-b-2 border-red-primary text-red-primary py-2 px-1 text-sm font-medium">
+                            All Donations
+                        </button>
+                        <button id="moneyTab" class="donation-tab border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-2 px-1 text-sm font-medium">
+                            Money Donations
+                        </button>
+                        <button id="inKindTab" class="donation-tab border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-2 px-1 text-sm font-medium">
+                            In-Kind Donations
+                        </button>
+                    </nav>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <!-- Chart Container -->
+                <div id="chartContainer" class="relative">
+                    <!-- Bar Chart -->
+                    <div id="barChart" class="min-h-[400px]">
+                        <!-- Horizontal bar chart will be populated here -->
                     </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Avg. Donation</p>
-                        <p id="avgDonation" class="text-2xl font-semibold text-gray-900">₱0</p>
+                    
+                    <!-- Donut Chart -->
+                    <div id="donutChart" class="hidden">
+                        <div class="flex flex-col lg:flex-row items-center justify-center space-y-6 lg:space-y-0 lg:space-x-8">
+                            <div class="relative">
+                                <svg id="donutSvg" width="300" height="300" class="transform -rotate-90">
+                                    <!-- Donut segments will be generated here -->
+                                </svg>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <div class="text-center">
+                                        <div class="text-2xl font-bold text-gray-900" id="totalDonorsChart">0</div>
+                                        <div class="text-sm text-gray-500">Total Donors</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="donutLegend" class="space-y-2 max-w-sm">
+                                <!-- Legend will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- No Data State -->
+                <div id="noTopDonors" class="hidden text-center py-12">
+                    <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    <h3 class="mt-4 text-lg font-medium text-gray-900">No Data Available</h3>
+                    <p class="mt-2 text-sm text-gray-500">No donors found for the selected period and filters</p>
+                    <div class="mt-6">
+                        <button onclick="resetFilters()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-primary hover:bg-red-700">
+                            Reset Filters
+                        </button>
                     </div>
                 </div>
             </div>
@@ -167,6 +310,345 @@
         </div>
     </div>
 
+    <!-- Print Preview Modal -->
+    <div id="printModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-2 sm:p-4">
+        <div class="relative mx-auto border w-full max-w-7xl shadow-lg rounded-md bg-white flex flex-col" style="margin-top: 10px; margin-bottom: 10px; height: calc(100vh - 20px); max-height: 95vh;">
+            <!-- Modal Header -->
+            <div class="p-3 sm:p-4 lg:p-6 border-b border-gray-200 flex-shrink-0">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-base sm:text-lg lg:text-xl font-medium text-gray-900">Print Donor Records</h3>
+                    <button id="closePrintModal" class="text-gray-400 hover:text-gray-600 text-xl sm:text-2xl">&times;</button>
+                </div>
+            </div>
+            
+            <!-- Modal Content -->
+            <div class="flex-1 p-3 sm:p-4 lg:p-6 overflow-y-auto">
+                <!-- Two Column Layout -->
+                <div class="flex flex-col lg:flex-row gap-3 sm:gap-4 lg:gap-6 min-h-full">
+                    
+                    <!-- Left Column: Print Filters -->
+                    <div class="w-full lg:w-96 flex-shrink-0">
+                        <div class="bg-gray-50 p-3 sm:p-4 rounded-lg h-full">
+                            <h4 class="text-sm sm:text-md font-medium text-gray-700 mb-2 sm:mb-3">Filter Options</h4>
+                            
+                            <!-- Donation Type Filter -->
+                            <div class="grid grid-cols-1 gap-2 sm:gap-4 mb-3 sm:mb-4">
+                                <div>
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Donation Type</label>
+                                    <select id="printDonationType" class="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                                        <option value="all">All Donations</option>
+                                        <option value="money">Money Donations Only</option>
+                                        <option value="inKind">In-Kind Donations Only</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- Anonymous Filter -->
+                            <div class="mb-3 sm:mb-4">
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="printHideAnonymous" class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                    <span class="ml-2 text-xs sm:text-sm text-gray-700">Hide Anonymous Donors</span>
+                                </label>
+                            </div>
+                            
+                            <!-- Sort Order (Money Donations Only) -->
+                            <div class="mb-3 sm:mb-4">
+                                <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Sort Order</label>
+                                <select id="printSortOrder" class="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                                    <option value="highest">Highest to Lowest (Money)</option>
+                                    <option value="lowest">Lowest to Highest (Money)</option>
+                                    <option value="name">Alphabetical (Name)</option>
+                                    <option value="recent">Most Recent First</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Date Range -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-4 mb-3 sm:mb-4">
+                                <div>
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">From Date</label>
+                                    <input type="date" id="printFromDate" class="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">To Date</label>
+                                    <input type="date" id="printToDate" class="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                                </div>
+                            </div>
+                            
+                            <!-- Payment Method (for Money Donations) -->
+                            <div id="paymentMethodFilter" class="mb-3 sm:mb-4">
+                                <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Payment Method</label>
+                                <select id="printPaymentMethod" class="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                                    <option value="">All Payment Methods</option>
+                                    <option value="Cash">Cash</option>
+                                    <option value="Check">Check</option>
+                                    <option value="Online Payment">Online Payment</option>
+                                    <option value="Bank Transfer">Bank Transfer</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Column: Print Preview -->
+                    <div class="flex-1 lg:flex-2 flex flex-col min-w-0">
+                        <div class="bg-white border border-gray-300 rounded-lg flex flex-col h-full min-h-64 sm:min-h-80 lg:min-h-96">
+                            <div class="bg-gray-50 px-3 sm:px-4 py-2 sm:py-3 border-b border-gray-300 rounded-t-lg flex-shrink-0">
+                                <div class="flex flex-col space-y-1 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
+                                    <h4 class="text-sm sm:text-md font-medium text-gray-700">Print Preview</h4>
+                                    <span id="previewRecordCount" class="text-xs sm:text-sm text-gray-600">0 records will be printed</span>
+                                </div>
+                            </div>
+                            
+                            <div id="printPreviewContent" class="p-2 sm:p-3 lg:p-4 flex-1 overflow-y-auto bg-white min-h-64 sm:min-h-80 lg:min-h-96">
+                                <!-- Preview content will be generated here -->
+                                <div class="text-center text-gray-500 py-6 sm:py-8">
+                                    <p class="text-sm sm:text-base">Apply filters to see preview</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="border-t border-gray-200 bg-gray-50 px-3 sm:px-4 lg:px-6 py-3 sm:py-4 rounded-b-md flex-shrink-0">
+                <div class="flex flex-col space-y-3 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
+                    <!-- Export Format Selection -->
+                    <div class="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                        <span class="text-xs sm:text-sm font-medium text-gray-700">Export Format:</span>
+                        <select id="exportFormatSelect" class="px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                            <option value="print">Print/PDF</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+                        <button id="resetPrintFilters" class="px-3 sm:px-4 py-2 bg-gray-500 text-white text-xs sm:text-sm rounded-md hover:bg-gray-600 transition-colors">
+                            <span class="hidden sm:inline">Reset Filters</span>
+                            <span class="sm:hidden">Reset</span>
+                        </button>
+                        <button id="cancelPrintBtn" class="px-3 sm:px-4 py-2 border border-gray-300 rounded-md text-gray-700 text-xs sm:text-sm hover:bg-gray-50 transition-colors">
+                            Cancel
+                        </button>
+                        <button id="confirmPrintBtn" class="px-3 sm:px-4 py-2 bg-red-600 text-white text-xs sm:text-sm rounded-md hover:bg-red-700 transition-colors">
+                            <span class="hidden sm:inline">Print Records</span>
+                            <span class="sm:hidden">Print</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Filter Modal -->
+    <div id="advancedFilterModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-60 hidden p-2 sm:p-4">
+        <div class="bg-white rounded-lg shadow-lg max-w-xs sm:max-w-2xl lg:max-w-4xl w-full max-h-[95vh] sm:max-h-[90vh] mx-2 sm:mx-4 flex flex-col">
+            <!-- Modal Header -->
+            <div class="p-4 sm:p-6 border-b border-gray-200 flex-shrink-0">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-gray-900">Advanced Filters</h3>
+                    <button id="closeAdvancedFilter" class="text-gray-400 hover:text-gray-600 text-xl sm:text-2xl">&times;</button>
+                </div>
+            </div>
+            
+            <!-- Modal Content -->
+            <div class="flex-1 p-4 sm:p-6 overflow-y-auto">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                    
+                    <!-- Donation Amount Range -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Donation Amount Range</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="number" id="filterMinAmount" placeholder="Min Amount" 
+                                   class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                            <input type="number" id="filterMaxAmount" placeholder="Max Amount" 
+                                   class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                        </div>
+                    </div>
+
+                    <!-- Donation Type -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Donation Type</label>
+                        <select id="filterDonationType" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                            <option value="">All Types</option>
+                            <option value="money">Money</option>
+                            <option value="in-kind">In-Kind</option>
+                        </select>
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Payment Method</label>
+                        <select id="filterPaymentMethod" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                            <option value="">All Methods</option>
+                            <option value="Cash">Cash</option>
+                            <option value="Check">Check</option>
+                            <option value="Online Payment">Online Payment</option>
+                            <option value="Bank Transfer">Bank Transfer</option>
+                        </select>
+                    </div>
+
+                    <!-- Date Range -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Donation Date Range</label>
+                        <div class="grid grid-cols-1 gap-2">
+                            <input type="date" id="filterFromDate" 
+                                   class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                            <input type="date" id="filterToDate" 
+                                   class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                        </div>
+                    </div>
+
+                    <!-- Donor Location -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Donor Location</label>
+                        <input type="text" id="filterLocation" placeholder="City, Province, or Address" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                    </div>
+
+                    <!-- Email Status -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Email Status</label>
+                        <select id="filterEmailStatus" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                            <option value="">All Donors</option>
+                            <option value="with-email">With Email</option>
+                            <option value="without-email">Without Email</option>
+                        </select>
+                    </div>
+
+                    <!-- Donation Count Range -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Number of Donations</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="number" id="filterMinDonations" placeholder="Min" min="1" 
+                                   class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                            <input type="number" id="filterMaxDonations" placeholder="Max" min="1" 
+                                   class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                        </div>
+                    </div>
+
+                    <!-- Contact Information -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Contact Information</label>
+                        <select id="filterContactStatus" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                            <option value="">All Donors</option>
+                            <option value="with-contact">With Contact Number</option>
+                            <option value="without-contact">Without Contact Number</option>
+                            <option value="complete-info">Complete Information</option>
+                        </select>
+                    </div>
+
+                    <!-- Anonymous Filter -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Anonymous Donations</label>
+                        <select id="filterAnonymous" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                            <option value="">Include All</option>
+                            <option value="exclude">Exclude Anonymous</option>
+                            <option value="only">Only Anonymous</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="border-t border-gray-200 bg-gray-50 px-4 sm:px-6 py-3 sm:py-4 rounded-b-lg flex-shrink-0">
+                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 sm:justify-end">
+                    <button id="clearAdvancedFilters" class="px-4 py-2 bg-gray-500 text-white text-sm rounded-md hover:bg-gray-600 transition-colors">
+                        Clear All
+                    </button>
+                    <button id="cancelAdvancedFilter" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 text-sm hover:bg-gray-50 transition-colors">
+                        Cancel
+                    </button>
+                    <button id="applyAdvancedFilters" class="px-4 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition-colors">
+                        Apply Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tutorial Modal -->
+    <div id="tutorialModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-semibold text-gray-900">Donor Records Tutorial</h3>
+                <button id="closeTutorialModal" class="text-gray-400 hover:text-gray-600 p-1">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="mb-6">
+                <div class="flex justify-between text-sm text-gray-600 mb-2">
+                    <span>Step <span id="currentStep">1</span> of <span id="totalSteps">4</span></span>
+                    <span id="progressPercentage">25%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div id="progressBar" class="bg-red-primary h-2 rounded-full transition-all duration-300" style="width: 25%"></div>
+                </div>
+            </div>
+            
+            <!-- Tutorial Content -->
+            <div class="flex-1 overflow-y-auto">
+                <div id="tutorialStep1" class="tutorial-step">
+                    <div class="text-center">
+                        <img src="Toturial/Donor Records/pic1.png" alt="Quick Actions Header" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-4">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-2">Step 1: Quick Actions & Header</h4>
+                        <p class="text-gray-600">Access key donor management functions from the header section. Use the search bar to find specific donors, apply advanced filters for detailed queries, sort records by various criteria, and generate professional print reports. All essential tools are readily accessible for efficient donor record management.</p>
+                    </div>
+                </div>
+                
+                <div id="tutorialStep2" class="tutorial-step hidden">
+                    <div class="text-center">
+                        <img src="Toturial/Donor Records/pic2.png" alt="Top Donors Ranking" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-4">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-2">Step 2: Top Donors Ranking</h4>
+                        <p class="text-gray-600">View and analyze your top donors using the trends section. Filter rankings by year and period (quarterly, monthly, or all-time), choose ranking criteria (by amount, frequency, or recent activity), and toggle the "Hide Anonymous" option. The interactive chart updates in real-time based on your filter selections.</p>
+                    </div>
+                </div>
+                
+                <div id="tutorialStep3" class="tutorial-step hidden">
+                    <div class="text-center">
+                        <img src="Toturial/Donor Records/pic3.png" alt="Donation Category Tabs" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-4">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-2">Step 3: Donation Category Tabs</h4>
+                        <p class="text-gray-600">Switch between donation types to focus your analysis. View "All Donations" for a complete overview, filter by "Money" to see only monetary contributions (cash, checks, online payments), or select "In-Kind" to display physical donations (food, clothing, supplies). The rankings and charts automatically update to reflect your selected category.</p>
+                    </div>
+                </div>
+                
+                <div id="tutorialStep4" class="tutorial-step hidden">
+                    <div class="text-center">
+                        <img src="Toturial/Donor Records/pic4.png" alt="Pie Chart Visualization" class="max-w-full h-auto mx-auto rounded-lg shadow-lg mb-4">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-2">Step 4: Pie Chart Visualization</h4>
+                        <p class="text-gray-600">Switch to pie chart view using the "Chart Type" dropdown for proportional visualization. The interactive pie chart displays percentage breakdowns of top donors with color-coded segments and a detailed legend. This view is perfect for presentations and quickly identifying the relative contribution of each major donor at a glance.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Navigation Buttons -->
+            <div class="flex justify-between items-center mt-6 pt-4 border-t">
+                <button id="prevTutorialBtn" class="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    <svg class="h-5 w-5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    Previous
+                </button>
+                
+                <div class="flex space-x-2">
+                    <button id="skipTutorialBtn" class="px-4 py-2 text-gray-500 hover:text-gray-700 transition-colors">
+                        Skip Tutorial
+                    </button>
+                </div>
+                
+                <button id="nextTutorialBtn" class="px-4 py-2 bg-red-primary text-white rounded-md hover:bg-red-700 transition-colors">
+                    Next
+                    <svg class="h-5 w-5 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import {
             db,
@@ -178,6 +660,15 @@
         let donorData = [];
         let filteredDonors = [];
         let currentUser = null;
+        let availableYears = [];
+        let topDonors = [];
+        let activeDonationType = 'all'; // Track active donation type tab
+        let trendsExpanded = true; // Track trends section state
+        let activeAdvancedFilters = {}; // Track active advanced filters
+        
+        // Tutorial functionality
+        let currentTutorialStep = 1;
+        const totalTutorialSteps = 4;
 
         // Session Manager
         const sessionManager = {
@@ -201,6 +692,7 @@
             currentUser = sessionManager.getCurrentUser();
             await loadRecordsFromFirebase();
             setupEventListeners();
+            setupTutorialFunctionality();
         });
 
         async function loadRecordsFromFirebase() {
@@ -215,10 +707,11 @@
                     allRecords.push(data);
                 });
                 processDonorData();
+                populateYearFilter();
                 
                 hideSkeletonLoading();
                 displayDonors();
-                updateStatistics();
+                updateTopDonorsRanking();
             } catch (error) {
                 console.error('Error loading donation records from Firestore:', error);
                 hideSkeletonLoading();
@@ -369,18 +862,137 @@
         function setupEventListeners() {
             document.getElementById('searchInput').addEventListener('input', filterDonors);
             document.getElementById('sortFilter').addEventListener('change', sortDonors);
-            document.getElementById('exportCSVBtn').addEventListener('click', exportToCSV);
+            document.getElementById('advancedFilterBtn').addEventListener('click', openAdvancedFilter);
+            document.getElementById('printBtn').addEventListener('click', openPrintModal);
             document.getElementById('donorModal').addEventListener('click', function(e) {
                 if (e.target === this) closeModal();
             });
+            
+            // Advanced filter modal listeners
+            document.getElementById('closeAdvancedFilter').addEventListener('click', closeAdvancedFilter);
+            document.getElementById('cancelAdvancedFilter').addEventListener('click', closeAdvancedFilter);
+            document.getElementById('clearAdvancedFilters').addEventListener('click', clearAdvancedFilters);
+            document.getElementById('applyAdvancedFilters').addEventListener('click', applyAdvancedFilters);
+            document.getElementById('advancedFilterModal').addEventListener('click', function(e) {
+                if (e.target === this) closeAdvancedFilter();
+            });
+            
+            // New trend filter listeners
+            document.getElementById('yearFilter').addEventListener('change', updateTopDonorsRanking);
+            document.getElementById('periodFilter').addEventListener('change', updateTopDonorsRanking);
+            document.getElementById('rankingType').addEventListener('change', updateTopDonorsRanking);
+            document.getElementById('chartType').addEventListener('change', displayTopDonors);
+            document.getElementById('hideAnonymous').addEventListener('change', updateTopDonorsRanking);
+            
+            // Donation type tab listeners
+            document.getElementById('allTab').addEventListener('click', () => switchDonationTab('all'));
+            document.getElementById('moneyTab').addEventListener('click', () => switchDonationTab('money'));
+            document.getElementById('inKindTab').addEventListener('click', () => switchDonationTab('inKind'));
+            
+            // Trends toggle listeners
+            document.getElementById('toggleTrends').addEventListener('click', toggleTrendsSection);
+            document.getElementById('toggleTrendsDesktop').addEventListener('click', toggleTrendsSection);
+            
+            // Print modal listeners
+            document.getElementById('closePrintModal').addEventListener('click', closePrintModal);
+            document.getElementById('cancelPrintBtn').addEventListener('click', closePrintModal);
+            document.getElementById('confirmPrintBtn').addEventListener('click', printRecords);
+            document.getElementById('resetPrintFilters').addEventListener('click', resetPrintFilters);
+            document.getElementById('printModal').addEventListener('click', function(e) {
+                if (e.target === this) closePrintModal();
+            });
+            
+            // Print filter listeners
+            document.getElementById('printDonationType').addEventListener('change', updatePrintPreview);
+            document.getElementById('printHideAnonymous').addEventListener('change', updatePrintPreview);
+            document.getElementById('printSortOrder').addEventListener('change', updatePrintPreview);
+            document.getElementById('printFromDate').addEventListener('change', updatePrintPreview);
+            document.getElementById('printToDate').addEventListener('change', updatePrintPreview);
+            document.getElementById('printPaymentMethod').addEventListener('change', updatePrintPreview);
+        }
+
+        // Reset filters function
+        function resetFilters() {
+            document.getElementById('periodFilter').value = 'all';
+            document.getElementById('yearFilter').value = '';
+            document.getElementById('rankingType').value = 'amount';
+            document.getElementById('chartType').value = 'bar';
+            document.getElementById('hideAnonymous').checked = true;
+            switchDonationTab('all');
+            
+            // Expand trends if collapsed
+            if (!trendsExpanded) {
+                toggleTrendsSection();
+            }
+            
+            updateTopDonorsRanking();
+        }
+
+        // Toggle trends section
+        function toggleTrendsSection() {
+            const trendsContent = document.getElementById('trendsContent');
+            const trendsChart = document.getElementById('trendsChart');
+            const toggleIcon = document.getElementById('toggleIcon');
+            const toggleIconDesktop = document.getElementById('toggleIconDesktop');
+            const toggleText = document.getElementById('toggleText');
+            const toggleTextDesktop = document.getElementById('toggleTextDesktop');
+            
+            trendsExpanded = !trendsExpanded;
+            
+            if (trendsExpanded) {
+                // Expand
+                trendsContent.classList.remove('trends-collapsed');
+                trendsContent.classList.add('trends-expanded');
+                trendsChart.classList.remove('chart-collapsed');
+                trendsChart.classList.add('chart-expanded');
+                
+                // Update button text and icons
+                toggleText.textContent = 'Hide';
+                toggleTextDesktop.textContent = 'Hide';
+                toggleIcon.classList.remove('rotate-180');
+                toggleIconDesktop.classList.remove('rotate-180');
+            } else {
+                // Collapse
+                trendsContent.classList.remove('trends-expanded');
+                trendsContent.classList.add('trends-collapsed');
+                trendsChart.classList.remove('chart-expanded');
+                trendsChart.classList.add('chart-collapsed');
+                
+                // Update button text and icons
+                toggleText.textContent = 'Show';
+                toggleTextDesktop.textContent = 'Show';
+                toggleIcon.classList.add('rotate-180');
+                toggleIconDesktop.classList.add('rotate-180');
+            }
+        }
+
+        // Switch donation type tabs
+        function switchDonationTab(type) {
+            activeDonationType = type;
+            
+            // Update tab appearance
+            document.querySelectorAll('.donation-tab').forEach(tab => {
+                tab.classList.remove('active-tab', 'border-red-primary', 'text-red-primary');
+                tab.classList.add('border-transparent', 'text-gray-500');
+            });
+            
+            const activeTab = document.getElementById(type + 'Tab');
+            activeTab.classList.add('active-tab', 'border-red-primary', 'text-red-primary');
+            activeTab.classList.remove('border-transparent', 'text-gray-500');
+            
+            // Update the ranking
+            updateTopDonorsRanking();
         }
 
         function filterDonors() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            if (!searchTerm) {
-                filteredDonors = [...donorData];
-            } else {
-                filteredDonors = donorData.filter(donor => {
+            
+            // Start with all donor data
+            let filteredData = [...donorData];
+            
+            // Apply search filter
+            if (searchTerm) {
+                filteredData = filteredData.filter(donor => {
                     const searchFields = [
                         donor.name,
                         donor.emailAddress,
@@ -390,8 +1002,185 @@
                     return searchFields.includes(searchTerm);
                 });
             }
+            
+            // Apply advanced filters
+            filteredData = applyAdvancedFiltersToData(filteredData);
+            
+            filteredDonors = filteredData;
             displayDonors();
-            updateStatistics();
+            updateTopDonorsRanking();
+        }
+
+        // Advanced Filter Functions
+        function openAdvancedFilter() {
+            document.getElementById('advancedFilterModal').classList.remove('hidden');
+        }
+
+        function closeAdvancedFilter() {
+            document.getElementById('advancedFilterModal').classList.add('hidden');
+        }
+
+        function clearAdvancedFilters() {
+            // Clear all advanced filter inputs
+            const filterInputs = [
+                'filterMinAmount', 'filterMaxAmount', 'filterDonationType', 'filterPaymentMethod',
+                'filterFromDate', 'filterToDate', 'filterLocation', 'filterEmailStatus',
+                'filterMinDonations', 'filterMaxDonations', 'filterContactStatus', 'filterAnonymous'
+            ];
+
+            filterInputs.forEach(id => {
+                const element = document.getElementById(id);
+                if (element.type === 'select-one') {
+                    element.value = '';
+                } else {
+                    element.value = '';
+                }
+            });
+
+            activeAdvancedFilters = {};
+            updateAdvancedFilterButtonStyle();
+        }
+
+        function applyAdvancedFilters() {
+            // Collect all filter values
+            const filters = {
+                minAmount: document.getElementById('filterMinAmount').value,
+                maxAmount: document.getElementById('filterMaxAmount').value,
+                donationType: document.getElementById('filterDonationType').value,
+                paymentMethod: document.getElementById('filterPaymentMethod').value,
+                fromDate: document.getElementById('filterFromDate').value,
+                toDate: document.getElementById('filterToDate').value,
+                location: document.getElementById('filterLocation').value,
+                emailStatus: document.getElementById('filterEmailStatus').value,
+                minDonations: document.getElementById('filterMinDonations').value,
+                maxDonations: document.getElementById('filterMaxDonations').value,
+                contactStatus: document.getElementById('filterContactStatus').value,
+                anonymous: document.getElementById('filterAnonymous').value
+            };
+
+            // Remove empty filters and store active ones
+            activeAdvancedFilters = {};
+            Object.keys(filters).forEach(key => {
+                if (filters[key] && filters[key] !== '') {
+                    activeAdvancedFilters[key] = filters[key];
+                }
+            });
+
+            updateAdvancedFilterButtonStyle();
+            closeAdvancedFilter();
+            
+            // Apply all filters
+            filterDonors();
+        }
+
+        function checkIfAdvancedFiltersActive() {
+            return Object.keys(activeAdvancedFilters).length > 0;
+        }
+
+        function updateAdvancedFilterButtonStyle() {
+            const button = document.getElementById('advancedFilterBtn');
+            if (checkIfAdvancedFiltersActive()) {
+                button.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                button.classList.add('bg-red-primary', 'hover:bg-red-700');
+            } else {
+                button.classList.remove('bg-red-primary', 'hover:bg-red-700');
+                button.classList.add('bg-blue-600', 'hover:bg-blue-700');
+            }
+        }
+
+        function applyAdvancedFiltersToData(donors) {
+            if (!checkIfAdvancedFiltersActive()) {
+                return donors;
+            }
+
+            return donors.filter(donor => {
+                // Amount range filter (total donated)
+                if (activeAdvancedFilters.minAmount) {
+                    const minAmount = parseFloat(activeAdvancedFilters.minAmount);
+                    if (donor.totalAmount < minAmount) return false;
+                }
+                if (activeAdvancedFilters.maxAmount) {
+                    const maxAmount = parseFloat(activeAdvancedFilters.maxAmount);
+                    if (donor.totalAmount > maxAmount) return false;
+                }
+
+                // Donation type filter (based on donor's primary donation type)
+                if (activeAdvancedFilters.donationType) {
+                    const hasMoneyDonations = donor.moneyDonations > 0;
+                    const hasInKindDonations = donor.inKindDonations > 0;
+                    
+                    if (activeAdvancedFilters.donationType === 'money' && !hasMoneyDonations) return false;
+                    if (activeAdvancedFilters.donationType === 'in-kind' && !hasInKindDonations) return false;
+                }
+
+                // Payment method filter (check if donor has donations with this payment method)
+                if (activeAdvancedFilters.paymentMethod) {
+                    const hasPaymentMethod = donor.donations.some(donation => 
+                        donation.donationType === 'money' && 
+                        donation.typeOfDonation === activeAdvancedFilters.paymentMethod
+                    );
+                    if (!hasPaymentMethod) return false;
+                }
+
+                // Date range filter (check if donor has donations in this range)
+                if (activeAdvancedFilters.fromDate || activeAdvancedFilters.toDate) {
+                    const fromDate = activeAdvancedFilters.fromDate ? new Date(activeAdvancedFilters.fromDate) : null;
+                    const toDate = activeAdvancedFilters.toDate ? new Date(activeAdvancedFilters.toDate) : null;
+                    if (toDate) toDate.setHours(23, 59, 59, 999);
+                    
+                    const hasMatchingDonation = donor.donations.some(donation => {
+                        const donationDate = new Date(donation.dateOfDonation);
+                        if (fromDate && donationDate < fromDate) return false;
+                        if (toDate && donationDate > toDate) return false;
+                        return true;
+                    });
+                    if (!hasMatchingDonation) return false;
+                }
+
+                // Location filter
+                if (activeAdvancedFilters.location) {
+                    const location = activeAdvancedFilters.location.toLowerCase();
+                    const donorLocation = (donor.address || '').toLowerCase();
+                    if (!donorLocation.includes(location)) return false;
+                }
+
+                // Email status filter
+                if (activeAdvancedFilters.emailStatus) {
+                    const hasEmail = donor.emailAddress && donor.emailAddress !== '';
+                    if (activeAdvancedFilters.emailStatus === 'with-email' && !hasEmail) return false;
+                    if (activeAdvancedFilters.emailStatus === 'without-email' && hasEmail) return false;
+                }
+
+                // Donation count range filter
+                if (activeAdvancedFilters.minDonations) {
+                    const minDonations = parseInt(activeAdvancedFilters.minDonations);
+                    if (donor.donationCount < minDonations) return false;
+                }
+                if (activeAdvancedFilters.maxDonations) {
+                    const maxDonations = parseInt(activeAdvancedFilters.maxDonations);
+                    if (donor.donationCount > maxDonations) return false;
+                }
+
+                // Contact status filter
+                if (activeAdvancedFilters.contactStatus) {
+                    const hasContact = donor.contactNumber && donor.contactNumber !== '';
+                    const hasEmail = donor.emailAddress && donor.emailAddress !== '';
+                    const hasAddress = donor.address && donor.address !== '';
+                    
+                    if (activeAdvancedFilters.contactStatus === 'with-contact' && !hasContact) return false;
+                    if (activeAdvancedFilters.contactStatus === 'without-contact' && hasContact) return false;
+                    if (activeAdvancedFilters.contactStatus === 'complete-info' && !(hasContact && hasEmail && hasAddress)) return false;
+                }
+
+                // Anonymous filter
+                if (activeAdvancedFilters.anonymous) {
+                    const isAnonymous = donor.name === 'Anonymous';
+                    if (activeAdvancedFilters.anonymous === 'exclude' && isAnonymous) return false;
+                    if (activeAdvancedFilters.anonymous === 'only' && !isAnonymous) return false;
+                }
+
+                return true;
+            });
         }
 
         function sortDonors() {
@@ -542,49 +1331,998 @@
             document.getElementById('donorModal').classList.add('hidden');
         }
 
-        function updateStatistics() {
-            const totalDonors = filteredDonors.length;
-            const totalAmount = filteredDonors.reduce((sum, donor) => sum + donor.totalAmount, 0);
-            const activeDonors = filteredDonors.filter(donor => {
-                const daysSinceLastDonation = (new Date() - donor.lastDonationDate) / (1000 * 60 * 60 * 24);
-                return daysSinceLastDonation <= 90;
-            }).length;
-            const avgDonation = totalDonors > 0 ? totalAmount / totalDonors : 0;
-            document.getElementById('totalDonors').textContent = totalDonors;
-            document.getElementById('totalAmount').textContent = `₱${totalAmount.toLocaleString()}`;
-            document.getElementById('activeDonors').textContent = activeDonors;
-            document.getElementById('avgDonation').textContent = `₱${Math.round(avgDonation).toLocaleString()}`;
+        function populateYearFilter() {
+            // Extract unique years from donation records
+            const years = new Set();
+            allRecords.forEach(record => {
+                if (record.dateOfDonation) {
+                    const year = new Date(record.dateOfDonation).getFullYear();
+                    if (!isNaN(year)) {
+                        years.add(year);
+                    }
+                }
+            });
+            
+            availableYears = Array.from(years).sort((a, b) => b - a); // Sort descending
+            const yearSelect = document.getElementById('yearFilter');
+            
+            // Clear existing options except "All Years"
+            yearSelect.innerHTML = '<option value="all">All Years</option>';
+            
+            // Add year options
+            availableYears.forEach(year => {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                yearSelect.appendChild(option);
+            });
         }
 
-        function exportToCSV() {
-            const headers = ['Donor Name', 'Email', 'Contact', 'Address', 'Total Donated', 'Donation Count', 'Money Donations', 'In-Kind Donations', 'Last Donation'];
-            const csvContent = [
-                headers.join(','),
-                ...filteredDonors.map(donor => [
-                    donor.name,
-                    donor.emailAddress || '',
-                    donor.contactNumber || '',
-                    donor.address || '',
-                    donor.totalAmount,
-                    donor.donationCount,
-                    donor.moneyDonations,
-                    donor.inKindDonations,
-                    formatDate(donor.lastDonationDate)
-                ].map(field => `"${field}"`).join(','))
-            ].join('\n');
-            const blob = new Blob([csvContent], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `donor-records-${new Date().toISOString().split('T')[0]}.csv`;
-            a.click();
-            window.URL.revokeObjectURL(url);
+        function getFilteredDonationsByPeriod() {
+            const yearFilter = document.getElementById('yearFilter').value;
+            const periodFilter = document.getElementById('periodFilter').value;
+            
+            let filteredRecords = [...allRecords];
+            
+            // Apply year filter
+            if (yearFilter !== 'all') {
+                filteredRecords = filteredRecords.filter(record => {
+                    if (!record.dateOfDonation) return false;
+                    const recordYear = new Date(record.dateOfDonation).getFullYear();
+                    return recordYear == yearFilter;
+                });
+            }
+            
+            // Apply period filter
+            if (periodFilter !== 'all') {
+                const now = new Date();
+                let startDate;
+                
+                switch (periodFilter) {
+                    case 'week':
+                        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                        break;
+                    case 'month':
+                        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                        break;
+                    case 'year':
+                        startDate = new Date(now.getFullYear(), 0, 1);
+                        break;
+                    default:
+                        return filteredRecords;
+                }
+                
+                filteredRecords = filteredRecords.filter(record => {
+                    if (!record.dateOfDonation) return false;
+                    const recordDate = new Date(record.dateOfDonation);
+                    return recordDate >= startDate && recordDate <= now;
+                });
+            }
+            
+            return filteredRecords;
+        }
+
+        function updateTopDonorsRanking() {
+            const filteredRecords = getFilteredDonationsByPeriod();
+            const rankingType = document.getElementById('rankingType').value;
+            const yearFilter = document.getElementById('yearFilter').value;
+            const periodFilter = document.getElementById('periodFilter').value;
+            
+            // Filter by donation type based on active tab
+            let typeFilteredRecords = filteredRecords;
+            if (activeDonationType === 'money') {
+                typeFilteredRecords = filteredRecords.filter(record => record.donationType === 'money');
+            } else if (activeDonationType === 'inKind') {
+                typeFilteredRecords = filteredRecords.filter(record => record.donationType === 'in-kind');
+            }
+            
+            // Process filtered records to get donor rankings
+            const donorMap = new Map();
+            
+            typeFilteredRecords.forEach(donation => {
+                const donorName = donation.donorName || 'Anonymous';
+                const donorEmail = donation.emailAddress || '';
+                const uniqueKey = `${donorName}|${donorEmail}`;
+                
+                if (!donorMap.has(uniqueKey)) {
+                    donorMap.set(uniqueKey, {
+                        uniqueKey: uniqueKey,
+                        name: donorName,
+                        emailAddress: donorEmail,
+                        contactNumber: donation.contactNumber || '',
+                        address: donation.address || '',
+                        donations: [],
+                        totalAmount: 0,
+                        donationCount: 0,
+                        lastDonationDate: null,
+                        moneyDonations: 0,
+                        inKindDonations: 0
+                    });
+                }
+                
+                const donor = donorMap.get(uniqueKey);
+                donor.donations.push(donation);
+                donor.donationCount++;
+                
+                if (donation.donationType === 'money') {
+                    donor.totalAmount += parseFloat(donation.amount || 0);
+                    donor.moneyDonations++;
+                } else {
+                    donor.inKindDonations++;
+                }
+                
+                const donationDate = new Date(donation.dateOfDonation);
+                if (!donor.lastDonationDate || donationDate > donor.lastDonationDate) {
+                    donor.lastDonationDate = donationDate;
+                }
+            });
+            
+            topDonors = Array.from(donorMap.values());
+            
+            // Filter out anonymous donors if checkbox is checked
+            const hideAnonymous = document.getElementById('hideAnonymous').checked;
+            if (hideAnonymous) {
+                topDonors = topDonors.filter(donor => donor.name !== 'Anonymous');
+            }
+            
+            // Sort based on ranking type
+            switch (rankingType) {
+                case 'amount':
+                    topDonors.sort((a, b) => b.totalAmount - a.totalAmount);
+                    break;
+                case 'count':
+                    topDonors.sort((a, b) => b.donationCount - a.donationCount);
+                    break;
+                case 'recent':
+                    topDonors.sort((a, b) => b.lastDonationDate - a.lastDonationDate);
+                    break;
+            }
+            
+            // Take top 5
+            topDonors = topDonors.slice(0, 5);
+            
+            displayTopDonors();
+            updateTrendingTitle();
+        }
+
+        function displayTopDonors() {
+            const noDataContainer = document.getElementById('noTopDonors');
+            const chartContainer = document.getElementById('chartContainer');
+            
+            if (topDonors.length === 0) {
+                chartContainer.classList.add('hidden');
+                noDataContainer.classList.remove('hidden');
+                return;
+            }
+            
+            noDataContainer.classList.add('hidden');
+            chartContainer.classList.remove('hidden');
+            
+            const chartType = document.getElementById('chartType').value;
+            
+            if (chartType === 'bar') {
+                displayBarChart(topDonors);
+            } else {
+                displayDonutChart(topDonors);
+            }
+        }
+        
+        // Display bar chart
+        function displayBarChart(donors) {
+            document.getElementById('barChart').classList.remove('hidden');
+            document.getElementById('donutChart').classList.add('hidden');
+            
+            const rankingType = document.getElementById('rankingType').value;
+            const container = document.getElementById('barChart');
+            
+            // Get values for scaling
+            let maxValue = 0;
+            donors.forEach(donor => {
+                let value;
+                switch (rankingType) {
+                    case 'amount':
+                        value = donor.totalAmount;
+                        break;
+                    case 'count':
+                        value = donor.donationCount;
+                        break;
+                    case 'recent':
+                        value = donor.donationCount; // Use count for recent as fallback
+                        break;
+                }
+                if (value > maxValue) maxValue = value;
+            });
+            
+            container.innerHTML = `
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <div class="space-y-4">
+                        ${donors.map((donor, index) => {
+                            let value, displayValue;
+                            switch (rankingType) {
+                                case 'amount':
+                                    // For in-kind donations, use count since they don't have amounts
+                                    if (activeDonationType === 'inKind') {
+                                        value = donor.donationCount;
+                                        displayValue = `${donor.donationCount} items`;
+                                    } else {
+                                        value = donor.totalAmount;
+                                        displayValue = `₱${donor.totalAmount.toLocaleString()}`;
+                                    }
+                                    break;
+                                case 'count':
+                                    value = donor.donationCount;
+                                    displayValue = donor.donationCount.toString();
+                                    break;
+                                case 'recent':
+                                    value = donor.donationCount;
+                                    displayValue = donor.donationCount.toString();
+                                    break;
+                            }
+                            
+                            const percentage = (value / maxValue) * 100;
+                            
+                            return `
+                                <div class="flex items-center space-x-4 py-3 hover:bg-white hover:shadow-sm rounded-lg px-3 transition-all cursor-pointer"
+                                     onclick="window.showDonorDetail && window.showDonorDetail('${donor.uniqueKey}')">
+                                    <!-- Donor Name (Left Side) -->
+                                    <div class="w-32 flex-shrink-0">
+                                        <div class="text-sm font-medium text-gray-900 truncate">${donor.name}</div>
+                                        <div class="text-xs text-gray-500">Rank #${index + 1}</div>
+                                    </div>
+                                    
+                                    <!-- Progress Bar (Middle) -->
+                                    <div class="flex-1 mx-4">
+                                        <div class="w-full bg-gray-200 rounded-full h-8 relative">
+                                            <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-8 rounded-full flex items-center justify-end pr-3 transition-all duration-1000" 
+                                                 style="width: ${Math.max(percentage, 5)}%">
+                                                <span class="text-white text-xs font-medium">${percentage.toFixed(1)}%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Value (Right Side) -->
+                                    <div class="w-24 flex-shrink-0 text-right">
+                                        <div class="text-sm font-bold text-gray-900">${displayValue}</div>
+                                        <div class="text-xs text-gray-500">${donor.donationCount} donations</div>
+                                    </div>
+                                    
+                                    <!-- Scale Numbers (Far Right) -->
+                                    <div class="w-16 flex-shrink-0 text-right">
+                                        <div class="text-lg font-bold text-blue-600">${value.toLocaleString()}</div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                    
+                    <!-- Chart Scale (Bottom) -->
+                    <div class="mt-6 flex justify-between text-xs text-gray-500 px-36">
+                        <span>0</span>
+                        <span>${Math.round(maxValue * 0.2).toLocaleString()}</span>
+                        <span>${Math.round(maxValue * 0.4).toLocaleString()}</span>
+                        <span>${Math.round(maxValue * 0.6).toLocaleString()}</span>
+                        <span>${Math.round(maxValue * 0.8).toLocaleString()}</span>
+                        <span>${maxValue.toLocaleString()}</span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Display donut chart
+        function displayDonutChart(donors) {
+            document.getElementById('barChart').classList.add('hidden');
+            document.getElementById('donutChart').classList.remove('hidden');
+            
+            const rankingType = document.getElementById('rankingType').value;
+            const svg = document.getElementById('donutSvg');
+            const legend = document.getElementById('donutLegend');
+            const totalDonorsSpan = document.getElementById('totalDonorsChart');
+            
+            // Clear previous content
+            svg.innerHTML = '';
+            
+            const radius = 120;
+            const centerX = 150;
+            const centerY = 150;
+            const strokeWidth = 40;
+            
+            // Calculate total for percentages
+            let total = 0;
+            donors.forEach(donor => {
+                switch (rankingType) {
+                    case 'amount':
+                        // For in-kind donations, use count since they don't have amounts
+                        if (activeDonationType === 'inKind') {
+                            total += donor.donationCount;
+                        } else {
+                            total += donor.totalAmount;
+                        }
+                        break;
+                    case 'count':
+                        total += donor.donationCount;
+                        break;
+                    case 'recent':
+                        total += donor.donationCount;
+                        break;
+                }
+            });
+            
+            let currentAngle = 0;
+            
+            // Generate colors
+            const colors = [
+                '#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4',
+                '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'
+            ];
+            
+            totalDonorsSpan.textContent = donors.length;
+            
+            // Create donut segments
+            const segments = donors.map((donor, index) => {
+                let value;
+                switch (rankingType) {
+                    case 'amount':
+                        // For in-kind donations, use count since they don't have amounts
+                        if (activeDonationType === 'inKind') {
+                            value = donor.donationCount;
+                        } else {
+                            value = donor.totalAmount;
+                        }
+                        break;
+                    case 'count':
+                        value = donor.donationCount;
+                        break;
+                    case 'recent':
+                        value = donor.donationCount;
+                        break;
+                }
+                
+                const percentage = (value / total) * 100;
+                const angle = (value / total) * 2 * Math.PI;
+                
+                const startAngle = currentAngle;
+                const endAngle = currentAngle + angle;
+                
+                const x1 = centerX + (radius - strokeWidth / 2) * Math.cos(startAngle);
+                const y1 = centerY + (radius - strokeWidth / 2) * Math.sin(startAngle);
+                const x2 = centerX + (radius - strokeWidth / 2) * Math.cos(endAngle);
+                const y2 = centerY + (radius - strokeWidth / 2) * Math.sin(endAngle);
+                
+                const largeArcFlag = angle > Math.PI ? 1 : 0;
+                
+                const pathData = [
+                    `M ${x1} ${y1}`,
+                    `A ${radius - strokeWidth / 2} ${radius - strokeWidth / 2} 0 ${largeArcFlag} 1 ${x2} ${y2}`
+                ].join(' ');
+                
+                currentAngle += angle;
+                
+                return {
+                    pathData,
+                    color: colors[index % colors.length],
+                    donor,
+                    percentage: percentage.toFixed(1)
+                };
+            });
+            
+            // Draw segments
+            segments.forEach((segment, index) => {
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', segment.pathData);
+                path.setAttribute('stroke', segment.color);
+                path.setAttribute('stroke-width', strokeWidth);
+                path.setAttribute('fill', 'none');
+                path.setAttribute('class', 'hover:opacity-80 transition-opacity cursor-pointer');
+                path.setAttribute('onclick', `window.showDonorDetail && window.showDonorDetail('${segment.donor.uniqueKey}')`);
+                svg.appendChild(path);
+            });
+            
+            // Create legend
+            legend.innerHTML = segments.map((segment, index) => {
+                let primaryMetric, secondaryMetric;
+                switch (rankingType) {
+                    case 'amount':
+                        if (activeDonationType === 'inKind') {
+                            primaryMetric = `${segment.donor.donationCount} items`;
+                            secondaryMetric = `${segment.donor.donationCount} donations`;
+                        } else {
+                            primaryMetric = `₱${segment.donor.totalAmount.toLocaleString()}`;
+                            secondaryMetric = `${segment.donor.donationCount} donations`;
+                        }
+                        break;
+                    case 'count':
+                        primaryMetric = `${segment.donor.donationCount} donations`;
+                        if (activeDonationType === 'inKind') {
+                            secondaryMetric = `${segment.donor.inKindDonations} in-kind`;
+                        } else {
+                            secondaryMetric = `₱${segment.donor.totalAmount.toLocaleString()}`;
+                        }
+                        break;
+                    case 'recent':
+                        primaryMetric = formatDate(segment.donor.lastDonationDate);
+                        secondaryMetric = `${segment.donor.donationCount} donations`;
+                        break;
+                }
+                
+                return `
+                    <div class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors"
+                         onclick="window.showDonorDetail && window.showDonorDetail('${segment.donor.uniqueKey}')">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-4 h-4 rounded-full" style="background-color: ${segment.color}"></div>
+                            <div class="min-w-0">
+                                <div class="text-sm font-medium text-gray-900 truncate">${segment.donor.name}</div>
+                                <div class="text-xs text-gray-500 truncate">${primaryMetric}</div>
+                            </div>
+                        </div>
+                        <div class="text-sm font-medium text-gray-600">${segment.percentage}%</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getRankBadgeColor(index) {
+            switch (index) {
+                case 0: return 'bg-yellow-500'; // Gold
+                case 1: return 'bg-gray-400'; // Silver
+                case 2: return 'bg-amber-600'; // Bronze
+                default: return 'bg-blue-500';
+            }
+        }
+
+        function getRankIcon(index) {
+            const iconColor = index < 3 ? 'text-white' : 'text-white';
+            switch (index) {
+                case 0: return `<svg class="h-6 w-6 ${iconColor}" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
+                case 1: return `<svg class="h-6 w-6 ${iconColor}" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
+                case 2: return `<svg class="h-6 w-6 ${iconColor}" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
+                default: return `<svg class="h-6 w-6 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>`;
+            }
+        }
+
+        function updateTrendingTitle() {
+            const yearFilter = document.getElementById('yearFilter').value;
+            const periodFilter = document.getElementById('periodFilter').value;
+            const rankingType = document.getElementById('rankingType').value;
+            const titleElement = document.getElementById('trendingTitle');
+            const periodElement = document.getElementById('trendingPeriod');
+            
+            let title = 'Top Donors';
+            
+            // Add donation type context
+            switch (activeDonationType) {
+                case 'money':
+                    title = 'Top Money Donors';
+                    break;
+                case 'inKind':
+                    title = 'Top In-Kind Donors';
+                    break;
+                default:
+                    title = 'Top Donors';
+                    break;
+            }
+            let period = '';
+            
+            // Add ranking type context
+            switch (rankingType) {
+                case 'amount':
+                    title += ' by Amount';
+                    break;
+                case 'count':
+                    title += ' by Frequency';
+                    break;
+                case 'recent':
+                    title += ' by Recent Activity';
+                    break;
+            }
+            
+            // Add period context
+            if (periodFilter !== 'all') {
+                switch (periodFilter) {
+                    case 'week':
+                        period = 'This Week';
+                        break;
+                    case 'month':
+                        period = 'This Month';
+                        break;
+                    case 'year':
+                        period = 'This Year';
+                        break;
+                }
+            } else if (yearFilter !== 'all') {
+                period = `Year ${yearFilter}`;
+            } else {
+                period = 'All Time';
+            }
+            
+            titleElement.textContent = `${title} - ${period}`;
+            periodElement.textContent = `Showing top ${topDonors.length} donor${topDonors.length !== 1 ? 's' : ''}`;
+        }
+
+        // Print Modal Functions
+        function openPrintModal() {
+            document.getElementById('printModal').classList.remove('hidden');
+            updatePrintPreview();
+        }
+
+        function closePrintModal() {
+            document.getElementById('printModal').classList.add('hidden');
+        }
+
+        function resetPrintFilters() {
+            document.getElementById('printDonationType').value = 'all';
+            document.getElementById('printHideAnonymous').checked = false;
+            document.getElementById('printSortOrder').value = 'highest';
+            document.getElementById('printFromDate').value = '';
+            document.getElementById('printToDate').value = '';
+            document.getElementById('printPaymentMethod').value = '';
+            updatePrintPreview();
+        }
+
+        function updatePrintPreview() {
+            const filters = getPrintFilters();
+            const filteredData = getFilteredPrintData(filters);
+            const previewContent = generatePrintPreview(filteredData);
+            
+            document.getElementById('printPreviewContent').innerHTML = previewContent;
+            document.getElementById('previewRecordCount').textContent = `${filteredData.length} records will be printed`;
+        }
+
+        function getPrintFilters() {
+            return {
+                donationType: document.getElementById('printDonationType').value,
+                hideAnonymous: document.getElementById('printHideAnonymous').checked,
+                sortOrder: document.getElementById('printSortOrder').value,
+                fromDate: document.getElementById('printFromDate').value,
+                toDate: document.getElementById('printToDate').value,
+                paymentMethod: document.getElementById('printPaymentMethod').value
+            };
+        }
+
+        function getFilteredPrintData(filters) {
+            let filteredRecords = [...allRecords];
+            
+            // Filter by donation type
+            if (filters.donationType === 'money') {
+                filteredRecords = filteredRecords.filter(record => record.donationType === 'money');
+            } else if (filters.donationType === 'inKind') {
+                filteredRecords = filteredRecords.filter(record => record.donationType === 'in-kind');
+            }
+            
+            // Filter by anonymous
+            if (filters.hideAnonymous) {
+                filteredRecords = filteredRecords.filter(record => record.donorName && record.donorName !== 'Anonymous');
+            }
+            
+            // Filter by date range
+            if (filters.fromDate) {
+                const fromDate = new Date(filters.fromDate);
+                filteredRecords = filteredRecords.filter(record => {
+                    const recordDate = new Date(record.dateOfDonation);
+                    return recordDate >= fromDate;
+                });
+            }
+            
+            if (filters.toDate) {
+                const toDate = new Date(filters.toDate);
+                toDate.setHours(23, 59, 59, 999); // End of day
+                filteredRecords = filteredRecords.filter(record => {
+                    const recordDate = new Date(record.dateOfDonation);
+                    return recordDate <= toDate;
+                });
+            }
+            
+            // Filter by payment method (for money donations only)
+            if (filters.paymentMethod && filters.donationType !== 'inKind') {
+                filteredRecords = filteredRecords.filter(record => 
+                    record.donationType === 'money' && 
+                    record.typeOfDonation && 
+                    record.typeOfDonation === filters.paymentMethod
+                );
+            }
+            
+            // Sort the data
+            switch (filters.sortOrder) {
+                case 'highest':
+                    filteredRecords.sort((a, b) => {
+                        const aAmount = a.donationType === 'money' ? (parseFloat(a.amount) || 0) : 0;
+                        const bAmount = b.donationType === 'money' ? (parseFloat(b.amount) || 0) : 0;
+                        return bAmount - aAmount;
+                    });
+                    break;
+                case 'lowest':
+                    filteredRecords.sort((a, b) => {
+                        const aAmount = a.donationType === 'money' ? (parseFloat(a.amount) || 0) : 0;
+                        const bAmount = b.donationType === 'money' ? (parseFloat(b.amount) || 0) : 0;
+                        return aAmount - bAmount;
+                    });
+                    break;
+                case 'name':
+                    filteredRecords.sort((a, b) => (a.donorName || 'Anonymous').localeCompare(b.donorName || 'Anonymous'));
+                    break;
+                case 'recent':
+                    filteredRecords.sort((a, b) => new Date(b.dateOfDonation) - new Date(a.dateOfDonation));
+                    break;
+            }
+            
+            return filteredRecords;
+        }
+
+        function generatePrintPreview(data) {
+            if (data.length === 0) {
+                return `
+                    <div class="text-center text-gray-500 py-8">
+                        <p>No records match the selected filters</p>
+                    </div>
+                `;
+            }
+            
+            const logoUrl = `${window.location.origin}${window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'))}/tahanan-logo.png`;
+            
+            return `
+                <div class="text-center mb-6 pb-4 border-b-2 border-red-600">
+                    <img src="${logoUrl}" alt="Tahanan ng Pagmamahal Logo" class="mx-auto mb-2" style="height: 60px;" onerror="this.style.display='none'">
+                    <p class="text-xs text-gray-600 mb-1">45 Dr. Pilapil St., Brgy. Sagad, Pasig, Metro Manila, Philippines</p>
+                    <p class="text-xs text-gray-600 mb-1">Contact: (+63) 917 525 7188 Tel: +632 8631 7188</p>
+                    <p class="text-xs text-gray-600 mb-3">Email: tahananpch@gmail.com</p>
+                    <h2 class="text-sm font-medium text-gray-700 mb-1">Donor Records Report</h2>
+                    <p class="text-xs text-gray-600">Generated on: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                </div>
+                
+                <table class="w-full border-collapse text-xs mt-5">
+                    <thead>
+                        <tr>
+                            <th class="bg-red-600 text-white border border-red-600 px-2 py-2 text-left text-xs font-bold">ID</th>
+                            <th class="bg-red-600 text-white border border-red-600 px-2 py-2 text-left text-xs font-bold">Donor Name</th>
+                            <th class="bg-red-600 text-white border border-red-600 px-2 py-2 text-left text-xs font-bold">Email</th>
+                            <th class="bg-red-600 text-white border border-red-600 px-2 py-2 text-left text-xs font-bold">Contact</th>
+                            <th class="bg-red-600 text-white border border-red-600 px-2 py-2 text-left text-xs font-bold">Type</th>
+                            <th class="bg-red-600 text-white border border-red-600 px-2 py-2 text-left text-xs font-bold">Amount/Items</th>
+                            <th class="bg-red-600 text-white border border-red-600 px-2 py-2 text-left text-xs font-bold">Payment Method</th>
+                            <th class="bg-red-600 text-white border border-red-600 px-2 py-2 text-left text-xs font-bold">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.slice(0, 10).map((record, index) => `
+                            <tr class="${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}">
+                                <td class="border border-gray-300 px-2 py-1.5 text-center text-xs">${record.donationId || `D${String(index + 1).padStart(3, '0')}`}</td>
+                                <td class="border border-gray-300 px-2 py-1.5 text-xs">${record.donorName || 'Anonymous'}</td>
+                                <td class="border border-gray-300 px-2 py-1.5 text-xs">${record.emailAddress || 'N/A'}</td>
+                                <td class="border border-gray-300 px-2 py-1.5 text-center text-xs">${record.contactNumber || 'N/A'}</td>
+                                <td class="border border-gray-300 px-2 py-1.5 text-center text-xs">${record.donationType === 'money' ? 'Money' : 'In-Kind'}</td>
+                                <td class="border border-gray-300 px-2 py-1.5 text-xs">
+                                    ${record.donationType === 'money' 
+                                        ? `₱${parseFloat(record.amount || 0).toLocaleString()}` 
+                                        : (record.itemDescription || 'N/A')}
+                                </td>
+                                <td class="border border-gray-300 px-2 py-1.5 text-center text-xs">
+                                    ${record.donationType === 'money' ? (record.typeOfDonation || 'N/A') : '-'}
+                                </td>
+                                <td class="border border-gray-300 px-2 py-1.5 text-center text-xs whitespace-nowrap">${formatDate(record.dateOfDonation)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                
+                ${data.length > 10 ? `
+                    <div class="mt-4 text-center text-xs text-gray-500">
+                        ... and ${data.length - 10} more records will be included in the full print
+                    </div>
+                ` : ''}
+                
+                <!-- Summary Section -->
+                <div class="mt-8 border-t-2 border-red-600 pt-5">
+                    <div class="text-center mb-5">
+                        <h3 class="text-xs font-bold text-red-600 mb-3">SUMMARY</h3>
+                        <div class="flex justify-center gap-8 text-xs">
+                            <div class="flex items-center gap-1">
+                                <span class="text-gray-600">Total:</span>
+                                <span class="font-bold text-red-600">${data.length}</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <span class="text-gray-600">Money:</span>
+                                <span class="font-bold text-red-600">${data.filter(r => r.donationType === 'money').length}</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <span class="text-gray-600">In-Kind:</span>
+                                <span class="font-bold text-red-600">${data.filter(r => r.donationType === 'in-kind').length}</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <span class="text-gray-600">Total Amount:</span>
+                                <span class="font-bold text-red-600">₱${data.filter(r => r.donationType === 'money').reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0).toLocaleString()}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Signature Section -->
+                <div class="mt-8 border-t border-gray-300 pt-4">
+                    <div class="flex justify-between items-start text-xs">
+                        <div></div>
+                        <div class="text-right">
+                            <div class="text-gray-600 mb-1">Prepared By:</div>
+                            <div class="font-bold mb-1">${currentUser?.fullName || currentUser?.firstName && currentUser?.lastName ? `${currentUser.firstName} ${currentUser.lastName}` : 'System User'}</div>
+                            <div class="text-gray-600 text-xs">Generated on: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function printRecords() {
+            const filters = getPrintFilters();
+            const filteredData = getFilteredPrintData(filters);
+            
+            if (filteredData.length === 0) {
+                alert('No records to print. Please adjust your filters.');
+                return;
+            }
+            
+            const printContent = generateFullPrintContent(filteredData);
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(printContent);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        function generateFullPrintContent(data) {
+            const currentDate = new Date().toLocaleDateString();
+            const logoUrl = `${window.location.origin}${window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'))}/tahanan-logo.png`;
+            
+            // Calculate statistics
+            const totalRecords = data.length;
+            const moneyDonations = data.filter(r => r.donationType === 'money').length;
+            const inKindDonations = data.filter(r => r.donationType === 'in-kind').length;
+            const totalAmount = data.filter(r => r.donationType === 'money').reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
+            
+            // Get current user name
+            const preparedBy = currentUser ? `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim() || currentUser.fullName || 'System User' : 'System User';
+            
+            return `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Donor Records Report - ${currentDate}</title>
+                    <style>
+                        body { 
+                            font-family: Arial, sans-serif; 
+                            font-size: 11px; 
+                            margin: 20px;
+                            line-height: 1.3;
+                        }
+                        .header { 
+                            text-align: center; 
+                            margin-bottom: 25px; 
+                            border-bottom: 2px solid #d1514a; 
+                            padding-bottom: 15px; 
+                        }
+                        .logo { 
+                            height: 60px; 
+                            margin-bottom: 10px; 
+                        }
+                        .organization { 
+                            font-size: 18px; 
+                            font-weight: bold; 
+                            margin-bottom: 5px; 
+                        }
+                        .report-title { 
+                            font-size: 14px; 
+                            margin-bottom: 5px; 
+                            color: #666;
+                        }
+                        .date { 
+                            font-size: 11px; 
+                            color: #666; 
+                        }
+                        .records-table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin-top: 20px;
+                            font-size: 10px;
+                        }
+                        .records-table th {
+                            background-color: #d1514a;
+                            border: 1px solid #d1514a;
+                            padding: 8px 5px;
+                            text-align: left;
+                            font-weight: bold;
+                            color: white;
+                            font-size: 9px;
+                        }
+                        .records-table td {
+                            border: 1px solid #ddd;
+                            padding: 6px 5px;
+                            vertical-align: top;
+                            font-size: 9px;
+                        }
+                        .records-table tbody tr:nth-child(even) {
+                            background-color: #f9f9f9;
+                        }
+                        .text-center {
+                            text-align: center;
+                        }
+                        .text-nowrap {
+                            white-space: nowrap;
+                        }
+                        .summary-section {
+                            margin-top: 30px;
+                            border-top: 2px solid #d1514a;
+                            padding-top: 20px;
+                        }
+                        .summary-stats {
+                            text-align: center;
+                            margin-bottom: 20px;
+                        }
+                        .summary-stats h3 {
+                            font-size: 12px;
+                            color: #d1514a;
+                            margin-bottom: 10px;
+                            font-weight: bold;
+                        }
+                        .stats-row {
+                            display: flex;
+                            justify-content: center;
+                            gap: 30px;
+                            font-size: 11px;
+                        }
+                        .stat-item {
+                            display: flex;
+                            align-items: center;
+                            gap: 5px;
+                        }
+                        .stat-label {
+                            color: #666;
+                        }
+                        .stat-value {
+                            font-weight: bold;
+                            color: #d1514a;
+                        }
+                        .signature-section {
+                            margin-top: 30px;
+                            border-top: 1px solid #ddd;
+                            padding-top: 15px;
+                            font-size: 11px;
+                        }
+                        .signature-row {
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: flex-start;
+                        }
+                        .signature-box {
+                            flex: 1;
+                            max-width: 200px;
+                        }
+                        .signature-box.left {
+                            text-align: left;
+                        }
+                        .signature-box.right {
+                            text-align: right;
+                        }
+                        .signature-label {
+                            color: #666;
+                            margin-bottom: 5px;
+                        }
+                        .signature-name {
+                            font-weight: bold;
+                            margin-bottom: 3px;
+                        }
+                        .signature-date {
+                            color: #666;
+                            font-size: 10px;
+                        }
+                        .signature-line {
+                            border-bottom: 1px solid #666;
+                            margin-bottom: 3px;
+                            height: 20px;
+                        }
+                        @media print { 
+                            body { margin: 10px; font-size: 10px; } 
+                            .records-table { font-size: 8px; }
+                            .records-table th { font-size: 8px; padding: 4px 3px; }
+                            .records-table td { font-size: 8px; padding: 4px 3px; }
+                            .header { margin-bottom: 15px; }
+                            .logo { height: 80px; }
+                            .summary-section { margin-top: 20px; padding-top: 15px; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <img src="${logoUrl}" alt="Logo" class="logo">
+                        <p style="margin: 2px 0; font-size: 10px;">45 Dr. Pilapil St., Brgy. Sagad, Pasig, Metro Manila, Philippines</p>
+                        <p style="margin: 2px 0; font-size: 10px;">Contact: (+63) 917 525 7188 Tel: +632 8631 7188</p>
+                        <p style="margin: 2px 0; font-size: 10px;">Email: tahananpch@gmail.com</p>
+                        <div class="report-title">Donor Records Report</div>
+                        <div class="date">Generated on: ${currentDate}</div>
+                    </div>
+                    
+                    <table class="records-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 8%;">ID</th>
+                                <th style="width: 20%;">Donor Name</th>
+                                <th style="width: 15%;">Email</th>
+                                <th style="width: 10%;">Contact</th>
+                                <th style="width: 8%;">Type</th>
+                                <th style="width: 15%;">Amount/Items</th>
+                                <th style="width: 12%;">Payment Method</th>
+                                <th style="width: 12%;">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.map((record, index) => `
+                                <tr>
+                                    <td class="text-center">${record.donationId || `D${String(index + 1).padStart(3, '0')}`}</td>
+                                    <td>${record.donorName || 'Anonymous'}</td>
+                                    <td>${record.emailAddress || 'N/A'}</td>
+                                    <td class="text-center">${record.contactNumber || 'N/A'}</td>
+                                    <td class="text-center">${record.donationType === 'money' ? 'Money' : 'In-Kind'}</td>
+                                    <td>${record.donationType === 'money' 
+                                        ? `₱${parseFloat(record.amount || 0).toLocaleString()}` 
+                                        : (record.itemDescription || 'N/A')}</td>
+                                    <td class="text-center">${record.donationType === 'money' ? (record.typeOfDonation || 'N/A') : '-'}</td>
+                                    <td class="text-center text-nowrap">${formatDateShort(record.dateOfDonation) || 'N/A'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    
+                    <!-- Summary Section -->
+                    <div class="summary-section">
+                        <div class="summary-stats">
+                            <h3>SUMMARY</h3>
+                            <div class="stats-row">
+                                <div class="stat-item">
+                                    <span class="stat-label">Total:</span>
+                                    <span class="stat-value">${totalRecords}</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Money:</span>
+                                    <span class="stat-value">${moneyDonations}</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">In-Kind:</span>
+                                    <span class="stat-value">${inKindDonations}</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Total Amount:</span>
+                                    <span class="stat-value">₱${totalAmount.toLocaleString()}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Signature Section -->
+                    <div class="signature-section">
+                        <div class="signature-row">
+                            <div></div>
+                            <div class="signature-box right">
+                                <div class="signature-label">Prepared By:</div>
+                                <div class="signature-name">${preparedBy}</div>
+                                <div class="signature-date">Generated on: ${currentDate}</div>
+                            </div>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `;
         }
 
         function formatDate(date) {
             if (!date) return 'N/A';
             const d = new Date(date);
             return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        function formatDateShort(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: '2-digit', 
+                day: '2-digit' 
+            });
         }
 
         function formatDateTime(dateString) {
@@ -654,6 +2392,105 @@
         function hideSkeletonLoading() {
             document.getElementById('skeletonGrid').classList.add('hidden');
             document.getElementById('donorsGrid').classList.remove('hidden');
+        }
+
+        // Tutorial functionality
+        function setupTutorialFunctionality() {
+            const tutorialBtn = document.getElementById('tutorialBtn');
+            const tutorialModal = document.getElementById('tutorialModal');
+            const closeTutorialModal = document.getElementById('closeTutorialModal');
+            const prevTutorialBtn = document.getElementById('prevTutorialBtn');
+            const nextTutorialBtn = document.getElementById('nextTutorialBtn');
+            const skipTutorialBtn = document.getElementById('skipTutorialBtn');
+
+            tutorialBtn.addEventListener('click', showTutorialModal);
+            closeTutorialModal.addEventListener('click', hideTutorialModal);
+            skipTutorialBtn.addEventListener('click', hideTutorialModal);
+            prevTutorialBtn.addEventListener('click', goToPreviousTutorialStep);
+            nextTutorialBtn.addEventListener('click', goToNextTutorialStep);
+
+            // Close tutorial on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && !tutorialModal.classList.contains('hidden')) {
+                    hideTutorialModal();
+                }
+            });
+        }
+
+        function showTutorialModal() {
+            currentTutorialStep = 1;
+            document.getElementById('tutorialModal').classList.remove('hidden');
+            updateTutorialStep();
+        }
+
+        function hideTutorialModal() {
+            document.getElementById('tutorialModal').classList.add('hidden');
+        }
+
+        function goToNextTutorialStep() {
+            if (currentTutorialStep < totalTutorialSteps) {
+                currentTutorialStep++;
+                updateTutorialStep();
+            } else {
+                hideTutorialModal();
+            }
+        }
+
+        function goToPreviousTutorialStep() {
+            if (currentTutorialStep > 1) {
+                currentTutorialStep--;
+                updateTutorialStep();
+            }
+        }
+
+        function updateTutorialStep() {
+            // Hide all steps
+            for (let i = 1; i <= totalTutorialSteps; i++) {
+                const step = document.getElementById(`tutorialStep${i}`);
+                if (step) {
+                    step.classList.add('hidden');
+                }
+            }
+
+            // Show current step
+            const currentStepElement = document.getElementById(`tutorialStep${currentTutorialStep}`);
+            if (currentStepElement) {
+                currentStepElement.classList.remove('hidden');
+            }
+
+            // Update progress bar
+            const progressPercentage = Math.round((currentTutorialStep / totalTutorialSteps) * 100);
+            document.getElementById('progressBar').style.width = `${progressPercentage}%`;
+            document.getElementById('progressPercentage').textContent = `${progressPercentage}%`;
+            document.getElementById('currentStep').textContent = currentTutorialStep;
+            document.getElementById('totalSteps').textContent = totalTutorialSteps;
+
+            // Update navigation buttons
+            const prevBtn = document.getElementById('prevTutorialBtn');
+            const nextBtn = document.getElementById('nextTutorialBtn');
+
+            prevBtn.disabled = currentTutorialStep === 1;
+            if (currentTutorialStep === 1) {
+                prevBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                prevBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+
+            if (currentTutorialStep === totalTutorialSteps) {
+                nextBtn.innerHTML = `
+                    Finish
+                    <svg class="h-5 w-5 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                `;
+            } else {
+                nextBtn.innerHTML = `
+                    Next
+                    <svg class="h-5 w-5 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                `;
+            }
         }
     </script>
 </body>

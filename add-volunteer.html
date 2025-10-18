@@ -126,6 +126,27 @@
         </div>
     </header>
 
+    <!-- Generic Message Modal -->
+    <div id="messageModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
+            <div class="text-center">
+                <div id="messageIcon" class="mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4">
+                    <!-- Icon will be inserted here -->
+                </div>
+                <h3 id="messageTitle" class="text-lg font-medium text-gray-900 mb-2">Message</h3>
+                <p id="messageText" class="text-sm text-gray-600 mb-6 whitespace-pre-line"></p>
+                <div class="flex space-x-3 justify-center">
+                    <button id="messageOkBtn" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                        OK
+                    </button>
+                    <button id="messageCancelBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors hidden">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Offline Records Modal -->
     <div id="offlineModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[80vh] flex flex-col">
@@ -1507,7 +1528,209 @@ document.addEventListener('DOMContentLoaded', function() {
     setupTutorialFunctionality();
     
     setupEventListeners();
+    
+    // Check for offline records on page load and notify user
+    checkOfflineRecordsOnLoad();
 });
+
+// Check for offline records on page load and notify user
+function checkOfflineRecordsOnLoad() {
+    const records = getOfflineRecords();
+    if (records.length > 0) {
+        // Calculate how long ago the oldest record was saved
+        const oldestRecord = records.reduce((oldest, record) => 
+            new Date(record.savedAt) < new Date(oldest.savedAt) ? record : oldest
+        );
+        
+        const savedTime = new Date(oldestRecord.savedAt);
+        const now = new Date();
+        const timeDiff = now - savedTime;
+        const hoursAgo = Math.floor(timeDiff / (1000 * 60 * 60));
+        const daysAgo = Math.floor(hoursAgo / 24);
+        
+        let timeText = '';
+        if (daysAgo > 0) {
+            timeText = `${daysAgo} day${daysAgo > 1 ? 's' : ''} ago`;
+        } else if (hoursAgo > 0) {
+            timeText = `${hoursAgo} hour${hoursAgo > 1 ? 's' : ''} ago`;
+        } else {
+            timeText = 'recently';
+        }
+        
+        const message = `You have ${records.length} offline volunteer record${records.length > 1 ? 's' : ''} saved ${timeText}.\n\nThese records are stored locally and need to be synced when you have an internet connection.`;
+        
+        setTimeout(async () => {
+            const action = await showOfflineNotificationModal(message, records.length);
+            
+            if (action === 'view') {
+                showOfflineModal();
+            } else if (action === 'sync' && navigator.onLine) {
+                syncAllOfflineRecords();
+            }
+        }, 1000);
+    }
+}
+
+// Generic message modal functions
+function showMessageModal(title, message, type = 'info', showCancel = false) {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('messageModal');
+        const titleEl = document.getElementById('messageTitle');
+        const textEl = document.getElementById('messageText');
+        const iconEl = document.getElementById('messageIcon');
+        const okBtn = document.getElementById('messageOkBtn');
+        const cancelBtn = document.getElementById('messageCancelBtn');
+        
+        titleEl.textContent = title;
+        textEl.textContent = message;
+        
+        // Set icon and colors based on type
+        let iconHTML = '';
+        let iconBgClass = '';
+        
+        switch (type) {
+            case 'success':
+                iconBgClass = 'bg-green-100';
+                iconHTML = `<svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>`;
+                break;
+            case 'error':
+                iconBgClass = 'bg-red-100';
+                iconHTML = `<svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>`;
+                break;
+            case 'warning':
+                iconBgClass = 'bg-yellow-100';
+                iconHTML = `<svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z"/>
+                </svg>`;
+                break;
+            default:
+                iconBgClass = 'bg-blue-100';
+                iconHTML = `<svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>`;
+        }
+        
+        iconEl.className = `mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4 ${iconBgClass}`;
+        iconEl.innerHTML = iconHTML;
+        
+        if (showCancel) {
+            cancelBtn.classList.remove('hidden');
+        } else {
+            cancelBtn.classList.add('hidden');
+        }
+        
+        const handleOk = () => {
+            modal.classList.add('hidden');
+            resolve(true);
+        };
+        
+        const handleCancel = () => {
+            modal.classList.add('hidden');
+            resolve(false);
+        };
+        
+        // Remove existing event listeners
+        okBtn.replaceWith(okBtn.cloneNode(true));
+        cancelBtn.replaceWith(cancelBtn.cloneNode(true));
+        
+        // Get new references after replacing
+        const newOkBtn = document.getElementById('messageOkBtn');
+        const newCancelBtn = document.getElementById('messageCancelBtn');
+        
+        newOkBtn.addEventListener('click', handleOk);
+        newCancelBtn.addEventListener('click', handleCancel);
+        
+        modal.classList.remove('hidden');
+    });
+}
+
+function showSuccessMessage(message) {
+    return showMessageModal('Success', message, 'success');
+}
+
+function showErrorMessage(message) {
+    return showMessageModal('Error', message, 'error');
+}
+
+function showWarningMessage(message) {
+    return showMessageModal('Warning', message, 'warning');
+}
+
+function showConfirmMessage(message) {
+    return showMessageModal('Confirm', message, 'question', true);
+}
+
+// Special notification modal for offline records on page load
+function showOfflineNotificationModal(message, recordCount) {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('messageModal');
+        const titleEl = document.getElementById('messageTitle');
+        const textEl = document.getElementById('messageText');
+        const iconEl = document.getElementById('messageIcon');
+        const okBtn = document.getElementById('messageOkBtn');
+        const cancelBtn = document.getElementById('messageCancelBtn');
+        
+        // Set title and message
+        titleEl.textContent = 'Offline Records Found';
+        textEl.textContent = message;
+        
+        // Set warning icon and colors
+        iconEl.className = 'mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4 bg-yellow-100';
+        iconEl.innerHTML = `
+            <svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z"/>
+            </svg>
+        `;
+        
+        // Update button layout for three options
+        const buttonContainer = okBtn.parentElement;
+        buttonContainer.innerHTML = `
+            <button id="dismissBtn" class="px-4 py-2 text-gray-500 hover:text-gray-700 transition-colors">
+                Dismiss
+            </button>
+            <button id="viewOfflineBtn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors">
+                View Records
+            </button>
+            ${navigator.onLine ? `
+                <button id="syncNowBtn" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors">
+                    Sync Now
+                </button>
+            ` : ''}
+        `;
+        
+        // Set up event handlers
+        const handleDismiss = () => {
+            modal.classList.add('hidden');
+            resolve('dismiss');
+        };
+        
+        const handleView = () => {
+            modal.classList.add('hidden');
+            resolve('view');
+        };
+        
+        const handleSync = () => {
+            modal.classList.add('hidden');
+            resolve('sync');
+        };
+        
+        document.getElementById('dismissBtn').addEventListener('click', handleDismiss);
+        document.getElementById('viewOfflineBtn').addEventListener('click', handleView);
+        if (navigator.onLine) {
+            const syncBtn = document.getElementById('syncNowBtn');
+            if (syncBtn) {
+                syncBtn.addEventListener('click', handleSync);
+            }
+        }
+        
+        // Show modal
+        modal.classList.remove('hidden');
+    });
+}
 
 // Camera functionality
 let currentStream = null;
@@ -1784,19 +2007,37 @@ function setupEventListeners() {
         const field = document.getElementById(fieldId);
         if (field) {
             field.addEventListener('input', function() {
-                const sanitized = validateContactField(this.value);
-                if (this.value !== sanitized) {
-                    this.value = sanitized;
+                // Only allow digits and limit to 11 characters
+                let value = this.value.replace(/\D/g, ''); // Remove non-digits
+                if (value.length > 11) {
+                    value = value.substring(0, 11); // Limit to 11 digits
+                }
+                
+                if (this.value !== value) {
+                    this.value = value;
                     this.style.borderColor = '#ef4444';
                     setTimeout(() => {
                         this.style.borderColor = '';
                     }, 1000);
                 }
+                
+                // Set maxlength to 11
+                this.setAttribute('maxlength', '11');
+                
+                // Visual validation feedback
+                if (value.length > 0 && value.length !== 11) {
+                    this.style.borderColor = '#ef4444';
+                    this.title = 'Contact number must be exactly 11 digits';
+                } else {
+                    this.style.borderColor = '';
+                    this.title = '';
+                }
             });
 
             field.addEventListener('keypress', function(e) {
-                const allowedPattern = /^[0-9\-\+\(\)\s]$/;
-                if (!allowedPattern.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab') {
+                // Only allow numbers 0-9
+                const allowedPattern = /^[0-9]$/;
+                if (!allowedPattern.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
                     e.preventDefault();
                     this.style.borderColor = '#ef4444';
                     setTimeout(() => {
@@ -1859,33 +2100,35 @@ function setupEventListeners() {
         });
     }
 
-    // Skills and motivation textarea fields
+    // Skills and motivation textarea fields - use gentle validation
     const textareaFields = ['skillsAndExperience', 'motivationForVolunteering'];
     textareaFields.forEach(fieldId => {
         const field = document.getElementById(fieldId);
         if (field) {
-            field.addEventListener('input', function() {
+            // Only validate on blur, not on every keystroke
+            field.addEventListener('blur', function() {
                 const sanitized = validateSkillsField(this.value);
                 if (this.value !== sanitized) {
                     this.value = sanitized;
                     this.style.borderColor = '#ef4444';
                     setTimeout(() => {
                         this.style.borderColor = '';
-                    }, 1000);
+                    }, 2000);
                 }
             });
 
             field.addEventListener('paste', function(e) {
-                e.preventDefault();
-                const pastedText = (e.clipboardData || window.clipboardData).getData('text');
-                const sanitized = validateSkillsField(pastedText);
-                this.value = sanitized;
-                if (pastedText !== sanitized) {
-                    this.style.borderColor = '#ef4444';
-                    setTimeout(() => {
-                        this.style.borderColor = '';
-                    }, 1000);
-                }
+                // Allow paste but validate after a short delay
+                setTimeout(() => {
+                    const sanitized = validateSkillsField(this.value);
+                    if (this.value !== sanitized) {
+                        this.value = sanitized;
+                        this.style.borderColor = '#ef4444';
+                        setTimeout(() => {
+                            this.style.borderColor = '';
+                        }, 2000);
+                    }
+                }, 100);
             });
         }
     });
@@ -2079,6 +2322,20 @@ async function handleSubmit(e) {
             }
         }
 
+        // Validate contact number format
+        const contactNumberField = document.getElementById('contactNumber');
+        if (contactNumberField && !validateContactNumber(contactNumberField.value)) {
+            showErrorModal('Contact number must be exactly 11 digits.');
+            return;
+        }
+
+        // Validate emergency contact number format (if provided)
+        const emergencyContactField = document.getElementById('emergencyContactNumber');
+        if (emergencyContactField && emergencyContactField.value.trim() && !validateContactNumber(emergencyContactField.value)) {
+            showErrorModal('Emergency contact number must be exactly 11 digits.');
+            return;
+        }
+
         // Show preview modal instead of saving directly
         showVolunteerPreviewModal();
         return;
@@ -2177,6 +2434,24 @@ async function saveVolunteerRecord(data, isSync = false) {
                 }
                 return { success: false };
             }
+        }
+
+        // Validate contact number format
+        if (!validateContactNumber(data.contactNumber)) {
+            if (!isSync) {
+                hideLoadingScreen();
+                showErrorModal('Contact number must be exactly 11 digits.');
+            }
+            return { success: false };
+        }
+
+        // Validate emergency contact number format (if provided)
+        if (data.emergencyContactNumber && data.emergencyContactNumber.trim() && !validateContactNumber(data.emergencyContactNumber)) {
+            if (!isSync) {
+                hideLoadingScreen();
+                showErrorModal('Emergency contact number must be exactly 11 digits.');
+            }
+            return { success: false };
         }
 
         // Check for email duplication in Firestore
@@ -2315,8 +2590,8 @@ function sanitizeInput(input) {
     sanitized = sanitized.replace(/javascript:/gi, '');
     sanitized = sanitized.replace(/on\w+\s*=/gi, '');
     
-    // Remove potentially dangerous characters and patterns
-    sanitized = sanitized.replace(/[<>'"&%$#@!`~\*\{\}\[\]\\\/\|]/g, '');
+    // Remove potentially dangerous characters but keep @ for emails and basic punctuation
+    sanitized = sanitized.replace(/[<>'"&%$#!`~\*\{\}\[\]\\\/\|]/g, '');
     
     // Remove SQL injection patterns
     sanitized = sanitized.replace(/(\b(select|insert|update|delete|drop|create|alter|exec|execute|script|iframe|object|embed|form|input)\b)/gi, '');
@@ -2325,7 +2600,7 @@ function sanitizeInput(input) {
 }
 
 // Generic text input validation with real-time sanitization
-function validateTextInput(input, allowedPattern = /^[a-zA-Z\s\-',.]*$/) {
+function validateTextInput(input, allowedPattern = /[a-zA-Z\s\-',.]*/) {
     if (!input) return '';
     
     // First sanitize to remove dangerous content
@@ -2339,32 +2614,42 @@ function validateTextInput(input, allowedPattern = /^[a-zA-Z\s\-',.]*$/) {
 
 // Name field validation (letters, spaces, hyphens, apostrophes only)
 function validateNameField(input) {
-    return validateTextInput(input, /^[a-zA-Z\s\-']*$/);
+    return validateTextInput(input, /[a-zA-Z\s\-']/);
 }
 
 // Address field validation (letters, numbers, basic punctuation)
 function validateAddressField(input) {
-    return validateTextInput(input, /^[a-zA-Z0-9\s\.,\-#/]*$/);
+    return validateTextInput(input, /[a-zA-Z0-9\s\.,\-#/]/);
 }
 
 // Username field validation (alphanumeric with safe symbols)
 function validateUsernameField(input) {
-    return validateTextInput(input, /^[a-zA-Z0-9_.-]*$/);
+    return validateTextInput(input, /[a-zA-Z0-9_.-]/);
 }
 
-// Contact number validation (numbers and phone formatting characters)
+// Contact number validation (11 digits only)
 function validateContactField(input) {
-    return validateTextInput(input, /^[0-9\-\+\(\)\s]*$/);
+    if (!input) return '';
+    // Remove all non-digit characters and limit to 11 digits
+    const cleaned = input.replace(/\D/g, '').substring(0, 11);
+    return cleaned;
+}
+
+// Validate contact number format (must be exactly 11 digits)
+function validateContactNumber(contactNumber) {
+    if (!contactNumber) return false;
+    const cleanNumber = contactNumber.replace(/\D/g, '');
+    return cleanNumber.length === 11;
 }
 
 // Skills and experience validation (comprehensive text with safe punctuation)
 function validateSkillsField(input) {
-    return validateTextInput(input, /^[a-zA-Z0-9\s\.,\-'()\n\r]*$/);
+    return validateTextInput(input, /[a-zA-Z0-9\s\.,\-'()\n\r]/);
 }
 
 // Email validation with basic sanitization
 function validateEmailField(input) {
-    return validateTextInput(input, /^[a-zA-Z0-9@.\-_]*$/);
+    return validateTextInput(input, /[a-zA-Z0-9@.\-_]/);
 }
 
 function showMessage(message, type) {
