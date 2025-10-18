@@ -26,6 +26,10 @@ function showNotification(title, message) {
       body: message,
       icon: 'tahanan-logo.jpg'
     });
+
+    const sound = new Audio('notif.mp3');
+    sound.play();
+
   }
 }
 

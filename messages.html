@@ -171,6 +171,32 @@
         </div>
         <div class="flex-1 overflow-y-auto hidden-scrollbar">
           <ul class="divide-y divide-gray-100" id="mobileInboxList"></ul>
+          <div id="mobileInboxSkeleton" class="p-4 space-y-4">
+            <div class="flex items-center gap-3 p-4">
+              <div class="skeleton skeleton-avatar"></div>
+              <div class="flex-1">
+                <div class="skeleton skeleton-text" style="width: 60%;"></div>
+                <div class="skeleton skeleton-text-sm" style="width: 80%;"></div>
+                <div class="skeleton skeleton-text-sm" style="width: 40%;"></div>
+              </div>
+            </div>
+            <div class="flex items-center gap-3 p-4">
+              <div class="skeleton skeleton-avatar"></div>
+              <div class="flex-1">
+                <div class="skeleton skeleton-text" style="width: 70%;"></div>
+                <div class="skeleton skeleton-text-sm" style="width: 90%;"></div>
+                <div class="skeleton skeleton-text-sm" style="width: 35%;"></div>
+              </div>
+            </div>
+            <div class="flex items-center gap-3 p-4">
+              <div class="skeleton skeleton-avatar"></div>
+              <div class="flex-1">
+                <div class="skeleton skeleton-text" style="width: 55%;"></div>
+                <div class="skeleton skeleton-text-sm" style="width: 75%;"></div>
+                <div class="skeleton skeleton-text-sm" style="width: 45%;"></div>
+              </div>
+            </div>
+          </div>
         </div>
       </aside>
     </div>
@@ -191,8 +217,25 @@
   <div class="flex flex-col flex-1 min-h-0">
           <!-- Messages Area -->
           <div id="mobileMessagesContainer" class="flex-1 p-4 overflow-y-auto bg-white" style="z-index:1; touch-action:manipulation;">
-            <div id="mobileMessagesLoading" class="flex items-center justify-center h-32">
-              <div class="text-gray-500">Loading messages...</div>
+            <div id="mobileMessagesLoading" class="space-y-6">
+              <div class="flex items-start space-x-2">
+                <div class="skeleton skeleton-avatar"></div>
+                <div class="skeleton skeleton-bubble"></div>
+              </div>
+              <div class="flex justify-end items-start space-x-2">
+                <div class="skeleton skeleton-bubble" style="width: 150px;"></div>
+              </div>
+              <div class="flex items-start space-x-2">
+                <div class="skeleton skeleton-avatar"></div>
+                <div class="skeleton skeleton-bubble" style="width: 180px;"></div>
+              </div>
+              <div class="flex justify-end items-start space-x-2">
+                <div class="skeleton skeleton-bubble" style="width: 120px;"></div>
+              </div>
+              <div class="flex items-start space-x-2">
+                <div class="skeleton skeleton-avatar"></div>
+                <div class="skeleton skeleton-bubble" style="width: 160px;"></div>
+              </div>
             </div>
             <div id="mobileMessagesEmpty" class="hidden md:flex items-center justify-center h-32">
               <div class="text-center text-gray-500">
