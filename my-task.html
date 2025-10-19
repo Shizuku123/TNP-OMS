@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Tasks - Tahanan ng Pagmamahal OMS</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="firebase.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -157,7 +158,18 @@
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        import { db, collection, getDocs, doc, updateDoc } from './firebase.js';
+        import { logActivity } from './activity-logger.js';
+
+        // Make Firebase functions globally accessible
+        window.db = db;
+        window.collection = collection;
+        window.getDocs = getDocs;
+        window.doc = doc;
+        window.updateDoc = updateDoc;
+        window.logActivity = logActivity;
+
         let allTasks = [];
         let filteredTasks = [];
         let currentFilter = 'all';
@@ -197,84 +209,109 @@
 
         function initializeUserInfo() {
             if (currentUser) {
-                document.getElementById('userWelcome').textContent = `Welcome, ${currentUser.name.split(' ')[0]}`;
-                const initials = currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                let displayName = '';
+                if (currentUser.name) {
+                    displayName = currentUser.name;
+                } else if (currentUser.firstName) {
+                    displayName = currentUser.firstName;
+                } else {
+                    displayName = currentUser.username || 'User';
+                }
+                
+                document.getElementById('userWelcome').textContent = `Welcome, ${displayName.split(' ')[0]}`;
+                const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase();
                 document.getElementById('userInitials').textContent = initials;
             }
         }
 
-        function loadAccountsData() {
-            fetch('data/accounts.json')
-                .then(response => response.json())
-                .then(data => {
-                    accountsData = data.accounts || [];
-                })
-                .catch(error => {
-                    console.error('Error loading accounts data:', error);
+        async function loadAccountsData() {
+            try {
+                const usersCol = collection(db, 'users');
+                const snapshot = await getDocs(usersCol);
+                accountsData = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    accountsData.push({
+                        email: data.email,
+                        name: data.name || `${data.firstName || ''} ${data.lastName || ''}`.trim() || data.username,
+                        role: data.role
+                    });
                 });
+            } catch (error) {
+                console.error('Error loading accounts data:', error);
+            }
         }
 
-        function loadTasks() {
-            // Load tasks from JSON file
-            fetch('data/tasks.json')
-                .then(response => response.json())
-                .then(data => {
-                    const userEmail = currentUser.email;
+        async function loadTasks() {
+            try {
+                // Load tasks from Firestore
+                const taskCol = collection(db, 'tasks');
+                const taskSnapshot = await getDocs(taskCol);
+                
+                // Get user email from various possible fields
+                const userEmail = currentUser.email || currentUser.emailAddress || currentUser.username;
+                const userRole = currentUser.role;
+                
+                allTasks = [];
+                
+                taskSnapshot.forEach(docSnap => {
+                    const task = docSnap.data();
                     
                     // Filter tasks for current user based on:
                     // 1. Tasks assigned to "all"
-                    // 2. Tasks where user's email is in acceptedBy array
-                    // 3. Tasks where user's email is in completedBy array
-                    // 4. Show tasks that are globally completed ONLY if the user has completed them
-                    allTasks = data.tasks.filter(task => {
-                        const isAssignedToAll = task.assignedTo === 'all';
-                        const hasAccepted = task.acceptedBy.includes(userEmail);
-                        const hasCompleted = task.completedBy.includes(userEmail);
-                        const isTaskCompleted = task.status === 'completed';
+                    // 2. Tasks assigned to user's role (staff/volunteers)
+                    // 3. Tasks where user's email is in acceptedBy array
+                    // 4. Tasks where user's email is in completedBy array
+                    const isAssignedToAll = task.assignedTo === 'all';
+                    const isAssignedToUserRole = (task.assignedTo === 'staff' && userRole === 'staff') ||
+                                                  (task.assignedTo === 'volunteers' && userRole === 'volunteer');
+                    const hasAccepted = Array.isArray(task.acceptedBy) && task.acceptedBy.includes(userEmail);
+                    const hasCompleted = Array.isArray(task.completedBy) && task.completedBy.includes(userEmail);
+                    const isTaskCompleted = task.status === 'completed';
+                    
+                    // Show task if:
+                    // - User is assigned/accepted/completed AND
+                    // - Either task is not globally completed OR user has completed it
+                    if ((isAssignedToAll || isAssignedToUserRole || hasAccepted || hasCompleted) && 
+                        (!isTaskCompleted || hasCompleted)) {
                         
-                        // Show task if:
-                        // - User is assigned/accepted/completed AND
-                        // - Either task is not globally completed OR user has completed it
-                        return (isAssignedToAll || hasAccepted || hasCompleted) && 
-                               (!isTaskCompleted || hasCompleted);
-                    }).map(task => {
                         // Transform task data to match our display format
-                        return {
+                        allTasks.push({
                             id: task.taskId,
                             title: task.title,
                             description: task.description,
                             category: task.assignedTo === 'all' ? 'General' : 'Assigned',
-                            status: getTaskStatus(task, userEmail),
+                            status: getTaskStatus(task, userEmail, userRole),
                             priority: task.priority,
                             progress: getTaskProgress(task, userEmail),
                             dueDate: task.dueDate,
                             assignedBy: task.author,
                             authorRole: task.authorRole,
                             createdAt: task.createdAt,
-                            peopleNeeded: task.peopleNeeded,
-                            acceptedBy: task.acceptedBy,
-                            completedBy: task.completedBy,
+                            peopleNeeded: task.peopleNeeded || 0,
+                            acceptedBy: task.acceptedBy || [],
+                            completedBy: task.completedBy || [],
                             originalTask: task
-                        };
-                    });
-                    
-                    filteredTasks = [...allTasks];
-                    displayTasks();
-                    updateTaskCounts();
-                })
-                .catch(error => {
-                    console.error('Error loading tasks:', error);
-                    showNotification('Error loading tasks. Please try again.', 'error');
+                        });
+                    }
                 });
+                
+                filteredTasks = [...allTasks];
+                displayTasks();
+                updateTaskCounts();
+            } catch (error) {
+                console.error('Error loading tasks:', error);
+                showNotification('Error loading tasks. Please try again.', 'error');
+            }
         }
 
-        function getTaskStatus(task, userEmail) {
+        function getTaskStatus(task, userEmail, userRole) {
             // Check if the user has completed this task (individual completion)
-            if (task.completedBy.includes(userEmail)) {
+            if (Array.isArray(task.completedBy) && task.completedBy.includes(userEmail)) {
                 return 'completed';
             }
             // Check if the user has accepted this task but not completed it
-            else if (task.acceptedBy.includes(userEmail)) {
+            else if (Array.isArray(task.acceptedBy) && task.acceptedBy.includes(userEmail)) {
                 return 'in-progress';
             }
             // Check if the task is available for the user to accept
@@ -283,12 +320,12 @@
                 // 1. Task is assigned to "all" OR user's role matches
                 // 2. Task is not full (acceptedBy count < peopleNeeded)
                 // 3. Task's global status is not "completed"
-                const userRole = currentUser.role;
                 const isAssignedToUser = task.assignedTo === 'all' || 
                                        (task.assignedTo === 'staff' && userRole === 'staff') ||
                                        (task.assignedTo === 'volunteers' && userRole === 'volunteer');
         
-                const isFull = task.acceptedBy.length >= task.peopleNeeded;
+                const acceptedCount = Array.isArray(task.acceptedBy) ? task.acceptedBy.length : 0;
+                const isFull = acceptedCount >= (task.peopleNeeded || 0);
                 const isGloballyCompleted = task.status === 'completed';
         
                 if (isAssignedToUser && !isFull && !isGloballyCompleted) {
@@ -300,16 +337,17 @@
         }
 
         function getTaskProgress(task, userEmail) {
-            if (task.completedBy.includes(userEmail)) {
+            if (Array.isArray(task.completedBy) && task.completedBy.includes(userEmail)) {
                 return 100;
-            } else if (task.acceptedBy.includes(userEmail)) {
+            } else if (Array.isArray(task.acceptedBy) && task.acceptedBy.includes(userEmail)) {
                 return 50;
             } else {
                 return 0;
             }
         }
 
-        function filterTasks(filter) {
+        // Make filterTasks available globally
+        window.filterTasks = function(filter) {
             currentFilter = filter;
             
             // Update tab styles
@@ -333,84 +371,10 @@
             }
             
             displayTasks();
-        }
+        };
 
-        function displayTasks() {
-            const tasksGrid = document.getElementById('tasksGrid');
-            const noTasks = document.getElementById('noTasks');
-
-            if (filteredTasks.length === 0) {
-                tasksGrid.innerHTML = '';
-                noTasks.classList.remove('hidden');
-                return;
-            }
-
-            noTasks.classList.add('hidden');
-            
-            tasksGrid.innerHTML = filteredTasks.map(task => {
-                const statusConfig = getStatusConfig(task.status);
-                const priorityConfig = getPriorityConfig(task.priority);
-                
-                return `
-                    <div class="task-card bg-white rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer" 
-                        onclick="showTaskDetail('${task.id}')">
-                        <div class="p-6">
-                            <div class="flex items-center justify-between mb-3">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusConfig.bgColor} ${statusConfig.textColor}">
-                                    ${statusConfig.icon}
-                                    ${statusConfig.label}
-                                </span>
-                                <span class="text-xs text-gray-500">${task.category}</span>
-                            </div>
-                            
-                            <h3 class="text-lg font-semibold text-gray-900 mb-2">${task.title}</h3>
-                            <p class="text-sm text-gray-600 mb-4 line-clamp-2">${task.description}</p>
-                            
-                            <div class="mb-4">
-                                <div class="flex items-center justify-between text-sm text-gray-600 mb-1">
-                                    <span>Progress</span>
-                                    <span>${task.progress}%</span>
-                                </div>
-                                <div class="w-full bg-gray-200 rounded-full h-2">
-                                    <div class="h-2 rounded-full ${getProgressColor(task.progress)}" style="width: ${task.progress}%"></div>
-                                </div>
-                            </div>
-                            
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center space-x-3">
-                                    <div class="flex items-center text-xs text-gray-500 relative">
-                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 515.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                        </svg>
-                                        <span class="cursor-help hover:text-gray-700 transition-colors duration-200" 
-                                              onmouseenter="showTaskCardTooltip(event, '${task.id}')" 
-                                              onmouseleave="hideTaskCardTooltip()">${task.acceptedBy.length}/${task.peopleNeeded}</span>
-                                        
-                                        <!-- Tooltip for task card -->
-                                        <div id="taskCardTooltip-${task.id}" class="hidden absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg z-50 whitespace-nowrap">
-                                            <div class="taskCardTooltipContent"></div>
-                                            <!-- Arrow -->
-                                            <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
-                                        </div>
-                                    </div>
-                                    
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${priorityConfig.bgColor} ${priorityConfig.textColor}">
-                                        ${priorityConfig.label}
-                                    </span>
-                                </div>
-                                
-                                <div class="text-right">
-                                    <div class="text-xs text-gray-500">Due</div>
-                                    <div class="text-sm font-medium ${isTaskOverdue(task.dueDate) ? 'text-red-600' : 'text-gray-900'}">${formatDate(task.dueDate)}</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function showTaskDetail(taskId) {
+        // Make showTaskDetail available globally
+        window.showTaskDetail = function(taskId) {
             selectedTask = allTasks.find(t => t.id === taskId);
             if (!selectedTask) return;
 
@@ -421,8 +385,9 @@
             document.getElementById('modalTitle').textContent = selectedTask.title;
             
             const modalContent = document.getElementById('modalContent');
-            const overallProgress = Math.round((selectedTask.completedBy.length / selectedTask.peopleNeeded) * 100);
-            const isGloballyCompleted = selectedTask.status === 'completed';
+            const overallProgress = selectedTask.peopleNeeded > 0 ? 
+                Math.round((selectedTask.completedBy.length / selectedTask.peopleNeeded) * 100) : 0;
+            const isGloballyCompleted = selectedTask.originalTask.status === 'completed';
 
             modalContent.innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -552,87 +517,311 @@
             }
 
             document.getElementById('taskModal').classList.remove('hidden');
-        }
+        };
 
-        function acceptTask() {
-            if (!selectedTask) return;
+        // Make acceptTask available globally
+        window.acceptTask = async function() {
+            if (!selectedTask) {
+                showNotification('No task selected.', 'error');
+                return;
+            }
 
-            const taskData = {
-                taskId: selectedTask.id,
-                userEmail: currentUser.email,
-                userName: currentUser.name,
-                userRole: currentUser.role
-            };
+            // Debug: Check currentUser structure
+            console.log('Current user object:', currentUser);
+            console.log('Current user email:', currentUser?.email);
+            
+            if (!currentUser) {
+                showNotification('User information is missing. Please log in again.', 'error');
+                return;
+            }
+            
+            // Get email from various possible fields
+            const userEmail = currentUser.email || currentUser.emailAddress || currentUser.username;
+            
+            if (!userEmail) {
+                console.error('No email found in currentUser:', currentUser);
+                showNotification('User email is missing. Please log in again.', 'error');
+                return;
+            }
 
-            fetch('api/accept-task.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(taskData)
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    showNotification('Task accepted successfully!', 'success');
-                    closeTaskModal();
-                    loadTasks(); // Reload tasks
-                } else {
-                    showNotification(result.message || 'Failed to accept task', 'error');
+            try {
+                // Find the Firestore document for this task
+                const taskCol = window.collection(window.db, 'tasks');
+                const taskSnapshot = await window.getDocs(taskCol);
+                
+                let taskDocId = null;
+                let taskData = null;
+                taskSnapshot.forEach((docSnap) => {
+                    if (docSnap.data().taskId === selectedTask.id) {
+                        taskDocId = docSnap.id;
+                        taskData = docSnap.data();
+                    }
+                });
+
+                if (!taskDocId || !taskData) {
+                    showNotification('Task not found in database.', 'error');
+                    return;
                 }
-            })
-            .catch(error => {
+
+                // Get current acceptedBy array from Firestore
+                const acceptedBy = Array.isArray(taskData.acceptedBy) ? taskData.acceptedBy : [];
+                
+                // Check if already accepted (use userEmail variable)
+                if (acceptedBy.includes(userEmail)) {
+                    showNotification('You have already accepted this task.', 'error');
+                    return;
+                }
+
+                // Check if full
+                const peopleNeeded = taskData.peopleNeeded || 0;
+                if (acceptedBy.length >= peopleNeeded) {
+                    showNotification('Task is already full.', 'error');
+                    return;
+                }
+
+                // Create updated array with current user's email (use userEmail variable)
+                const updatedAcceptedBy = [...acceptedBy, userEmail];
+                
+                // Validate that we're not adding undefined
+                if (updatedAcceptedBy.some(email => email === undefined || email === null || email === '')) {
+                    console.error('Invalid email in acceptedBy array:', updatedAcceptedBy);
+                    console.error('UserEmail was:', userEmail);
+                    showNotification('Error: Invalid user data. Please try again.', 'error');
+                    return;
+                }
+
+                // Update task in Firestore
+                const taskDocRef = window.doc(window.db, 'tasks', taskDocId);
+                await window.updateDoc(taskDocRef, {
+                    acceptedBy: updatedAcceptedBy
+                });
+
+                // Log activity
+                const username = currentUser.username || currentUser.name || currentUser.email || 'User';
+                await window.logActivity(
+                    username,
+                    'Task Accepted',
+                    `Accepted task: ${taskData.title}`
+                );
+
+                showNotification('Task accepted successfully!', 'success');
+                closeTaskModal();
+                loadTasks(); // Reload tasks
+            } catch (error) {
                 console.error('Error accepting task:', error);
+                console.error('Current user:', currentUser);
+                console.error('Selected task:', selectedTask);
                 showNotification('Error accepting task. Please try again.', 'error');
-            });
-        }
+            }
+        };
 
-        function completeTask() {
-            if (!selectedTask) return;
+        // Make completeTask available globally
+        window.completeTask = async function() {
+            if (!selectedTask) {
+                showNotification('No task selected.', 'error');
+                return;
+            }
 
-            const taskData = {
-                taskId: selectedTask.id,
-                userEmail: currentUser.email,
-                userName: currentUser.name
-            };
+            // Get user email from various possible fields
+            const userEmail = currentUser.email || currentUser.emailAddress || currentUser.username;
+            
+            if (!userEmail) {
+                showNotification('User email is missing. Please log in again.', 'error');
+                return;
+            }
 
-            fetch('api/complete-task.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(taskData)
-            })
-            .then(response => {
-                // Check if response is JSON
-                const contentType = response.headers.get('content-type');
-                if (contentType && contentType.includes('application/json')) {
-                    return response.json();
-                } else {
-                    // If not JSON, get text to see what was returned
-                    return response.text().then(text => {
-                        console.error('Non-JSON response:', text);
-                        throw new Error('Server returned non-JSON response');
-                    });
+            try {
+                // Find the Firestore document for this task
+                const taskCol = window.collection(window.db, 'tasks');
+                const taskSnapshot = await window.getDocs(taskCol);
+                
+                let taskDocId = null;
+                let taskData = null;
+                taskSnapshot.forEach((docSnap) => {
+                    if (docSnap.data().taskId === selectedTask.id) {
+                        taskDocId = docSnap.id;
+                        taskData = docSnap.data();
+                    }
+                });
+
+                if (!taskDocId || !taskData) {
+                    showNotification('Task not found in database.', 'error');
+                    return;
                 }
-            })
-            .then(result => {
-                if (result.success) {
-                    showNotification('Task completed successfully!', 'success');
-                    closeTaskModal();
-                    loadTasks(); // Reload tasks to update the display
-                } else {
-                    showNotification(result.message || 'Failed to complete task', 'error');
+
+                // Get current completedBy array from Firestore
+                const completedBy = Array.isArray(taskData.completedBy) ? taskData.completedBy : [];
+                
+                // Check if already completed
+                if (completedBy.includes(userEmail)) {
+                    showNotification('You have already completed this task.', 'error');
+                    return;
                 }
-            })
-            .catch(error => {
+
+                // Check if user has accepted the task first
+                const acceptedBy = Array.isArray(taskData.acceptedBy) ? taskData.acceptedBy : [];
+                if (!acceptedBy.includes(userEmail)) {
+                    showNotification('You must accept the task before completing it.', 'error');
+                    return;
+                }
+
+                // Add user email to completedBy array
+                const updatedCompletedBy = [...completedBy, userEmail];
+                
+                // Check if task should be marked as completed (all people have completed)
+                const peopleNeeded = taskData.peopleNeeded || 0;
+                const newStatus = updatedCompletedBy.length >= peopleNeeded ? 'completed' : 'in-progress';
+
+                // Update task in Firestore
+                const taskDocRef = window.doc(window.db, 'tasks', taskDocId);
+                await window.updateDoc(taskDocRef, {
+                    completedBy: updatedCompletedBy,
+                    status: newStatus
+                });
+
+                // Log activity
+                const username = currentUser.username || currentUser.name || userEmail || 'User';
+                await window.logActivity(
+                    username,
+                    'Task Completed',
+                    `Completed task: ${taskData.title}`
+                );
+
+                showNotification('Task completed successfully!', 'success');
+                closeTaskModal();
+                loadTasks(); // Reload tasks
+            } catch (error) {
                 console.error('Error completing task:', error);
                 showNotification('Error completing task. Please try again.', 'error');
-            });
-        }
+            }
+        };
 
-        function closeTaskModal() {
+        // Make closeTaskModal available globally
+        window.closeTaskModal = function() {
             document.getElementById('taskModal').classList.add('hidden');
             selectedTask = null;
+        };
+
+        function displayTasks() {
+            const tasksGrid = document.getElementById('tasksGrid');
+            const noTasks = document.getElementById('noTasks');
+
+            if (filteredTasks.length === 0) {
+                tasksGrid.innerHTML = '';
+                noTasks.classList.remove('hidden');
+                return;
+            }
+
+            noTasks.classList.add('hidden');
+            
+            tasksGrid.innerHTML = filteredTasks.map(task => {
+                const statusConfig = getStatusConfig(task.status);
+                const priorityConfig = getPriorityConfig(task.priority);
+                
+                return `
+                    <div class="task-card bg-white rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer" 
+                        onclick="showTaskDetail('${task.id}')">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusConfig.bgColor} ${statusConfig.textColor}">
+                                    ${statusConfig.icon}
+                                    ${statusConfig.label}
+                                </span>
+                                <span class="text-xs text-gray-500">${task.category}</span>
+                            </div>
+                            
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">${task.title}</h3>
+                            <p class="text-sm text-gray-600 mb-4 line-clamp-2">${task.description}</p>
+                            
+                            <div class="mb-4">
+                                <div class="flex items-center justify-between text-sm text-gray-600 mb-1">
+                                    <span>Progress</span>
+                                    <span>${task.progress}%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="h-2 rounded-full ${getProgressColor(task.progress)}" style="width: ${task.progress}%"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="flex items-center text-xs text-gray-500 relative">
+                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 01 5.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                        </svg>
+                                        <span class="cursor-help hover:text-gray-700 transition-colors duration-200" 
+                                              onmouseenter="showTaskCardTooltip(event, '${task.id}')" 
+                                              onmouseleave="hideTaskCardTooltip()">${task.acceptedBy.length}/${task.peopleNeeded}</span>
+                                        
+                                        <!-- Tooltip for task card -->
+                                        <div id="taskCardTooltip-${task.id}" class="hidden absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg z-50 whitespace-nowrap">
+                                            <div class="taskCardTooltipContent"></div>
+                                            <!-- Arrow -->
+                                            <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${priorityConfig.bgColor} ${priorityConfig.textColor}">
+                                        ${priorityConfig.label}
+                                    </span>
+                                </div>
+                                
+                                <div class="text-right">
+                                    <div class="text-xs text-gray-500">Due</div>
+                                    <div class="text-sm font-medium ${isTaskOverdue(task.dueDate) ? 'text-red-600' : 'text-gray-900'}">${formatDate(task.dueDate)}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
+        // Make showTaskCardTooltip available globally
+        window.showTaskCardTooltip = function(event, taskId) {
+            const task = allTasks.find(t => t.id === taskId);
+            if (!task || !task.acceptedBy || task.acceptedBy.length === 0) {
+                return;
+            }
+
+            const tooltip = document.getElementById(`taskCardTooltip-${taskId}`);
+            const tooltipContent = tooltip.querySelector('.taskCardTooltipContent');
+            
+            // Get names of people who accepted
+            const acceptedNames = task.acceptedBy.map(email => {
+                const account = getAccountByEmail(email);
+                return account ? account.name : email;
+            });
+            
+            if (acceptedNames.length > 0) {
+                tooltipContent.innerHTML = `<strong>Accepted by:</strong><br>${acceptedNames.join('<br>')}`;
+                tooltip.classList.remove('hidden');
+            }
+        };
+
+        // Make hideTaskCardTooltip available globally
+        window.hideTaskCardTooltip = function() {
+            // Hide all task card tooltips
+            document.querySelectorAll('[id^="taskCardTooltip-"]').forEach(tooltip => {
+                tooltip.classList.add('hidden');
+            });
+        };
+
         function getAccountByEmail(email) {
+            // First check if it's the current user
+            const currentUserEmail = currentUser.email || currentUser.emailAddress || currentUser.username;
+            if (email === currentUserEmail) {
+                return {
+                    email: currentUserEmail,
+                    name: currentUser.name || 
+                          (currentUser.firstName ? `${currentUser.firstName} ${currentUser.lastName || ''}`.trim() : '') || 
+                          currentUser.username || 
+                          'You',
+                    role: currentUser.role
+                };
+            }
+            
+            // Then check in accountsData
             return accountsData.find(acc => acc.email === email);
         }
 
@@ -748,34 +937,6 @@
                 if (e.target === this) {
                     closeTaskModal();
                 }
-            });
-        }
-
-        function showTaskCardTooltip(event, taskId) {
-            const task = allTasks.find(t => t.id === taskId);
-            if (!task || !task.acceptedBy || task.acceptedBy.length === 0) {
-                return;
-            }
-
-            const tooltip = document.getElementById(`taskCardTooltip-${taskId}`);
-            const tooltipContent = tooltip.querySelector('.taskCardTooltipContent');
-            
-            // Get names of people who accepted
-            const acceptedNames = task.acceptedBy.map(email => {
-                const account = getAccountByEmail(email);
-                return account ? account.name : email;
-            });
-            
-            if (acceptedNames.length > 0) {
-                tooltipContent.innerHTML = `<strong>Accepted by:</strong><br>${acceptedNames.join('<br>')}`;
-                tooltip.classList.remove('hidden');
-            }
-        }
-
-        function hideTaskCardTooltip() {
-            // Hide all task card tooltips
-            document.querySelectorAll('[id^="taskCardTooltip-"]').forEach(tooltip => {
-                tooltip.classList.add('hidden');
             });
         }
     </script>

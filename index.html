@@ -285,49 +285,87 @@
                 </div>
                 
                 <!-- Header Actions -->
-                <div id="headerActions" class="flex items-center space-x-1 sm:space-x-2 md:space-x-4">
-                    <!-- Info Button -->
-                    <button id="info-btn" class="p-1.5 sm:p-2 md:p-3 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Information">
-                        <div class="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 rounded-full border-2 border-current flex items-center justify-center">
-                            <span class="text-xs font-bold">i</span>
-                        </div>
-                    </button>
-
-                    <!-- Create Button (Admin Only) -->
-                    <div id="adminCreateButton" class="relative hidden">
-                        <button id="create-btn" class="flex items-center px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm md:text-base">
-                            <svg class="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                <div class="flex items-center space-x-1 sm:space-x-2">
+                    <!-- Mobile: More Options Button (visible on mobile, hidden on md+) -->
+                    <div class="relative md:hidden">
+                        <button id="mobile-more-btn" class="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
                             </svg>
-                            <span class="hidden sm:inline">Create</span>
                         </button>
                         
-                        <div id="create-dropdown" class="hidden absolute right-0 mt-2 w-40 sm:w-48 bg-white rounded-md shadow-lg z-50 border">
+                        <!-- Mobile Dropdown Menu -->
+                        <div id="mobile-more-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg z-50 border">
                             <div class="py-1">
-                                <button onclick="showAnnouncementModal()" class="block w-full text-left px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-700 hover:bg-gray-100">Create Announcement</button>
-                                <button onclick="showTaskModal()" class="block w-full text-left px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-700 hover:bg-gray-100">Create Task</button>
+                                <button id="mobile-info-btn" class="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">
+                                    <div class="h-5 w-5 rounded-full border-2 border-current flex items-center justify-center mr-3">
+                                        <span class="text-xs font-bold">i</span>
+                                    </div>
+                                    Information
+                                </button>
+                                <button id="mobile-messages-btn" class="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">
+                                    <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                    </svg>
+                                    Messages
+                                </button>
+                                <button id="mobile-history-btn" class="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">
+                                    <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    Activity Log
+                                </button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Messages Button -->
-                    <button id="messages-btn" class="p-1.5 sm:p-2 md:p-3 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                        <svg class="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                        </svg>
-                    </button>
+                    <!-- Desktop: Individual Buttons (hidden on mobile, visible on md+) -->
+                    <div id="headerActions" class="hidden md:flex items-center space-x-1 sm:space-x-2 md:space-x-4">
+                        <!-- Info Button -->
+                        <button id="info-btn" class="p-1.5 sm:p-2 md:p-3 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Information">
+                            <div class="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 rounded-full border-2 border-current flex items-center justify-center">
+                                <span class="text-xs font-bold">i</span>
+                            </div>
+                        </button>
 
-                    <!-- History Button -->
-                    <button id="history-btn" class="p-1.5 sm:p-2 md:p-3 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors">
-                        <svg class="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </button>
+                        <!-- Create Button (Admin Only) -->
+                        <div id="adminCreateButton" class="relative hidden">
+                            <button id="create-btn" class="flex items-center px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm md:text-base">
+                                <svg class="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                </svg>
+                                <span class="hidden sm:inline">Create</span>
+                            </button>
+                            
+                            <div id="create-dropdown" class="hidden absolute right-0 mt-2 w-40 sm:w-48 bg-white rounded-md shadow-lg z-50 border">
+                                <div class="py-1">
+                                    <button onclick="showAnnouncementModal()" class="block w-full text-left px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-700 hover:bg-gray-100">Create Announcement</button>
+                                    <button onclick="showTaskModal()" class="block w-full text-left px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-700 hover:bg-gray-100">Create Task</button>
+                                </div>
+                            </div>
+                        </div>
 
-                    <!-- Notifications -->
+                        <!-- Messages Button -->
+                        <button id="messages-btn" class="p-1.5 sm:p-2 md:p-3 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                            <svg class="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                            </svg>
+                        </button>
+
+                        <!-- History Button -->
+                        <button id="history-btn" class="p-1.5 sm:p-2 md:p-3 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors">
+                            <svg class="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Notifications (visible on all devices) -->
                     <div class="relative">
                         <button id="notifications-btn" class="relative p-1.5 sm:p-2 md:p-3 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                            
+                            <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                            </svg>
                             <span id="notificationBadge" class="hidden absolute -top-0.5 -right-0.5 h-4 w-4 sm:h-5 sm:w-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center">3</span>
                         </button>
 
@@ -344,7 +382,7 @@
                         </div>
                     </div>
 
-                    <!-- User Profile -->
+                    <!-- User Profile (visible on all devices) -->
                     <div class="relative">
                         <button id="profile-btn" class="flex items-center space-x-2 p-1 rounded-lg hover:bg-gray-100 transition-colors">
                             <div class="w-8 h-8 sm:w-10 sm:h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-medium text-sm sm:text-base">
@@ -374,20 +412,20 @@
         </header>
 
         <!-- Dashboard Content -->
-        <div class="p-2 sm:p-4 md:p-6 lg:p-5">
+        <div class="p-2 sm:p-4 md:p-6 lg:p-8">
             <!-- Greeting Section -->
             <div class="mb-4 sm:mb-6">
-                <div class="bg-white rounded-lg shadow-sm p-3 sm:p-4 md:p-6">
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div class="bg-white rounded-lg shadow-sm p-3 sm:p-4 md:p-6 lg:p-8">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-6">
                         <!-- Greeting content on the left side -->
-                        <div class="flex-1 sm:mr-6">
-                            <h2 id="greeting" class="text-lg sm:text-xl md:text-3xl lg:text-5xl font-semibold text-gray-900 mb-1 sm:mb-2">Hello!</h2>
+                        <div class="flex-1">
+                            <h2 id="greeting" class="text-xl sm:text-2xl md:text-3xl lg:text-5xl font-semibold text-gray-900 mb-1 sm:mb-2">Hello!</h2>
                             <p id="greetingSubtext" class="text-gray-600 text-sm sm:text-base md:text-xl lg:text-3xl">Good Morning, Administrator</p>
                         </div>
                         
                         <!-- Date/time on the right side -->
-                        <div class="flex-1 text-left sm:text-right mt-3 sm:mt-0">
-                            <p id="currentDateTime" class="text-gray-500 text-sm sm:text-base md:text-lg lg:text-xl"></p>
+                        <div class="flex-1 text-left sm:text-right">
+                            <p id="currentDateTime" class="text-gray-500 text-xs sm:text-sm md:text-base lg:text-xl"></p>
                         </div>
                     </div>
                     <script>
@@ -435,142 +473,204 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 w-full">
                 <!-- Total Children Card -->
                 <a href="child-records.html" class="w-full">
-                    <div class="bg-white rounded-lg shadow-sm p-3 sm:p-4 md:p-6 lg:p-8 hover:bg-gray-100 transition-colors duration-200 cursor-pointer h-full">
-                        <div class="flex items-center justify-between mb-3 sm:mb-4">
-                           <div class="space-y-1 sm:space-y-2 flex-1">
-                            <p class="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 mb-1 font-bold">Total Children In Care</p>
-
-                            <div class="flex items-center space-x-2 sm:space-x-4">
-                                <!-- Male -->
-                                <div class="flex items-center space-x-1 text-blue-500">
-                                <!-- Male Icon -->
-                                <img src="male.png" alt="Male Icon" class="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 inline" />
-                                <span class="text-xs sm:text-sm md:text-base"><span id="maleCount" class="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold">0</span></span>
-                                </div>
-
-                                <!-- Female -->
-                                <div class="flex items-center space-x-1 text-pink-500">
-                                <!-- Female Icon -->
-                                <img src="female.png" alt="Female Icon" class="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 inline" />
-                                <span class="text-xs sm:text-sm md:text-base"><span id="femaleCount" class="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold">0</span></span>
-                                </div>
+                    <div class="bg-white rounded-lg shadow-sm p-4 sm:p-4 md:p-6 lg:p-8 hover:bg-gray-100 transition-colors duration-200 cursor-pointer h-full">
+                        <!-- Mobile Layout: Stacked vertically -->
+                        <div class="flex flex-col lg:hidden space-y-3">
+                            <div class="flex items-center justify-between">
+                                <p class="text-sm font-bold text-gray-600">Total Children In Care</p>
+                                <div class="text-3xl font-bold text-gray-900" id="childrenCountMobile">14</div>
                             </div>
-                            </div>
-                            <div class="text-right flex-shrink-0">
-                                <div class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900" id="childrenCount">
-                                    <div class="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-gray-900 mx-auto" id="childrenLoader"></div>
-                                </div>
-
-                                
-                                <div class="flex items-center justify-end space-x-3 mt-2">
-                                    <!-- <div class="flex items-center space-x-1">
-                                        <svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M16 3h5v5m-5 0L21 3M17 8a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                        </svg>
-                                        <span class="text-sm font-semibold text-blue-700" id="maleCount">0</span>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="flex items-center space-x-1 text-blue-500">
+                                        <img src="male.png" alt="Male" class="h-10 w-10" />
+                                        <span class="text-lg font-bold" id="maleCountMobile">8</span>
                                     </div>
-                                    <div class="flex items-center space-x-1">
-                                        <svg class="h-5 w-5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M12 4a4 4 0 100 8 4 4 0 000-8zm0 8v4m0 4v2m-4-2h8" />
-                                        </svg>
-                                        <span class="text-sm font-semibold text-pink-700" id="femaleCount">0</span>
-                                    </div> -->
+                                    <div class="flex items-center space-x-1 text-pink-500">
+                                        <img src="female.png" alt="Female" class="h-10 w-10" />
+                                        <span class="text-lg font-bold" id="femaleCountMobile">6</span>
+                                    </div>
                                 </div>
+                                <span class="text-xs text-green-600 font-medium" id="childrenWeeklyMobile">+3 this week</span>
                             </div>
                         </div>
-                        <div class="flex items-center text-xs sm:text-sm md:text-base">
-                            <span class="text-green-600 font-medium" id="childrenWeekly">+0 Child added this week</span>
+
+                        <!-- Desktop/Tablet Layout: Original design -->
+                        <div class="hidden lg:block">
+                            <div class="flex items-center justify-between mb-3 sm:mb-4">
+                               <div class="space-y-1 sm:space-y-2 flex-1">
+                                <p class="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 mb-1 font-bold">Total Children In Care</p>
+
+                                <div class="flex items-center space-x-2 sm:space-x-4">
+                                    <!-- Male -->
+                                    <div class="flex items-center space-x-1 text-blue-500">
+                                    <img src="male.png" alt="Male Icon" class="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 inline" />
+                                    <span class="text-xs sm:text-sm md:text-base"><span id="maleCount" class="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold">0</span></span>
+                                    </div>
+
+                                    <!-- Female -->
+                                    <div class="flex items-center space-x-1 text-pink-500">
+                                    <img src="female.png" alt="Female Icon" class="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 inline" />
+                                    <span class="text-xs sm:text-sm md:text-base"><span id="femaleCount" class="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold">0</span></span>
+                                    </div>
+                                </div>
+                                </div>
+                                <div class="text-right flex-shrink-0">
+                                    <div class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900" id="childrenCount">
+                                        <div class="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-gray-900 mx-auto" id="childrenLoader"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center text-xs sm:text-sm md:text-base">
+                                <span class="text-green-600 font-medium" id="childrenWeekly">+0 Child added this week</span>
+                            </div>
                         </div>
                     </div>
                 </a>
 
                 <!-- Total Staff Card -->
                 <a href="staff-records.html" class="w-full">
-                    <div class="bg-white rounded-lg shadow-sm p-3 sm:p-4 md:p-6 lg:p-8 hover:bg-gray-100 transition-colors duration-200 cursor-pointer h-full">
-                        <div class="flex items-center justify-between mb-3 sm:mb-4">
-                           <div class="space-y-1 sm:space-y-2 flex-1">
-                            <p class="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 mb-1 font-bold">Total Staff</p>
-
-                            <div class="flex items-center space-x-2 sm:space-x-4">
-                                <!-- Male -->
-                                <div class="flex items-center space-x-1 text-blue-500">
-                                <!-- Male Icon -->
-                                <img src="male.png" alt="Male Icon" class="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 inline" />
-                                <span class="text-xs sm:text-sm md:text-base"><span id="maleStaffCount" class="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold">0</span></span>
-                                </div>
-
-                                <!-- Female -->
-                                <div class="flex items-center space-x-1 text-pink-500">
-                                <!-- Female Icon -->
-                                <img src="female.png" alt="Female Icon" class="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 inline" />
-                                <span class="text-xs sm:text-sm md:text-base"><span id="femaleStaffCount" class="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold">0</span></span>
-                                </div>
+                    <div class="bg-white rounded-lg shadow-sm p-4 sm:p-4 md:p-6 lg:p-8 hover:bg-gray-100 transition-colors duration-200 cursor-pointer h-full">
+                        <!-- Mobile Layout: Stacked vertically -->
+                        <div class="flex flex-col lg:hidden space-y-3">
+                            <div class="flex items-center justify-between">
+                                <p class="text-sm font-bold text-gray-600">Total Staff</p>
+                                <div class="text-3xl font-bold text-gray-900" id="staffCountMobile">8</div>
                             </div>
-                            </div>
-                            <div class="text-right flex-shrink-0">
-                                <div class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900" id="staffCount">
-                                    <div class="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-gray-900 mx-auto" id="staffLoader"></div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="flex items-center space-x-1 text-blue-500">
+                                        <img src="male.png" alt="Male" class="h-10 w-10" />
+                                        <span class="text-lg font-bold" id="maleStaffCountMobile">5</span>
+                                    </div>
+                                    <div class="flex items-center space-x-1 text-pink-500">
+                                        <img src="female.png" alt="Female" class="h-10 w-10" />
+                                        <span class="text-lg font-bold" id="femaleStaffCountMobile">3</span>
+                                    </div>
                                 </div>
+                                <span class="text-xs text-green-600 font-medium" id="staffWeeklyMobile">+1 this week</span>
                             </div>
                         </div>
-                        <div class="flex items-center text-xs sm:text-sm md:text-base">
-                            <span class="text-green-600 font-medium" id="staffWeekly">+0 Staff added this week</span>
+
+                        <!-- Desktop/Tablet Layout: Original design -->
+                        <div class="hidden lg:block">
+                            <div class="flex items-center justify-between mb-3 sm:mb-4">
+                               <div class="space-y-1 sm:space-y-2 flex-1">
+                                <p class="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 mb-1 font-bold">Total Staff</p>
+
+                                <div class="flex items-center space-x-2 sm:space-x-4">
+                                    <!-- Male -->
+                                    <div class="flex items-center space-x-1 text-blue-500">
+                                    <img src="male.png" alt="Male Icon" class="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 inline" />
+                                    <span class="text-xs sm:text-sm md:text-base"><span id="maleStaffCount" class="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold">0</span></span>
+                                    </div>
+
+                                    <!-- Female -->
+                                    <div class="flex items-center space-x-1 text-pink-500">
+                                    <img src="female.png" alt="Female Icon" class="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 inline" />
+                                    <span class="text-xs sm:text-sm md:text-base"><span id="femaleStaffCount" class="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold">0</span></span>
+                                    </div>
+                                </div>
+                                </div>
+                                <div class="text-right flex-shrink-0">
+                                    <div class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900" id="staffCount">
+                                        <div class="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-gray-900 mx-auto" id="staffLoader"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center text-xs sm:text-sm md:text-base">
+                                <span class="text-green-600 font-medium" id="staffWeekly">+0 Staff added this week</span>
+                            </div>
                         </div>
                     </div>
                 </a>
 
                 <!-- Total Volunteers Card -->
                 <a href="volunteer-records.html" class="w-full">
-                    <div class="bg-white rounded-lg shadow-sm p-3 sm:p-4 md:p-6 lg:p-8 hover:bg-gray-100 transition-colors duration-200 cursor-pointer h-full">
-                        <div class="flex items-center justify-between mb-3 sm:mb-4">
-                           <div class="space-y-1 sm:space-y-2 flex-1">
-                            <p class="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 mb-1 font-bold">Total Volunteers</p>
-
-                            <div class="flex items-center space-x-2 sm:space-x-4">
-                                <!-- Male -->
-                                <div class="flex items-center space-x-1 text-blue-500">
-                                <!-- Male Icon -->
-                                <img src="male.png" alt="Male Icon" class="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 inline" />
-                                <span class="text-xs sm:text-sm md:text-base"><span id="maleVolunteerCount" class="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold">0</span></span>
-                                </div>
-
-                                <!-- Female -->
-                                <div class="flex items-center space-x-1 text-pink-500">
-                                <!-- Female Icon -->
-                                <img src="female.png" alt="Female Icon" class="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 inline" />
-                                <span class="text-xs sm:text-sm md:text-base"><span id="femaleVolunteerCount" class="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold">0</span></span>
-                                </div>
+                    <div class="bg-white rounded-lg shadow-sm p-4 sm:p-4 md:p-6 lg:p-8 hover:bg-gray-100 transition-colors duration-200 cursor-pointer h-full">
+                        <!-- Mobile Layout: Stacked vertically -->
+                        <div class="flex flex-col lg:hidden space-y-3">
+                            <div class="flex items-center justify-between">
+                                <p class="text-sm font-bold text-gray-600">Total Volunteers</p>
+                                <div class="text-3xl font-bold text-gray-900" id="volunteersCountMobile">6</div>
                             </div>
-                            </div>
-                            <div class="text-right flex-shrink-0">
-                                <div class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900" id="volunteersCount">
-                                    <div class="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-gray-900 mx-auto" id="volunteersLoader"></div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="flex items-center space-x-1 text-blue-500">
+                                        <img src="male.png" alt="Male" class="h-10 w-10" />
+                                        <span class="text-lg font-bold" id="maleVolunteerCountMobile">5</span>
+                                    </div>
+                                    <div class="flex items-center space-x-1 text-pink-500">
+                                        <img src="female.png" alt="Female" class="h-10 w-10" />
+                                        <span class="text-lg font-bold" id="femaleVolunteerCountMobile">1</span>
+                                    </div>
                                 </div>
+                                <span class="text-xs text-green-600 font-medium" id="volunteersWeeklyMobile">+2 this week</span>
                             </div>
                         </div>
-                        <div class="flex items-center text-xs sm:text-sm md:text-base">
-                            <span class="text-green-600 font-medium" id="volunteersWeekly">+0 Volunteer added this week</span>
+
+                        <!-- Desktop/Tablet Layout: Original design -->
+                        <div class="hidden lg:block">
+                            <div class="flex items-center justify-between mb-3 sm:mb-4">
+                               <div class="space-y-1 sm:space-y-2 flex-1">
+                                <p class="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 mb-1 font-bold">Total Volunteers</p>
+
+                                <div class="flex items-center space-x-2 sm:space-x-4">
+                                    <!-- Male -->
+                                    <div class="flex items-center space-x-1 text-blue-500">
+                                    <img src="male.png" alt="Male Icon" class="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 inline" />
+                                    <span class="text-xs sm:text-sm md:text-base"><span id="maleVolunteerCount" class="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold">0</span></span>
+                                    </div>
+
+                                    <!-- Female -->
+                                    <div class="flex items-center space-x-1 text-pink-500">
+                                    <img src="female.png" alt="Female Icon" class="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 inline" />
+                                    <span class="text-xs sm:text-sm md:text-base"><span id="femaleVolunteerCount" class="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold">0</span></span>
+                                    </div>
+                                </div>
+                                </div>
+                                <div class="text-right flex-shrink-0">
+                                    <div class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900" id="volunteersCount">
+                                        <div class="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-gray-900 mx-auto" id="volunteersLoader"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center text-xs sm:text-sm md:text-base">
+                                <span class="text-green-600 font-medium" id="volunteersWeekly">+0 Volunteer added this week</span>
+                            </div>
                         </div>
                     </div>
                 </a>
 
                 <!-- Total Donors Card -->
                 <a href="donors-records.html" class="w-full">
-                    <div class="bg-white rounded-lg shadow-sm p-3 sm:p-4 md:p-6 lg:p-8 hover:bg-gray-100 transition-colors duration-200 cursor-pointer h-full">
-                        <div class="flex items-center justify-between mb-3 sm:mb-4">
-                            <div class="flex-1">
-                                <p class="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 mb-1 font-bold">Total Donors<br class="hidden sm:block"><br class="hidden md:block"><br class="hidden lg:block"></p>
+                    <div class="bg-white rounded-lg shadow-sm p-4 sm:p-4 md:p-6 lg:p-8 hover:bg-gray-100 transition-colors duration-200 cursor-pointer h-full">
+                        <!-- Mobile Layout: Stacked vertically -->
+                        <div class="flex flex-col lg:hidden space-y-3">
+                            <div class="flex items-center justify-between">
+                                <p class="text-sm font-bold text-gray-600">Total Donors</p>
+                                <div class="text-3xl font-bold text-gray-900" id="donorsCountMobile">17</div>
                             </div>
-                            <div class="text-right flex-shrink-0">
-                                <div class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900" id="donorsCount">
-                                    <div class="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-gray-900 mx-auto" id="donorsLoader"></div>
-                                </div>
+                            <div class="flex items-center justify-end">
+                                <span class="text-xs text-green-600 font-medium" id="donorsWeeklyMobile">+16 this week</span>
                             </div>
                         </div>
-                        <div class="flex items-center text-xs sm:text-sm md:text-base">
-                            <span class="text-green-600 font-medium" id="donorsWeekly">+0 Donors this week</span>
+
+                        <!-- Desktop/Tablet Layout: Original design -->
+                        <div class="hidden lg:block">
+                            <div class="flex items-center justify-between mb-3 sm:mb-4">
+                                <div class="flex-1">
+                                    <p class="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 mb-1 font-bold">Total Donors<br class="hidden sm:block"><br class="hidden md:block"><br class="hidden lg:block"></p>
+                                </div>
+                                <div class="text-right flex-shrink-0">
+                                    <div class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900" id="donorsCount">
+                                        <div class="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-gray-900 mx-auto" id="donorsLoader"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center text-xs sm:text-sm md:text-base">
+                                <span class="text-green-600 font-medium" id="donorsWeekly">+0 Donors this week</span>
+                            </div>
                         </div>
                     </div>
                 </a>
@@ -580,16 +680,18 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 w-full">
                 <!-- Total Donation Card -->
                 <!-- <a href="transaction.html" class="w-full"> -->
-                    <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6  transition-colors duration-200 cursor-pointer h-full">
+                    <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6 transition-colors duration-200 cursor-pointer h-full">
                         <!-- Header with title and year selector -->
-                        <div class="flex items-center justify-between mb-6">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
                             <h3 class="text-lg sm:text-xl font-semibold text-gray-900">Total Donation</h3>
-                            <a href="donation-records.html" class="text-sm text-blue-600 hover:underline">View Details</a>
-                            <div class="flex items-center space-x-2">
-                                <label for="yearSelector" class="text-sm text-gray-600 whitespace-nowrap">Year:</label>
-                                <select id="yearSelector" class="text-sm border border-gray-300 rounded px-3 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[80px]">
-                                    <!-- Years will be populated by JavaScript -->
-                                </select>
+                            <div class="flex items-center justify-between sm:justify-end gap-2 sm:gap-4">
+                                <a href="donation-records.html" class="text-sm text-blue-600 hover:underline whitespace-nowrap">View Details</a>
+                                <div class="flex items-center space-x-2">
+                                    <label for="yearSelector" class="text-xs sm:text-sm text-gray-600 whitespace-nowrap">Year:</label>
+                                    <select id="yearSelector" class="text-xs sm:text-sm border border-gray-300 rounded px-2 sm:px-3 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[70px] sm:min-w-[80px]">
+                                        <!-- Years will be populated by JavaScript -->
+                                    </select>
+                                </div>
                             </div>
                         </div>
                         
@@ -622,7 +724,7 @@
                             <div class="border-t pt-4">
                                 <div class="relative">
                                     <div class="overflow-x-auto overflow-y-hidden" style="scrollbar-width: thin;">
-                                        <div class="h-48 min-w-[700px] pr-4">
+                                        <div class="h-40 sm:h-48 min-w-[500px] sm:min-w-[700px] pr-4">
                                             <canvas id="donationChart"></canvas>
                                         </div>
                                     </div>
@@ -641,6 +743,24 @@
                                         }
                                         .overflow-x-auto::-webkit-scrollbar-thumb:hover {
                                             background: #94a3b8;
+                                        }
+                                        
+                                        /* Mobile button improvements */
+                                        @media (max-width: 640px) {
+                                            #pageNumbers button {
+                                                min-width: 32px !important;
+                                                height: 32px !important;
+                                                padding: 6px !important;
+                                                font-size: 12px !important;
+                                                border: 1px solid #d1d5db !important;
+                                                background: white !important;
+                                            }
+                                            
+                                            #pageNumbers button.bg-red-primary {
+                                                background: #dc2626 !important;
+                                                color: white !important;
+                                                border-color: #dc2626 !important;
+                                            }
                                         }
                                     </style>
                                 </div>
@@ -690,18 +810,20 @@
                         
                         <!-- Pagination Info and Controls -->
                         <div class="flex flex-col items-center space-y-3 pt-4 border-t border-gray-200">
-                            <div class="text-sm text-gray-600">
+                            <div class="text-xs sm:text-sm text-gray-600 text-center">
                                 Showing <span id="currentPageInfo">1-2</span> of <span id="totalStaffCount">0</span> staff
                             </div>
-                            <div class="flex items-center space-x-2">
-                                <button id="prevPage" class="px-3 py-1 text-sm bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                                    ← Previous
+                            <div class="flex items-center justify-center space-x-1 sm:space-x-2 w-full">
+                                <button id="prevPage" class="px-2 sm:px-3 py-1 text-xs sm:text-sm bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap" disabled>
+                                    <span class="hidden sm:inline">← Previous</span>
+                                    <span class="sm:hidden">←</span>
                                 </button>
-                                <div id="pageNumbers" class="flex items-center space-x-1">
+                                <div id="pageNumbers" class="flex items-center space-x-1 overflow-x-auto max-w-[50vw] sm:max-w-none">
                                     <!-- Page numbers will be generated here -->
                                 </div>
-                                <button id="nextPage" class="px-3 py-1 text-sm bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                                    Next →
+                                <button id="nextPage" class="px-2 sm:px-3 py-1 text-xs sm:text-sm bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap" disabled>
+                                    <span class="hidden sm:inline">Next →</span>
+                                    <span class="sm:hidden">→</span>
                                 </button>
                             </div>
                         </div>
@@ -775,21 +897,21 @@
                             </div>
                         </div>
                         <!-- Split Layout: Announcements & Tasks Side by Side -->
-                        <div id="announcementsTasksContent" class="grid grid-cols-1 lg:grid-cols-2 gap-2">
+                        <div id="announcementsTasksContent" class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                             <!-- Announcements Section -->
                             <div class="space-y-4">
-                                <div class="flex items-center justify-between">
-                                    <h4 class="text-md font-medium text-gray-800">Announcements</h4>
-                                    <div class="flex items-center space-x-2">
+                                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                    <h4 class="text-base sm:text-md font-medium text-gray-800">Announcements</h4>
+                                    <div class="flex items-center justify-between sm:justify-end space-x-2">
                                         <span class="text-xs text-gray-500" id="announcementCount">0 items</span>
                                         <div class="flex items-center space-x-1" id="announcementPagination">
-                                            <button id="prevAnnouncements" class="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-50" disabled>
+                                            <button id="prevAnnouncements" class="p-1.5 sm:p-1 text-gray-400 hover:text-gray-600 disabled:opacity-50 border border-gray-300 sm:border-0 rounded" disabled>
                                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                                                 </svg>
                                             </button>
-                                            <span class="text-xs text-gray-500" id="announcementPageInfo">1 / 1</span>
-                                            <button id="nextAnnouncements" class="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-50" disabled>
+                                            <span class="text-xs text-gray-500 px-1" id="announcementPageInfo">1 / 1</span>
+                                            <button id="nextAnnouncements" class="p-1.5 sm:p-1 text-gray-400 hover:text-gray-600 disabled:opacity-50 border border-gray-300 sm:border-0 rounded" disabled>
                                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                                 </svg>
@@ -804,18 +926,18 @@
 
                             <!-- Tasks Section -->
                             <div class="space-y-4">
-                                <div class="flex items-center justify-between">
-                                    <h4 class="text-md font-medium text-gray-800">Tasks</h4>
-                                    <div class="flex items-center space-x-2">
+                                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                    <h4 class="text-base sm:text-md font-medium text-gray-800">Tasks</h4>
+                                    <div class="flex items-center justify-between sm:justify-end space-x-2">
                                         <span class="text-xs text-gray-500" id="taskCount">0 items</span>
                                         <div class="flex items-center space-x-1" id="taskPagination">
-                                            <button id="prevTasks" class="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-50" disabled>
+                                            <button id="prevTasks" class="p-1.5 sm:p-1 text-gray-400 hover:text-gray-600 disabled:opacity-50 border border-gray-300 sm:border-0 rounded" disabled>
                                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                                                 </svg>
                                             </button>
-                                            <span class="text-xs text-gray-500" id="taskPageInfo">1 / 1</span>
-                                            <button id="nextTasks" class="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-50" disabled>
+                                            <span class="text-xs text-gray-500 px-1" id="taskPageInfo">1 / 1</span>
+                                            <button id="nextTasks" class="p-1.5 sm:p-1 text-gray-400 hover:text-gray-600 disabled:opacity-50 border border-gray-300 sm:border-0 rounded" disabled>
                                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                                 </svg>
@@ -1530,8 +1652,21 @@
                         item.style.display = '';
                     }
                 });
+            } else if (role === 'staff') {
+                // For staff, show granted features and always show "My Tasks"
+                document.querySelectorAll('[data-feature]').forEach(function (item) {
+                    const featureName = (item.getAttribute('data-feature') || '').trim().toLowerCase();
+                    // Show My Tasks for staff regardless of feature grants
+                    if (featureName === 'my tasks') {
+                        item.style.display = '';
+                    } else if (!features.includes(featureName)) {
+                        item.style.display = 'none';
+                    } else {
+                        item.style.display = '';
+                    }
+                });
             } else {
-                // For others, show only granted features (including "My Tasks" if present)
+                // For volunteers and others, show only granted features
                 document.querySelectorAll('[data-feature]').forEach(function (item) {
                     const featureName = (item.getAttribute('data-feature') || '').trim().toLowerCase();
                     if (!features.includes(featureName)) {
@@ -1732,15 +1867,22 @@
             }
         });
 
-        // Update total count
+        // Update total count (desktop)
         document.getElementById('childrenCount').textContent = children.length;
+        // Update total count (mobile)
+        document.getElementById('childrenCountMobile').textContent = children.length;
 
         // Count male & female
         const maleCount = children.filter(c => (c.gender || '').toLowerCase() === 'male').length;
         const femaleCount = children.filter(c => (c.gender || '').toLowerCase() === 'female').length;
 
+        // Update desktop counts
         document.getElementById('maleCount').textContent = maleCount;
         document.getElementById('femaleCount').textContent = femaleCount;
+        
+        // Update mobile counts
+        document.getElementById('maleCountMobile').textContent = maleCount;
+        document.getElementById('femaleCountMobile').textContent = femaleCount;
 
         // Weekly additions
         const oneWeekAgo = new Date();
@@ -1751,15 +1893,24 @@
             return addedDate >= oneWeekAgo;
         }).length;
 
+        // Update desktop weekly
         document.getElementById('childrenWeekly').textContent = 
             `+${weeklyAdditions} Child${weeklyAdditions !== 1 ? 'ren' : ''} added this week`;
+        
+        // Update mobile weekly
+        document.getElementById('childrenWeeklyMobile').textContent = 
+            `+${weeklyAdditions} this week`;
 
     } catch (error) {
         console.error('Error loading children data:', error);
         document.getElementById('childrenCount').textContent = '0';
+        document.getElementById('childrenCountMobile').textContent = '0';
         document.getElementById('maleCount').textContent = '0';
         document.getElementById('femaleCount').textContent = '0';
+        document.getElementById('maleCountMobile').textContent = '0';
+        document.getElementById('femaleCountMobile').textContent = '0';
         document.getElementById('childrenWeekly').textContent = '+0 Children added this week';
+        document.getElementById('childrenWeeklyMobile').textContent = '+0 this week';
     }
 }
 
@@ -1779,16 +1930,23 @@ async function loadStaffData() {
             }
         });
         
-        // Hide loader and show count
+        // Hide loader and show count (desktop)
         document.getElementById('staffLoader').style.display = 'none';
         document.getElementById('staffCount').textContent = staff.length;
+        // Update mobile count
+        document.getElementById('staffCountMobile').textContent = staff.length;
         
         // Count male & female staff
         const maleStaffCount = staff.filter(s => (s.gender || '').toLowerCase() === 'male').length;
         const femaleStaffCount = staff.filter(s => (s.gender || '').toLowerCase() === 'female').length;
 
+        // Update desktop counts
         document.getElementById('maleStaffCount').textContent = maleStaffCount;
         document.getElementById('femaleStaffCount').textContent = femaleStaffCount;
+        
+        // Update mobile counts
+        document.getElementById('maleStaffCountMobile').textContent = maleStaffCount;
+        document.getElementById('femaleStaffCountMobile').textContent = femaleStaffCount;
         
         // Calculate weekly additions
         const oneWeekAgo = new Date();
@@ -1799,7 +1957,10 @@ async function loadStaffData() {
             return addedDate >= oneWeekAgo;
         }).length;
         
+        // Update desktop weekly
         document.getElementById('staffWeekly').textContent = `+${weeklyAdditions} Staff added this week`;
+        // Update mobile weekly
+        document.getElementById('staffWeeklyMobile').textContent = `+${weeklyAdditions} this week`;
     } catch (error) {
         console.error('Error loading staff data:', error);
         document.getElementById('staffLoader').style.display = 'none';
@@ -1825,15 +1986,22 @@ async function loadVolunteerData() {
         // For users collection, we already filtered by role='volunteer' above
         const activeVolunteers = volunteers;
         
-        // Update total count
+        // Update total count (desktop)
         document.getElementById('volunteersCount').textContent = activeVolunteers.length;
+        // Update total count (mobile)
+        document.getElementById('volunteersCountMobile').textContent = activeVolunteers.length;
         
         // Count male & female volunteers
         const maleVolunteerCount = activeVolunteers.filter(v => (v.gender || '').toLowerCase() === 'male').length;
         const femaleVolunteerCount = activeVolunteers.filter(v => (v.gender || '').toLowerCase() === 'female').length;
 
+        // Update desktop counts
         document.getElementById('maleVolunteerCount').textContent = maleVolunteerCount;
         document.getElementById('femaleVolunteerCount').textContent = femaleVolunteerCount;
+        
+        // Update mobile counts
+        document.getElementById('maleVolunteerCountMobile').textContent = maleVolunteerCount;
+        document.getElementById('femaleVolunteerCountMobile').textContent = femaleVolunteerCount;
         
         // Calculate weekly additions
         const oneWeekAgo = new Date();
@@ -1844,13 +2012,20 @@ async function loadVolunteerData() {
             return addedDate >= oneWeekAgo;
         }).length;
         
+        // Update desktop weekly
         document.getElementById('volunteersWeekly').textContent = `+${weeklyAdditions} Volunteer${weeklyAdditions !== 1 ? 's' : ''} added this week`;
+        // Update mobile weekly
+        document.getElementById('volunteersWeeklyMobile').textContent = `+${weeklyAdditions} this week`;
     } catch (error) {
         console.error('Error loading volunteer data:', error);
         document.getElementById('volunteersCount').textContent = '0';
+        document.getElementById('volunteersCountMobile').textContent = '0';
         document.getElementById('maleVolunteerCount').textContent = '0';
         document.getElementById('femaleVolunteerCount').textContent = '0';
+        document.getElementById('maleVolunteerCountMobile').textContent = '0';
+        document.getElementById('femaleVolunteerCountMobile').textContent = '0';
         document.getElementById('volunteersWeekly').textContent = '+0 Volunteers added this week';
+        document.getElementById('volunteersWeeklyMobile').textContent = '+0 this week';
     }
 }
 
@@ -2137,14 +2312,21 @@ async function loadDonorsData() {
             return donor.lastDonationDate >= oneWeekAgo;
         }).length;
         
-        // Update the display
+        // Update the display (desktop)
         document.getElementById('donorsCount').textContent = totalDonors;
         document.getElementById('donorsWeekly').textContent = `+${weeklyDonors} Donors this week`;
+        
+        // Update mobile display
+        document.getElementById('donorsCountMobile').textContent = totalDonors;
+        document.getElementById('donorsWeeklyMobile').textContent = `+${weeklyDonors} this week`;
     } catch (error) {
         console.error('Error loading donors data:', error);
-        // Fallback to 0 if file doesn't exist or is empty
+        // Fallback to 0 if file doesn't exist or is empty (desktop)
         document.getElementById('donorsCount').textContent = '0';
         document.getElementById('donorsWeekly').textContent = '+0 Donors this week';
+        // Fallback to 0 (mobile)
+        document.getElementById('donorsCountMobile').textContent = '0';
+        document.getElementById('donorsWeeklyMobile').textContent = '+0 this week';
     }
 }
 
@@ -2686,8 +2868,8 @@ async function loadDonorsData() {
                 
                 // Check if user can accept this task based on assignedTo
                 const canAcceptByRole = (task.assignedTo === 'all') || 
-                                       (task.assignedTo === 'staff' && userRole === 'staff') ||
-                                       (task.assignedTo === 'volunteers' && userRole === 'volunteer');
+                                       (task.assignedTo === 'staff' && currentUser.role === 'staff') ||
+                                       (task.assignedTo === 'volunteers' && currentUser.role === 'volunteer');
                 
                 const canAccept = !isFull && !alreadyAccepted && canAcceptByRole;
                 taskAcceptDiv.classList.remove('hidden');
@@ -2697,7 +2879,8 @@ async function loadDonorsData() {
                 acceptBtn.classList.toggle('cursor-not-allowed', !canAccept);
                 acceptBtn.onclick = function() {
                     if (canAccept) {
-                        acceptTask(taskId, currentUser.name, currentUser.role, currentUser.email);
+                        const userName = currentUser.name || currentUser.username || 'User';
+                        acceptTask(taskId, userName, currentUser.role, currentUser.email);
                     }
                 };
             } else {
@@ -2708,7 +2891,7 @@ async function loadDonorsData() {
             document.getElementById('detailModal').classList.remove('hidden');
         }
 
-        function acceptTask(taskId, userName, userRole, userEmail) {
+        async function acceptTask(taskId, userName, userRole, userEmail) {
             // Find the task
             const task = allTasks.find(t => t.taskId === taskId);
             if (!task) {
@@ -2739,25 +2922,49 @@ async function loadDonorsData() {
                 return;
             }
 
-            // Send accept request to backend
-            fetch('api/accept-task.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ taskId, userEmail, userName, userRole })
-            })
-            .then(res => res.json())
-            .then(result => {
-                if (result.success) {
-                    showMessage('Task accepted!', 'success');
-                    closeDetailModal();
-                    loadAnnouncementsAndTasks(); // Refresh UI
-                } else {
-                    showMessage(result.message || 'Failed to accept task.', 'error');
+            try {
+                // Update task in Firestore
+                const taskCol = window.collection(window.db, 'tasks');
+                const taskSnapshot = await window.getDocs(taskCol);
+                
+                let taskDocId = null;
+                let taskData = null;
+                taskSnapshot.forEach((docSnap) => {
+                    if (docSnap.data().taskId === taskId) {
+                        taskDocId = docSnap.id;
+                        taskData = docSnap.data();
+                    }
+                });
+
+                if (!taskDocId || !taskData) {
+                    showMessage('Task not found in database.', 'error');
+                    return;
                 }
-            })
-            .catch(() => {
-                showMessage('Network error. Please try again.', 'error');
-            });
+
+                // Add user email to acceptedBy array from Firestore data
+                const currentAcceptedBy = Array.isArray(taskData.acceptedBy) ? taskData.acceptedBy : [];
+                const updatedAcceptedBy = [...currentAcceptedBy, userEmail];
+                
+                const taskDocRef = window.doc(window.db, 'tasks', taskDocId);
+                await window.updateDoc(taskDocRef, {
+                    acceptedBy: updatedAcceptedBy
+                });
+
+                // Log activity
+                const username = currentUser.username || currentUser.name || currentUser.email || 'User';
+                await window.logActivity(
+                    username,
+                    'Task Accepted',
+                    `Accepted task: ${taskData.title}`
+                );
+
+                showMessage('Task accepted successfully!', 'success');
+                closeDetailModal();
+                loadAnnouncementsAndTasks(); // Refresh UI
+            } catch (error) {
+                console.error('Error accepting task:', error);
+                showMessage('Failed to accept task. Please try again.', 'error');
+            }
         }
 
         function closeDetailModal() {
@@ -2951,6 +3158,31 @@ async function loadDonorsData() {
                 mobileMenuBtn.classList.remove('hidden');
             });
 
+            // Mobile "More Options" button and dropdown
+            const mobileMoreBtn = document.getElementById('mobile-more-btn');
+            const mobileMoreDropdown = document.getElementById('mobile-more-dropdown');
+            
+            if (mobileMoreBtn && mobileMoreDropdown) {
+                mobileMoreBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    mobileMoreDropdown.classList.toggle('hidden');
+                });
+
+                // Mobile dropdown options
+                document.getElementById('mobile-info-btn').addEventListener('click', function() {
+                    mobileMoreDropdown.classList.add('hidden');
+                    startTutorial();
+                });
+
+                document.getElementById('mobile-messages-btn').addEventListener('click', function() {
+                    window.location.href = 'messages.html';
+                });
+
+                document.getElementById('mobile-history-btn').addEventListener('click', function() {
+                    window.location.href = 'system-activity.html';
+                });
+            }
+
             // Header buttons
             const createBtn = document.getElementById('create-btn');
             if (createBtn) {
@@ -2959,17 +3191,26 @@ async function loadDonorsData() {
                 });
             }
 
-            document.getElementById('info-btn').addEventListener('click', function() {
-                startTutorial();
-            });
+            const infoBtn = document.getElementById('info-btn');
+            if (infoBtn) {
+                infoBtn.addEventListener('click', function() {
+                    startTutorial();
+                });
+            }
 
-            document.getElementById('messages-btn').addEventListener('click', function() {
-                window.location.href = 'messages.html';
-            });
+            const messagesBtn = document.getElementById('messages-btn');
+            if (messagesBtn) {
+                messagesBtn.addEventListener('click', function() {
+                    window.location.href = 'messages.html';
+                });
+            }
 
-            document.getElementById('history-btn').addEventListener('click', function() {
-                window.location.href = 'system-activity.html';
-            });
+            const historyBtn = document.getElementById('history-btn');
+            if (historyBtn) {
+                historyBtn.addEventListener('click', function() {
+                    window.location.href = 'system-activity.html';
+                });
+            }
 
             document.getElementById('notifications-btn').addEventListener('click', function() {
                 document.getElementById('notifications-dropdown').classList.toggle('hidden');
@@ -3000,6 +3241,8 @@ async function loadDonorsData() {
                 const notificationsDropdown = document.getElementById('notifications-dropdown');
                 const profileBtn = document.getElementById('profile-btn');
                 const profileDropdown = document.getElementById('profile-dropdown');
+                const mobileMoreBtn = document.getElementById('mobile-more-btn');
+                const mobileMoreDropdown = document.getElementById('mobile-more-dropdown');
 
                 // Close create dropdown
                 if (createBtn && createDropdown && !createBtn.contains(e.target) && !createDropdown.contains(e.target)) {
@@ -3014,6 +3257,11 @@ async function loadDonorsData() {
                 // Close profile dropdown
                 if (!profileBtn.contains(e.target) && !profileDropdown.contains(e.target)) {
                     profileDropdown.classList.add('hidden');
+                }
+
+                // Close mobile more dropdown
+                if (mobileMoreBtn && mobileMoreDropdown && !mobileMoreBtn.contains(e.target) && !mobileMoreDropdown.contains(e.target)) {
+                    mobileMoreDropdown.classList.add('hidden');
                 }
             });
 
