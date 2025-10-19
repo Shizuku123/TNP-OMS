@@ -79,10 +79,17 @@
             if (!requireLogin()) return;
             currentUser = getCurrentUser();
             currentVolunteerId = getVolunteerIdFromURL();
+
+            // 🪄 Hide ?id=CH001 from the URL bar
+            window.history.replaceState({}, document.title, "view-volunteer");
+
             if (!currentVolunteerId) {
                 window.location.href = 'volunteer-records.html';
                 return;
             }
+
+            // Remove any sessionStorage key if you use it for navigation (optional)
+            sessionStorage.removeItem('viewVolunteerId');
             await loadVolunteerData();
             setupEventListeners();
         });

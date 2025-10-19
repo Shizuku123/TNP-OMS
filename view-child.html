@@ -437,16 +437,24 @@
 
         document.addEventListener('DOMContentLoaded', async function() {
             if (!requireLogin()) return;
+
             currentUser = getCurrentUser();
             currentChildId = getChildIdFromURL();
+
+            // 🪄 Hide ?id=CH001 from the URL bar
+            window.history.replaceState({}, document.title, "view-child");
+
             if (!currentChildId) {
                 window.location.href = 'child-records.html';
                 return;
             }
+
+            sessionStorage.removeItem('viewChildId');
             await loadChildData();
             setupEventListeners();
             setupTabs();
         });
+
 
         async function loadChildData() {
             try {
