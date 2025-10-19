@@ -5623,15 +5623,15 @@
 
                 filteredHistory = [...historyData];
                 currentHistoryPage = 1; // Reset pagination
-                displayHistory();
+                
+                // Show modal first so elements are available
+                modal.classList.remove('hidden');
                 
                 // Setup event listeners for filters
                 setupHistoryFilters();
                 
-                // Load saved filter presets if available
-                loadSavedFilters();
-                
-                modal.classList.remove('hidden');
+                // Load saved filter presets if available, but don't auto-apply if it would show no results
+                loadSavedFiltersWithFallback();
             } catch (err) {
                 content.innerHTML = `
                     <div class="text-center py-12">
@@ -6135,6 +6135,66 @@
                 }
             } catch (err) {
                 console.warn('Failed to load saved filters:', err);
+            }
+        }
+        
+        function loadSavedFiltersWithFallback() {
+            try {
+                const savedFilters = localStorage.getItem('inventoryHistoryFilters');
+                if (savedFilters) {
+                    const filters = JSON.parse(savedFilters);
+                    
+                    // Wait a bit to ensure DOM elements are ready
+                    setTimeout(() => {
+                        // Set the filter values with element existence checks
+                        const historyFilter = document.getElementById('historyFilter');
+                        const historyTimeFilter = document.getElementById('historyTimeFilter');
+                        const historyUserFilter = document.getElementById('historyUserFilter');
+                        const historyQuantityFilter = document.getElementById('historyQuantityFilter');
+                        const historySortBy = document.getElementById('historySortBy');
+                        const historySearch = document.getElementById('historySearch');
+                        const dateFrom = document.getElementById('dateFrom');
+                        const dateTo = document.getElementById('dateTo');
+                        const customDateRange = document.getElementById('customDateRange');
+                        const clearSearchBtn = document.getElementById('clearSearchBtn');
+                        
+                        if (historyFilter) historyFilter.value = filters.action || '';
+                        if (historyTimeFilter) historyTimeFilter.value = filters.time || '';
+                        if (historyUserFilter) historyUserFilter.value = filters.user || '';
+                        if (historyQuantityFilter) historyQuantityFilter.value = filters.quantity || '';
+                        if (historySortBy) historySortBy.value = filters.sort || 'date-desc';
+                        if (historySearch) historySearch.value = filters.search || '';
+                        if (dateFrom) dateFrom.value = filters.dateFrom || '';
+                        if (dateTo) dateTo.value = filters.dateTo || '';
+                        
+                        // Handle custom date range visibility
+                        if (filters.time === 'custom' && customDateRange) {
+                            customDateRange.classList.remove('hidden');
+                        }
+                        
+                        // Update search button visibility
+                        if (filters.search && clearSearchBtn) {
+                            clearSearchBtn.classList.remove('opacity-0');
+                            clearSearchBtn.classList.add('opacity-100');
+                        }
+                        
+                        // Apply the filters and check if we get results
+                        filterHistory();
+                        
+                        // If no results with saved filters, clear them and show all data
+                        if (filteredHistory.length === 0 && historyData.length > 0) {
+                            console.log('Saved filters resulted in no data, clearing filters to show all history');
+                            clearAllFilters();
+                        }
+                    }, 100);
+                } else {
+                    // No saved filters, just display all data
+                    setTimeout(() => displayHistory(), 50);
+                }
+            } catch (err) {
+                console.warn('Failed to load saved filters:', err);
+                // Fallback to showing all data
+                setTimeout(() => displayHistory(), 50);
             }
         }
 
