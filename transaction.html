@@ -20,6 +20,36 @@
             }
         }
     </script>
+    <style>
+        /* Smooth transition for collapsible content */
+        #trendsContent {
+            transition: all 0.3s ease-in-out;
+        }
+        
+        #trendsChevron {
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        .rotate-180 {
+            transform: rotate(180deg);
+        }
+        
+        /* Print styles */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .print-content, .print-content * {
+                visibility: visible;
+            }
+            .print-content {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
     <!-- Header -->
@@ -42,13 +72,173 @@
 
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <!-- Record Expenses Button -->
         
+        <!-- Search and Action Header -->
+        <div class="bg-white rounded-lg shadow mb-6">
+            <div class="p-6 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Recent Transaction</h2>
+            </div>
+            
+            <!-- Search and Filter Controls -->
+            <div class="p-6 border-b border-gray-200 space-y-4">
+                <!-- Search and Action Buttons Row -->
+                <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
+                    <!-- Search Bar -->
+                    <div class="md:col-span-4">
+                        <input type="text" id="searchInput" placeholder="Search" 
+                               class="w-full h-12 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+
+                    <!-- Print Report Button -->
+                    <div class="md:col-span-1">
+                        <button onclick="openPrintModal()" class="w-full h-12 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center">
+                            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                            </svg>
+                            Print Report
+                        </button>
+                    </div>
+
+                    <!-- Record Expenses Button -->
+                    <div class="md:col-span-1">
+                        <button onclick="openRecordExpenseModal()" class="w-full h-12 px-4 py-2 bg-red-primary text-white rounded-lg hover:bg-red-700 transition-colors">
+                            Record Expenses
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filters Row -->
+                <div class="grid grid-cols-1 md:grid-cols-10 gap-4 items-center">
+                    <!-- Sort Dropdown -->
+                    <div class="md:col-span-2">
+                        <select id="sortFilter" class="w-full h-12 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <option value="default">Default</option>
+                            <option value="highToLow">High to Low</option>
+                            <option value="lowToHigh">Low to High</option>
+                        </select>
+                    </div>
+
+                    <!-- Payment Type Filter -->
+                    <div class="md:col-span-2">
+                        <select id="typeFilter" class="w-full h-12 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <option value="all">All</option>
+                            <option value="cash">Cash</option>
+                            <option value="check">Check</option>
+                            <option value="bank Transfer">Bank Transfer</option>
+                            <option value="online Payment">Online Payment</option>
+                        </select>
+                    </div>
+
+                    <!-- Date Range -->
+                    <div class="md:col-span-3 flex space-x-2">
+                        <input type="date" id="dateStart" placeholder="From"
+                            class="w-1/2 h-12 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                        <input type="date" id="dateEnd" placeholder="To"
+                            class="w-1/2 h-12 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                    </div>
+
+                    <!-- Year Filter -->
+                    <div class="md:col-span-2">
+                        <select id="yearFilter" class="w-full h-12 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
+                            <option value="">Select Year</option>
+                            <option value="2025">2025</option>
+                            <option value="2024">2024</option>
+                            <option value="2023">2023</option>
+                            <option value="2022">2022</option>
+                            <option value="2021">2021</option>
+                            <option value="2020">2020</option>
+                        </select>
+                    </div>
+
+                    <!-- Clear Button -->
+                    <div class="md:col-span-1">
+                        <button id="clearFiltersBtn" class="w-full h-12 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                            Clear
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
         
-        <!-- Statistics Cards -->
-        <div class="grid grid-cols-1 gap-6 mb-8 pt-5">
+        <!-- Statistics Cards (Collapsible Trends) -->
+        <div class="grid grid-cols-1 gap-6 mb-8">
             <!-- Overall Expenses Card -->
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="bg-white rounded-lg shadow">
+                <div class="p-6 border-b border-gray-200 flex items-center justify-between">
+                    <h2 class="text-lg font-semibold text-gray-900">Expenses Trends</h2>
+                    <button onclick="toggleTrendsSection()" id="toggleTrendsBtn" class="text-gray-600 hover:text-gray-900 transition-colors">
+                        <svg id="trendsChevron" class="h-5 w-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <!-- Skeleton Loading for Trends -->
+                <div id="trendsSkeleton" class="hidden p-6 animate-pulse">
+                    <!-- Total Amount Skeleton -->
+                    <div class="flex flex-col md:flex-row items-start justify-between mb-8">
+                        <div class="mb-4 md:mb-0">
+                            <div class="h-16 bg-gray-300 rounded w-48 mb-2"></div>
+                            <div class="h-4 bg-gray-200 rounded w-40"></div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="h-10 bg-gray-200 rounded w-24"></div>
+                            <div class="h-10 bg-gray-200 rounded w-32"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Payment Method Breakdown Skeleton -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="flex items-center space-x-2 mb-2">
+                                <div class="h-5 w-5 bg-gray-300 rounded"></div>
+                                <div class="h-4 bg-gray-300 rounded w-24"></div>
+                            </div>
+                            <div class="h-6 bg-gray-300 rounded w-20"></div>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="flex items-center space-x-2 mb-2">
+                                <div class="h-5 w-5 bg-gray-300 rounded"></div>
+                                <div class="h-4 bg-gray-300 rounded w-24"></div>
+                            </div>
+                            <div class="h-6 bg-gray-300 rounded w-20"></div>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="flex items-center space-x-2 mb-2">
+                                <div class="h-5 w-5 bg-gray-300 rounded"></div>
+                                <div class="h-4 bg-gray-300 rounded w-24"></div>
+                            </div>
+                            <div class="h-6 bg-gray-300 rounded w-20"></div>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="flex items-center space-x-2 mb-2">
+                                <div class="h-5 w-5 bg-gray-300 rounded"></div>
+                                <div class="h-4 bg-gray-300 rounded w-24"></div>
+                            </div>
+                            <div class="h-6 bg-gray-300 rounded w-20"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Chart Skeleton -->
+                    <div class="mt-4">
+                        <div class="h-64 bg-gray-200 rounded flex items-end justify-around p-4 space-x-2">
+                            <div class="bg-gray-300 rounded w-8 h-12"></div>
+                            <div class="bg-gray-300 rounded w-8 h-16"></div>
+                            <div class="bg-gray-300 rounded w-8 h-24"></div>
+                            <div class="bg-gray-300 rounded w-8 h-20"></div>
+                            <div class="bg-gray-300 rounded w-8 h-32"></div>
+                            <div class="bg-gray-300 rounded w-8 h-16"></div>
+                            <div class="bg-gray-300 rounded w-8 h-40"></div>
+                            <div class="bg-gray-300 rounded w-8 h-28"></div>
+                            <div class="bg-gray-300 rounded w-8 h-36"></div>
+                            <div class="bg-gray-300 rounded w-8 h-20"></div>
+                            <div class="bg-gray-300 rounded w-8 h-24"></div>
+                            <div class="bg-gray-300 rounded w-8 h-16"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="trendsContent" class="p-6">
                 <div class="flex flex-col md:flex-row items-start justify-between mb-8">
                     <!-- Left-aligned Total Amount -->
                     <div class="mb-4 md:mb-0">
@@ -116,107 +306,12 @@
                 <div class="mt-4">
                     <canvas id="expensesChart" class="w-full" height="100"></canvas>
                 </div>
+                </div>
             </div>
         </div>
 
-        <!-- Recent Transaction Section -->
+        <!-- Recent Transaction List -->
         <div class="bg-white rounded-lg shadow mb-6">
-            <div class="p-6 border-b border-gray-200">
-                <h2 class="text-lg font-semibold text-gray-900">Recent Transaction</h2>
-            </div>
-            
-            <!-- Search and Filter Controls -->
-            <div class="p-6 border-b border-gray-200 space-y-4">
-                <!-- Search and Action Buttons Row -->
-                <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
-                    <!-- Search Bar -->
-                    <div class="md:col-span-4">
-                        <input type="text" id="searchInput" placeholder="Search" 
-                               class="w-full h-12 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
-                    </div>
-
-                    <!-- Print Report Button -->
-                    <div class="md:col-span-1">
-                        <button onclick="printReport()" class="w-full h-12 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center">
-                            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
-                            </svg>
-                            Print Report
-                        </button>
-                    </div>
-
-                    <!-- Record Expenses Button -->
-                    <div class="md:col-span-1">
-                        <button onclick="openRecordExpenseModal()" class="w-full h-12 px-4 py-2 bg-red-primary text-white rounded-lg hover:bg-red-700 transition-colors">
-                            Record Expenses
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Filters Row -->
-                <div class="grid grid-cols-1 md:grid-cols-10 gap-4 items-center">
-                    <!-- Sort Dropdown -->
-                    <div class="md:col-span-2">
-                        <select id="sortFilter" class="w-full h-12 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
-                            <option value="default">Default</option>
-                            <option value="highToLow">High to Low</option>
-                            <option value="lowToHigh">Low to High</option>
-                        </select>
-                    </div>
-
-                    <!-- Payment Type Filter -->
-                    <div class="md:col-span-2">
-                        <select id="typeFilter" class="w-full h-12 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
-                            <option value="all">All</option>
-                            <option value="cash">Cash</option>
-                            <option value="check">Check</option>
-                            <option value="bank Transfer">Bank Transfer</option>
-                            <option value="online Payment">Online Payment</option>
-                        </select>
-                    </div>
-
-                    <!-- Date Range -->
-                    <div class="md:col-span-3 flex space-x-2">
-                        <input type="date" id="dateStart" placeholder="From"
-                            class="w-1/2 h-12 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
-                        <input type="date" id="dateEnd" placeholder="To"
-                            class="w-1/2 h-12 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
-                    </div>
-
-                    <!-- Year Filter -->
-                    <div class="md:col-span-2">
-                        <select id="yearFilter" class="w-full h-12 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-red-primary focus:border-red-primary">
-                            <option value="">Select Year</option>
-                            <option value="2025">2025</option>
-                            <option value="2024">2024</option>
-                            <option value="2023">2023</option>
-                            <option value="2022">2022</option>
-                            <option value="2021">2021</option>
-                            <option value="2020">2020</option>
-                            <option value="2019">2019</option>
-                            <option value="2018">2018</option>
-                            <option value="2017">2017</option>
-                            <option value="2016">2016</option>
-                            <option value="2015">2015</option>
-                            <option value="2014">2014</option>
-                            <option value="2013">2013</option>
-                            <option value="2012">2012</option>
-                            <option value="2011">2011</option>
-                            <option value="2010">2010</option>
-                            <option value="2009">2009</option>
-                            <option value="2008">2008</option>
-                            <option value="2007">2007</option>
-                        </select>
-                    </div>
-
-                    <!-- Clear Filters Button -->
-                    <div class="md:col-span-1">
-                        <button id="clearFiltersBtn" class="w-full h-12 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
-                            Clear
-                        </button>
-                    </div>
-                </div>
-            </div>
 
             <!-- Transaction List -->
             <div id="transactionList" class="p-6">
@@ -268,6 +363,106 @@
         </div>
 
         
+    </div>
+
+    <!-- Transaction Details Modal -->
+    <div id="transactionDetailsModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" onclick="if(event.target === this) closeTransactionDetailsModal()">
+        <div class="relative top-10 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-medium text-gray-900">Transaction Details</h3>
+                    <button onclick="closeTransactionDetailsModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div id="transactionDetailsContent" class="space-y-4">
+                    <!-- Details will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Preview Modal -->
+    <div id="printModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-2 sm:p-4" onclick="if(event.target === this) closePrintModal()">
+        <div class="relative mx-auto border w-full max-w-7xl shadow-lg rounded-md bg-white flex flex-col" style="margin-top: 10px; margin-bottom: 10px; height: calc(100vh - 20px); max-height: 95vh;">
+            <div class="flex items-center justify-between p-4 sm:p-6 border-b flex-shrink-0">
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900">Print Expenses Report</h3>
+                <button onclick="closePrintModal()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+            </div>
+            
+            <div class="flex-1 overflow-hidden flex flex-col lg:flex-row">
+                <!-- Filter Options Panel -->
+                <div class="lg:w-1/3 p-4 sm:p-6 border-b lg:border-b-0 lg:border-r border-gray-200 overflow-y-auto flex-shrink-0">
+                    <h4 class="font-semibold text-gray-900 mb-4">Filter Options</h4>
+                    
+                    <div class="space-y-4">
+                        <!-- Date Range Filter -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Date Range</label>
+                            <input type="date" id="printDateStart" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm mb-2">
+                            <input type="date" id="printDateEnd" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                        </div>
+                        
+                        <!-- Payment Method Filter -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
+                            <select id="printPaymentMethod" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                                <option value="">All Methods</option>
+                                <option value="cash">Cash</option>
+                                <option value="check">Check</option>
+                                <option value="bank Transfer">Bank Transfer</option>
+                                <option value="online Payment">Online Payment</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Status Filter -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                            <select id="printStatus" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                                <option value="">All Status</option>
+                                <option value="approved">Approved</option>
+                                <option value="pending">Pending</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Export Format -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Export Format</label>
+                            <select id="printExportFormat" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                                <option value="print">Print/PDF</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="pt-4">
+                            <button onclick="resetPrintFilters()" class="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 text-sm">
+                                Reset Filters
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Preview Panel -->
+                <div class="flex-1 flex flex-col overflow-hidden">
+                    <div class="p-4 sm:p-6 flex-1 overflow-y-auto" id="printPreviewContainer">
+                        <div id="printPreview">
+                            <!-- Preview content will be generated here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Print Button -->
+                    <div class="p-4 sm:p-6 border-t flex-shrink-0">
+                        <button onclick="confirmPrint()" class="w-full px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 font-medium">
+                            Print Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Record Expense Modal -->
@@ -410,6 +605,7 @@
         async function loadData() {
             try {
                 showSkeletonLoading();
+                showTrendsSkeleton();
                 
                 // Load expenses
                 const expensesCol = collection(db, 'expenses');
@@ -426,6 +622,7 @@
                 console.log('Loaded expenses:', allExpenses);
                 
                 hideSkeletonLoading();
+                hideTrendsSkeleton();
                 updateStatistics();
                 displayTransactions();
                 // Initialize chart after data is loaded
@@ -433,8 +630,19 @@
             } catch (error) {
                 console.error('Failed to load data:', error);
                 hideSkeletonLoading();
+                hideTrendsSkeleton();
                 displayTransactions();
             }
+        }
+
+        function showTrendsSkeleton() {
+            document.getElementById('trendsContent').classList.add('hidden');
+            document.getElementById('trendsSkeleton').classList.remove('hidden');
+        }
+
+        function hideTrendsSkeleton() {
+            document.getElementById('trendsSkeleton').classList.add('hidden');
+            document.getElementById('trendsContent').classList.remove('hidden');
         }
 
         function showSkeletonLoading() {
@@ -656,16 +864,16 @@
             const sortedExpenses = [...expenses].sort((a, b) => 
                 new Date(b.dateTime) - new Date(a.dateTime));
 
-            transactionList.innerHTML = sortedExpenses.map(expense => `
-                <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer mb-4">
+            transactionList.innerHTML = sortedExpenses.map((expense, index) => `
+                <div onclick='viewTransactionDetails(${JSON.stringify(expense).replace(/'/g, "&#39;")})' class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer mb-4 transition-colors">
                     <div class="flex items-center space-x-4">
                         <div class="p-2 rounded-full ${getPaymentMethodColor(expense.paymentMethod)}">
                             ${getPaymentMethodIcon(expense.paymentMethod)}
                         </div>
                         <div>
-                            <p class="font-medium text-gray-900">${expense.createdBy || 'Unknown Vendor'}</p>
+                            <p class="font-medium text-gray-900">${expense.notes || expense.description || 'No notes'}</p>
                             <p class="text-sm text-gray-500">${expense.expenseId || 'No ID'}</p>
-                            <p class="text-sm text-gray-500">${expense.description || 'No description'}</p>
+                            <p class="text-sm text-gray-500">${expense.category || 'No category'}</p>
                         </div>
                     </div>
                     <div class="text-right">
@@ -870,15 +1078,519 @@
         // Global functions
         window.openRecordExpenseModal = function() {
             window.location.href ="record-expenses.html"
-            };
+        };
 
-        
+        // Toggle Trends Section
+        window.toggleTrendsSection = function() {
+            const trendsContent = document.getElementById('trendsContent');
+            const chevron = document.getElementById('trendsChevron');
+            
+            if (trendsContent.classList.contains('hidden')) {
+                trendsContent.classList.remove('hidden');
+                chevron.classList.remove('rotate-180');
+            } else {
+                trendsContent.classList.add('hidden');
+                chevron.classList.add('rotate-180');
+            }
+        };
+
+        // Transaction Details Modal Functions
+        window.viewTransactionDetails = function(expense) {
+            const modal = document.getElementById('transactionDetailsModal');
+            const content = document.getElementById('transactionDetailsContent');
+            
+            content.innerHTML = `
+                <div class="bg-gray-50 p-4 rounded-lg space-y-3">
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Expense ID:</span>
+                        <span class="text-gray-900">${expense.expenseId || 'N/A'}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Date:</span>
+                        <span class="text-gray-900">${formatDate(expense.date)}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Amount:</span>
+                        <span class="text-red-600 font-bold text-xl">₱${parseFloat(expense.amount || 0).toLocaleString()}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Category:</span>
+                        <span class="text-gray-900">${expense.category || 'N/A'}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Description:</span>
+                        <span class="text-gray-900">${expense.description || 'N/A'}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Payment Method:</span>
+                        <span class="text-gray-900">${expense.paymentMethod || 'N/A'}</span>
+                    </div>
+                    ${expense.checkNumber ? `
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Check Number:</span>
+                        <span class="text-gray-900">${expense.checkNumber}</span>
+                    </div>
+                    ` : ''}
+                    ${expense.onlinePaymentType ? `
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Online Payment Type:</span>
+                        <span class="text-gray-900">${expense.onlinePaymentType}</span>
+                    </div>
+                    ` : ''}
+                    ${expense.referenceId ? `
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Reference ID:</span>
+                        <span class="text-gray-900">${expense.referenceId}</span>
+                    </div>
+                    ` : ''}
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Requested By:</span>
+                        <span class="text-gray-900">${expense.requestedBy || 'N/A'}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Approved By:</span>
+                        <span class="text-gray-900">${expense.approvedBy || 'N/A'}</span>
+                    </div>
+                    ${expense.notes ? `
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Notes:</span>
+                        <span class="text-gray-900">${expense.notes}</span>
+                    </div>
+                    ` : ''}
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Status:</span>
+                        <span class="px-2 py-1 rounded text-sm ${
+                            expense.status === 'approved' ? 'bg-green-100 text-green-800' : 
+                            expense.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                            'bg-red-100 text-red-800'
+                        }">${expense.status || 'N/A'}</span>
+                    </div>
+                    ${expense.createdBy ? `
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Created By:</span>
+                        <span class="text-gray-900">${expense.createdBy}</span>
+                    </div>
+                    ` : ''}
+                    ${expense.createdAt ? `
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Created At:</span>
+                        <span class="text-gray-900">${formatDateTime(expense.createdAt)}</span>
+                    </div>
+                    ` : ''}
+                    ${expense.attachmentName ? `
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Attachment:</span>
+                        <span class="text-gray-900">${expense.attachmentName} (${(expense.attachmentSize / 1024).toFixed(1)} KB)</span>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+        };
+
+        window.closeTransactionDetailsModal = function() {
+            document.getElementById('transactionDetailsModal').classList.add('hidden');
+        };
+
+        // Print Modal Functions
+        let printFilteredExpenses = [];
+
+        window.openPrintModal = function() {
+            document.getElementById('printModal').classList.remove('hidden');
+            printFilteredExpenses = [...allExpenses];
+            updatePrintPreview();
+            
+            // Add event listeners for auto-update
+            document.getElementById('printDateStart').addEventListener('change', applyPrintFilters);
+            document.getElementById('printDateEnd').addEventListener('change', applyPrintFilters);
+            document.getElementById('printPaymentMethod').addEventListener('change', applyPrintFilters);
+            document.getElementById('printStatus').addEventListener('change', applyPrintFilters);
+        };
+
+        window.closePrintModal = function() {
+            document.getElementById('printModal').classList.add('hidden');
+        };
+
+        window.applyPrintFilters = function() {
+            const dateStart = document.getElementById('printDateStart').value;
+            const dateEnd = document.getElementById('printDateEnd').value;
+            const paymentMethod = document.getElementById('printPaymentMethod').value;
+            const status = document.getElementById('printStatus').value;
+            
+            printFilteredExpenses = allExpenses.filter(expense => {
+                let matches = true;
+                
+                // Date filter - use expense.date instead of expense.dateTime
+                if (dateStart) {
+                    const expenseDate = new Date(expense.date);
+                    const startDate = new Date(dateStart);
+                    startDate.setHours(0, 0, 0, 0);
+                    expenseDate.setHours(0, 0, 0, 0);
+                    if (expenseDate < startDate) matches = false;
+                }
+                
+                if (dateEnd) {
+                    const expenseDate = new Date(expense.date);
+                    const endDate = new Date(dateEnd);
+                    endDate.setHours(23, 59, 59, 999);
+                    expenseDate.setHours(0, 0, 0, 0);
+                    if (expenseDate > endDate) matches = false;
+                }
+                
+                // Payment method filter - case insensitive comparison
+                if (paymentMethod && expense.paymentMethod.toLowerCase() !== paymentMethod.toLowerCase()) {
+                    matches = false;
+                }
+                
+                // Status filter - case insensitive comparison
+                if (status && expense.status.toLowerCase() !== status.toLowerCase()) {
+                    matches = false;
+                }
+                
+                return matches;
+            });
+            
+            updatePrintPreview();
+        };
+
+        window.resetPrintFilters = function() {
+            document.getElementById('printDateStart').value = '';
+            document.getElementById('printDateEnd').value = '';
+            document.getElementById('printPaymentMethod').value = '';
+            document.getElementById('printStatus').value = '';
+            printFilteredExpenses = [...allExpenses];
+            updatePrintPreview();
+        };
+
+        function updatePrintPreview() {
+            const preview = document.getElementById('printPreview');
+            const totalAmount = printFilteredExpenses.reduce((sum, exp) => sum + parseFloat(exp.amount || 0), 0);
+            
+            // Count expenses by status
+            const approvedCount = printFilteredExpenses.filter(exp => exp.status === 'approved').length;
+            const pendingCount = printFilteredExpenses.filter(exp => exp.status === 'pending').length;
+            const rejectedCount = printFilteredExpenses.filter(exp => exp.status === 'rejected').length;
+            
+            preview.innerHTML = `
+                <div class="print-content bg-white" style="font-family: Arial, sans-serif; padding: 20px;">
+                    <!-- Header -->
+                    <div style="text-align: center; padding-bottom: 20px; border-bottom: 2px solid #333;">
+                        <img src="tahanan-logo.png" alt="Tahanan ng Pagmamahal" style="height: 60px; margin: 0 auto; display: block; margin-bottom: 10px;">
+                        <p style="font-size: 11px; color: #666; margin: 8px 0;">45 Dr. Pilapil St. Brgy. Sagesl Pasig, Metro Manila, Philippines</p>
+                        <p style="font-size: 11px; color: #666; margin: 3px 0;">Contact: +(63) 917 325 7168 Tel: +632 8631 7168</p>
+                        <p style="font-size: 11px; color: #666; margin: 3px 0;">Email: tahananph@gmail.com</p>
+                    </div>
+
+                    <!-- Report Title -->
+                    <div style="text-align: center; padding: 15px 0;">
+                        <h2 style="font-size: 16px; font-weight: bold; color: #333; margin: 0;">Expenses Report</h2>
+                        <p style="font-size: 11px; color: #666; margin: 5px 0;">Generated on: ${new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}</p>
+                    </div>
+
+                    <!-- Table -->
+                    <table style="width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 11px;">
+                        <thead>
+                            <tr style="background-color: #dc2626; color: white;">
+                                <th style="padding: 10px 6px; text-align: left; border: 1px solid #999; font-weight: 600;">ID</th>
+                                <th style="padding: 10px 6px; text-align: left; border: 1px solid #999; font-weight: 600;">Date</th>
+                                <th style="padding: 10px 6px; text-align: left; border: 1px solid #999; font-weight: 600;">Category</th>
+                                <th style="padding: 10px 6px; text-align: left; border: 1px solid #999; font-weight: 600;">Description</th>
+                                <th style="padding: 10px 6px; text-align: left; border: 1px solid #999; font-weight: 600;">Payment</th>
+                                <th style="padding: 10px 6px; text-align: right; border: 1px solid #999; font-weight: 600;">Amount</th>
+                                <th style="padding: 10px 6px; text-align: center; border: 1px solid #999; font-weight: 600;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${printFilteredExpenses.slice(0, 9).map(expense => `
+                                <tr style="border-bottom: 1px solid #ddd;">
+                                    <td style="padding: 8px 6px; border: 1px solid #ddd;">${expense.expenseId || 'N/A'}</td>
+                                    <td style="padding: 8px 6px; border: 1px solid #ddd;">${formatDate(expense.date)}</td>
+                                    <td style="padding: 8px 6px; border: 1px solid #ddd;">${expense.category || 'N/A'}</td>
+                                    <td style="padding: 8px 6px; border: 1px solid #ddd;">${expense.description || expense.notes || 'N/A'}</td>
+                                    <td style="padding: 8px 6px; border: 1px solid #ddd; text-transform: capitalize;">${expense.paymentMethod || 'N/A'}</td>
+                                    <td style="padding: 8px 6px; border: 1px solid #ddd; text-align: right; font-weight: 500;">₱${parseFloat(expense.amount || 0).toLocaleString()}</td>
+                                    <td style="padding: 8px 6px; border: 1px solid #ddd; text-align: center;">
+                                        <span style="color: ${expense.status === 'approved' ? '#0066cc' : expense.status === 'pending' ? '#ff9900' : '#cc0000'}; font-weight: 500;">
+                                            ${expense.status || 'N/A'}
+                                        </span>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+
+                    ${printFilteredExpenses.length > 9 ? `
+                    <p style="text-align: center; font-size: 11px; color: #666; margin: 10px 0;">
+                        ... and ${printFilteredExpenses.length - 9} more records will be included in the full print
+                    </p>
+                    ` : ''}
+
+                    <!-- Summary -->
+                    <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 4px;">
+                        <h3 style="font-size: 14px; font-weight: bold; margin: 0 0 10px 0; text-align: center;">SUMMARY</h3>
+                        <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; font-size: 11px; margin-bottom: 10px;">
+                            <span><strong>Total:</strong> ${printFilteredExpenses.length}</span>
+                            ${approvedCount > 0 ? `<span style="color: #0066cc;"><strong>Approved:</strong> ${approvedCount}</span>` : ''}
+                            ${pendingCount > 0 ? `<span style="color: #ff9900;"><strong>Pending:</strong> ${pendingCount}</span>` : ''}
+                            ${rejectedCount > 0 ? `<span style="color: #cc0000;"><strong>Rejected:</strong> ${rejectedCount}</span>` : ''}
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div style="margin-top: 40px; padding-top: 15px; border-top: 1px solid #ddd; font-size: 11px; color: #666;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <p style="margin: 5px 0;"><strong>Prepared By:</strong> ${currentUser?.username || 'System'}</p>
+                            <p style="margin: 5px 0;"><strong>Generated on:</strong> ${new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        window.confirmPrint = function() {
+            // Get all expenses for printing (not just preview slice)
+            const approvedCount = printFilteredExpenses.filter(exp => exp.status === 'approved').length;
+            const pendingCount = printFilteredExpenses.filter(exp => exp.status === 'pending').length;
+            const rejectedCount = printFilteredExpenses.filter(exp => exp.status === 'rejected').length;
+            const totalAmount = printFilteredExpenses.reduce((sum, exp) => sum + parseFloat(exp.amount || 0), 0);
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Expenses Report - Print</title>
+                    <style>
+                        * { margin: 0; padding: 0; box-sizing: border-box; }
+                        body { 
+                            font-family: Arial, sans-serif; 
+                            padding: 20px;
+                            font-size: 11px;
+                        }
+                        .header {
+                            text-align: center;
+                            padding-bottom: 20px;
+                            border-bottom: 2px solid #333;
+                            margin-bottom: 15px;
+                        }
+                        .header img { 
+                            height: 60px; 
+                            margin: 0 auto; 
+                            display: block; 
+                            margin-bottom: 10px; 
+                        }
+                        .header h1 { 
+                            color: #333; 
+                            font-size: 20px; 
+                            font-weight: bold; 
+                            margin: 8px 0; 
+                            letter-spacing: 1px; 
+                        }
+                        .header .subtitle { 
+                            color: #dc2626; 
+                            font-size: 13px; 
+                            letter-spacing: 3px; 
+                            margin: 5px 0; 
+                        }
+                        .header p { 
+                            font-size: 11px; 
+                            color: #666; 
+                            margin: 3px 0; 
+                        }
+                        .report-title {
+                            text-align: center;
+                            padding: 15px 0;
+                        }
+                        .report-title h2 {
+                            font-size: 16px;
+                            font-weight: bold;
+                            color: #333;
+                            margin: 0;
+                        }
+                        .report-title p {
+                            font-size: 11px;
+                            color: #666;
+                            margin: 5px 0;
+                        }
+                        table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin: 15px 0;
+                            font-size: 11px;
+                        }
+                        thead {
+                            background-color: #dc2626 !important;
+                            color: white !important;
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        th, td {
+                            padding: 8px 6px;
+                            border: 1px solid #999;
+                            text-align: left;
+                        }
+                        th { font-weight: 600; }
+                        td.amount { text-align: right; font-weight: 500; }
+                        td.status { text-align: center; font-weight: 500; }
+                        .status-approved { color: #0066cc; }
+                        .status-pending { color: #ff9900; }
+                        .status-rejected { color: #cc0000; }
+                        tbody tr { border-bottom: 1px solid #ddd; }
+                        .summary {
+                            margin: 20px 0;
+                            padding: 15px;
+                            border: 1px solid #ddd;
+                            border-radius: 4px;
+                        }
+                        .summary h3 {
+                            font-size: 14px;
+                            font-weight: bold;
+                            margin: 0 0 10px 0;
+                            text-align: center;
+                        }
+                        .summary-content {
+                            display: flex;
+                            justify-content: center;
+                            gap: 20px;
+                            flex-wrap: wrap;
+                            font-size: 11px;
+                            margin-bottom: 10px;
+                        }
+                        .footer {
+                            margin-top: 40px;
+                            padding-top: 15px;
+                            border-top: 1px solid #ddd;
+                            font-size: 11px;
+                            color: #666;
+                            display: flex;
+                            justify-content: space-between;
+                        }
+                        @media print {
+                            body { padding: 10px; }
+                            table { page-break-inside: auto; }
+                            tr { page-break-inside: avoid; page-break-after: auto; }
+                            thead { 
+                                display: table-header-group;
+                                background-color: #dc2626 !important;
+                                color: white !important;
+                                -webkit-print-color-adjust: exact !important;
+                                print-color-adjust: exact !important;
+                            }
+                            th {
+                                background-color: #dc2626 !important;
+                                color: white !important;
+                            }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <img src="tahanan-logo.png" alt="Tahanan ng Pagmamahal">
+                        <p>45 Dr. Pilapil St. Brgy. Sagesl Pasig, Metro Manila, Philippines</p>
+                        <p>Contact: +(63) 917 325 7168 Tel: +632 8631 7168</p>
+                        <p>Email: tahananph@gmail.com</p>
+                    </div>
+
+                    <div class="report-title">
+                        <h2>Expenses Report</h2>
+                        <p>Generated on: ${new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}</p>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Date</th>
+                                <th>Category</th>
+                                <th>Description</th>
+                                <th>Payment</th>
+                                <th style="text-align: right;">Amount</th>
+                                <th style="text-align: center;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${printFilteredExpenses.map(expense => `
+                                <tr>
+                                    <td>${expense.expenseId || 'N/A'}</td>
+                                    <td>${formatDate(expense.date)}</td>
+                                    <td>${expense.category || 'N/A'}</td>
+                                    <td>${expense.description || expense.notes || 'N/A'}</td>
+                                    <td style="text-transform: capitalize;">${expense.paymentMethod || 'N/A'}</td>
+                                    <td class="amount">₱${parseFloat(expense.amount || 0).toLocaleString()}</td>
+                                    <td class="status status-${expense.status || 'unknown'}">${expense.status || 'N/A'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+
+                    <div class="summary">
+                        <h3>SUMMARY</h3>
+                        <div class="summary-content">
+                            <span><strong>Total:</strong> ${printFilteredExpenses.length}</span>
+                            ${approvedCount > 0 ? `<span style="color: #0066cc;"><strong>Approved:</strong> ${approvedCount}</span>` : ''}
+                            ${pendingCount > 0 ? `<span style="color: #ff9900;"><strong>Pending:</strong> ${pendingCount}</span>` : ''}
+                            ${rejectedCount > 0 ? `<span style="color: #cc0000;"><strong>Rejected:</strong> ${rejectedCount}</span>` : ''}
+                        </div>
+                    </div>
+
+                    <div class="footer">
+                        <p><strong>Prepared By:</strong> ${currentUser?.username || 'System'}</p>
+                        <p><strong>Generated on:</strong> ${new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}</p>
+                    </div>
+                </body>
+                </html>
+            `);
+            
+            printWindow.document.close();
+            printWindow.focus();
+            
+            // Wait for content to load before printing
+            setTimeout(() => {
+                printWindow.print();
+                printWindow.close();
+            }, 250);
+        };
+
+        function formatDateTime(dateString) {
+            if (!dateString) return 'N/A';
+            
+            // Handle Firebase Timestamp objects
+            let date;
+            if (dateString && typeof dateString === 'object' && dateString.seconds) {
+                date = new Date(dateString.seconds * 1000);
+            } else {
+                date = new Date(dateString);
+            }
+            
+            // Check if date is valid
+            if (isNaN(date.getTime())) return 'N/A';
+            
+            return date.toLocaleString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
 
         
 
         function formatDate(dateString) {
             if (!dateString) return 'N/A';
-            const date = new Date(dateString);
+            
+            // Handle Firebase Timestamp objects
+            let date;
+            if (dateString && typeof dateString === 'object' && dateString.seconds) {
+                date = new Date(dateString.seconds * 1000);
+            } else {
+                date = new Date(dateString);
+            }
+            
+            // Check if date is valid
+            if (isNaN(date.getTime())) return 'N/A';
+            
             return date.toLocaleDateString('en-US', { 
                 year: 'numeric', 
                 month: 'short', 
