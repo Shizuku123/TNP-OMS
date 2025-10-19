@@ -634,7 +634,6 @@ ensureAdminUser();
         let userData = null;
         let userDocId = null;
         let userDocRef = null;
-
         try {
           // Step 1: Fetch user's email and doc from Firestore (by username or email)
           if (userInput.includes('@')) {
@@ -698,8 +697,40 @@ ensureAdminUser();
           
           await logActivity('User Login', `${persistUser.username} logged into the system`, persistUser);
           
+          // --- 2FA Check ---
+      if (persistUser.twoFactorAuth === true) {
+        loginText.textContent = '2FA required. Sending OTP...';
+        // Send OTP via PHP mailer
+        const otpResponse = await fetch('otpmailer.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: `userId=${encodeURIComponent(userUid)}&userEmail=${encodeURIComponent(userEmail)}&userName=${encodeURIComponent(persistUser.firstName || persistUser.username || userEmail)}`
+        });
+        const otpHtml = await otpResponse.text();
+        // Show OTP input modal
+        showOTPModal(userUid);
+        // Save OTP to Firestore if received
+        let otpValue = null;
+        try {
+          const otpJson = JSON.parse(otpHtml);
+          if (otpJson.otp) {
+            otpValue = otpJson.otp;
+            console.log('Received OTP from PHP:', otpValue);
+            const { saveOtpToFirestore } = await import('./saveOtpToFirestore.js');
+            await saveOtpToFirestore(userUid, otpValue);
+            console.log('OTP saved to Firestore for user:', userUid);
+          } else {
+            console.warn('No OTP found in PHP response:', otpJson);
+          }
+        } catch (e) {
+          console.error('Failed to parse OTP response from PHP:', e, otpHtml);
+        }
+        loginBtn.disabled = false;
+        loginText.textContent = 'Sign in';
+        return;
+      }
+      // --- End 2FA Check ---
           loginText.textContent = 'Success! Redirecting...';
-          
           setTimeout(() => {
             if (persistUser.role === 'volunteer') {
               window.location.href = 'volunteer-attendance.html';
@@ -707,7 +738,6 @@ ensureAdminUser();
               window.location.href = 'index.html';
             }
           }, 500);
-          
         } catch (error) {
           console.error('Login error:', error);
           
@@ -805,14 +835,72 @@ ensureAdminUser();
       });
     });
 
-    // Auto-fill demo credentials (Ctrl+D)
-    document.addEventListener('keydown', function(e) {
-      if (e.ctrlKey && e.key === 'd') {
-        e.preventDefault();
-        document.getElementById('username').value = 'szanilgueco';
-        document.getElementById('password').value = 'admin123';
+    // OTP Modal for 2FA
+  function showOTPModal(userUid) {
+    // Create modal if not exists
+    let modal = document.getElementById('otp2faModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'otp2faModal';
+      modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+      modal.innerHTML = `
+        <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md mx-4">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Two-Factor Authentication</h3>
+          <p class="mb-2 text-gray-700">An OTP has been sent to your email. Please enter it below:</p>
+          <input id="otp2faInput" type="text" maxlength="6" class="w-full px-3 py-2 border border-gray-300 rounded-md mb-4" placeholder="Enter OTP">
+          <div id="otp2faError" class="mb-2 text-red-600 hidden"></div>
+          <button id="otp2faVerifyBtn" class="w-full py-2 px-4 bg-red-primary text-white rounded-md hover:bg-red-700">Verify OTP</button>
+          <button id="otp2faCancelBtn" class="w-full py-2 px-4 mt-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">Cancel</button>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    } else {
+      modal.style.display = 'flex';
+    }
+    // Add event listeners
+    document.getElementById('otp2faVerifyBtn').onclick = async function() {
+      const otpVal = document.getElementById('otp2faInput').value.trim();
+      if (!otpVal || otpVal.length !== 6) {
+        showOTPError('OTP must be 6 digits.');
+        return;
       }
-    });
+      // Check OTP in Firestore
+      try {
+        const userDocRef = doc(db, 'users', userUid);
+        const userDocSnap = await getDoc(userDocRef);
+        if (!userDocSnap.exists()) {
+          showOTPError('User not found.');
+          return;
+        }
+        const userData = userDocSnap.data();
+        if (!userData.otp || userData.otp !== otpVal) {
+          showOTPError('Invalid OTP.');
+          return;
+        }
+        // Optionally check expiry (if you want)
+        // Success: remove modal and redirect
+        document.body.removeChild(modal);
+        loginText.textContent = 'Success! Redirecting...';
+        setTimeout(() => {
+          if (userData.role === 'volunteer') {
+            window.location.href = 'volunteer-attendance.html';
+          } else {
+            window.location.href = 'index.html';
+          }
+        }, 500);
+      } catch (err) {
+        showOTPError('Error verifying OTP.');
+      }
+    };
+    document.getElementById('otp2faCancelBtn').onclick = function() {
+      document.body.removeChild(modal);
+    };
+    function showOTPError(msg) {
+      const errDiv = document.getElementById('otp2faError');
+      errDiv.textContent = msg;
+      errDiv.classList.remove('hidden');
+    }
+  }
     </script>
 </body>
 </html>

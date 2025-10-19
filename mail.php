@@ -168,7 +168,7 @@ function sendDonationThankYouEmail($donorName, $donorEmail, $donationType, $dona
         $mail->isSMTP();
         $mail->Host       = 'smtp.gmail.com';
         $mail->SMTPAuth   = true;
-        $mail->Username   = 'tahananngpagmamahalcapstone@gmail.com';  // Keep existing credentials
+        $mail->Username   = 'coffeecornerofficial1@gmail.com';  // Keep existing credentials
         $mail->Password   = 'sfxr wvap lbwj bszs';               // Keep existing credentials
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port       = 587;
