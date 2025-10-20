@@ -3203,7 +3203,7 @@
             // Remove SQL injection patterns
             sanitized = sanitized.replace(/(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION|SCRIPT)\b)/gi, '');
             
-            return sanitized.trim();
+            return sanitized;
         }
 
         function validateTextInput(input, fieldName, maxLength = 100) {

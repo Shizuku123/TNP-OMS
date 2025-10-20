@@ -1658,7 +1658,7 @@
             const motherNameField = document.getElementById('motherName');
             const parentalStatusField = document.getElementById('parentalStatus');
 
-            if (reason === 'Foundling') {
+            if (reason === 'Foundling' || reason === 'Neglected') {
                 // Set fields to "Unknown" and disable them
                 fatherNameField.value = 'Unknown';
                 motherNameField.value = 'Unknown';
@@ -1674,7 +1674,7 @@
                 motherNameField.classList.add('bg-gray-100', 'cursor-not-allowed');
                 parentalStatusField.classList.add('bg-gray-100', 'cursor-not-allowed');
             } else {
-                // Enable the fields and clear the "Unknown" values if they were set by Foundling
+                // Enable the fields and clear the "Unknown" values if they were set by Foundling or Neglected
                 const wasDisabled = fatherNameField.disabled;
                 
                 fatherNameField.disabled = false;
@@ -1686,7 +1686,7 @@
                 motherNameField.classList.remove('bg-gray-100', 'cursor-not-allowed');
                 parentalStatusField.classList.remove('bg-gray-100', 'cursor-not-allowed');
                 
-                // Clear the "Unknown" values only if they were set by the Foundling option
+                // Clear the "Unknown" values only if they were set by the Foundling/Neglected option
                 if (wasDisabled) {
                     if (fatherNameField.value === 'Unknown') fatherNameField.value = '';
                     if (motherNameField.value === 'Unknown') motherNameField.value = '';
@@ -1877,10 +1877,11 @@
                         }
                     });
 
-                    // Keypress prevention for invalid characters
+                    // Keypress prevention for invalid characters (allows spaces)
                     field.addEventListener('keypress', function(e) {
                         const allowedPattern = /^[a-zA-Z\s\-']$/;
-                        if (!allowedPattern.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab') {
+                        // Explicitly allow space, letters, hyphens, and apostrophes
+                        if (!allowedPattern.test(e.key) && e.key !== ' ' && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab' && e.key !== 'Enter') {
                             e.preventDefault();
                             this.style.borderColor = '#ef4444';
                             setTimeout(() => {
@@ -1923,7 +1924,8 @@
 
                     field.addEventListener('keypress', function(e) {
                         const allowedPattern = /^[a-zA-Z\s\-',.]$/;
-                        if (!allowedPattern.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab') {
+                        // Explicitly allow space and other allowed characters
+                        if (!allowedPattern.test(e.key) && e.key !== ' ' && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab' && e.key !== 'Enter') {
                             e.preventDefault();
                             this.style.borderColor = '#ef4444';
                             setTimeout(() => {
@@ -2314,7 +2316,7 @@
             // Remove SQL injection patterns
             sanitized = sanitized.replace(/(\b(select|insert|update|delete|drop|create|alter|exec|execute|script|iframe|object|embed|form|input)\b)/gi, '');
             
-            return sanitized.trim();
+            return sanitized;
         }
         
         // Generic text input validation with real-time sanitization
@@ -2347,7 +2349,7 @@
         
         // Notes field validation (comprehensive text with safe punctuation)
         function validateNotesField(input) {
-            return validateTextInput(input, /^[a-zA-Z0-9\s\.,\-'()\n\r]*$/);
+            return validateTextInput(input,/^[a-zA-Z0-9\s\.,\-'()\n\r]*$/);
         }
 
         function showMessage(message, type) {
