@@ -37,24 +37,20 @@
                         </svg>
                     </a>
                 </div>
-                <h1 class="text-xl font-semibold text-gray-900">Staff Attendance Records</h1>
-                <div class="flex items-center space-x-4">
-                    <button onclick="exportToCSV()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                        Export CSV
-                    </button>
-                </div>
+                <h1 class="text-base sm:text-lg md:text-xl font-semibold text-gray-900">Staff Attendance Records</h1>
+                <div class="w-6"></div>
             </div>
         </div>
     </header>
 
     <!-- Main Content -->
-    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
         <!-- Success/Error Messages -->
         <div id="messageContainer" class="mb-4 hidden"></div>
 
         <!-- Summary Cards -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white rounded-lg shadow p-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+            <div class="bg-white rounded-lg shadow p-3 sm:p-4">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
@@ -64,13 +60,13 @@
                         </div>
                     </div>
                     <div class="ml-3">
-                        <p class="text-sm font-medium text-gray-500">Today Present</p>
-                        <p class="text-2xl font-semibold text-gray-900" id="todayPresent">0</p>
+                        <p class="text-xs sm:text-sm font-medium text-gray-500">Today Present</p>
+                        <p class="text-xl sm:text-2xl font-semibold text-gray-900" id="todayPresent">0</p>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white rounded-lg shadow p-4">
+            <div class="bg-white rounded-lg shadow p-3 sm:p-4">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
@@ -80,8 +76,8 @@
                         </div>
                     </div>
                     <div class="ml-3">
-                        <p class="text-sm font-medium text-gray-500">Late Today</p>
-                        <p class="text-2xl font-semibold text-gray-900" id="todayLate">0</p>
+                        <p class="text-xs sm:text-sm font-medium text-gray-500">Late Today</p>
+                        <p class="text-xl sm:text-2xl font-semibold text-gray-900" id="todayLate">0</p>
                     </div>
                 </div>
             </div>
@@ -120,33 +116,33 @@
         </div>
 
         <!-- Enhanced Filters and Search -->
-        <div class="bg-white shadow rounded-lg mb-6">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <h3 class="text-lg font-medium text-gray-900">Filters & Search</h3>
+        <div class="bg-white shadow rounded-lg mb-4 sm:mb-6">
+            <div class="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+                <h3 class="text-base sm:text-lg font-medium text-gray-900">Filters & Search</h3>
             </div>
-            <div class="p-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="p-4 sm:p-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                     <!-- Date Range Filter -->
                     <div>
-                        <label for="startDate" class="block text-sm font-medium text-gray-700 mb-1">From Date</label>
-                        <input type="date" id="startDate" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                        <label for="startDate" class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">From Date</label>
+                        <input type="date" id="startDate" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
                     </div>
                     <div>
-                        <label for="endDate" class="block text-sm font-medium text-gray-700 mb-1">To Date</label>
-                        <input type="date" id="endDate" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                        <label for="endDate" class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">To Date</label>
+                        <input type="date" id="endDate" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
                     </div>
                     
                     <!-- Search -->
-                    <div>
-                        <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                    <div class="sm:col-span-2">
+                        <label for="searchInput" class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Search</label>
                         <input type="text" id="searchInput" placeholder="Search name, ID, type, location, remarks..." 
-                               class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                               class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
                     </div>
                     
                     <!-- Status Filter -->
-                    <div>
-                        <label for="statusFilter" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                        <select id="statusFilter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                    <div class="sm:col-span-2 lg:col-span-4">
+                        <label for="statusFilter" class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Status</label>
+                        <select id="statusFilter" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
                             <option value="">All Status</option>
                             <option value="Present">Present</option>
                             <option value="Late">Late</option>
@@ -157,14 +153,14 @@
                 </div>
 
                 <!-- Advanced Search Options -->
-                <div class="mt-4">
-                    <button type="button" id="toggleAdvanced" class="text-sm text-red-600 hover:text-red-800 font-medium">
+                <div class="mt-3 sm:mt-4">
+                    <button type="button" id="toggleAdvanced" class="text-xs sm:text-sm text-red-600 hover:text-red-800 font-medium">
                         ▼ Advanced Search Options
                     </button>
-                    <div id="advancedOptions" class="hidden mt-3 grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
+                    <div id="advancedOptions" class="hidden mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 p-3 sm:p-4 bg-gray-50 rounded-lg">
                         <div>
-                            <label for="accountTypeFilter" class="block text-sm font-medium text-gray-700 mb-1">Account Type</label>
-                            <select id="accountTypeFilter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                            <label for="accountTypeFilter" class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Account Type</label>
+                            <select id="accountTypeFilter" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
                                 <option value="">All Types</option>
                                 <option value="Admin">Admin</option>
                                 <option value="Staff">Staff</option>
@@ -172,13 +168,13 @@
                             </select>
                         </div>
                         <div>
-                            <label for="locationFilter" class="block text-sm font-medium text-gray-700 mb-1">Location Contains</label>
+                            <label for="locationFilter" class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Location Contains</label>
                             <input type="text" id="locationFilter" placeholder="Search location..." 
-                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
                         </div>
-                        <div>
-                            <label for="timeRangeFilter" class="block text-sm font-medium text-gray-700 mb-1">Time Range</label>
-                            <select id="timeRangeFilter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                        <div class="sm:col-span-2 lg:col-span-1">
+                            <label for="timeRangeFilter" class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Time Range</label>
+                            <select id="timeRangeFilter" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
                                 <option value="">Any Time</option>
                                 <option value="early">Early (Before 8 AM)</option>
                                 <option value="ontime">On Time (8-9 AM)</option>
@@ -190,27 +186,27 @@
 
                 <!-- Filter Validation Messages -->
                 <div id="filterMessages" class="mt-3 hidden">
-                    <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 px-3 py-2 rounded text-sm">
+                    <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 px-3 py-2 rounded text-xs sm:text-sm">
                         <span id="filterMessageText"></span>
                     </div>
                 </div>
                 
                 <!-- Quick Date Filters -->
-                <div class="mt-4 flex flex-wrap gap-2">
-                    <button onclick="setDateRange('today')" class="px-3 py-1 text-sm bg-red-100 text-red-700 rounded-full hover:bg-red-200">Today</button>
-                    <button onclick="setDateRange('yesterday')" class="px-3 py-1 text-sm bg-red-100 text-red-700 rounded-full hover:bg-red-200">Yesterday</button>
-                    <button onclick="setDateRange('thisWeek')" class="px-3 py-1 text-sm bg-red-100 text-red-700 rounded-full hover:bg-red-200">This Week</button>
-                    <button onclick="setDateRange('thisMonth')" class="px-3 py-1 text-sm bg-red-100 text-red-700 rounded-full hover:bg-red-200">This Month</button>
-                    <button onclick="clearDateRange()" class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200">Clear Filters</button>
+                <div class="mt-3 sm:mt-4 flex flex-wrap gap-2">
+                    <button onclick="setDateRange('today')" class="px-3 py-1.5 text-xs sm:text-sm bg-red-100 text-red-700 rounded-full hover:bg-red-200">Today</button>
+                    <button onclick="setDateRange('yesterday')" class="px-3 py-1.5 text-xs sm:text-sm bg-red-100 text-red-700 rounded-full hover:bg-red-200">Yesterday</button>
+                    <button onclick="setDateRange('thisWeek')" class="px-3 py-1.5 text-xs sm:text-sm bg-red-100 text-red-700 rounded-full hover:bg-red-200">This Week</button>
+                    <button onclick="setDateRange('thisMonth')" class="px-3 py-1.5 text-xs sm:text-sm bg-red-100 text-red-700 rounded-full hover:bg-red-200">This Month</button>
+                    <button onclick="clearDateRange()" class="px-3 py-1.5 text-xs sm:text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200">Clear Filters</button>
                 </div>
                 
                 <!-- Records Count -->
-                <div class="mt-4 flex justify-between items-center">
-                    <span id="record-count" class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">0 records</span>
-                    <div class="flex gap-2">
-                        <button onclick="refreshData()" class="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200">Refresh</button>
-                        <button onclick="exportFiltered()" class="px-3 py-1 text-sm bg-green-100 text-green-700 rounded-full hover:bg-green-200">Export Filtered</button>
-                        <button onclick="showDTRModal()" class="px-3 py-1 text-sm bg-purple-100 text-purple-700 rounded-full hover:bg-purple-200">Print DTR</button>
+                <div class="mt-3 sm:mt-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
+                    <span id="record-count" class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs sm:text-sm font-medium">0 records</span>
+                    <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+                        <button onclick="refreshData()" class="px-3 py-1.5 text-xs sm:text-sm bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200">Refresh</button>
+                        <button onclick="exportFiltered()" class="px-3 py-1.5 text-xs sm:text-sm bg-green-100 text-green-700 rounded-full hover:bg-green-200">Export Filtered</button>
+                        <button onclick="showDTRModal()" class="px-3 py-1.5 text-xs sm:text-sm bg-purple-100 text-purple-700 rounded-full hover:bg-purple-200">Print DTR</button>
                     </div>
                 </div>
             </div>
@@ -279,18 +275,18 @@
     </div>
 
     <!-- Pagination Controls -->
-    <div id="pagination-controls" class="mt-6 flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 sm:px-6 rounded-lg shadow">
+    <div id="pagination-controls" class="mt-4 sm:mt-6 flex items-center justify-between px-3 sm:px-4 py-3 bg-white border-t border-gray-200 sm:px-6 rounded-lg shadow">
         <div class="flex justify-between flex-1 sm:hidden">
-            <button id="prevPageMobile" class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+            <button id="prevPageMobile" class="relative inline-flex items-center px-3 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
                 Previous
             </button>
-            <button id="nextPageMobile" class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+            <button id="nextPageMobile" class="relative inline-flex items-center px-3 py-2 ml-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
                 Next
             </button>
         </div>
         <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
             <div>
-                <p class="text-sm text-gray-700">
+                <p class="text-xs sm:text-sm text-gray-700">
                     Showing <span id="startRecord" class="font-medium">1</span> to <span id="endRecord" class="font-medium">10</span> of <span id="totalRecordsCount" class="font-medium">0</span> results
                 </p>
             </div>
@@ -298,14 +294,14 @@
                 <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" id="paginationNav">
                     <button id="prevPage" class="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-l-md hover:bg-gray-50">
                         <span class="sr-only">Previous</span>
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
                         </svg>
                     </button>
                     <!-- Page numbers will be inserted here -->
                     <button id="nextPage" class="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-r-md hover:bg-gray-50">
                         <span class="sr-only">Next</span>
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
                         </svg>
                     </button>
@@ -320,101 +316,101 @@
 
     <!-- Leave Request Approval Modal -->
     <div id="leave-approval-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 lg:w-1/3 shadow-lg rounded-md bg-white">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-medium text-gray-900">Leave Request Approval</h3>
+        <div class="relative top-10 sm:top-20 mx-auto p-4 sm:p-5 border w-11/12 sm:w-10/12 md:w-1/2 lg:w-1/3 shadow-lg rounded-md bg-white">
+            <div class="flex items-center justify-between mb-3 sm:mb-4">
+                <h3 class="text-base sm:text-lg font-medium text-gray-900">Leave Request Approval</h3>
                 <button onclick="closeLeaveApprovalModal()" class="text-gray-400 hover:text-gray-600">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
             </div>
-            <div id="leave-request-details" class="space-y-4 mb-6">
+            <div id="leave-request-details" class="space-y-3 sm:space-y-4 mb-4 sm:mb-6 text-sm sm:text-base">
                 <!-- Leave request details will be populated here -->
             </div>
-            <div class="flex justify-end space-x-4">
-                <button onclick="approveLeaveRequest()" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">Approve</button>
-                <button onclick="rejectLeaveRequest()" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">Reject</button>
-                <button onclick="closeLeaveApprovalModal()" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">Close</button>
+            <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4">
+                <button onclick="approveLeaveRequest()" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm sm:text-base">Approve</button>
+                <button onclick="rejectLeaveRequest()" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm sm:text-base">Reject</button>
+                <button onclick="closeLeaveApprovalModal()" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-sm sm:text-base">Close</button>
             </div>
         </div>
     </div>
 
     <!-- Full Details Modal -->
-    <div id="details-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-lg w-11/12 max-w-md p-6 relative">
-            <button onclick="closeDetailsModal()" class="absolute top-3 right-3 text-gray-500 hover:text-black">
+    <div id="details-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-4 sm:p-6 relative">
+            <button onclick="closeDetailsModal()" class="absolute top-2 right-2 sm:top-3 sm:right-3 text-gray-500 hover:text-black text-xl">
                 &times;
             </button>
-            <h2 class="text-lg font-semibold text-gray-800 mb-4">Attendance Details</h2>
-            <div id="details-content" class="space-y-2 text-sm text-gray-700">
+            <h2 class="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Attendance Details</h2>
+            <div id="details-content" class="space-y-2 text-xs sm:text-sm text-gray-700">
                 <!-- Details go here -->
             </div>
         </div>
     </div>
 
     <!-- DTR Print Modal -->
-    <div id="dtr-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-lg w-11/12 max-w-lg p-6 relative">
-            <button onclick="closeDTRModal()" class="absolute top-3 right-3 text-gray-500 hover:text-black text-xl">
+    <div id="dtr-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-lg p-4 sm:p-6 relative max-h-screen overflow-y-auto">
+            <button onclick="closeDTRModal()" class="absolute top-2 right-2 sm:top-3 sm:right-3 text-gray-500 hover:text-black text-xl">
                 &times;
             </button>
-            <h2 class="text-xl font-semibold text-gray-800 mb-6">Print DTR (Daily Time Record)</h2>
+            <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-4 sm:mb-6">Print DTR (Daily Time Record)</h2>
             
-            <div class="space-y-4">
+            <div class="space-y-3 sm:space-y-4">
                 <!-- Staff Selection -->
                 <div>
-                    <label for="dtr-staff-select" class="block text-sm font-medium text-gray-700 mb-2">Select Staff</label>
-                    <select id="dtr-staff-select" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500">
+                    <label for="dtr-staff-select" class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Select Staff</label>
+                    <select id="dtr-staff-select" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
                         <option value="">Choose a staff member...</option>
                     </select>
                 </div>
                 
                 <!-- Date Range -->
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
-                        <label for="dtr-start-date" class="block text-sm font-medium text-gray-700 mb-2">From Date</label>
-                        <input type="date" id="dtr-start-date" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500">
+                        <label for="dtr-start-date" class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">From Date</label>
+                        <input type="date" id="dtr-start-date" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
                     </div>
                     <div>
-                        <label for="dtr-end-date" class="block text-sm font-medium text-gray-700 mb-2">To Date</label>
-                        <input type="date" id="dtr-end-date" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500">
+                        <label for="dtr-end-date" class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">To Date</label>
+                        <input type="date" id="dtr-end-date" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
                     </div>
                 </div>
                 
                 <!-- Quick Date Options -->
                 <div class="flex flex-wrap gap-2">
-                    <button onclick="setDTRDateRange('thisWeek')" class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200">This Week</button>
-                    <button onclick="setDTRDateRange('lastWeek')" class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200">Last Week</button>
-                    <button onclick="setDTRDateRange('thisMonth')" class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200">This Month</button>
-                    <button onclick="setDTRDateRange('lastMonth')" class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200">Last Month</button>
+                    <button onclick="setDTRDateRange('thisWeek')" class="px-2.5 py-1 text-xs sm:text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200">This Week</button>
+                    <button onclick="setDTRDateRange('lastWeek')" class="px-2.5 py-1 text-xs sm:text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200">Last Week</button>
+                    <button onclick="setDTRDateRange('thisMonth')" class="px-2.5 py-1 text-xs sm:text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200">This Month</button>
+                    <button onclick="setDTRDateRange('lastMonth')" class="px-2.5 py-1 text-xs sm:text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200">Last Month</button>
                 </div>
                 
                 <!-- Action Buttons -->
-                <div class="flex justify-end space-x-3 pt-4">
-                    <button onclick="closeDTRModal()" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">Cancel</button>
-                    <button onclick="previewDTR()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Preview DTR</button>
-                    <button onclick="printDTR()" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Print DTR</button>
+                <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 pt-3 sm:pt-4">
+                    <button onclick="closeDTRModal()" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 text-sm">Cancel</button>
+                    <button onclick="previewDTR()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm">Preview DTR</button>
+                    <button onclick="printDTR()" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm">Print DTR</button>
                 </div>
                 
                 <!-- Download Options -->
-                <div class="mt-4 pt-4 border-t border-gray-200">
-                    <h4 class="text-sm font-medium text-gray-700 mb-3">📥 Download Options</h4>
+                <div class="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200">
+                    <h4 class="text-xs sm:text-sm font-medium text-gray-700 mb-3">📥 Download Options</h4>
                     <div class="grid grid-cols-3 gap-2">
-                        <button onclick="downloadDTR('pdf')" class="flex items-center justify-center px-3 py-2 bg-red-50 text-red-700 border border-red-200 rounded-md hover:bg-red-100 text-sm">
-                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <button onclick="downloadDTR('pdf')" class="flex items-center justify-center px-2 py-2 bg-red-50 text-red-700 border border-red-200 rounded-md hover:bg-red-100 text-xs sm:text-sm">
+                            <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
                             </svg>
                             PDF
                         </button>
-                        <button onclick="downloadDTR('csv')" class="flex items-center justify-center px-3 py-2 bg-green-50 text-green-700 border border-green-200 rounded-md hover:bg-green-100 text-sm">
-                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <button onclick="downloadDTR('csv')" class="flex items-center justify-center px-2 py-2 bg-green-50 text-green-700 border border-green-200 rounded-md hover:bg-green-100 text-xs sm:text-sm">
+                            <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
                             </svg>
                             CSV
                         </button>
-                        <button onclick="downloadDTR('word')" class="flex items-center justify-center px-3 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-md hover:bg-blue-100 text-sm">
-                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <button onclick="downloadDTR('word')" class="flex items-center justify-center px-2 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-md hover:bg-blue-100 text-xs sm:text-sm">
+                            <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
                             </svg>
                             Word

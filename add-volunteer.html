@@ -2601,7 +2601,7 @@ function sanitizeInput(input) {
 }
 
 // Generic text input validation with real-time sanitization
-function validateTextInput(input, allowedPattern = /[a-zA-Z\s\-',.]*/) {
+function validateTextInput(input, allowedPattern = /[a-zA-Z\s\-',.\(\)]*/) {
     if (!input) return '';
     
     // First sanitize to remove dangerous content
@@ -2613,12 +2613,12 @@ function validateTextInput(input, allowedPattern = /[a-zA-Z\s\-',.]*/) {
     return cleaned;
 }
 
-// Name field validation (letters, spaces, hyphens, apostrophes only)
+// Name field validation (letters, spaces, hyphens, apostrophes only - NO COMMAS)
 function validateNameField(input) {
     return validateTextInput(input, /[a-zA-Z\s\-']/);
 }
 
-// Address field validation (letters, numbers, basic punctuation)
+// Address field validation (letters, numbers, basic punctuation including commas)
 function validateAddressField(input) {
     return validateTextInput(input, /[a-zA-Z0-9\s\.,\-#/]/);
 }
@@ -2643,7 +2643,7 @@ function validateContactNumber(contactNumber) {
     return cleanNumber.length === 11;
 }
 
-// Skills and experience validation (comprehensive text with safe punctuation)
+// Skills and experience validation (comprehensive text with safe punctuation including commas)
 function validateSkillsField(input) {
     return validateTextInput(input, /[a-zA-Z0-9\s\.,\-'()\n\r]/);
 }

@@ -2320,7 +2320,7 @@
         }
         
         // Generic text input validation with real-time sanitization
-        function validateTextInput(input, allowedPattern = /^[a-zA-Z\s\-',.]*$/) {
+        function validateTextInput(input, allowedPattern = /^[a-zA-Z\s\-'.]*$/) {
             if (!input) return '';
             
             // First sanitize to remove dangerous content
@@ -2337,19 +2337,19 @@
             return validateTextInput(input, /^[a-zA-Z\s\-']*$/);
         }
         
-        // Address field validation (letters, numbers, basic punctuation)
+        // Address field validation (letters, numbers, basic punctuation including commas)
         function validateAddressField(input) {
-            return validateTextInput(input, /^[a-zA-Z0-9\s\.,\-#/]*$/);
+            return validateTextInput(input, /^[a-zA-Z0-9\s\.\-#/,]*$/);
         }
         
-        // Reason field validation (allows more characters for descriptive text)
+        // Reason field validation (allows more characters for descriptive text including commas)
         function validateReasonField(input) {
-            return validateTextInput(input, /^[a-zA-Z0-9\s\.,\-'()]*$/);
+            return validateTextInput(input, /^[a-zA-Z0-9\s\.\-'(),]*$/);
         }
         
-        // Notes field validation (comprehensive text with safe punctuation)
+        // Notes field validation (comprehensive text with safe punctuation including commas)
         function validateNotesField(input) {
-            return validateTextInput(input,/^[a-zA-Z0-9\s\.,\-'()\n\r]*$/);
+            return validateTextInput(input,/^[a-zA-Z0-9\s\.\-'(),\n\r]*$/);
         }
 
         function showMessage(message, type) {

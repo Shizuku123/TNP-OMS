@@ -1292,7 +1292,36 @@
     // Make clearMonthFilter globally available
     window.clearMonthFilter = clearMonthFilter;
 
-    // Helper function to create safe placeholder URLs
+    // Helper function to create gender-specific icon HTML
+    function createGenderIcon(gender) {
+        const isMale = gender && gender.toLowerCase() === 'male';
+        const isFemale = gender && gender.toLowerCase() === 'female';
+        
+        if (isMale) {
+            // Male icon - blue background with boy/male symbol
+            return `<div class="h-12 w-12 sm:h-16 sm:w-16 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                <svg class="h-7 w-7 sm:h-10 sm:w-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+            </div>`;
+        } else if (isFemale) {
+            // Female icon - pink background with girl/female symbol
+            return `<div class="h-12 w-12 sm:h-16 sm:w-16 rounded-full bg-pink-100 flex items-center justify-center flex-shrink-0">
+                <svg class="h-7 w-7 sm:h-10 sm:w-10 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+            </div>`;
+        } else {
+            // Default icon - gray background with person symbol
+            return `<div class="h-12 w-12 sm:h-16 sm:w-16 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                <svg class="h-7 w-7 sm:h-10 sm:w-10 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+            </div>`;
+        }
+    }
+
+    // Helper function to create safe placeholder URLs (kept for backward compatibility)
     function createSafePlaceholderUrl(name, width = 150, height = 150) {
         // Clean the name to avoid URL encoding issues
         const safeName = (name || 'Child').replace(/[^a-zA-Z0-9\s]/g, '').trim() || 'Child';
@@ -1869,7 +1898,22 @@
         recordsGrid.innerHTML = records.map(child => {
             const fullName = `${child.firstName || ''} ${child.middleName || ''} ${child.lastName || ''}`.trim();
             const age = calculateAge(child.dateOfBirth);
-            const photoSrc = child.photoData || createSafePlaceholderUrl(child.firstName);
+            
+            // Check if photo exists and is valid (not empty, not default placeholder)
+            const hasValidPhoto = child.photoData && 
+                                  child.photoData.trim() !== '' && 
+                                  !child.photoData.includes('placeholder.com') &&
+                                  !child.photoData.endsWith('user.png') &&
+                                  child.photoData.startsWith('data:image');
+            
+            // Use photo if valid, otherwise use gender-specific icon
+            let photoDisplay = '';
+            if (hasValidPhoto) {
+                photoDisplay = `<img src="${child.photoData}" alt="${fullName}" class="h-12 w-12 sm:h-16 sm:w-16 rounded-full object-cover">`;
+            } else {
+                photoDisplay = createGenderIcon(child.gender);
+            }
+            
             const statusColor = getStatusColor(child.currentStatus);
 
             let actionButtons = '';
@@ -1914,7 +1958,7 @@
                      onclick="viewChildDetails('${child.childId}')">
                     <div class="p-4 sm:p-6">
                         <div class="flex items-center space-x-4 mb-4">
-                            <img src="${photoSrc}" alt="${fullName}" class="h-12 w-12 sm:h-16 sm:w-16 rounded-full object-cover">
+                            ${photoDisplay}
                             <div class="flex-1 min-w-0">
                                 <h3 class="text-sm sm:text-lg font-medium text-gray-900 truncate">${fullName}</h3>
                                 <p class="text-xs sm:text-sm text-gray-500">ID: ${child.childId}</p>
@@ -1922,10 +1966,7 @@
                                 <p class="text-xs sm:text-sm text-gray-500">Gender: ${child.gender || ''}</p>
                             </div>
                         </div>
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor}">
-                                ${child.currentStatus || 'No Status'}
-                            </span>
+                        <div class="flex items-center justify-end mb-2">
                             <span class="text-xs text-gray-400">
                                 Added: ${formatDate(child.dateAdded)}
                             </span>

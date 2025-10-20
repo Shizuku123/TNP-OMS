@@ -3215,10 +3215,10 @@
                 errors.push(`${fieldName} must be ${maxLength} characters or less`);
             }
             
-            // Only allow letters, numbers, spaces, hyphens, apostrophes, and periods
-            const allowedPattern = /^[a-zA-Z0-9\s\-'\.]+$/;
+            // Allow letters, numbers, spaces, hyphens, apostrophes, periods, and commas
+            const allowedPattern = /^[a-zA-Z0-9\s\-'\.,]+$/;
             if (sanitized && !allowedPattern.test(sanitized)) {
-                errors.push(`${fieldName} contains invalid characters. Only letters, numbers, spaces, hyphens, apostrophes, and periods are allowed`);
+                errors.push(`${fieldName} contains invalid characters. Only letters, numbers, spaces, hyphens, apostrophes, periods, and commas are allowed`);
             }
             
             return { sanitized, errors };
@@ -3246,7 +3246,7 @@
             const errors = [];
             
             // Address can have letters, numbers, spaces, commas, periods, hyphens
-            const addressPattern = /^[a-zA-Z0-9\s,.\-#\/]+$/;
+            const addressPattern = /^[a-zA-Z0-9\s,.\-#\/,]+$/;
             if (sanitized && !addressPattern.test(sanitized)) {
                 errors.push('Address contains invalid characters. Only letters, numbers, spaces, commas, periods, hyphens, # and / are allowed');
             }

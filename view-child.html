@@ -487,16 +487,28 @@
             }
         }
 
+        // Create gender-specific icon when no photo is available
+        function createGenderIcon(gender) {
+            const iconColor = gender === 'Male' ? 'text-blue-600' : gender === 'Female' ? 'text-pink-600' : 'text-gray-600';
+            const bgColor = gender === 'Male' ? 'bg-blue-100' : gender === 'Female' ? 'bg-pink-100' : 'bg-gray-100';
+            return `<div class="w-24 h-24 sm:w-32 sm:h-32 ${bgColor} rounded-lg flex items-center justify-center flex-shrink-0"><svg class="w-16 h-16 sm:w-20 sm:h-20 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg></div>`;
+        }
+
         function displayChildHeader() {
             const fullName = `${currentChild.firstName || ''} ${currentChild.middleName || ''} ${currentChild.lastName || ''}`.trim();
             const age = calculateAge(currentChild.dateOfBirth);
             const photoSrc = currentChild.photoData;
             let statusColor = getStatusColor(currentChild.currentStatus);
             let statusText = currentChild.currentStatus || 'No Status';
+            
+            // Check if photo is valid
+            const hasValidPhoto = photoSrc && photoSrc !== '' && !photoSrc.includes('placeholder.com') && !photoSrc.includes('user.png') && photoSrc.startsWith('data:image');
+            const photoDisplay = hasValidPhoto ? `<img src="${photoSrc}" alt="${fullName}" class="h-24 w-24 sm:h-32 sm:w-32 rounded-lg object-cover">` : createGenderIcon(currentChild.gender);
+            
             document.getElementById('childHeader').innerHTML = `
                 <div class="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-6">
                     <div class="flex-shrink-0 flex justify-center lg:justify-start">
-                        <img src="${photoSrc}" alt="${fullName}" class="h-24 w-24 sm:h-32 sm:w-32 rounded-lg object-cover">
+                        ${photoDisplay}
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between space-y-4 lg:space-y-0">

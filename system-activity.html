@@ -22,8 +22,9 @@
     <style>
         /* Table Scrolling */
         .table-container {
-            max-height: 400px;
+            max-height: 500px;
             overflow-y: auto;
+            overflow-x: auto;
         }
         
         /* Responsive Table */
@@ -35,6 +36,56 @@
                 -webkit-overflow-scrolling: touch;
             }
             
+            .responsive-table thead {
+                display: none;
+            }
+            
+            .responsive-table tbody tr {
+                display: block;
+                margin-bottom: 1rem;
+                border: 1px solid #e5e7eb;
+                border-radius: 0.5rem;
+                background-color: white;
+            }
+            
+            .responsive-table tbody td {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                padding: 0.75rem 1rem;
+                border-bottom: 1px solid #f3f4f6;
+            }
+            
+            .responsive-table tbody td:last-child {
+                border-bottom: none;
+            }
+            
+            .responsive-table tbody td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: #6b7280;
+                min-width: 100px;
+                margin-right: 1rem;
+            }
+            
+            .activity-cell {
+                min-width: auto;
+            }
+            
+            .timestamp-cell {
+                min-width: auto;
+            }
+            
+            .user-cell {
+                min-width: auto;
+            }
+            
+            .table-container {
+                max-height: none;
+            }
+        }
+        
+        @media (min-width: 769px) {
             .activity-cell {
                 min-width: 200px;
             }
@@ -50,11 +101,19 @@
         
         /* Pagination Styles */
         .pagination-button {
-            padding: 0.5rem 1rem;
-            margin: 0 0.25rem;
+            padding: 0.5rem 0.75rem;
+            margin: 0 0.125rem;
             border-radius: 0.375rem;
             font-weight: 500;
             transition: all 0.15s ease-in-out;
+            font-size: 0.875rem;
+        }
+        
+        @media (min-width: 640px) {
+            .pagination-button {
+                padding: 0.5rem 1rem;
+                margin: 0 0.25rem;
+            }
         }
         
         .pagination-button:disabled {
@@ -65,6 +124,19 @@
         .pagination-active {
             background-color: #dc2626;
             color: white;
+        }
+        
+        /* Stats Cards Responsive */
+        @media (max-width: 640px) {
+            .stat-icon {
+                width: 2rem;
+                height: 2rem;
+            }
+            
+            .stat-icon svg {
+                width: 1.25rem;
+                height: 1.25rem;
+            }
         }
     </style>
 </head>
@@ -80,15 +152,8 @@
                         </svg>
                     </a>
                 </div>
-                <h1 class="text-xl font-semibold text-gray-900">System Activity</h1>
-                <div class="flex items-center space-x-4">
-                    <button onclick="exportToCSV()" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
-                        Export CSV
-                    </button>
-                    <button onclick="clearActivities()" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
-                        Clear All
-                    </button>
-                </div>
+                <h1 class="text-lg sm:text-xl font-semibold text-gray-900">System Activity</h1>
+                <div class="w-6"></div>
             </div>
         </div>
     </header>
@@ -99,54 +164,54 @@
         <div id="messageContainer" class="mb-4 hidden"></div>
 
          
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-white rounded-lg shadow p-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+            <div class="bg-white rounded-lg shadow p-4 sm:p-6">
                 <div class="flex items-center">
-                    <div class="p-3 bg-blue-100 rounded-lg">
-                        <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="p-2 sm:p-3 bg-blue-100 rounded-lg stat-icon">
+                        <svg class="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                         </svg>
                     </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">Total Activities</p>
-                        <p id="totalActivities" class="text-2xl font-semibold text-gray-900">0</p>
+                    <div class="ml-3 sm:ml-4">
+                        <p class="text-xs sm:text-sm font-medium text-gray-600">Total Activities</p>
+                        <p id="totalActivities" class="text-xl sm:text-2xl font-semibold text-gray-900">0</p>
                     </div>
                 </div>
             </div>
             
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="bg-white rounded-lg shadow p-4 sm:p-6">
                 <div class="flex items-center">
-                    <div class="p-3 bg-green-100 rounded-lg">
-                        <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="p-2 sm:p-3 bg-green-100 rounded-lg stat-icon">
+                        <svg class="h-6 w-6 sm:h-8 sm:w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                     </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">Today's Activities</p>
-                        <p id="todayActivities" class="text-2xl font-semibold text-gray-900">0</p>
+                    <div class="ml-3 sm:ml-4">
+                        <p class="text-xs sm:text-sm font-medium text-gray-600">Today's Activities</p>
+                        <p id="todayActivities" class="text-xl sm:text-2xl font-semibold text-gray-900">0</p>
                     </div>
                 </div>
             </div>
             
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="bg-white rounded-lg shadow p-4 sm:p-6">
                 <div class="flex items-center">
-                    <div class="p-3 bg-purple-100 rounded-lg">
-                        <svg class="h-8 w-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="p-2 sm:p-3 bg-purple-100 rounded-lg stat-icon">
+                        <svg class="h-6 w-6 sm:h-8 sm:w-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                         </svg>
                     </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">Active Users</p>
-                        <p id="activeUsers" class="text-2xl font-semibold text-gray-900">0</p>
+                    <div class="ml-3 sm:ml-4">
+                        <p class="text-xs sm:text-sm font-medium text-gray-600">Active Users</p>
+                        <p id="activeUsers" class="text-xl sm:text-2xl font-semibold text-gray-900">0</p>
                     </div>
                 </div>
             </div>
         </div>
 
          
-        <div class="mb-6 bg-white rounded-lg shadow p-6">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-                <div class="flex-1 max-w-lg">
+        <div class="mb-6 bg-white rounded-lg shadow p-4 sm:p-6">
+            <div class="flex flex-col space-y-4">
+                <div class="w-full">
                     <div class="relative">
                         <input type="text" id="searchInput" placeholder="Search activities..." 
                                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
@@ -157,7 +222,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="flex space-x-4">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <select id="actionFilter" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
                         <option value="">All Actions</option>
                         <option value="login">Login</option>
@@ -176,19 +241,19 @@
         </div>
 
          
-        <div class="bg-white shadow rounded-lg">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <h2 class="text-lg font-medium text-gray-900">Recent System Activities (<span id="recordCount">0</span>)</h2>
+        <div class="bg-white shadow rounded-lg overflow-hidden">
+            <div class="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+                <h2 class="text-base sm:text-lg font-medium text-gray-900">Recent System Activities (<span id="recordCount">0</span>)</h2>
             </div>
             <div class="table-container">
                 <table class="min-w-full divide-y divide-gray-200 responsive-table">
                     <thead class="bg-gray-50 sticky top-0">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider user-cell">User</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider activity-cell">Details</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider timestamp-cell">Timestamp</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP Address</th>
+                            <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider user-cell">User</th>
+                            <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                            <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider activity-cell">Details</th>
+                            <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider timestamp-cell">Timestamp</th>
+                            <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP Address</th>
                         </tr>
                     </thead>
                     <tbody id="activityTableBody" class="bg-white divide-y divide-gray-200">
@@ -198,45 +263,16 @@
             </div>
             
             <!-- Pagination Controls -->
-            <div class="flex justify-center items-center mt-4 p-4 border-t border-gray-200 space-x-2" id="paginationControls">
-                <button id="prevPage" class="pagination-button bg-gray-200 hover:bg-gray-300" disabled>
+            <div class="flex flex-col sm:flex-row justify-center items-center mt-4 p-3 sm:p-4 border-t border-gray-200 space-y-2 sm:space-y-0 sm:space-x-2" id="paginationControls">
+                <button id="prevPage" class="pagination-button bg-gray-200 hover:bg-gray-300 w-full sm:w-auto" disabled>
                     Previous
                 </button>
-                <div id="pageNumbers" class="flex space-x-2">
+                <div id="pageNumbers" class="flex flex-wrap justify-center space-x-1 sm:space-x-2">
                     <!-- Page numbers will be populated here -->
                 </div>
-                <button id="nextPage" class="pagination-button bg-gray-200 hover:bg-gray-300" disabled>
+                <button id="nextPage" class="pagination-button bg-gray-200 hover:bg-gray-300 w-full sm:w-auto" disabled>
                     Next
                 </button>
-            </div>
-        </div>
-    </div>
-
-     
-    <div id="clearModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div class="mt-3 text-center">
-                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
-                    <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                    </svg>
-                </div>
-                <h3 class="text-lg font-medium text-gray-900 mt-2">Clear All Activities</h3>
-                <div class="mt-2 px-7 py-3">
-                    <p class="text-sm text-gray-500">Are you sure you want to clear all system activities? This action cannot be undone.</p>
-                    <div class="mt-4">
-                        <label for="adminPassword" class="block text-sm font-medium text-gray-700 mb-2">Admin Password Required</label>
-                        <input type="password" id="adminPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-primary focus:border-red-primary">
-                    </div>
-                </div>
-                <div class="flex justify-center space-x-4 mt-4">
-                    <button onclick="closeClearModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
-                        Cancel
-                    </button>
-                    <button onclick="confirmClear()" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
-                        Clear All
-                    </button>
-                </div>
             </div>
         </div>
     </div>
@@ -503,7 +539,7 @@
 
                 return `
                     <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-4 sm:px-6 py-4 whitespace-nowrap" data-label="User">
                             <div class="flex items-center">
                                 <div class="flex-shrink-0 h-8 w-8">
                                     <div class="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
@@ -518,18 +554,18 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-4 sm:px-6 py-4 whitespace-nowrap" data-label="Action">
                             <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getActionColor(action)}">
                                 ${action}
                             </span>
                         </td>
-                        <td class="px-6 py-4">
+                        <td class="px-4 sm:px-6 py-4" data-label="Details">
                             <div class="text-sm text-gray-900">${details}</div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-label="Timestamp">
                             ${timestamp}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-label="IP Address">
                             ${ipAddress}
                         </td>
                     </tr>
@@ -562,68 +598,6 @@
             }
         }
 
-        window.exportToCSV = function() {
-            const headers = ['User ID', 'Username', 'Action', 'Details', 'Timestamp', 'IP Address'];
-            const csvContent = [
-                headers.join(','),
-                ...filteredActivities.map(activity => [
-                    activity.userId,
-                    activity.username,
-                    activity.action,
-                    activity.details,
-                    activity.timestamp,
-                    activity.ipAddress
-                ].map(field => `"${field}"`).join(','))
-            ].join('\n');
-
-            const blob = new Blob([csvContent], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `system_activity_${new Date().toISOString().split('T')[0]}.csv`;
-            a.click();
-            window.URL.revokeObjectURL(url);
-        }
-
-        window.clearActivities = function() {
-            document.getElementById('clearModal').classList.remove('hidden');
-            document.getElementById('adminPassword').value = '';
-        }
-
-        window.closeClearModal = function() {
-            document.getElementById('clearModal').classList.add('hidden');
-        }
-
-        window.confirmClear = async function() {
-            const adminPassword = document.getElementById('adminPassword').value;
-            
-            if (!adminPassword) {
-                showMessage('Admin password is required.', 'error');
-                return;
-            }
-
-            // Simple password check (in real app, this would be more secure)
-            if (adminPassword !== 'admin123') {
-                showMessage('Invalid admin password.', 'error');
-                return;
-            }
-
-            try {
-                // Delete all activities from Firestore
-                const deletePromises = allActivities.map(activity => 
-                    deleteDoc(doc(db, 'systemActivities', activity.id))
-                );
-                await Promise.all(deletePromises);
-                
-                showMessage('All system activities have been cleared.', 'success');
-                await loadActivities();
-                closeClearModal();
-            } catch (error) {
-                console.error('Error clearing activities:', error);
-                showMessage('Error clearing activities. Please try again.', 'error');
-            }
-        }
-
         function showMessage(message, type) {
             const container = document.getElementById('messageContainer');
             const bgColor = type === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700';
@@ -639,13 +613,6 @@
                 container.classList.add('hidden');
             }, 5000);
         }
-
-        // Close modal when clicking outside
-        document.getElementById('clearModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeClearModal();
-            }
-        });
     </script>
 </body>
 </html>
