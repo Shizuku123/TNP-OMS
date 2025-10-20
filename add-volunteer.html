@@ -904,7 +904,7 @@
                     <div>
                         <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
                         <input type="text" id="username" name="username"
-                               pattern="[a-zA-Z0-9_.-]+"
+                               pattern="[a-zA-Z0-9_.\\-]+"
                                minlength="3"
                                maxlength="20"
                                title="Username can only contain letters, numbers, underscores, periods, and hyphens. 3-20 characters."
@@ -1656,6 +1656,62 @@ function showSuccessMessage(message) {
 function showErrorMessage(message) {
     return showMessageModal('Error', message, 'error');
 }
+
+function showConfirmationDialog(title, message, confirmText = 'Confirm', cancelText = 'Cancel') {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('messageModal');
+        const titleEl = document.getElementById('messageTitle');
+        const textEl = document.getElementById('messageText');
+        const iconEl = document.getElementById('messageIcon');
+        const okBtn = document.getElementById('messageOkBtn');
+        const cancelBtn = document.getElementById('messageCancelBtn');
+        
+        titleEl.textContent = title;
+        textEl.textContent = message;
+        
+        // Set warning icon
+        const iconBgClass = 'bg-yellow-100';
+        const iconHTML = `<svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z"/>
+        </svg>`;
+        
+        iconEl.className = `mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4 ${iconBgClass}`;
+        iconEl.innerHTML = iconHTML;
+        
+        // Show cancel button and update button texts
+        cancelBtn.classList.remove('hidden');
+        okBtn.textContent = confirmText;
+        cancelBtn.textContent = cancelText;
+        
+        const handleOk = () => {
+            modal.classList.add('hidden');
+            okBtn.textContent = 'OK'; // Reset
+            resolve(true);
+        };
+        
+        const handleCancel = () => {
+            modal.classList.add('hidden');
+            okBtn.textContent = 'OK'; // Reset
+            resolve(false);
+        };
+        
+        // Remove existing event listeners
+        okBtn.replaceWith(okBtn.cloneNode(true));
+        cancelBtn.replaceWith(cancelBtn.cloneNode(true));
+        
+        // Get new references after replacing
+        const newOkBtn = document.getElementById('messageOkBtn');
+        const newCancelBtn = document.getElementById('messageCancelBtn');
+        
+        newOkBtn.textContent = confirmText;
+        newCancelBtn.textContent = cancelText;
+        newOkBtn.addEventListener('click', handleOk);
+        newCancelBtn.addEventListener('click', handleCancel);
+        
+        modal.classList.remove('hidden');
+    });
+}
+
 
 function showWarningMessage(message) {
     return showMessageModal('Warning', message, 'warning');
@@ -2488,19 +2544,71 @@ async function saveVolunteerRecord(data, isSync = false) {
             const dob = data.dateOfBirth; // YYYY-MM-DD
             const [yyyy, mm, dd] = dob.split('-');
             const password = `TNPOMS@${dd}${mm}${yyyy}`;
+            
+            // Validate email and password before Firebase Auth call
+            console.log('Creating Firebase Auth account:', {
+                email: data.emailAddress,
+                passwordLength: password.length,
+                dobFormat: dob
+            });
+            
+            // Check if email is valid
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(data.emailAddress)) {
+                if (!isSync) {
+                    hideLoadingScreen();
+                    showErrorModal('Invalid email format. Please enter a valid email address.');
+                }
+                return { success: false };
+            }
+            
+            // Check if password meets Firebase requirements (min 6 characters)
+            if (password.length < 6) {
+                if (!isSync) {
+                    hideLoadingScreen();
+                    showErrorModal('Password must be at least 6 characters. Please check the date of birth.');
+                }
+                return { success: false };
+            }
+            
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, data.emailAddress, password);
                 userId = userCredential.user.uid;
+                console.log('Firebase Auth account created successfully:', userId);
             } catch (error) {
+                console.error('Firebase Auth error:', error.code, error.message);
                 if (!isSync) {
                     hideLoadingScreen();
                     if (error.code === 'auth/email-already-in-use') {
                         showErrorModal('Email address is already in use for authentication.');
+                        return { success: false };
+                    } else if (error.code === 'auth/invalid-email') {
+                        showErrorModal('Invalid email address format.');
+                        return { success: false };
+                    } else if (error.code === 'auth/weak-password') {
+                        showErrorModal('Password is too weak. Minimum 6 characters required.');
+                        return { success: false };
+                    } else if (error.code === 'auth/network-request-failed') {
+                        // Offer to save without creating auth account
+                        const saveAnyway = await showConfirmationDialog(
+                            'Network Error',
+                            'Unable to create authentication account due to network issues. Would you like to save the volunteer record without creating a login account? You can create the account later.',
+                            'Save Without Account',
+                            'Cancel'
+                        );
+                        
+                        if (!saveAnyway) {
+                            return { success: false };
+                        }
+                        // Continue with random UUID instead of Firebase Auth UID
+                        console.log('Saving without Firebase Auth account...');
                     } else {
-                        showErrorModal('Error creating user account: ' + error.message);
+                        showErrorModal('Error creating user account: ' + error.message + ' (Code: ' + error.code + ')');
+                        return { success: false };
                     }
+                } else {
+                    return { success: false };
                 }
-                return { success: false };
             }
         }
 
@@ -2559,6 +2667,11 @@ async function saveVolunteerRecord(data, isSync = false) {
             window.loadedOfflineRecordId = null; // Clear the reference
         }
 
+        // Send welcome email to the new volunteer
+        if (data.emailAddress && data.emailAddress.trim() !== '') {
+            await sendVolunteerWelcomeEmail(data);
+        }
+
         if (!isSync) {
             hideLoadingScreen();
             const fullName = `${data.firstName} ${data.lastName}`;
@@ -2575,6 +2688,142 @@ async function saveVolunteerRecord(data, isSync = false) {
             showErrorModal('Error saving volunteer record. Please try again.');
         }
         return { success: false };
+    }
+}
+
+// Send welcome email to newly registered volunteer
+async function sendVolunteerWelcomeEmail(volunteerData) {
+    console.log('=== STARTING WELCOME EMAIL PROCESS ===');
+    console.log('📧 Volunteer Data:', {
+        name: `${volunteerData.firstName} ${volunteerData.lastName}`,
+        email: volunteerData.emailAddress,
+        volunteerId: volunteerData.volunteerId,
+        dateAdded: volunteerData.dateAdded,
+        department: volunteerData.preferredDepartment,
+        hasAccount: volunteerData.createAccount === '1'
+    });
+    
+    try {
+        // Skip if no email provided
+        if (!volunteerData.emailAddress || volunteerData.emailAddress.trim() === '') {
+            console.error('❌ Skipping welcome email - no email address provided');
+            return;
+        }
+
+        console.log('✅ Email address validated:', volunteerData.emailAddress);
+
+        // Prepare email data
+        const emailData = new FormData();
+        emailData.append('action', 'send_volunteer_welcome');
+        emailData.append('volunteerName', `${volunteerData.firstName} ${volunteerData.lastName}`);
+        emailData.append('volunteerEmail', volunteerData.emailAddress);
+        emailData.append('volunteerId', volunteerData.volunteerId);
+        emailData.append('dateAdded', volunteerData.dateAdded);
+        emailData.append('preferredDepartment', volunteerData.preferredDepartment || 'Not specified');
+        
+        // Add login credentials if account was created
+        if (volunteerData.createAccount === '1') {
+            const dob = volunteerData.dateOfBirth; // YYYY-MM-DD
+            const [yyyy, mm, dd] = dob.split('-');
+            const password = `TNPOMS@${dd}${mm}${yyyy}`;
+            emailData.append('hasAccount', '1');
+            emailData.append('username', volunteerData.username);
+            emailData.append('password', password);
+            console.log('✅ Login credentials added to email:', {
+                username: volunteerData.username,
+                passwordFormat: 'TNPOMS@DDMMYYYY',
+                passwordLength: password.length
+            });
+        } else {
+            emailData.append('hasAccount', '0');
+            console.log('ℹ️ No account created - email will be sent without login credentials');
+        }
+        
+        // Add website and APK links
+        emailData.append('websiteLink', 'https://tahananngpagmamahal.capstone-two.com/');
+        emailData.append('apkLink', 'https://drive.google.com/file/d/1LNQzny-4qzoEemFZ1xsFcu4gZsJWXwHV/view');
+
+        console.log('📤 Sending POST request to mail.php...');
+        console.log('📦 FormData contents:', {
+            action: 'send_volunteer_welcome',
+            volunteerEmail: volunteerData.emailAddress,
+            hasAccount: volunteerData.createAccount === '1' ? '1' : '0'
+        });
+
+        // Send email via AJAX to mail.php
+        const response = await fetch('mail.php', {
+            method: 'POST',
+            body: emailData
+        });
+
+        console.log('📬 Response received from mail.php');
+        console.log('Response status:', response.status, response.statusText);
+        console.log('Response headers:', {
+            contentType: response.headers.get('content-type'),
+            contentLength: response.headers.get('content-length')
+        });
+
+        // Check if response is OK
+        if (!response.ok) {
+            console.error('❌ HTTP error when sending welcome email:', response.status, response.statusText);
+            console.error('This might indicate mail.php is not accessible or returned an error');
+            return;
+        }
+
+        console.log('✅ HTTP response OK - reading response body...');
+
+        // Get response text first to check if it's valid JSON
+        const responseText = await response.text();
+        console.log('📄 Raw response from mail.php:');
+        console.log(responseText);
+        console.log('Response length:', responseText.length, 'characters');
+        
+        // Check if response looks like PHP source code
+        if (responseText.trim().startsWith('<?php')) {
+            console.error('❌ ERROR: Received PHP source code instead of executed result!');
+            console.error('This indicates that Apache or PHP is not properly configured.');
+            console.error('Make sure PHP is installed and Apache is configured to execute .php files');
+            return;
+        }
+        
+        // Check if response is empty
+        if (!responseText.trim()) {
+            console.error('❌ ERROR: Empty response from mail.php');
+            console.error('This might indicate a PHP error occurred. Check Apache error logs.');
+            return;
+        }
+        
+        console.log('🔍 Attempting to parse JSON response...');
+        
+        let result;
+        try {
+            result = JSON.parse(responseText);
+            console.log('✅ JSON parsed successfully:', result);
+        } catch (parseError) {
+            console.error('❌ Invalid JSON response from mail.php');
+            console.error('Parse error:', parseError.message);
+            console.error('Response text:', responseText.substring(0, 500));
+            return;
+        }
+        
+        if (result.success) {
+            console.log('✅ ✅ ✅ Welcome email sent successfully! ✅ ✅ ✅');
+            console.log('Recipient:', volunteerData.emailAddress);
+            console.log('Server message:', result.message);
+        } else {
+            console.error('❌ Failed to send welcome email');
+            console.error('Error message:', result.message);
+            console.error('Full response:', result);
+        }
+        
+        console.log('=== EMAIL PROCESS COMPLETED ===');
+        
+    } catch (error) {
+        console.error('❌ ❌ ❌ EXCEPTION CAUGHT IN EMAIL FUNCTION ❌ ❌ ❌');
+        console.error('Error type:', error.name);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+        // Don't throw error as volunteer was saved successfully
     }
 }
 
@@ -2625,7 +2874,7 @@ function validateAddressField(input) {
 
 // Username field validation (alphanumeric with safe symbols)
 function validateUsernameField(input) {
-    return validateTextInput(input, /[a-zA-Z0-9_.-]/);
+    return validateTextInput(input, /[a-zA-Z0-9_.\-]/);
 }
 
 // Contact number validation (11 digits only)
