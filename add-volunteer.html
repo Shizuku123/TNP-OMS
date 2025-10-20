@@ -6,6 +6,7 @@
     <title>Add New Volunteer - Tahanan ng Pagmamahal OMS</title>
     <script type="module" src="firebase.js"></script>
     <script src="tailwind.js"></script>
+    <script type="module" src="notification.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -2596,7 +2597,7 @@ function sanitizeInput(input) {
     // Remove SQL injection patterns
     sanitized = sanitized.replace(/(\b(select|insert|update|delete|drop|create|alter|exec|execute|script|iframe|object|embed|form|input)\b)/gi, '');
     
-    return sanitized.trim();
+    return sanitized;
 }
 
 // Generic text input validation with real-time sanitization

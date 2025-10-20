@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Volunteer Details - Tahanan ng Pagmamahal OMS</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="tailwind.js"></script>
+    <script type="module" src="notification.js"></script>
     <script type="module" src="firebase.js"></script>
     <script>
         tailwind.config = {
@@ -79,10 +80,17 @@
             if (!requireLogin()) return;
             currentUser = getCurrentUser();
             currentVolunteerId = getVolunteerIdFromURL();
+
+            // 🪄 Hide ?id=CH001 from the URL bar
+            window.history.replaceState({}, document.title, "view-volunteer");
+
             if (!currentVolunteerId) {
                 window.location.href = 'volunteer-records.html';
                 return;
             }
+
+            // Remove any sessionStorage key if you use it for navigation (optional)
+            sessionStorage.removeItem('viewVolunteerId');
             await loadVolunteerData();
             setupEventListeners();
         });

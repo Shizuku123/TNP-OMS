@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Record Expenses - TNP OMS</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="tailwind.js"></script>
+    <script type="module" src="notification.js"></script>
     <script src="tailwind.js"></script>
     <script type="module" src="firebase.js"></script>
     <script type="module" src="session.js"></script>
@@ -1251,9 +1252,15 @@
             form.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
+                console.log('📝 Form submitted - Starting validation...');
                 const isValid = await validateForm();
+                console.log('Validation result:', isValid);
+                
                 if (isValid) {
+                    console.log('✅ Form is valid - Showing preview modal...');
                     showPreviewModal();
+                } else {
+                    console.log('❌ Form validation failed');
                 }
             });
 
@@ -1458,6 +1465,8 @@
         }
 
         function showPreviewModal() {
+            console.log('=== GENERATING PREVIEW MODAL ===');
+            
             const previewContent = document.getElementById('previewContent');
             const formData = new FormData(document.getElementById('expenseForm'));
             
@@ -1473,20 +1482,35 @@
             const approvedBy = document.getElementById('approvedBy').value;
             const notes = document.getElementById('notes').value;
             const attachment = document.getElementById('attachment').files[0];
+            
+            console.log('📝 Preview Data:');
+            console.log('- Expense ID:', expenseId);
+            console.log('- Date:', date);
+            console.log('- Category:', category);
+            console.log('- Description:', description);
+            console.log('- Amount:', amount);
+            console.log('- Payment Method:', paymentMethod);
+            console.log('- Requested By:', requestedBy);
+            console.log('- Approved By:', approvedBy);
+            console.log('- Notes:', notes);
+            console.log('- Attachment:', attachment ? attachment.name : 'None');
 
             // Get payment details
             let paymentDetails = '';
             if (paymentMethod === 'Check') {
                 const checkNumber = document.getElementById('checkNumber').value;
-                if (checkNumber === 'new') {
-                    paymentDetails = `New Check Number: ${document.getElementById('newCheckNumber').value}`;
-                } else {
-                    paymentDetails = `Check Number: ${checkNumber}`;
-                }
+                const actualCheckNumber = checkNumber === 'new' ? 
+                    document.getElementById('newCheckNumber').value : checkNumber;
+                paymentDetails = `<strong>Check Number:</strong> ${actualCheckNumber}`;
+                console.log('💳 Check Number:', actualCheckNumber);
             } else if (paymentMethod === 'Online Payment') {
                 const onlineType = document.getElementById('onlinePaymentType').value;
                 const referenceId = document.getElementById('referenceId').value;
-                paymentDetails = `${onlineType} - Reference: ${referenceId}`;
+                paymentDetails = `<strong>Type:</strong> ${onlineType}<br><strong>Reference ID:</strong> ${referenceId}`;
+                console.log('💳 Online Payment Type:', onlineType);
+                console.log('💳 Reference ID:', referenceId);
+            } else {
+                console.log('💳 No additional payment details');
             }
 
             // Format amount
@@ -1561,11 +1585,16 @@
                     ` : ''}
                 </div>
             `;
+            
+            console.log('✅ Preview Modal Generated Successfully');
+            console.log('=== END PREVIEW GENERATION ===');
 
             document.getElementById('previewModal').classList.remove('hidden');
         }
 
         async function submitForm() {
+            console.log('=== STARTING EXPENSE SUBMISSION ===');
+            
             // Get form data first
             const expenseData = {
                 expenseId: document.getElementById('expenseId').value,
@@ -1582,19 +1611,27 @@
                 createdBy: getCurrentUser(),
                 status: 'approved'
             };
+            
+            console.log('📋 Initial Expense Data:', expenseData);
 
             // Add payment details based on method
             const paymentMethod = document.getElementById('paymentMethod').value;
+            console.log('💳 Payment Method:', paymentMethod);
+            
             if (paymentMethod === 'Check') {
                 const checkNumber = document.getElementById('checkNumber').value;
                 if (checkNumber === 'new') {
                     expenseData.checkNumber = document.getElementById('newCheckNumber').value;
+                    console.log('✅ New Check Number:', expenseData.checkNumber);
                 } else {
                     expenseData.checkNumber = checkNumber;
+                    console.log('✅ Existing Check Number:', expenseData.checkNumber);
                 }
             } else if (paymentMethod === 'Online Payment') {
                 expenseData.onlinePaymentType = document.getElementById('onlinePaymentType').value;
                 expenseData.referenceId = document.getElementById('referenceId').value;
+                console.log('✅ Online Payment Type:', expenseData.onlinePaymentType);
+                console.log('✅ Reference ID:', expenseData.referenceId);
             }
 
             // Handle file upload if present
@@ -1604,7 +1641,14 @@
                 // you'd upload to Firebase Storage first
                 expenseData.attachmentName = fileInput.files[0].name;
                 expenseData.attachmentSize = fileInput.files[0].size;
+                console.log('📎 Attachment:', expenseData.attachmentName, `(${expenseData.attachmentSize} bytes)`);
+            } else {
+                console.log('📎 No attachment');
             }
+            
+            console.log('📦 COMPLETE EXPENSE DATA TO BE UPLOADED TO FIREBASE:');
+            console.log(JSON.stringify(expenseData, null, 2));
+            console.table(expenseData);
 
             // Check if online
             if (navigator.onLine) {
@@ -1612,19 +1656,26 @@
                 showLoadingModal('Saving expense record...');
                 
                 try {
-                    console.log('Saving expense data:', expenseData);
+                    console.log('🌐 Online - Attempting to save to Firebase...');
+                    console.log('📦 COMPLETE EXPENSE DATA TO BE UPLOADED TO FIREBASE:');
+                    console.log(JSON.stringify(expenseData, null, 2));
 
                     // Save to expenses collection
                     const expensesCol = collection(db, 'expenses');
-                    await addDoc(expensesCol, expenseData);
+                    const docRef = await addDoc(expensesCol, expenseData);
 
-                    console.log('Expense saved successfully');
+                    console.log('✅ Expense saved successfully to Firebase!');
+                    console.log('📄 Document ID:', docRef.id);
+                    console.log('📊 Saved Data:', expenseData);
 
                     // Now deduct from donations based on payment method
                     showLoadingModal('Updating donation records...');
+                    console.log('💰 Starting donation deduction...');
                     await deductFromDonations(expenseData);
+                    console.log('✅ Donation deduction completed');
 
                     hideLoadingModal();
+                    console.log('=== EXPENSE SUBMISSION COMPLETED SUCCESSFULLY ===');
                     
                     // Show success modal
                     document.getElementById('successModal').classList.remove('hidden');
@@ -1635,27 +1686,38 @@
                     loadSummaryData();
 
                 } catch (error) {
-                    console.error('Error saving expense:', error);
+                    console.error('❌ ERROR SAVING EXPENSE:', error);
+                    console.error('Error details:', error.message);
+                    console.error('Error stack:', error.stack);
                     hideLoadingModal();
                     
                     // Try to save offline as fallback
+                    console.log('⚠️ Firebase save failed, attempting offline save...');
                     const savedOffline = saveExpenseOffline(expenseData);
                     if (savedOffline) {
+                        console.log('💾 Expense saved offline successfully');
                         showOfflineSuccessModal(`Expense record of ₱${expenseData.amount.toFixed(2)} saved offline.`);
                         resetForm();
                         generateExpenseId();
                     } else {
+                        console.error('❌ Failed to save offline');
                         showErrorMessage('Failed to save expense. Please try again.');
                     }
                 }
             } else {
                 // Save offline when no internet connection
+                console.log('📴 OFFLINE MODE - Saving to local storage...');
+                console.log('📦 Expense Data for Offline Storage:');
+                console.log(JSON.stringify(expenseData, null, 2));
+                
                 const savedOffline = saveExpenseOffline(expenseData);
                 if (savedOffline) {
+                    console.log('💾 Expense saved offline successfully');
                     showOfflineSuccessModal(`Expense record of ₱${expenseData.amount.toFixed(2)} saved offline.`);
                     resetForm();
                     generateExpenseId();
                 } else {
+                    console.error('❌ Failed to save expense offline');
                     showErrorMessage('Failed to save expense offline. Please try again.');
                 }
             }

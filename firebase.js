@@ -15,6 +15,7 @@ import {
   orderBy,
   where,
   limit,
+  Timestamp,
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js"
 import {
   getStorage,
@@ -69,4 +70,34 @@ export {
   uploadBytes,
   getDownloadURL,
   limit,
+  Timestamp,
+}
+
+
+async function sendOTP(userId, userEmail, userName) {
+  const formData = new FormData()
+  formData.append('userId', userId)
+  formData.append('userEmail', userEmail)
+  formData.append('userName', userName)
+
+  const res = await fetch('send_otp.php', {
+    method: 'POST',
+    body: formData,
+  })
+
+  const data = await res.json()
+  if (data.success) {
+    const otp = data.otp
+
+    // Save to Firestore
+    const userRef = doc(db, 'users', userId)
+    await updateDoc(userRef, {
+      otp: otp,
+      otpCreated: Timestamp.now(),
+    })
+
+    alert('OTP sent and saved successfully!')
+  } else {
+    alert(data.message)
+  }
 }

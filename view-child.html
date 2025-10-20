@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Child Details - Tahanan ng Pagmamahal OMS</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="tailwind.js"></script>
+    <script type="module" src="notification.js"></script>
     <script type="module" src="firebase.js"></script>
     <script>
         tailwind.config = {
@@ -437,16 +438,24 @@
 
         document.addEventListener('DOMContentLoaded', async function() {
             if (!requireLogin()) return;
+
             currentUser = getCurrentUser();
             currentChildId = getChildIdFromURL();
+
+            // 🪄 Hide ?id=CH001 from the URL bar
+            window.history.replaceState({}, document.title, "view-child");
+
             if (!currentChildId) {
                 window.location.href = 'child-records.html';
                 return;
             }
+
+            sessionStorage.removeItem('viewChildId');
             await loadChildData();
             setupEventListeners();
             setupTabs();
         });
+
 
         async function loadChildData() {
             try {

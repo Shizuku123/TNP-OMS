@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Staff Details - Tahanan ng Pagmamahal OMS</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="tailwind.js"></script>
+    <script type="module" src="notification.js"></script>
     <script type="module" src="firebase.js"></script>
     <script>
         tailwind.config = {
@@ -210,12 +211,20 @@
         }
         document.addEventListener('DOMContentLoaded', async function() {
             if (!requireLogin()) return;
+
             currentUser = getCurrentUser();
             currentStaffId = getStaffIdFromURL();
+
+            // 🪄 Hide ?id=CH001 from the URL bar
+            window.history.replaceState({}, document.title, "view-staff");
+
             if (!currentStaffId) {
                 window.location.href = 'staff-records.html';
                 return;
             }
+
+            // Remove any sessionStorage key if you use it for navigation (optional)
+            sessionStorage.removeItem('viewStaffId');
             await loadStaffData();
             setupEventListeners();
             setupTabs();
