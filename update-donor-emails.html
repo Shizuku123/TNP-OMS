@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Donor Emails - TNP OMS</title>
+    <script src="tailwind.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen p-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white shadow rounded-lg p-6">
+            <h1 class="text-2xl font-bold text-gray-900 mb-4">Update Donor Email Addresses</h1>
+            <p class="text-gray-600 mb-4">This tool will update all Cash donation email addresses to: <strong>johnmichaelsantos340@gmail.com</strong></p>
+            
+            <div class="mb-6">
+                <label class="flex items-center">
+                    <input type="checkbox" id="confirmUpdate" class="mr-2">
+                    <span class="text-sm text-gray-700">I understand this will update all Cash donation email addresses in the database</span>
+                </label>
+            </div>
+            
+            <button id="updateBtn" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>
+                Update Email Addresses
+            </button>
+            
+            <div id="status" class="mt-6 hidden">
+                <div class="border-t pt-4">
+                    <h3 class="font-semibold text-lg mb-2">Update Progress:</h3>
+                    <div id="progressLog" class="bg-gray-50 p-4 rounded border max-h-96 overflow-y-auto font-mono text-sm"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { 
+            db,
+            collection,
+            getDocs,
+            updateDoc,
+            doc
+        } from './firebase.js';
+
+        const confirmCheckbox = document.getElementById('confirmUpdate');
+        const updateBtn = document.getElementById('updateBtn');
+        const statusDiv = document.getElementById('status');
+        const progressLog = document.getElementById('progressLog');
+
+        // Enable button only when checkbox is checked
+        confirmCheckbox.addEventListener('change', function() {
+            updateBtn.disabled = !this.checked;
+        });
+
+        updateBtn.addEventListener('click', updateEmailAddresses);
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                info: 'text-blue-600',
+                success: 'text-green-600',
+                warning: 'text-yellow-600',
+                error: 'text-red-600'
+            };
+            
+            const entry = document.createElement('div');
+            entry.className = colors[type] || 'text-gray-600';
+            entry.textContent = `[${timestamp}] ${message}`;
+            progressLog.appendChild(entry);
+            progressLog.scrollTop = progressLog.scrollHeight;
+            
+            console.log(message);
+        }
+
+        async function updateEmailAddresses() {
+            try {
+                updateBtn.disabled = true;
+                statusDiv.classList.remove('hidden');
+                progressLog.innerHTML = '';
+                
+                log('🔍 Starting email address update process...', 'info');
+                log('📧 Target email: johnmichaelsantos340@gmail.com', 'info');
+                
+                // Get all donations
+                const donationsCol = collection(db, 'donations');
+                const donationsSnapshot = await getDocs(donationsCol);
+                
+                log(`📊 Found ${donationsSnapshot.size} total donations in database`, 'info');
+                
+                let cashDonationsFound = 0;
+                let updatedCount = 0;
+                let skippedCount = 0;
+                let errorCount = 0;
+                
+                // Process each donation
+                for (const donationDoc of donationsSnapshot.docs) {
+                    const donation = donationDoc.data();
+                    const donationId = donationDoc.id;
+                    
+                    // Check if this is a Cash donation
+                    const paymentMethod = donation.paymentMethod || donation.typeOfDonation || '';
+                    
+                    if (paymentMethod === 'Cash') {
+                        cashDonationsFound++;
+                        
+                        log(`\n💰 Processing Cash donation: ${donationId}`, 'info');
+                        log(`   Current donor: ${donation.donorName || donation.name || 'Unknown'}`, 'info');
+                        log(`   Current email: ${donation.emailAddress || donation.email || 'Not set'}`, 'info');
+                        log(`   Amount: ₱${donation.amount || 0}`, 'info');
+                        
+                        try {
+                            // Prepare update data
+                            const updateData = {
+                                emailAddress: 'johnmichaelsantos340@gmail.com',
+                                email: 'johnmichaelsantos340@gmail.com' // Update both possible field names
+                            };
+                            
+                            // Update the document
+                            await updateDoc(doc(db, 'donations', donationId), updateData);
+                            
+                            updatedCount++;
+                            log(`   ✅ Updated successfully!`, 'success');
+                            
+                        } catch (updateError) {
+                            errorCount++;
+                            log(`   ❌ Error updating: ${updateError.message}`, 'error');
+                        }
+                    }
+                }
+                
+                // Summary
+                log('\n' + '='.repeat(50), 'info');
+                log('📊 UPDATE SUMMARY:', 'info');
+                log(`   Total donations in database: ${donationsSnapshot.size}`, 'info');
+                log(`   Cash donations found: ${cashDonationsFound}`, 'info');
+                log(`   ✅ Successfully updated: ${updatedCount}`, 'success');
+                if (errorCount > 0) {
+                    log(`   ❌ Errors: ${errorCount}`, 'error');
+                }
+                log('='.repeat(50), 'info');
+                
+                if (updatedCount > 0) {
+                    log('\n✨ All Cash donation emails have been updated to johnmichaelsantos340@gmail.com', 'success');
+                    log('💡 You can now test the expense notification system!', 'success');
+                } else if (cashDonationsFound === 0) {
+                    log('\n⚠️ No Cash donations found in the database', 'warning');
+                } else {
+                    log('\n⚠️ Update completed with errors. Please check the log above.', 'warning');
+                }
+                
+            } catch (error) {
+                log(`\n❌ CRITICAL ERROR: ${error.message}`, 'error');
+                console.error('Error updating email addresses:', error);
+            } finally {
+                updateBtn.disabled = false;
+                confirmCheckbox.checked = false;
+            }
+        }
+    </script>
+</body>
+</html>

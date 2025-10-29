@@ -1728,10 +1728,114 @@
                 const amount = parseFloat(expenseData.amount);
                 const paymentMethod = expenseData.paymentMethod;
                 
-                console.log(`=== DEDUCTION DEBUG ===`);
-                console.log(`Deducting ${amount} using ${paymentMethod} payment method`);
+                console.log(`=== FIFO DEDUCTION SYSTEM STARTED ===`);
+                console.log(`Deducting ₱${amount} from ${paymentMethod} donations`);
+                console.log(`Expense Category: ${expenseData.category}`);
+                console.log(`Expense Description: ${expenseData.description}`);
 
-                // Get the appropriate balance document based on payment method
+                // Get all donations ordered by date (oldest first)
+                const donationsCol = collection(db, 'donations');
+                const q = query(donationsCol, orderBy('dateOfDonation', 'asc'));
+                const donationsSnapshot = await getDocs(q);
+
+                let remainingAmount = amount;
+                const affectedDonors = []; // Track which donors were affected
+
+                console.log(`\n=== PROCESSING DONATIONS (FIFO) ===`);
+                console.log(`🔍 FILTER: Only processing donations with payment method = "${paymentMethod}"`);
+                
+                // Process donations in FIFO order
+                for (const donationDoc of donationsSnapshot.docs) {
+                    if (remainingAmount <= 0) break;
+
+                    const donation = donationDoc.data();
+                    const donationPaymentMethod = (donation.paymentMethod || donation.paymentType || 'Cash').toString().trim();
+                    const expensePaymentMethodNormalized = (paymentMethod || 'Cash').toString().trim();
+                    
+                    console.log(`\n🔎 Checking Donation ${donationDoc.id}:`);
+                    console.log(`  - Donation Payment Method (raw): "${donation.paymentMethod || 'not set'}"`);
+                    console.log(`  - Donation Payment Type (raw): "${donation.paymentType || 'not set'}"`);
+                    console.log(`  - Final Donation Method: "${donationPaymentMethod}"`);
+                    console.log(`  - Expense Payment Method: "${expensePaymentMethodNormalized}"`);
+                    console.log(`  - Donation Amount: ₱${donation.amount}`);
+                    
+                    // ⚠️ CRITICAL FIX: Case-insensitive matching of payment methods
+                    const normalizedDonationMethod = donationPaymentMethod.toLowerCase();
+                    const normalizedExpenseMethod = expensePaymentMethodNormalized.toLowerCase();
+                    
+                    console.log(`  - Normalized Donation: "${normalizedDonationMethod}"`);
+                    console.log(`  - Normalized Expense: "${normalizedExpenseMethod}"`);
+                    
+                    if (normalizedDonationMethod !== normalizedExpenseMethod) {
+                        console.log(`  ⏭️ SKIPPED - Payment method doesn't match`);
+                        continue;
+                    }
+                    
+                    console.log(`  ✅✅✅ MATCH FOUND - Processing this donation!`);
+
+                    const currentDonationAmount = parseFloat(donation.amount || 0);
+                    
+                    // Skip if donation is already fully used
+                    if (currentDonationAmount <= 0) continue;
+
+                    // Calculate how much to deduct from this donation
+                    const deductionAmount = Math.min(remainingAmount, currentDonationAmount);
+                    const newDonationAmount = currentDonationAmount - deductionAmount;
+
+                    console.log(`\n📊 Donation ID: ${donationDoc.id}`);
+                    console.log(`  - Donor: ${donation.donorName || 'Anonymous'}`);
+                    console.log(`  - Original Amount: ₱${currentDonationAmount.toFixed(2)}`);
+                    console.log(`  - Deducting: ₱${deductionAmount.toFixed(2)}`);
+                    console.log(`  - Remaining: ₱${newDonationAmount.toFixed(2)}`);
+
+                    // Update the donation amount in Firebase
+                    await updateDoc(doc(db, 'donations', donationDoc.id), {
+                        amount: newDonationAmount,
+                        lastUpdated: new Date().toISOString(),
+                        lastExpenseId: expenseData.expenseId,
+                        lastExpenseDate: expenseData.date,
+                        lastExpenseCategory: expenseData.category
+                    });
+
+                    // Track this donor for email notification
+                    const donorEmail = donation.emailAddress || donation.email || '';
+                    const donorName = donation.donorName || donation.name || 'Anonymous';
+                    
+                    // DETAILED EMAIL ELIGIBILITY CHECK
+                    console.log(`\n🔍 EMAIL ELIGIBILITY CHECK for Donation ${donationDoc.id}:`);
+                    console.log(`  - donorEmail: "${donorEmail}"`);
+                    console.log(`  - donorName: "${donorName}"`);
+                    console.log(`  - donation.emailAddress: "${donation.emailAddress || 'not found'}"`);
+                    console.log(`  - donation.email: "${donation.email || 'not found'}"`);
+                    console.log(`  - donation.donorName: "${donation.donorName || 'not found'}"`);
+                    console.log(`  - donation.name: "${donation.name || 'not found'}"`);
+                    console.log(`  - Has valid email? ${!!(donorEmail && donorEmail !== 'Anonymous' && donorEmail !== '')}`);
+                    console.log(`  - Has valid name? ${!!(donorName && donorName !== 'Anonymous')}`);
+                    console.log(`  - ALL DONATION FIELDS:`, donation);
+                    
+                    if (donorEmail && donorEmail !== 'Anonymous' && donorEmail !== '' && donorName && donorName !== 'Anonymous') {
+                        console.log(`  ✅ ELIGIBLE for email notification!`);
+                        affectedDonors.push({
+                            email: donorEmail,
+                            name: donorName,
+                            amountUsed: deductionAmount,
+                            originalDonationAmount: currentDonationAmount,
+                            remainingDonationAmount: newDonationAmount,
+                            donationDate: donation.dateOfDonation || donation.date || 'Not specified',
+                            donationId: donationDoc.id
+                        });
+                    } else {
+                        console.log(`  ❌ NOT ELIGIBLE for email - Missing email or donor is Anonymous`);
+                    }
+
+                    remainingAmount -= deductionAmount;
+                }
+
+                if (remainingAmount > 0.01) { // Allow for small floating point errors
+                    throw new Error(`Insufficient funds: Still need ₱${remainingAmount.toFixed(2)} more`);
+                }
+
+                // Update total balances
                 let balanceDoc;
                 switch(paymentMethod) {
                     case 'Cash':
@@ -1750,65 +1854,128 @@
                         throw new Error('Invalid payment method');
                 }
 
-                // Get fundBalance document
                 const fundBalanceDoc = doc(db, 'TotalFunds', 'fundBalance');
-
-                // Get current balances
                 const balanceSnapshot = await getDoc(balanceDoc);
                 const fundBalanceSnapshot = await getDoc(fundBalanceDoc);
 
-                if (!balanceSnapshot.exists()) {
-                    throw new Error(`No balance found for ${paymentMethod}`);
+                if (balanceSnapshot.exists() && fundBalanceSnapshot.exists()) {
+                    const currentBalance = balanceSnapshot.data().amount;
+                    const currentFundBalance = fundBalanceSnapshot.data().amount;
+
+                    const now = new Date();
+                    const options = {
+                        timeZone: 'Asia/Manila',
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: true
+                    };
+                    const phTime = now.toLocaleString('en-US', options);
+
+                    await updateDoc(balanceDoc, {
+                        amount: currentBalance - amount,
+                        lastUpdated: phTime
+                    });
+
+                    await updateDoc(fundBalanceDoc, {
+                        amount: currentFundBalance - amount,
+                        lastUpdated: phTime
+                    });
+
+                    console.log(`\n✅ Total balances updated`);
+                    console.log(`  - New ${paymentMethod} balance: ₱${(currentBalance - amount).toFixed(2)}`);
+                    console.log(`  - New fund balance: ₱${(currentFundBalance - amount).toFixed(2)}`);
                 }
-                if (!fundBalanceSnapshot.exists()) {
-                    throw new Error('No fund balance found');
+
+                // Send email notifications to affected donors
+                console.log(`\n=== SENDING EMAIL NOTIFICATIONS ===`);
+                console.log(`Affected donors count: ${affectedDonors.length}`);
+                
+                if (affectedDonors.length === 0) {
+                    console.warn(`⚠️ NO DONORS TO NOTIFY - Possible reasons:`);
+                    console.warn(`   - Donations don't have 'emailAddress' or 'email' field`);
+                    console.warn(`   - Donations don't have 'donorName' or 'name' field`);
+                    console.warn(`   - Donor name or email is 'Anonymous'`);
+                    console.warn(`   - Please check your donation records in Firebase`);
+                } else {
+                    console.log(`📧 Preparing to send emails to ${affectedDonors.length} donor(s):`);
+                    affectedDonors.forEach((donor, index) => {
+                        console.log(`   ${index + 1}. ${donor.name} (${donor.email}) - ₱${donor.amountUsed.toFixed(2)}`);
+                    });
+                }
+                
+                for (const donor of affectedDonors) {
+                    try {
+                        console.log(`\n📤 Sending email to: ${donor.name} (${donor.email})`);
+                        await sendExpenseNotificationEmail(donor, expenseData);
+                        console.log(`✅ Email sent successfully to: ${donor.email}`);
+                    } catch (emailError) {
+                        console.error(`❌ Failed to send email to ${donor.email}:`, emailError);
+                        // Don't throw error - continue even if email fails
+                    }
                 }
 
-                const currentBalance = balanceSnapshot.data().amount;
-                const currentFundBalance = fundBalanceSnapshot.data().amount;
-
-                // Check if sufficient funds are available
-                if (currentBalance < amount) {
-                    throw new Error(`Insufficient ${paymentMethod} balance`);
-                }
-                if (currentFundBalance < amount) {
-                    throw new Error('Insufficient total funds');
-                }
-
-                // Get current Philippines time
-                const now = new Date();
-                const options = {
-                    timeZone: 'Asia/Manila',
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit',
-                    hour12: true
-                };
-                const phTime = now.toLocaleString('en-US', options);
-
-                // Update specific balance
-                await updateDoc(balanceDoc, {
-                    amount: currentBalance - amount,
-                    lastUpdated: phTime
-                });
-
-                // Update fund balance
-                await updateDoc(fundBalanceDoc, {
-                    amount: currentFundBalance - amount,
-                    lastUpdated: phTime
-                });
-
-                console.log('=== DEDUCTION COMPLETED ===');
-                console.log(`Successfully deducted ${amount} from ${paymentMethod} balance`);
-                console.log(`New ${paymentMethod} balance: ${currentBalance - amount}`);
-                console.log(`New total fund balance: ${currentFundBalance - amount}`);
+                console.log(`\n=== FIFO DEDUCTION COMPLETED ===`);
+                return true;
 
             } catch (error) {
-                console.error('Error processing deduction:', error);
+                console.error('Error processing FIFO deduction:', error);
                 throw error;
+            }
+        }
+
+        // New function to send expense notification emails to donors
+        async function sendExpenseNotificationEmail(donor, expenseData) {
+            try {
+                console.log(`\n📧 === SENDING EMAIL FUNCTION ===`);
+                console.log(`  Donor: ${donor.name}`);
+                console.log(`  Email: ${donor.email}`);
+                console.log(`  Amount Used: ₱${donor.amountUsed.toFixed(2)}`);
+                console.log(`  Expense Category: ${expenseData.category}`);
+                
+                const formData = new FormData();
+                formData.append('action', 'send_expense_notification');
+                formData.append('donorName', donor.name);
+                formData.append('donorEmail', donor.email);
+                formData.append('amountUsed', donor.amountUsed.toFixed(2));
+                formData.append('originalDonationAmount', donor.originalDonationAmount.toFixed(2));
+                formData.append('remainingDonationAmount', donor.remainingDonationAmount.toFixed(2));
+                formData.append('donationDate', donor.donationDate);
+                formData.append('donationId', donor.donationId);
+                formData.append('expenseCategory', expenseData.category);
+                formData.append('expenseDescription', expenseData.description);
+                formData.append('expenseAmount', expenseData.amount);
+                formData.append('expenseDate', expenseData.date);
+                formData.append('expenseId', expenseData.expenseId);
+
+                console.log(`  📤 Sending POST request to mail.php...`);
+                
+                const response = await fetch('mail.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                console.log(`  📬 Response status: ${response.status} ${response.statusText}`);
+                
+                const result = await response.json();
+                
+                console.log(`  📨 Response from mail.php:`, result);
+                
+                if (!result.success) {
+                    console.warn(`⚠️ Email notification failed for ${donor.email}: ${result.message}`);
+                } else {
+                    console.log(`  ✅ Email sent successfully!`);
+                }
+                
+                return result.success;
+            } catch (error) {
+                console.error('❌ Error sending expense notification email:', error);
+                console.error('Error details:', error.message);
+                console.error('Error stack:', error.stack);
+                return false;
             }
         }
 

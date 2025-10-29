@@ -159,6 +159,75 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     exit;
 }
 
+// Check if this is an AJAX request for sending expense notification email
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'send_expense_notification') {
+    header('Content-Type: application/json');
+    
+    error_log("=== MAIL.PHP: EXPENSE NOTIFICATION EMAIL REQUEST RECEIVED ===");
+    error_log("POST Data: " . json_encode($_POST));
+    
+    try {
+        $donorName = $_POST['donorName'] ?? '';
+        $donorEmail = $_POST['donorEmail'] ?? '';
+        $amountUsed = $_POST['amountUsed'] ?? '';
+        $originalDonationAmount = $_POST['originalDonationAmount'] ?? '';
+        $remainingDonationAmount = $_POST['remainingDonationAmount'] ?? '';
+        $donationDate = $_POST['donationDate'] ?? '';
+        $donationId = $_POST['donationId'] ?? '';
+        $expenseCategory = $_POST['expenseCategory'] ?? '';
+        $expenseDescription = $_POST['expenseDescription'] ?? '';
+        $expenseAmount = $_POST['expenseAmount'] ?? '';
+        $expenseDate = $_POST['expenseDate'] ?? '';
+        $expenseId = $_POST['expenseId'] ?? '';
+        
+        error_log("📧 Extracted Data:");
+        error_log("  - Donor Name: " . $donorName);
+        error_log("  - Donor Email: " . $donorEmail);
+        error_log("  - Amount Used: " . $amountUsed);
+        error_log("  - Expense Category: " . $expenseCategory);
+        
+        if (empty($donorEmail) || empty($donorName)) {
+            error_log("❌ VALIDATION FAILED: Missing donor email or name");
+            echo json_encode(['success' => false, 'message' => 'Missing donor email or name']);
+            exit;
+        }
+        
+        error_log("✅ Validation passed, calling sendExpenseNotificationEmail()...");
+        $result = sendExpenseNotificationEmail(
+            $donorName, 
+            $donorEmail, 
+            $amountUsed, 
+            $originalDonationAmount, 
+            $remainingDonationAmount, 
+            $donationDate, 
+            $donationId, 
+            $expenseCategory, 
+            $expenseDescription, 
+            $expenseAmount, 
+            $expenseDate, 
+            $expenseId
+        );
+        
+        if ($result) {
+            error_log("✅ ✅ ✅ EXPENSE NOTIFICATION EMAIL SENT SUCCESSFULLY! ✅ ✅ ✅");
+            echo json_encode(['success' => true, 'message' => 'Expense notification email sent successfully']);
+        } else {
+            error_log("❌ sendExpenseNotificationEmail() returned FALSE");
+            echo json_encode(['success' => false, 'message' => 'Failed to send expense notification email']);
+        }
+    } catch (Exception $e) {
+        error_log("❌ EXCEPTION in mail.php handler: " . $e->getMessage());
+        echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
+    } catch (Error $e) {
+        error_log("❌ FATAL ERROR in mail.php handler: " . $e->getMessage());
+        echo json_encode(['success' => false, 'message' => 'Fatal Error: ' . $e->getMessage()]);
+    } catch (Throwable $e) {
+        error_log("❌ THROWABLE in mail.php handler: " . $e->getMessage());
+        echo json_encode(['success' => false, 'message' => 'Unexpected Error: ' . $e->getMessage()]);
+    }
+    exit;
+}
+
 // Check if this is an AJAX request for sending volunteer welcome email
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'send_volunteer_welcome') {
     header('Content-Type: application/json');
@@ -438,6 +507,296 @@ function sendDonationThankYouEmail($donorName, $donorEmail, $donationType, $dona
         return true;
     } catch (Exception $e) {
         error_log("Email Error: {$mail->ErrorInfo}");
+        return false;
+    }
+}
+
+function sendExpenseNotificationEmail($donorName, $donorEmail, $amountUsed, $originalDonationAmount, $remainingDonationAmount, $donationDate, $donationId, $expenseCategory, $expenseDescription, $expenseAmount, $expenseDate, $expenseId) {
+    error_log("=== ENTERING sendExpenseNotificationEmail() FUNCTION ===");
+    error_log("Parameters: Donor: $donorName, Email: $donorEmail, Amount Used: ₱$amountUsed, Category: $expenseCategory");
+    
+    $mail = new PHPMailer(true);
+
+    try {
+        // Server settings
+        $mail->SMTPDebug = SMTP::DEBUG_OFF;
+        $mail->isSMTP();
+        $mail->Host       = 'smtp.gmail.com';
+        $mail->SMTPAuth   = true;
+        $mail->Username   = 'coffeecornerofficial1@gmail.com';
+        $mail->Password   = 'sfxr wvap lbwj bszs';
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port       = 587;
+
+        // Recipients
+        $mail->setFrom('tahananngpagmamahalcapstone@gmail.com', 'Tahanan ng Pagmamahal');
+        $mail->addAddress($donorEmail, $donorName);
+
+        // Content
+        $mail->isHTML(true);
+        $mail->Subject = "Your Donation is Making a Difference - Tahanan ng Pagmamahal";
+
+        $mail->Body = "
+        <html>
+        <head>
+            <style>
+                body {
+                    margin: 0;
+                    padding: 0;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    color: #2c3e50;
+                    font-family: Arial, sans-serif;
+                    background-color: #f8f9fa;
+                }
+                .email-container {
+                    width: 700px;
+                    background-color: #ffffff;
+                    border-radius: 10px;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                    overflow: hidden;
+                }
+                .header {
+                    background: linear-gradient(135deg, #16a34a, #22c55e);
+                    color: white;
+                    padding: 40px 30px;
+                    text-align: center;
+                }
+                .content {
+                    padding: 40px 30px;
+                }
+                .main-title {
+                    font-size: 36px;
+                    margin: 0 0 10px 0;
+                    font-weight: bold;
+                }
+                .sub-title {
+                    font-size: 20px;
+                    margin: 0;
+                    opacity: 0.9;
+                }
+                .greeting {
+                    font-size: 24px;
+                    color: #16a34a;
+                    margin: 0 0 20px 0;
+                    font-weight: bold;
+                }
+                .message {
+                    font-size: 16px;
+                    line-height: 1.6;
+                    color: #555;
+                    margin: 20px 0;
+                }
+                .expense-details {
+                    background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+                    border-left: 4px solid #16a34a;
+                    padding: 25px;
+                    margin: 30px 0;
+                    border-radius: 0 8px 8px 0;
+                }
+                .detail-header {
+                    color: #16a34a;
+                    margin: 0 0 15px 0;
+                    font-size: 20px;
+                    font-weight: bold;
+                }
+                .expense-details p {
+                    margin: 10px 0;
+                    font-size: 15px;
+                }
+                .highlight-box {
+                    background: white;
+                    border: 2px solid #16a34a;
+                    padding: 20px;
+                    border-radius: 8px;
+                    margin: 25px 0;
+                    text-align: center;
+                }
+                .highlight-amount {
+                    font-size: 32px;
+                    color: #16a34a;
+                    font-weight: bold;
+                    margin: 10px 0;
+                }
+                .highlight-text {
+                    font-size: 14px;
+                    color: #666;
+                    margin: 5px 0;
+                }
+                .donation-summary {
+                    background-color: #f8f9fa;
+                    padding: 20px;
+                    border-radius: 8px;
+                    margin: 25px 0;
+                }
+                .summary-row {
+                    display: flex;
+                    justify-content: space-between;
+                    padding: 8px 0;
+                    border-bottom: 1px solid #e5e7eb;
+                }
+                .summary-label {
+                    font-weight: 600;
+                    color: #555;
+                }
+                .summary-value {
+                    color: #16a34a;
+                    font-weight: bold;
+                }
+                .impact-section {
+                    background: #fef3c7;
+                    padding: 25px;
+                    border-radius: 8px;
+                    margin: 30px 0;
+                    border: 2px solid #fbbf24;
+                }
+                .impact-title {
+                    color: #d97706;
+                    font-size: 20px;
+                    margin: 0 0 15px 0;
+                    font-weight: bold;
+                }
+                .footer {
+                    background-color: #f8f9fa;
+                    padding: 30px;
+                    text-align: center;
+                    color: #666;
+                    font-size: 14px;
+                }
+                .contact-info {
+                    margin: 15px 0;
+                }
+                .signature {
+                    margin-top: 30px;
+                    font-style: italic;
+                    color: #16a34a;
+                    font-weight: bold;
+                }
+            </style>
+        </head>
+        <body>
+            <table width='100%' height='100%' border='0' cellspacing='0' cellpadding='0'>
+                <td align='center' valign='middle'>
+                    <div class='email-container'>
+                        <div class='header'>
+                            <h1 class='main-title'>YOUR DONATION IS AT WORK!</h1>
+                            <h2 class='sub-title'>Transparency Update</h2>
+                        </div>
+                        
+                        <div class='content'>
+                            <h2 class='greeting'>Dear $donorName,</h2>
+                            
+                            <p class='message'>
+                                We want to keep you informed about how your generous donation is being used to 
+                                make a real difference in the lives of the children at <strong>Tahanan ng Pagmamahal</strong>.
+                            </p>
+                            
+                            <div class='highlight-box'>
+                                <p class='highlight-text'>PART OF YOUR DONATION WAS USED FOR:</p>
+                                <p class='highlight-amount'>₱" . number_format((float)$amountUsed, 2) . "</p>
+                                <p class='highlight-text' style='font-size: 18px; color: #16a34a; font-weight: bold;'>$expenseCategory</p>
+                            </div>
+                            
+                            <div class='expense-details'>
+                                <h3 class='detail-header'>📋 Expense Details</h3>
+                                <p><strong>Category:</strong> $expenseCategory</p>
+                                <p><strong>Description:</strong> $expenseDescription</p>
+                                <p><strong>Total Expense Amount:</strong> ₱" . number_format((float)$expenseAmount, 2) . "</p>
+                                <p><strong>Expense Date:</strong> $expenseDate</p>
+                                <p><strong>Expense ID:</strong> $expenseId</p>
+                            </div>
+                            
+                            <div class='donation-summary'>
+                                <h3 style='color: #16a34a; margin: 0 0 15px 0; font-size: 18px;'>💰 Your Donation Summary</h3>
+                                <div class='summary-row'>
+                                    <span class='summary-label'>Original Donation Amount:</span>
+                                    <span class='summary-value'>₱" . number_format((float)$originalDonationAmount, 2) . "</span>
+                                </div>
+                                <div class='summary-row'>
+                                    <span class='summary-label'>Amount Used (This Expense):</span>
+                                    <span class='summary-value'>₱" . number_format((float)$amountUsed, 2) . "</span>
+                                </div>
+                                <div class='summary-row' style='border-bottom: none;'>
+                                    <span class='summary-label'>Remaining Balance:</span>
+                                    <span class='summary-value'>₱" . number_format((float)$remainingDonationAmount, 2) . "</span>
+                                </div>
+                                <p style='font-size: 12px; color: #666; margin-top: 15px; font-style: italic;'>
+                                    Donation ID: $donationId | Donation Date: $donationDate
+                                </p>
+                            </div>
+                            
+                            <div class='impact-section'>
+                                <h3 class='impact-title'>🌟 How This Helps</h3>
+                                <p style='font-size: 15px; line-height: 1.6;'>
+                                    Your contribution to <strong>$expenseCategory</strong> directly impacts the children's wellbeing. 
+                                    Every peso is carefully allocated to ensure the children receive the best possible care, 
+                                    education, and support they need to thrive.
+                                </p>
+                            </div>
+                            
+                            <p class='message'>
+                                We are committed to <strong>complete transparency</strong> in how we use donations. 
+                                This notification is part of our promise to keep you informed about the real-world 
+                                impact of your generosity.
+                            </p>
+                            
+                            <p class='message'>
+                                Thank you for your continued support and trust in Tahanan ng Pagmamahal. 
+                                Together, we are creating brighter futures for these children!
+                            </p>
+                            
+                            <p class='signature'>
+                                With deep gratitude,<br>
+                                <strong>The Tahanan ng Pagmamahal Team</strong>
+                            </p>
+                        </div>
+                        
+                        <div class='footer'>
+                            <div class='contact-info'>
+                                <strong>Tahanan ng Pagmamahal</strong><br>
+                                Children's Home and Care Center<br>
+                                45 Dr. Pilapil St., Brgy. Sagad, Pasig Metro Manila, Philippines<br>
+                                Email: tahananpch@gmail.com<br>
+                                Phone: (+63) 917 525 7168 | Tel: +632 8631 7188
+                            </div>
+                            <p>This is an automated transparency notification to keep you informed about how your donation is being used.</p>
+                        </div>
+                    </div>
+                </td>
+            </table>
+        </body>
+        </html>";
+
+        $altBody = "Dear $donorName,\n\n";
+        $altBody .= "TRANSPARENCY UPDATE: YOUR DONATION IS MAKING A DIFFERENCE\n\n";
+        $altBody .= "Part of your donation was used for:\n";
+        $altBody .= "Amount: ₱" . number_format((float)$amountUsed, 2) . "\n";
+        $altBody .= "Category: $expenseCategory\n\n";
+        $altBody .= "Expense Details:\n";
+        $altBody .= "- Description: $expenseDescription\n";
+        $altBody .= "- Total Expense: ₱" . number_format((float)$expenseAmount, 2) . "\n";
+        $altBody .= "- Date: $expenseDate\n";
+        $altBody .= "- Expense ID: $expenseId\n\n";
+        $altBody .= "Your Donation Summary:\n";
+        $altBody .= "- Original Amount: ₱" . number_format((float)$originalDonationAmount, 2) . "\n";
+        $altBody .= "- Amount Used (This Expense): ₱" . number_format((float)$amountUsed, 2) . "\n";
+        $altBody .= "- Remaining Balance: ₱" . number_format((float)$remainingDonationAmount, 2) . "\n";
+        $altBody .= "- Donation ID: $donationId\n";
+        $altBody .= "- Donation Date: $donationDate\n\n";
+        $altBody .= "Your contribution to $expenseCategory directly impacts the children's wellbeing.\n\n";
+        $altBody .= "Thank you for your continued support!\n\n";
+        $altBody .= "With deep gratitude,\n";
+        $altBody .= "The Tahanan ng Pagmamahal Team\n\n";
+        $altBody .= "Contact: tahananpch@gmail.com | (+63) 917 525 7168";
+
+        $mail->AltBody = $altBody;
+
+        $mail->send();
+        error_log("✅ Expense notification email sent successfully to: " . $donorEmail);
+        return true;
+    } catch (Exception $e) {
+        error_log("❌ Email Error: {$mail->ErrorInfo}");
         return false;
     }
 }
