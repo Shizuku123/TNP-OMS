@@ -694,8 +694,9 @@ function sendExpenseNotificationEmail($donorName, $donorEmail, $amountUsed, $ori
                             
                             <div class='highlight-box'>
                                 <p class='highlight-text'>PART OF YOUR DONATION WAS USED FOR:</p>
-                                <p class='highlight-amount'>₱" . number_format((float)$amountUsed, 2) . "</p>
                                 <p class='highlight-text' style='font-size: 18px; color: #16a34a; font-weight: bold;'>$expenseCategory</p>
+                                <p class='highlight-amount'>₱" . number_format((float)$amountUsed, 2) . "</p>
+
                             </div>
                             
                             <div class='expense-details'>
